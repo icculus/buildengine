@@ -25,7 +25,9 @@
 
 #define PLATFORM_TIMER_HZ 280
 
+#if ((!defined __WATCOMC__) && (!defined __int64))
 #define __int64 long long
+#endif
 
 // need these for something where we abstracted with SDL...
 typedef unsigned long Uint32;
