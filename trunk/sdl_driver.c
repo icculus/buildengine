@@ -117,6 +117,8 @@ long total_rendered_frames = 0;
 static char *titlelong = NULL;
 static char *titleshort = NULL;
 
+static int audio_disabled = 0;
+
 void restore256_palette (void);
 void set16color_palette (void);
 
@@ -471,12 +473,11 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_INSERT]          = 0xE052;
     scancodes[SDLK_KP_ENTER]        = 0xE01C;
 
-    if (SDL_Init(SDL_INIT_VIDEO |
-                 SDL_INIT_TIMER |
-                 SDL_INIT_AUDIO) == -1)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1)
     {
         fprintf(stderr, "SDL_Init() failed!\n");
         fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
+        exit(1);
     } // if
 } // _platform_init
 
@@ -1271,6 +1272,7 @@ void uninittimer(void)
 void _initkeys(void)
 {
     // does nothing in SDL. Key input handling is set up elsewhere.
+    // !!! why not here?
 }
 
 void uninitkeys(void)
@@ -1280,8 +1282,25 @@ void uninitkeys(void)
 
 void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeakers, char dabytespersample, char daintspersec, char daquality)
 {
-    fprintf(stderr, "%s, line %d; initsb(): STUB.\n", __FILE__, __LINE__);
+    audio_disabled = (SDL_Init(SDL_INIT_AUDIO) == -1);
+
+    if (audio_disabled)
+    {
+        fprintf(stderr, "SDL_Init(SDL_INIT_AUDIO) failed!\n");
+        fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
+        fprintf(stderr, "We'll continue without sound.\n");
+        audio_disabled = 1;
+        return;
+    } // if
+
+    
+
 } // initsb
+
+void uninitsb(void)
+{
+    fprintf(stderr, "%s, line %d; uninitsb(): STUB.\n", __FILE__, __LINE__);
+} // uninitsb
 
 int loadsong(char *filename)
 {
@@ -1299,30 +1318,25 @@ void musicoff(void)
     fprintf(stderr, "%s, line %d; musicoff(): STUB.\n", __FILE__, __LINE__);
 } // musicoff
 
-void uninitsb(void)
+void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat)
 {
-    fprintf(stderr, "%s, line %d; uninitsb(): STUB.\n", __FILE__, __LINE__);
-} // uninitsb
+    fprintf(stderr, "%s, line %d; wsayfollow(): STUB.\n", __FILE__, __LINE__);
+} // wsayfollow    
+
+void wsay(char *dafilename, long dafreq, long volume1, long volume2)
+{
+    fprintf(stderr, "%s, line %d; wsay(): STUB.\n", __FILE__, __LINE__);
+} // wsay
 
 void preparesndbuf(void)
 {
     fprintf(stderr,"%s, line %d; preparesndbuf(): STUB.\n", __FILE__, __LINE__);
 } // preparesndbuf
 
-void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat)
-{
-    fprintf(stderr, "%s, line %d; wsayfollow(): STUB.\n", __FILE__, __LINE__);
-} // wsayfollow    
-
 void setears(long daposx, long daposy, long daxvect, long dayvect)
 {
 //    fprintf(stderr, "%s, line %d; setears(): STUB.\n", __FILE__, __LINE__);
 } // setears
-
-void wsay(char *dafilename, long dafreq, long volume1, long volume2)
-{
-    fprintf(stderr, "%s, line %d; wsay(): STUB.\n", __FILE__, __LINE__);
-} // wsay
 
 void set16color_palette (void)
 {
