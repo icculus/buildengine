@@ -8,16 +8,9 @@
 #include <string.h>
 #include <stdarg.h>
 
-#ifdef PLATFORM_DOS
-#include <dos.h>
-#include <process.h>
-#endif
+#include "platform.h"
 
 #include "pragmas.h"
-
-#ifdef PLATFORM_UNIX
-#include "unix_compat.h"
-#endif
 
 #define MAXPLAYERS 16
 #define BAKSIZ 16384

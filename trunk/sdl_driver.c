@@ -16,8 +16,13 @@
 #include <assert.h>
 #include <string.h>
 
+#include "platform.h"
+
+#if (!defined PLATFORM_SUPPORTS_SDL)
+#error This platform apparently does not use SDL. Do not compile this.
+#endif
+
 #include "SDL.h"
-#include "unix_compat.h"
 #include "build.h"
 #include "display.h"
 #include "pragmas.h"
@@ -27,16 +32,17 @@
 
 // !!! I'd like this to be temporary. --ryan.
 // !!!  That is, the self-modifying part, so I can ditch the mprotect() stuff.
-#ifdef USE_I386_ASM
+#if ((defined PLATFORM_UNIX) && (defined USE_I386_ASM))
+
 #include <sys/mman.h>
 #include <limits.h>
+
 #ifndef PAGESIZE
 #define PAGESIZE 4096
 #endif
-#else
-#error There is currently only I386 asm. Please make your platform work,
-#error  ...or write us some portable C code.
+
 #endif
+
 
 // !!! remove the surface_end checks, for speed's sake. They are a
 // !!!  needed safety right now. --ryan.
@@ -236,7 +242,7 @@ static int root_sdl_event_filter(const SDL_Event *event)
 
 
 // !!! I'd like this to be temporary. --ryan.
-#ifdef USE_I386_ASM
+#if ((defined PLATFORM_UNIX) && (defined USE_I386_ASM))
 
 #define PROT_R_W_X (PROT_READ | PROT_WRITE | PROT_EXEC)
 
@@ -327,9 +333,12 @@ void unprotect_ASM_pages(void)
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
-    #ifdef USE_I386_ASM
+    #if ((PLATFORM_UNIX) && (defined USE_I386_ASM))
         unprotect_ASM_pages();
     #endif
+
+    setbuf(stderr, NULL);
+    setbuf(stdout, NULL);
 
     if (title == NULL)
         title = "BUILD";
@@ -339,9 +348,6 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
 
     titlelong = strdup(title);
     titleshort = strdup(icon);
-
-    setbuf(stderr, NULL);
-    setbuf(stdout, NULL);
 
     if (getenv(BUILD_NOMOUSEGRAB) == NULL)
         mouse_grabbed = 1;
@@ -452,7 +458,7 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
 
     if (SDL_Init(SDL_INIT_VIDEO |
                  SDL_INIT_TIMER |
-                 SDL_INIT_AUDIO ) == -1)
+                 SDL_INIT_AUDIO) == -1)
     {
         fprintf(stderr, "SDL_Init() failed!\n");
         fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
@@ -464,6 +470,7 @@ int setvesa(long x, long y)
 {
     fprintf(stderr, "setvesa() called in SDL driver!\n");
     exit(23);
+    return(0);
 } // setvesa
 
 
@@ -746,10 +753,12 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
  *  so we do a conversion.
  */
 {
-    SDL_Color fmt_swap[start + num];
+    SDL_Color fmt_swap[256];  // !!! used to be: [start + num];
     SDL_Color *sdlp = fmt_swap + start;
     char *p = palettebuffer + (start * 4);
     int i;
+
+    assert( (start + num) <= (sizeof (fmt_swap) / sizeof (SDL_Color)) );
 
     for (i = 0; i < num; i++)
     {
@@ -897,7 +906,7 @@ void drawpixels(long offset, Uint16 pixels)
     if (SDL_MUSTLOCK(surface))
         SDL_LockSurface(surface);
 
-    surface_end = (surface->pixels + (surface->w * surface->h)) - 2;
+    surface_end = (((Uint8 *) surface->pixels) + (surface->w * surface->h)) - 2;
     pos = (Uint16 *) (((Uint8 *) surface->pixels) + offset);
     if ((pos >= (Uint16 *) surface->pixels) && (pos < (Uint16 *) surface_end))
         *pos = pixels;
@@ -918,7 +927,7 @@ void drawpixelses(long offset, Uint32 pixelses)
     if (SDL_MUSTLOCK(surface))
         SDL_LockSurface(surface);
 
-    surface_end = (surface->pixels + (surface->w * surface->h)) - 2;
+    surface_end = (((Uint8 *)surface->pixels) + (surface->w * surface->h)) - 2;
     pos = (Uint32 *) (((Uint8 *) surface->pixels) + offset);
     if ((pos >= (Uint32 *) surface->pixels) && (pos < (Uint32 *) surface_end))
         *pos = pixelses;
@@ -929,14 +938,14 @@ void drawpixelses(long offset, Uint32 pixelses)
 
 
 // Fix this up The Right Way (TM) - DDOI
-void setcolor16 (long col)
+void setcolor16 (int col)
 {
 	drawpixel_color = col;
 }
 
 void drawpixel16(long offset)
 {
-    drawpixel((long) (surface->pixels + offset), drawpixel_color);
+    drawpixel(((long) surface->pixels + offset), drawpixel_color);
 } // drawpixel16
 
 
@@ -954,7 +963,7 @@ void fillscreen16 (long offset, long color, long blocksize)
 	    offset += 640*336;
     }
 
-    surface_end = (surface->pixels + (surface->w * surface->h)) - 1;
+    surface_end = (((Uint8 *) surface->pixels) + (surface->w * surface->h)) - 1;
     wanted_end = (((Uint8 *) surface->pixels) + offset) + blocksize;
 
     if (offset < 0)
@@ -963,7 +972,7 @@ void fillscreen16 (long offset, long color, long blocksize)
     if (wanted_end > surface_end)
         blocksize = ((unsigned long) surface_end) - ((unsigned long) surface->pixels + offset);
 
-    memset(surface->pixels + offset, (int) color, blocksize);
+    memset(((Uint8 *)surface->pixels) + offset, (int) color, blocksize);
 
     if (SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
@@ -1053,7 +1062,7 @@ void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color)
     }
 
     /* Point to the bitmap address first pixel to draw */
-    ScreenPtr = surface->pixels + XStart + (surface->w * YStart);
+    ScreenPtr = ((Uint8 *) surface->pixels) + XStart + (surface->w * YStart);
 
     /* Figure out whether we're going left or right, and how far we're going horizontally */
     if ((XDelta = XEnd - XStart) < 0)
@@ -1156,8 +1165,6 @@ void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color)
         DrawVerticalRun(&ScreenPtr, XAdvance, FinalPixelCount, Color);
         UNLOCK_SURFACE_AND_RETURN;
      }
-
-     UNLOCK_SURFACE_AND_RETURN;
 } // drawline16
 
 
@@ -1223,11 +1230,13 @@ Uint32 _timer_catcher(Uint32 interval, void *bleh)
 
 void inittimer(void)
 {
+    SDL_ClearError();
     primary_timer = SDL_AddTimer(1000 / 120, _timer_catcher, NULL);
     if (primary_timer == NULL)
     {
-        SDL_Quit();
         fprintf(stderr, "Error initializing primary timer!\n");
+        fprintf(stderr, "Reason: [%s]\n", SDL_GetError());
+        SDL_Quit();
         exit(2);
     } // if
 }

@@ -8,20 +8,15 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <memory.h>
+#include <stdlib.h>
+#include "platform.h"
 #include "build.h"
 #include "pragmas.h"
 #include "names.h"
 
-#ifdef PLATFORM_DOS
-#include <dos.h>
-#include <io.h>
-#elif (defined PLATFORM_UNIX)
 // !!! temporary externs.
 extern long total_rendered_frames, total_render_time;
-#include <unistd.h>
-#include "unix_compat.h"
-//#include <sys/io.h>
-#endif
 
 extern char keystatus[256];
 
@@ -89,10 +84,9 @@ extern void printext16(long xpos, long ypos, short col, short backcol,
 extern void drawline16(long x1, long y1, long x2, long y2, char col);
 extern short getnumber16(char namestart[80], short num, long maxnumber);
 extern void printmessage16(char name[82]);
-#ifdef PLATFORM_UNIX
 extern void statusbar_printext16(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
-#else
-// !!! move this to unix_compat.h - DDOI
+
+#ifdef PLATFORM_DOS
 #define statusbar_printext16 printext16
 #define statusbar_printext16_noupdate printext16
 #endif
