@@ -311,6 +311,15 @@
             version still works fine, and presumably so will the Cygwin
             version. Overall, the quality of the port's codebase is improving
             through this effort. I wonder if the DOS version will build now...
+02152001 - Did initial work to get a protected mode DOS binary running again.
+            Hey, why not? Not complete (compiles clean, no link). Lots of
+            cleanups, and again, this is improving the quality of the port's
+            codebase. As usual, the Linux, and presumably Cygwin, versions
+            still compile clean and run. Haven't tried Watcom/Win32 tonight.
+            Renamed dos_driver.c to dos_drvr.c, so you can build the DOS bits
+            on a regular FAT filesystem. Added a Makefile.dos for use with
+            Watcom C's wmake (based on Ken's original). Lots of other files
+            touched.
 
 --ryan. (icculus@lokigames.com)
 
