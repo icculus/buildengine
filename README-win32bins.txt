@@ -54,6 +54,10 @@ CHANGELOG of win32 binary releases:
 02202001 - Fixed rendering bug in 2D editor, enabled optimizations,
            disabled debugging. Disabled console window.
 02212001 - Fixed too-slow gameplay (Thanks, Matt!).
+02222001 - Ported back to DOS/386...since so much code got touched, it's
+           worth putting out a new binary to make sure nothing broke.
+02222001 - Ported back to DOS/386...since so much code got touched, it's
+           worth putting out a new binary to make sure nothing broke.
 
 // end of README-win32bins.txt ...
 

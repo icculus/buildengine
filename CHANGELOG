@@ -352,6 +352,7 @@
             out by Matt Saettler. Amen. This led to a better abstraction:
             PLATFORM_TIMER_HZ, defined in platform.h ... Removed the wedged-in
             call to SDL_PumpEvents() in game.c...not needed anymore.
+02222001 - Ported the codebase back to DOS. Point wmake.exe at Makefile.dos.
 
 --ryan. (icculus@lokigames.com)
 
