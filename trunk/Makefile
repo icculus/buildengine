@@ -5,7 +5,19 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
+# set this to "true" if you are building on Cygwin. Leave it false otherwise.
+cygwin = false
+
+# To use a different platform's ASM or portable C, change this.
+#  (note that this MUST be -DUSE_I386_ASM right now if you even want a
+#   prayer of having a successful compilation.)
 USE_ASM = -DUSE_I386_ASM
+
+
+
+# Everything below this line is probably okay.
+
+
 
 CC = gcc
 ASM = nasm
@@ -22,10 +34,22 @@ BUILDEXE = build
 BUILDSRCS = build.c bstub.c engine.c cache1d.c sdl_driver.c unix_compat.c
 BUILDSRCS += a_linux.asm pragmas.c a.c
 
+ifeq ($(cygwin), true)
+ASMOBJFMT = win32
+ASMDEFS = -dC_IDENTIFIERS_UNDERSCORED
+CFLAGS += -DC_IDENTIFIERS_UNDERSCORED
+else
+ASMOBJFMT = elf
+endif
+
+ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 
 # Rules for turning source files into .o files
 %.o: %.c
 	$(CC) -c -o $@ $< $(CFLAGS)
+
+%.o: %.asm
+	$(ASM) $(ASMFLAGS) -o $@ $<
 
 # Rule for getting list of objects from source
 GAMEOBJS1 := $(GAMESRCS:.c=.o)
@@ -40,12 +64,6 @@ $(GAMEEXE) : $(GAMEOBJS)
 
 $(BUILDEXE) : $(BUILDOBJS)
 	$(LINKER) -o $(BUILDEXE) $(LDFLAGS) $(BUILDOBJS)
-
-a_linux.o: a_linux.asm
-	$(ASM) -o a_linux.o -f elf a_linux.asm
-
-k.o: k.asm
-	$(ASM) -o k.o -f elf k.asm
 
 clean:
 	rm -f $(GAMEOBJS) $(BUILDOBJS) $(GAMEEXE) $(BUILDEXE) core
