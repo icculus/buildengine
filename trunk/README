@@ -104,8 +104,8 @@ INFO:
   Make sure your in the buildengine directory. Set these two environment
   variables:
 
-    export SDL_LIB_DIR=C:/where/i/installed/SDL-1.1.8/lib
-    export SDL_INC_DIR=C:/where/i/installed/SDL-1.1.8/include
+    export SDL_LIB_DIR=C:/where/i/installed/SDL-1.2.0/lib
+    export SDL_INC_DIR=C:/where/i/installed/SDL-1.2.0/include
 
    (Yes, those directory separators are backwards; it is intentional.)
 
@@ -120,11 +120,13 @@ INFO:
 - To build with Watcom C for Win32: Get SDL (as above). Unpack the source,
   edit Makefile.w32 (instructions are in that file). Change the paths at the
   top to point to your Watcom and SDL installs. Run "wmake -f Makefile.w32"
-  ... that's all. I tried this with Watcom C 10.6 and the win32 ("nt") target.
-  Your mileage may vary.
+  ... that's all. I tried this with Watcom C 10.6 and 11.0 using the win32
+  (both "nt" and "nt_win") targets. Anything older than Watcom C 11.0 will
+  NOT build an EXE that will work on Windows NT 4.0 or Windows 2000, even
+  though the same binary will work on Windows 95 and 98. Your mileage may vary.
 
 - If anyone wants to make this work with Visual C++ to make this easier
-  for Windows users, I'll happily accept your changes.
+  for Windows users, I'll happily accept your changes and additions.
 
 - One more thing, about licensing. If you build this with Cygwin, you are
   NOT permitted to release binaries, as Cygwin's POSIX-support DLL is
@@ -154,10 +156,19 @@ GOOD REFERENCES:
 - The Art of Assembly Language, complete text:
     http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
 
+TO PORT TO NEW OPERATING SYSTEMS:
+- If Simple Directmedia Layer supports your OS, you're in luck. Just get
+  everything building. If not, look at display.h for what you need to
+  implement, and sdl_driver.c and dos_drvr.c for examples. Consider getting
+  SDL working on your platform instead.
+- Start in platform.h for an idea of where to add anything that's
+  platform-specific. If you can't get by on PLATFORM_UNIX, then define
+  PLATFORM_WHATEVER.
+- Try not to wedge in platform dependent code, but find good abstractions.
 
 TO PORT TO NEW PROCESSORS:
 - You can either write new ASM for your processor, or better yet, implement
-  the stuff in C, so everyone can benefit.
+  the stuff in portable C, so everyone can benefit.
 - Most of your work will be in pragmas.*, a_linux.*, and a.*.  Look for
   USE_I386_ASM. Define your own version.
 
