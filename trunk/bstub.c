@@ -151,7 +151,7 @@ static int use_palette_lookup_file(const char *lookup_file)
     int i = 0;
     int bytes = 0;
 
-    long in = kopen4load(lookup_file, 1);
+    long in = kopen4load(lookup_file, 0);
     if (in != -1)
     {
         if (kread(in, &num_palettes, 1) == 1)
