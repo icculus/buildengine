@@ -6,7 +6,7 @@ The notable annoyances:
 1) No sound.
 2) No networking. Boohoo.   :)
 
-Bug reports to Ryan C. Gordon (icculus@lokigames.com).
+Bug reports to Ryan C. Gordon (icculus@linuxgames.com).
 
 I've only tested this briefly on a Windows 98 (second edition) box. YMMV.
  Please feel free to report success and failure on different Windows platforms.
@@ -44,7 +44,7 @@ Feel free to send me comments, complaints, suggestions, and donations.
 
 Enjoy!
 
---ryan. (icculus@lokigames.com)
+--ryan. (icculus@linuxgames.com)
 
 
 CHANGELOG of win32 binary releases:

@@ -1,7 +1,7 @@
 /*
  * DOS compatibility header. Takes care of some legacy code issues.
  *
- *  Written by Ryan C. Gordon (icculus@lokigames.com)
+ *  Written by Ryan C. Gordon (icculus@linuxgames.com)
  *
  * Please do NOT harrass Ken Silverman about any code modifications
  *  (including this file) to BUILD.
