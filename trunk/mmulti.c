@@ -1227,7 +1227,7 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
         }
 
         if (bogus)
-            printf("bogus token!\n");
+            printf("bogus token! [%s]\n", tok);
     }
 
     free(buf);
