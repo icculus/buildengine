@@ -392,8 +392,7 @@ long totalclocklock;
 
 
 // !!! can we move this somewhere?   --ryan.
-
-#ifdef PLATFORM_DOS
+#if ((defined USE_I386_ASM) && (defined __WATCOMC__))
 extern long mmxoverlay();
 #pragma aux mmxoverlay modify [eax ebx ecx edx];
 extern long sethlinesizes(long,long,long);
