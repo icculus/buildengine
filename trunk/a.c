@@ -8,6 +8,18 @@
 
 #ifdef USE_I386_ASM
 
+long is_vmware_running(void)
+{
+    int retval;
+    __asm__ __volatile__ ("
+        call _asm_isvmwarerunning
+      " : "=a" (retval)
+        :
+        :  "cc", "ebx", "ecx", "edx", "memory");
+    return(retval);
+} // is_vmware_running
+
+
 //#pragma aux mmxoverlay modify [eax ebx ecx edx]
 long mmxoverlay(void)
 {
@@ -521,6 +533,12 @@ long stretchhline(long i1, long i2, long i3, long i4, long i5, long i6)
 } // drawslab
 
 #else  // below is the C version of all that nasty self-modifying ASM...
+
+
+long is_vmware_running(void)
+{
+    return(0);
+} // is_vmware_running
 
 
 static unsigned char machxbits_val = 6;

@@ -43,6 +43,22 @@ CODE SEGMENT PUBLIC USE32 'DATA'
 ASSUME cs:CODE,ds:CODE
 
 ALIGN 16
+PUBLIC is_vmware_running_
+is_vmware_running_:
+        mov eax,564d5868h
+        mov ecx,0000000ah
+        mov dx,5658h
+        in  eax,dx
+        cmp ebx,564d5868h
+        jz  vmware_y
+        xor eax,eax
+        ret
+vmware_y:
+        mov eax,1h
+        ret
+
+
+ALIGN 16
 PUBLIC sethlinesizes_
 sethlinesizes_:
 	mov byte ptr [machxbits1+2], al

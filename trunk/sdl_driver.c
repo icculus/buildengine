@@ -898,9 +898,25 @@ static inline void init_debugging(void)
 	    debug_file = stdout;
         else
             debug_file = fopen(envr, "w");
-    } // if
 
+        if (debug_file == NULL)
+            printf("BUILDSDL: -WARNING- Could not open debug file!\n");
+        else
+            setbuf(debug_file, NULL);
+    } // if
 } // init_debugging
+
+
+static int in_vmware = 0;
+static inline void detect_vmware(void)
+{
+    // !!! need root access to touch i/o ports on Linux.
+    #if (!defined __linux__)
+        in_vmware = (int) is_vmware_running();
+    #endif
+    sdldebug("vmWare %s running.", (in_vmware) ? "is" : "is not");
+} // detect_vmware
+
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
@@ -910,14 +926,13 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         unprotect_ASM_pages();
     #endif
 
-    setbuf(stderr, NULL);
-    setbuf(stdout, NULL);
-
     if (title == NULL)
         title = "BUILD";
 
     if (icon == NULL)
         icon = "BUILD";
+
+    detect_vmware();
 
     titlelong = strdup(title);
     titleshort = strdup(icon);

@@ -61,6 +61,7 @@ long settransreverse(void);
 long setupdrawslab(long,long);
 long drawslab(long,long,long,long,long,long);
 long stretchhline(long,long,long,long,long,long);
+long is_vmware_running(void);
 
     // !!! This part might be better stated as "USE_ASM".  --ryan.
 #ifdef USE_I386_ASM
@@ -107,6 +108,7 @@ long stretchhline(long,long,long,long,long,long);
   long asm_setupdrawslab(long,long);
   long asm_drawslab(long,long,long,long,long,long);
   long asm_stretchhline(long,long,long,long,long,long);
+  long asm_isvmwarerunning(void);
 
   // !!! I need a reference to this, for mprotect(), but the actual function
   // !!!  is never called in BUILD...just from other ASM routines. --ryan.
@@ -157,6 +159,7 @@ long stretchhline(long,long,long,long,long,long);
     long asm_setupdrawslab(long,long) __attribute__ ((alias ("_asm_setupdrawslab")));
     long asm_drawslab(long,long,long,long,long,long) __attribute__ ((alias ("_asm_drawslab")));
     long asm_stretchhline(long,long,long,long,long,long) __attribute__ ((alias ("_asm_stretchhline")));
+    long asm_isvmwarerunning(void) __attribute__ ((alias ("_asm_isvmwarerunning")));
     // !!! I need a reference to this, for mprotect(), but the actual function
     // !!!  is never called in BUILD...just from other ASM routines. --ryan.
     long asm_prohlineasm4(void) __attribute__ ((alias ("_asm_prohlineasm4")));
