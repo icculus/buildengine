@@ -534,6 +534,9 @@ void deinit_network_transport(gcomtype *gcom)
 #  define socklen_t size_t
 #  define netstrerror() win32netstrerror()
 #  define neterrno() WSAGetLastError()
+#  define sockettype SOCKET
+#  define socketclose(x) closesocket(x)
+#  define SOCKET_SHUTDOWN_BOTH SD_BOTH
 #else
 #  include <sys/types.h>
 #  include <sys/socket.h>
@@ -548,6 +551,9 @@ void deinit_network_transport(gcomtype *gcom)
 #  include <time.h>
 #  define netstrerror() strerror(errno)
 #  define neterrno() errno
+#  define sockettype int
+#  define socketclose(x) close(x)
+#  define SOCKET_SHUTDOWN_BOTH 2
 #  ifndef MSG_ERRQUEUE  /* legacy glibc header workaround... */
 #    define MSG_ERRQUEUE 0x2000
 #  endif
@@ -566,7 +572,7 @@ void deinit_network_transport(gcomtype *gcom)
 #define CLIENT_POLL_DELAY 3000  /* ms between pings at peer-to-peer startup. */
 #define HEADER_PEER_GREETING 245
 
-static int udpsocket = -1;
+static sockettype udpsocket = -1;
 static short udpport = BUILD_DEFAULT_UDP_PORT;
 static int allowed_addresses[MAX_PLAYERS];  /* only respond to these IPs. */
 
@@ -828,9 +834,40 @@ static char *get_token(char **ptr)
     return(retval);
 }
 
-static int open_udp_socket(int ip, int port)
+static int set_socket_blockmode(int onOrOff)
 {
     int flags;
+    int rc = 0;
+
+    /* set socket to be (non-)blocking. */
+
+#if PLATFORM_WIN32
+    flags = (onOrOff) ? 1 : 0;
+    rc = (ioctlsocket(udpsocket, FIONBIO, &flags) == 0);
+#else
+	flags = fcntl(udpsocket, F_GETFL, 0);
+    if (flags != -1)
+    {
+        if (onOrOff)
+            flags &= ~O_NONBLOCK;
+        else
+    	    flags |= O_NONBLOCK;
+	    rc = (fcntl(udpsocket, F_SETFL, flags) == 0);
+    }
+#endif
+
+    if (!rc)
+    {
+        printf("set socket %sblocking failed: %s\n",
+            ((onOrOff) ? "" : "non-"), netstrerror());
+    }
+
+    return(rc);
+}
+
+
+static int open_udp_socket(int ip, int port)
+{
     struct sockaddr_in addr;
 
     printf("Setting up UDP interface %s:%d...\n", static_ipstring(ip), port);
@@ -842,30 +879,16 @@ static int open_udp_socket(int ip, int port)
         return(0);
     }
 
-    /* set socket to be non-blocking. */
-#if PLATFORM_WIN32
-    flags = 1;
-    flags = (ioctlsocket(udpsocket, FIONBIO, &flags) != 0);
-#else
-	flags = fcntl(udpsocket, F_GETFL, 0);
-    if (flags != -1)
-    {
-    	flags |= O_NONBLOCK;
-	    flags = (fcntl(udpsocket, F_SETFL, flags) != 0);
-    }
-#endif
-
-	if (flags)
-	{
-        printf("set non-blocking failed: %s\n", netstrerror());
+    if (!set_socket_blockmode(0))
         return(0);
-    }
 
-#if !PLATFORM_WIN32
+    #if !PLATFORM_WIN32
+    {
 	/* !!! FIXME: Might be Linux (not Unix, not BSD, not WinSock) specific. */
-    flags = 1;
-	setsockopt(udpsocket, SOL_IP, IP_RECVERR, &flags, sizeof (flags));
-#endif
+        int flags = 1;
+	    setsockopt(udpsocket, SOL_IP, IP_RECVERR, &flags, sizeof (flags));
+    }
+    #endif
 
     memset(&addr, '\0', sizeof (addr));
 	addr.sin_family = AF_INET;
@@ -1268,7 +1291,9 @@ void deinit_network_transport(gcomtype *gcom)
     if (udpsocket != -1)
     {
         printf("  ...closing socket...\n");
-        close(udpsocket);
+        set_socket_blockmode(1);  /* block while socket drains. */
+        shutdown(udpsocket, SOCKET_SHUTDOWN_BOTH);
+        socketclose(udpsocket);
         udpsocket = -1;
     }
 
