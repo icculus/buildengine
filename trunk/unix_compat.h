@@ -110,8 +110,11 @@ long filelength(int fhandle);
 #define S_IREAD S_IRUSR
 #endif
 
-#ifndef getch
-#define getch() getchar()
+#ifdef DC //bero
+#undef stdout
+#undef stderr
+#define        stdout ((FILE*)2)
+#define        stderr ((FILE*)2)
 #endif
 
 #ifndef max

@@ -153,6 +153,9 @@ void set16color_palette (void);
 
 static FILE *_sdl_debug_file = NULL;
 
+#ifdef DC
+#define sdldebug(fmt,args...) printf("BUILDSDL: " fmt "\n",##args)
+#else
 static __inline void __out_sdldebug(const char *subsystem,
                                   const char *fmt, va_list ap)
 {
@@ -174,7 +177,7 @@ static void sdldebug(const char *fmt, ...)
         va_end(ap);
     } /* if */
 } /* sdldebug */
-
+#endif
 
 #if (defined USE_OPENGL)
 void sgldebug(const char *fmt, ...)
@@ -302,7 +305,7 @@ static Uint8 *get_framebuffer(void)
 
 int using_opengl(void)
 {
-    return(renderer == RENDERER_OPENGL3D);
+    return(renderer = RENDERER_OPENGL3D);
 } /* using_opengl */
 
 
@@ -1081,7 +1084,7 @@ static void set_sdl_renderer(void)
     const char *envr = getenv(BUILD_RENDERER);
 
 #ifdef USE_OPENGL
-    int need_opengl_lib = 0;
+    int need_opengl_lib = 1;
 #endif
 
     if ((envr == NULL) || (strcmp(envr, ENVRSTR_RENDERER_SOFTWARE) == 0))
@@ -1651,8 +1654,8 @@ void getvalidvesamodes(void)
     int i;
     SDL_Rect **modes = NULL;
     int stdres[][2] = {
-                        {320, 200}, {640, 350}, {640, 480},
-                        {800, 600}, {1024, 768}
+                        {320, 200}, {320, 240}, {640, 350},
+			{640, 480}, {800, 600}, {1024, 768}
                       };
 
     if (already_checked)
@@ -1711,6 +1714,7 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
 
     if (gl)
     {
+        return 255;
         dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_R, gl_reds);
         dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_G, gl_greens);
         dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_B, gl_blues);

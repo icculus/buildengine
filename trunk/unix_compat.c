@@ -52,6 +52,7 @@ const int hbits[64] =
 };
 
 
+#ifndef DC
 int stricmp(const char *x, const char *y)
 {
     int ux, uy;
@@ -70,7 +71,7 @@ int stricmp(const char *x, const char *y)
 
     return(0);
 } /* stricmp */
-
+#endif /* DC */
 
 long filelength(int fhandle)
 {

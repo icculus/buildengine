@@ -148,7 +148,7 @@ int insertsprite(short sectnum, short statnum);
  * @remark Ken's Notes on this function:
  * \n Be careful when you use this function with sprites because
  * remember that the sprite's sector number should not be modified directly.
- * If you want to update a sprite's sector, I recomment using the setsprite
+ * If you want to update a sprite's sector, I recommend using the setsprite
  * function.
  *
  */
