@@ -519,15 +519,30 @@ extern long drawslab(long,long,long,long,long,long);
 
 #else  /* USE_I386_ASM */
 
-        static long krecipasm(long i1)
+        static long krecipasm(long param)
         {
-            long retval;
-            __asm__ __volatile__ (
-                "\n\t"
-                "call _asm_krecipasm\n\t"
-            : "=a" (retval) : "a" (i1)
-        	: "cc", "ebx", "ecx", "memory");
-            return(retval);
+		unsigned int xormask;
+		int mantissa;
+		int exponent;
+		long recip;
+
+		union {
+		float f;
+		unsigned int i;
+		} fi;
+
+		fi.f = (float) param;
+
+		fpuasm = fi.i;
+
+		xormask = (param < 0) ? 0xffffffff : 0;
+
+		mantissa = (fi.i & 0x007ff000) >> 12;
+		exponent = (fi.i - 0x3f800000) >> 23;
+
+		recip = (reciptable[mantissa] >> exponent) ^ xormask;
+
+		return recip;
         } /* krecipasm */
 /*
     static long krecipasm(long x)
