@@ -102,8 +102,17 @@ extern long klseek(long handle, long offset, long whence);
 extern long kfilelength(long handle);
 extern void kclose(long handle);
 extern void kdfread(void *buffer, size_t dasizeof, size_t count, long fil);
+extern void kdfread8(char *buffer, size_t count, long fil);
+extern void kdfread16(short *buffer, size_t count, long fil);
+extern void kdfread32(long *buffer, size_t count, long fil);
 extern void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil);
+extern void dfread8(char *buffer, size_t count, FILE *fil);
+extern void dfread16(short *buffer, size_t count, FILE *fil);
+extern void dfread32(long *buffer, size_t count, FILE *fil);
 extern void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil);
+extern void dfwrite8(char *buffer, size_t count, FILE *fil);
+extern void dfwrite16(short *buffer, size_t count, FILE *fil);
+extern void dfwrite32(long *buffer, size_t count, FILE *fil);
 extern long compress(char *lzwinbuf, long uncompleng, char *lzwoutbuf);
 extern long uncompress(char *lzwinbuf, long compleng, char *lzwoutbuf);
 

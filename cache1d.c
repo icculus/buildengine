@@ -660,7 +660,7 @@ void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 	if (dasizeof > LZWSIZE) { count *= dasizeof; dasizeof = 1; }
 	ptr = (char *)buffer;
 
-	kread(fil,&leng,2); kread(fil,lzwbuf5,(long)leng);
+	kread16(fil,&leng); kread(fil,lzwbuf5,(long)leng);
 	k = 0;
 	kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 
@@ -671,7 +671,7 @@ void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 	{
 		if (k >= kgoal)
 		{
-			kread(fil,&leng,2); kread(fil,lzwbuf5,(long)leng);
+			kread16(fil,&leng); kread(fil,lzwbuf5,(long)leng);
 			k = 0; kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 		}
 		for(j=0;j<dasizeof;j++) ptr[j+dasizeof] = (unsigned char) ((ptr[j]+lzwbuf4[j+k])&255);
@@ -688,24 +688,28 @@ void kdfread8(char *_buffer, size_t count, long fil)
 
 void kdfread16(short *_buffer, size_t count, long fil)
 {
-    int i;
     kdfread(_buffer, 2, count, fil);
-#if PLATFORM_BIGENDIAN
-    unsigned short *buffer = (unsigned short *) _buffer;
-    for (i = 0; i < count; i++)
-        buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
-#endif
+    #if PLATFORM_BIGENDIAN
+    {
+        int i;
+        unsigned short *buffer = (unsigned short *) _buffer;
+        for (i = 0; i < count; i++)
+            buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
+    }
+    #endif
 }
 
 void kdfread32(long *_buffer, size_t count, long fil)
 {
-    int i;
     kdfread(_buffer, 4, count, fil);
-#if PLATFORM_BIGENDIAN
-    unsigned long *buffer = (unsigned long *) _buffer;
-    for (i = 0; i < count; i++)
-        buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
-#endif
+    #if PLATFORM_BIGENDIAN
+    {
+        int i;
+        unsigned long *buffer = (unsigned long *) _buffer;
+        for (i = 0; i < count; i++)
+            buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
+    }
+    #endif
 }
 
 void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
@@ -725,7 +729,9 @@ void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 	if (dasizeof > LZWSIZE) { count *= dasizeof; dasizeof = 1; }
 	ptr = (char *)buffer;
 
-	fread(&leng,2,1,fil); fread(lzwbuf5,(long)leng,1,fil);
+	fread(&leng,2,1,fil);
+	leng = BUILDSWAP_INTEL16(leng);
+	fread(lzwbuf5,(long)leng,1,fil);
 	k = 0; kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 
 	copybufbyte(lzwbuf4,ptr,(long)dasizeof);
@@ -735,7 +741,9 @@ void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 	{
 		if (k >= kgoal)
 		{
-			fread(&leng,2,1,fil); fread(lzwbuf5,(long)leng,1,fil);
+			fread(&leng,2,1,fil);
+			leng = BUILDSWAP_INTEL16(leng);
+			fread(lzwbuf5,(long)leng,1,fil);
 			k = 0; kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 		}
 		for(j=0;j<dasizeof;j++) ptr[j+dasizeof] = (unsigned char) ((ptr[j]+lzwbuf4[j+k])&255);
@@ -752,24 +760,28 @@ void dfread8(char *buffer, size_t count, FILE *fil)
 
 void dfread16(short *_buffer, size_t count, FILE *fil)
 {
-    int i;
     dfread(_buffer, 2, count, fil);
-#if PLATFORM_BIGENDIAN
-    unsigned short *buffer = (unsigned short *) _buffer;
-    for (i = 0; i < count; i++)
-        buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
-#endif
+    #if PLATFORM_BIGENDIAN
+    {
+        int i;
+        unsigned short *buffer = (unsigned short *) _buffer;
+        for (i = 0; i < count; i++)
+            buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
+    }
+    #endif
 }
 
 void dfread32(long *_buffer, size_t count, FILE *fil)
 {
-    int i;
     dfread(_buffer, 4, count, fil);
-#if PLATFORM_BIGENDIAN
-    unsigned long *buffer = (unsigned long *) _buffer;
-    for (i = 0; i < count; i++)
-        buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
-#endif
+    #if PLATFORM_BIGENDIAN
+    {
+        int i;
+        unsigned long *buffer = (unsigned long *) _buffer;
+        for (i = 0; i < count; i++)
+            buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
+    }
+    #endif
 }
 
 
@@ -862,6 +874,11 @@ long compress(char *lzwinbuf, long uncompleng, char *lzwoutbuf)
 	long bytecnt1, bitcnt, numbits, oneupnumbits;
 	short *shortptr;
 
+#if PLATFORM_BIGENDIAN
+fprintf(stderr, "Not byte order safe, yet!");
+assert(0);
+#endif
+
 	for(i=255;i>=0;i--) { lzwbuf1[i] = (char) i; lzwbuf3[i] = (short) ((i+1)&255); }
 	clearbuf((void *) FP_OFF(lzwbuf2),256>>1,0xffffffff);
 	clearbuf((void *) FP_OFF(lzwoutbuf),((uncompleng+15)+3)>>2,0L);
@@ -925,11 +942,11 @@ long uncompress(char *lzwinbuf, long compleng, char *lzwoutbuf)
 	short *shortptr;
 
 	shortptr = (short *)lzwinbuf;
-	strtot = (long)shortptr[1];
+	strtot = (long) BUILDSWAP_INTEL16(shortptr[1]);
 	if (strtot == 0)
 	{
 		copybuf((void *)(FP_OFF(lzwinbuf)+4),(void *)(FP_OFF(lzwoutbuf)),((compleng-4)+3)>>2);
-		return((long)shortptr[0]); /* uncompleng */
+		return((long) BUILDSWAP_INTEL16(shortptr[0])); /* uncompleng */
 	}
 	for(i=255;i>=0;i--) { lzwbuf2[i] = (short) i; lzwbuf3[i] = (short) i; }
 	currstr = 256; bitcnt = (4<<3); outbytecnt = 0;
@@ -937,7 +954,7 @@ long uncompress(char *lzwinbuf, long compleng, char *lzwoutbuf)
 	do
 	{
 		longptr = (long *)&lzwinbuf[bitcnt>>3];
-		dat = ((longptr[0]>>(bitcnt&7)) & (oneupnumbits-1));
+		dat = ((BUILDSWAP_INTEL32(longptr[0])>>(bitcnt&7)) & (oneupnumbits-1));
 		bitcnt += numbits;
 		if ((dat&((oneupnumbits>>1)-1)) > ((currstr-1)&((oneupnumbits>>1)-1)))
 			{ dat &= ((oneupnumbits>>1)-1); bitcnt--; }
@@ -954,5 +971,5 @@ long uncompress(char *lzwinbuf, long compleng, char *lzwoutbuf)
 		currstr++;
 		if (currstr > oneupnumbits) { numbits++; oneupnumbits <<= 1; }
 	} while (currstr < strtot);
-	return((long)shortptr[0]); /* uncompleng */
+	return((long) BUILDSWAP_INTEL16(shortptr[0])); /* uncompleng */
 }
