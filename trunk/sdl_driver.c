@@ -309,7 +309,7 @@ static Uint8 *get_framebuffer(void)
 
 int using_opengl(void)
 {
-    return(renderer = RENDERER_OPENGL3D);
+    return(renderer == RENDERER_OPENGL3D);
 } /* using_opengl */
 
 
@@ -1150,12 +1150,13 @@ static void init_renderer_names(void)
 
 void set_splash(void)
 {
+    SDL_Surface *screen;
     SDL_Surface *bmp = SDL_LoadBMP("splash.bmp");
     if (bmp == NULL)
         return;
 
     putenv("SDL_VIDEO_WINDOW_POS=center");
-    SDL_Surface *screen = SDL_SetVideoMode(bmp->w, bmp->h, 0, SDL_NOFRAME);
+    screen  = SDL_SetVideoMode(bmp->w, bmp->h, 0, SDL_NOFRAME);
     putenv("SDL_VIDEO_WINDOW_POS=nopref");
 
     if (screen != NULL)
