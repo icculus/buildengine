@@ -109,7 +109,8 @@ BUILDOBJS := $(BUILDOBJS1:.asm=.o)
 CLEANUP = $(GAMEOBJS) $(BUILDOBJS) \
           $(GAMEEXE) $(BUILDEXE) \
           $(wildcard *.exe) $(wildcard *.obj) \
-          $(wildcard *~) $(wildcard *.err) core
+          $(wildcard *~) $(wildcard *.err) \
+          $(wildcard .\#*) core
 
 all: $(BUILDEXE) $(GAMEEXE)
 
