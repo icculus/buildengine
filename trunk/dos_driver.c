@@ -765,7 +765,7 @@ void uninitkeys(void)
 	ptr = (short *)0x417; *ptr &= ~0x030f;
 }
 
-void _platform_init(int argc, char **argv)
+void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
     // no op in DOS, currently.  --ryan.
 }
