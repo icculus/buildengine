@@ -44,6 +44,7 @@
 
 #endif  // PLATFORM_SUPPORTS_SDL
 
+// !!! gads, look at all the namespace polution...
 extern long xres, yres, bytesperline, imageSize, maxpages;
 extern char *screen, vesachecked;
 extern long buffermode, origbuffermode, linearmode;
@@ -67,18 +68,13 @@ extern long xdimen, xdimenrecip, halfxdimen, xdimenscale, xdimscale;
 extern char permanentlock;
 
 
-
-// these are implemented in BUILD:
-void setview(long x1, long y1, long x2, long y2);
-void clearallviews(long dacol);
-void setbrightness(char dabrightness, unsigned char *dapal);
-
-
 // these need to be implemented by YOUR driver.
 void _platform_init(int argc, char **argv, const char *title, const char *icon);
 void _idle(void);
 void *_getVideoBase(void);
 void _initkeys(void);
+void _nextpage(void);
+void _uninitengine(void);
 
 // VESA replacement code: The Unix (not-actually-VESA) version of this is
 //  originally using SDL (Simple Directmedia Layer: http://www.libsdl.org/),
@@ -114,16 +110,14 @@ unsigned char _readlastkeyhit(void);
 void __interrupt __far timerhandler(void);
 
 // resolution inits. sdl_driver.c ...
-int setgamemode(char davidoption, long daxdim, long daydim);
 int _setgamemode(char davidoption, long daxdim, long daydim);
 void qsetmode640350(void);
 void qsetmode640480(void);
 
 unsigned long getticks();
 
-#if (defined PLATFORM_DOS)
-//#include "ves2.h"
-#endif
+void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color);
+void setcolor16(int i1);
 
 #endif  // _INCLUDE_DISPLAY_H_
 

@@ -11,41 +11,24 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "engine.h"
 #include "platform.h"
 #include "build.h"
 #include "pragmas.h"
 
 #include "display.h"
 
+#include "bstub.h"
+
 #define MAXMENUFILES 256
 #define updatecrc16(crc,dat) (crc = (((crc<<8)&65535)^crctable[((((unsigned short)crc)>>8)&65535)^dat]))
 static long crctable[256];
 static char kensig[24];
 
-extern void ExtInit(void);
-extern void ExtUnInit(void);
-extern void ExtLoadMap(const char *mapname);
-extern void ExtSaveMap(const char *mapname);
-extern const char *ExtGetSectorCaption(short sectnum);
-extern const char *ExtGetWallCaption(short wallnum);
-extern const char *ExtGetSpriteCaption(short spritenum);
-extern void ExtShowSectorData(short sectnum);
-extern void ExtShowWallData(short wallnum);
-extern void ExtShowSpriteData(short spritenum);
-extern void ExtEditSectorData(short sectnum);
-extern void ExtEditWallData(short wallnum);
-extern void ExtEditSpriteData(short spritenum);
-extern void ExtPreCheckKeys(void);
-extern void ExtAnalyzeSprites(void);
-extern void ExtCheckKeys(void);
-
-void (__interrupt __far *oldtimerhandler)(void);
-void __interrupt __far timerhandler(void);
-
 #define KEYFIFOSIZ 64
-void __interrupt __far keyhandler(void);
-volatile unsigned char keystatus[256], keyfifo[KEYFIFOSIZ], keyfifoplc, keyfifoend;
-volatile unsigned char readch, oldreadch, extended, keytemp;
+volatile unsigned char keystatus[256];
+static volatile unsigned char keyfifo[KEYFIFOSIZ], keyfifoplc, keyfifoend;
+static volatile unsigned char readch, oldreadch, extended, keytemp;
 
 long vel, svel, angvel;
 
@@ -137,7 +120,7 @@ static char scantoascwithshift[128] =
 };
 
 
-
+// !!!
 // function prototypes for forward references...
 char changechar(char dachar, long dadir, char smooshyalign, char boundcheck);
 long gettile(long tilenum);
@@ -182,87 +165,92 @@ void AutoAlignWalls(long nWall0, long ply);
 int movewalls(long start, long offs);
 int menuselect(void);
 
-// External function prototypes
-extern int setgamemode(char davidoption, long daxdim, long daydim);
-extern int loadboard(unsigned char *filename, long *daposx, long *daposy,
-			long *daposz, short *daang, short *dacursectnum);
-extern void initspritelists(void);
-extern void drawrooms(long daposx, long daposy, long daposz, short daang,
-			long dahoriz, short dacursectnum);
-extern void drawmasks(void);
-extern void nextpage(void);
-extern void printext256(long xpos, long ypos, short col, short backcol,
-			char name[82], char fontsize);
-extern void printext256_noupdate(long xpos, long ypos, short col, short backcol,
-			char name[82], char fontsize);
-extern void uninitengine(void);
-extern int loadpics(char *filename);
-#ifndef PLATFORM_DOS
-extern void setvmode(int mode);
-#endif
-extern void updatesector(long x, long y, short *sectnum);
-extern int saveboard(char *filename, long *daposx, long *daposy, long *daposz,
-                         short *daang, short *dacursectnum);
-extern void plotpixel(long x, long y, char col);
-extern void setbrightness(char dabrightness, unsigned char *dapal);
-extern int screencapture(char *filename, char inverseit);
-extern void getmousevalues(short *mousx, short *mousy, short *bstatus);
-extern int clipmove (long *x, long *y, long *z, short *sectnum, long xvect,
-			long yvect, long walldist, long ceildist,
-			long flordist, unsigned long cliptype);
-extern void getzrange(long x, long y, long z, short sectnum,
-			long *ceilz, long *ceilhit, long *florz, long *florhit,
-			long walldist, unsigned long cliptype);
-extern int getceilzofslope(short sectnum, long dax, long day);
-extern int getflorzofslope(short sectnum, long dax, long day);
-extern int getangle(long xvect, long yvect);
-extern void alignceilslope(short dasect, long x, long y, long z);
-extern void alignflorslope(short dasect, long x, long y, long z);
-extern int hitscan(long xs, long ys, long zs, short sectnum, long vx, long vy,
-			long vz, short *hitsect, short *hitwall,
-			short *hitsprite, long *hitx, long *hity, long *hitz,
-			unsigned long cliptype);
-extern int changespritesect(short spritenum, short newsectnum);
-extern int inside (long x, long y, short sectnum);
-extern void setfirstwall(short sectnum, short newfirstwall);
-extern void rotatepoint(long xpivot, long ypivot, long x, long y, short daang,
-			long *x2, long *y2);
-extern int insertsprite(short sectnum, short statnum);
-extern int deletesprite(short spritenum);
-extern int drawtilescreen(long pictopleft, long picbox);
-extern void clearview(long dacol);
-extern void loadtile (short tilenume);
-extern void qsetmode640480(void);
-extern void drawline16(long x1, long y1, long x2, long y2, char col);
-extern void draw2dgrid(long posxe, long posye, short ange, long zoome,
-			short gride);
-extern void draw2dscreen(long posxe, long posye, short ange, long zoome,
-			short gride);
-extern int sectorofwall(short theline);
-extern int changespritestat(short spritenum, short newstatnum);
-extern int setsprite(short spritenum, long newx, long newy, long newz);
-extern void dragpoint(short pointhighlight, long dax, long day);
-extern int ksqrt(long num);
-extern int lastwall(short point);
-extern int loopnumofsector(short sectnum, short wallnum);
 
-// !!! move this to ves2.h?  --ryan.
-#ifdef PLATFORM_DOS
-#pragma aux fillscreen16 =\
-	"mov dx, 0x3ce",\
-	"shl ax, 8",\
-	"out dx, ax",\
-	"mov ax, 0xff08",\
-	"out dx, ax",\
-	"shr ecx, 5",\
-	"add edi, 0xa0000",\
-	"rep stosd",\
-	parm [edi][eax][ecx]\
-	modify [edx]\
+void __interrupt __far timerhandler(void)
+{
+	totalclock++;
+	keytimerstuff();
 
-#endif
+    #ifdef PLATFORM_DOS
+    	outp(0x20,0x20);
+    #endif
+}
 
-// !!! where was this originally? --ryan.
+void __interrupt __far keyhandler(void)
+{
+        // ryan sez: End Of Interrupt call on DOS. This seems like a
+        //  dangerous place to put it, if you ask me, but oh well.  --ryan.
+    #ifdef PLATFORM_DOS
+    	koutp(0x20,0x20);
+    #endif
+
+	oldreadch = readch; readch = _readlastkeyhit();
+
+    //printf("keyhandler() got a (0x%X) ... \n", readch);
+
+        // ryan sez: these inp/outp calls read the keyboard state,
+        //  reset the keyboard, and put the original state back in.
+        //  This is apparently needed on some XTs, but not newer boxes, and
+        //  obviously never on Linux.  --ryan.
+    #ifdef PLATFORM_DOS
+    	keytemp = kinp(0x61); koutp(0x61,keytemp|128); koutp(0x61,keytemp&127);
+    #else
+        keytemp = readch;
+    #endif
+
+	if ((readch|1) == 0xe1) { extended = 128; return; }
+	if (oldreadch != readch)
+	{
+		if ((readch&128) == 0)
+		{
+			keytemp = readch+extended;
+			if (keystatus[keytemp] == 0)
+			{
+				keystatus[keytemp] = 1;
+				keyfifo[keyfifoend] = keytemp;
+				keyfifo[(keyfifoend+1)&(KEYFIFOSIZ-1)] = 1;
+				keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
+			}
+		}
+		else
+		{
+			keytemp = (readch&127)+extended;
+			keystatus[keytemp] = 0;
+			keyfifo[keyfifoend] = keytemp;
+			keyfifo[(keyfifoend+1)&(KEYFIFOSIZ-1)] = 0;
+			keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
+		}
+	}
+	extended = 0;
+}
+
+
+void keytimerstuff(void)
+{
+	if (keystatus[buildkeys[5]] == 0)
+	{
+		if (keystatus[buildkeys[2]] > 0) angvel = max(angvel-16,-128);
+		if (keystatus[buildkeys[3]] > 0) angvel = min(angvel+16,127);
+	}
+	else
+	{
+		if (keystatus[buildkeys[2]] > 0) svel = min(svel+8,127);
+		if (keystatus[buildkeys[3]] > 0) svel = max(svel-8,-128);
+	}
+	if (keystatus[buildkeys[0]] > 0) vel = min(vel+8,127);
+	if (keystatus[buildkeys[1]] > 0) vel = max(vel-8,-128);
+	if (keystatus[buildkeys[12]] > 0) svel = min(svel+8,127);
+	if (keystatus[buildkeys[13]] > 0) svel = max(svel-8,-128);
+
+	if (angvel < 0) angvel = min(angvel+12,0);
+	if (angvel > 0) angvel = max(angvel-12,0);
+	if (svel < 0) svel = min(svel+2,0);
+	if (svel > 0) svel = max(svel-2,0);
+	if (vel < 0) vel = min(vel+2,0);
+	if (vel > 0) vel = max(vel-2,0);
+}
+
+
 void initkeys(void)
 {
 	long i;
@@ -273,8 +261,6 @@ void initkeys(void)
 }
 
 
-extern long dommxoverlay;
-
 int main(int argc,char **argv)
 {
 	char ch, quitflag;
@@ -283,7 +269,7 @@ int main(int argc,char **argv)
     _platform_init(argc, argv, "BUILD editor by Ken Silverman", "BUILD");
 
     if (getenv("BUILD_NOPENTIUM") != NULL)
-        dommxoverlay = 0;
+        setmmxoverlay(0);
 
 	editstatus = 1;
 	if (argc >= 2)
@@ -6605,90 +6591,6 @@ void showspritedata(short spritenum)
 	statusbar_printext16(400,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Extra: %d",sprite[spritenum].extra);
 	statusbar_printext16(400,96,11,-1,snotbuf,0);
-}
-
-void __interrupt __far timerhandler(void)
-{
-	totalclock++;
-	keytimerstuff();
-
-    #ifdef PLATFORM_DOS
-    	outp(0x20,0x20);
-    #endif
-}
-
-void __interrupt __far keyhandler(void)
-{
-        // ryan sez: End Of Interrupt call on DOS. This seems like a
-        //  dangerous place to put it, if you ask me, but oh well.  --ryan.
-    #ifdef PLATFORM_DOS
-    	koutp(0x20,0x20);
-    #endif
-
-	oldreadch = readch; readch = _readlastkeyhit();
-
-    //printf("keyhandler() got a (0x%X) ... \n", readch);
-
-        // ryan sez: these inp/outp calls read the keyboard state,
-        //  reset the keyboard, and put the original state back in.
-        //  This is apparently needed on some XTs, but not newer boxes, and
-        //  obviously never on Linux.  --ryan.
-    #ifdef PLATFORM_DOS
-    	keytemp = kinp(0x61); koutp(0x61,keytemp|128); koutp(0x61,keytemp&127);
-    #else
-        keytemp = readch;
-    #endif
-
-	if ((readch|1) == 0xe1) { extended = 128; return; }
-	if (oldreadch != readch)
-	{
-		if ((readch&128) == 0)
-		{
-			keytemp = readch+extended;
-			if (keystatus[keytemp] == 0)
-			{
-				keystatus[keytemp] = 1;
-				keyfifo[keyfifoend] = keytemp;
-				keyfifo[(keyfifoend+1)&(KEYFIFOSIZ-1)] = 1;
-				keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
-			}
-		}
-		else
-		{
-			keytemp = (readch&127)+extended;
-			keystatus[keytemp] = 0;
-			keyfifo[keyfifoend] = keytemp;
-			keyfifo[(keyfifoend+1)&(KEYFIFOSIZ-1)] = 0;
-			keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
-		}
-	}
-	extended = 0;
-}
-
-
-void keytimerstuff(void)
-{
-	if (keystatus[buildkeys[5]] == 0)
-	{
-		if (keystatus[buildkeys[2]] > 0) angvel = max(angvel-16,-128);
-		if (keystatus[buildkeys[3]] > 0) angvel = min(angvel+16,127);
-	}
-	else
-	{
-		if (keystatus[buildkeys[2]] > 0) svel = min(svel+8,127);
-		if (keystatus[buildkeys[3]] > 0) svel = max(svel-8,-128);
-	}
-	if (keystatus[buildkeys[0]] > 0) vel = min(vel+8,127);
-	if (keystatus[buildkeys[1]] > 0) vel = max(vel-8,-128);
-	if (keystatus[buildkeys[12]] > 0) svel = min(svel+8,127);
-	if (keystatus[buildkeys[13]] > 0) svel = max(svel-8,-128);
-
-	if (angvel < 0) angvel = min(angvel+12,0);
-	if (angvel > 0) angvel = max(angvel-12,0);
-	if (svel < 0) svel = min(svel+2,0);
-	if (svel > 0) svel = max(svel-2,0);
-	if (vel < 0) vel = min(vel+2,0);
-	if (vel > 0) vel = max(vel-2,0);
 }
 
 

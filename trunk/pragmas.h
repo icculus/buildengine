@@ -2487,8 +2487,8 @@ void swapchar2(unsigned char *p1, unsigned char *p2, int xsiz);
 unsigned long getkensmessagecrc(long param);
 long msqrtasm(int i1);
 
-
 #ifdef USE_I386_ASM
+void vlin16first (long i1, long i2);
 int sqr (int input1);
 int scale (int input1, int input2, int input3);
 int mulscale (int input1, int input2, short input3);

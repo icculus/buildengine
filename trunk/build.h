@@ -295,8 +295,6 @@ OTHER VARIABLES:
 
 #define PORTSIG  "Linux port by Ryan C. Gordon, Andrew Henderson, and Dan Olson."
 
-
-
 #endif  // defined _INCLUDE_BUILD_H_
 
 
