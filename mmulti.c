@@ -536,7 +536,6 @@ void deinit_network_transport(gcomtype *gcom)
 #  define neterrno() WSAGetLastError()
 #  define sockettype SOCKET
 #  define socketclose(x) closesocket(x)
-#  define SOCKET_SHUTDOWN_BOTH SD_BOTH
 #else
 #  include <sys/types.h>
 #  include <sys/socket.h>
@@ -553,11 +552,12 @@ void deinit_network_transport(gcomtype *gcom)
 #  define neterrno() errno
 #  define sockettype int
 #  define socketclose(x) close(x)
-#  define SOCKET_SHUTDOWN_BOTH 2
 #  ifndef MSG_ERRQUEUE  /* legacy glibc header workaround... */
 #    define MSG_ERRQUEUE 0x2000
 #  endif
 #endif
+
+#define SOCKET_SHUTDOWN_BOTH 2
 
 #include "cache1d.h"  /* kopen4load for cfg file. */
 #include "display.h"  /* getticks */
