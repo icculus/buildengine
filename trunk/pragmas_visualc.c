@@ -2591,7 +2591,7 @@ long divscale32(long i1, long i2)
 {
     __asm
     {
-        mov eax, i1
+        mov edx, i1
         mov ebx, i2
         xor eax, eax
         idiv ebx
