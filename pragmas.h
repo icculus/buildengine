@@ -1,7 +1,9 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file has been modified from Ken Silverman's original release
+ */
 
 #ifndef __PRAGMAS_H__
 #define __PRAGMAS_H__
@@ -1544,7 +1546,7 @@ long divscale32(long i1, long i2);
         parm nomemory [edx][ebx]\
         modify exact [eax edx]\
 
-// !!! move these into ves.h?  --ryan.
+/* !!! move these into ves.h?  --ryan. */
 #ifdef PLATFORM_DOS
 
 void int5(void);
@@ -1761,7 +1763,7 @@ void qinterpolatedown16short(long *i1, long i2, long i3, long i4);
         modify exact [eax ebx ecx edx edi]\
 
 
-#if (defined PLATFORM_DOS)   // !!! move this to dos_driver.c?
+#if (defined PLATFORM_DOS)   /* !!! move this to dos_driver.c? */
 
 void setcolor16(int i1);
 #pragma aux setcolor16 =\
@@ -1771,7 +1773,7 @@ void setcolor16(int i1);
         parm [eax]\
         modify exact [eax edx]\
 
-#endif  // PLATFORM_DOS
+#endif  /* defined PLATFORM_DOS */
 
 
 void vlin16first(long i1, long i2);
@@ -1808,7 +1810,7 @@ void vlin16(long i1, long i2);
         parm [edi][ecx]\
         modify exact [ecx esi edi]\
 
-#if (defined PLATFORM_DOS)   // !!! move this to dos_driver.c?
+#if (defined PLATFORM_DOS)   /* !!! move this to dos_driver.c? */
 
 void drawpixel16(long offset);
 #pragma aux drawpixel16 =\
@@ -1854,7 +1856,7 @@ int kinp(long i);
         parm nomemory [edx]\
         modify exact [eax]\
 
-#endif  // PLATFORM_DOS
+#endif  /* defined PLATFORM_DOS */
 
 
 long mul3(long i1);
@@ -1872,7 +1874,7 @@ long mul9(long i1);
         "lea eax, [eax+eax*8]",\
         parm nomemory [eax]\
 
-        //returns eax/ebx, dmval = eax%edx;
+        /* returns eax/ebx, dmval = eax%edx; */
 long divmod(long i1, long i2);
 #pragma aux divmod =\
         "xor edx, edx",\
@@ -1882,7 +1884,7 @@ long divmod(long i1, long i2);
         modify exact [eax edx]\
         value [eax]
 
-        //returns eax%ebx, dmval = eax/edx;
+        /* returns eax%ebx, dmval = eax/edx; */
 long moddiv(long i1, long i2);
 #pragma aux moddiv =\
         "xor edx, edx",\
@@ -1909,7 +1911,7 @@ long ksgn(long i1);
         parm nomemory [ebx]\
         modify exact [eax ebx]\
 
-        //eax = (unsigned min)umin(eax,ebx)
+        /* eax = (unsigned min)umin(eax,ebx) */
 long umin(long i1, long i2);
 #pragma aux umin =\
         "sub eax, ebx",\
@@ -1919,7 +1921,7 @@ long umin(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax ecx]\
 
-        //eax = (unsigned max)umax(eax,ebx)
+        /* eax = (unsigned max)umax(eax,ebx) */
 long umax(long i1, long i2);
 #pragma aux umax =\
         "sub eax, ebx",\
@@ -1948,7 +1950,7 @@ long kmax(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax]\
 
-#if (defined PLATFORM_DOS)  // !!! move to dos_driver.c?
+#if (defined PLATFORM_DOS)  /* !!! move to dos_driver.c? */
 void limitrate(void);
 #pragma aux limitrate =\
         "mov dx, 0x3da",\
@@ -2072,8 +2074,10 @@ void swaplong(long *i1, long *i2);
         modify exact [ecx edx]\
 
 
-        //swapchar2(ptr1,ptr2,xsiz); is the same as:
-        //swapchar(ptr1,ptr2); swapchar(ptr1+1,ptr2+xsiz);
+        /*
+         * swapchar2(ptr1,ptr2,xsiz); is the same as:
+         * swapchar(ptr1,ptr2); swapchar(ptr1+1,ptr2+xsiz);
+		 */ 
 void swapchar2(char *ptr1, char *ptr2, long xsiz);
 #pragma aux swapchar2 =\
         "add esi, ebx",\
@@ -2087,7 +2091,7 @@ void swapchar2(char *ptr1, char *ptr2, long xsiz);
         modify exact [ecx edx esi]\
 
 static long timeroffs1mhz;
-        //accutimeroffs = -8-(t1-t0);
+        /* accutimeroffs = -8-(t1-t0); */
 #pragma aux inittimer1mhz =\
         "xor ebx, ebx",\
         "xor ecx, ecx",\
@@ -2131,7 +2135,7 @@ static long timeroffs1mhz;
         "out 0x61, al",\
         modify exact [eax]\
 
-        //t = ((ecx-ebx+timeroffs1mhz)&0xfff0)*4095 + ecx;
+        /* t = ((ecx-ebx+timeroffs1mhz)&0xfff0)*4095 + ecx; */
 #pragma aux gettime1mhz =\
         "mov ebx, timeroffs1mhz",\
         "xor ecx, ecx",\
@@ -2157,7 +2161,7 @@ static long timeroffs1mhz;
         modify exact [eax ebx ecx]\
         value [ebx]\
 
-        //eax = eax-ebx; if (eax < 0) eax += (1<<28) - (1<<16);
+        /* eax = eax-ebx; if (eax < 0) eax += (1<<28) - (1<<16); */
 #pragma aux deltatime1mhz =\
         "sub eax, ebx",\
         "jnc skipit",\
@@ -2479,10 +2483,10 @@ long divscale32(long i1, long i2);
         parm nomemory [edx][ebx]\
         modify exact [eax edx]
 
-#else  // non-Watcom platforms:
+#else  /* non-Watcom platforms land here: */
 
 
-// These are not defines, so they land in pragma.c for ASM and non-ASM.
+/* These are not defines, so they land in pragma.c for ASM and non-ASM. */
 void swapchar(unsigned char *p1, unsigned char *p2);
 void swapshort(short *p1, short *p2);
 void swaplong(long *p1, long *p2);
@@ -2609,75 +2613,75 @@ int mul9 (int i1);
 void qinterpolatedown16 (long *source, int size, int linum, int linum_inc);
 void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);
 
-#else   // USE_I386_ASM
+#else   /* !defined USE_I386_ASM lands here. */
 
 #define sqr(a) (a*a)
 #define scale(a,b,c) ((a*b)/c)
-#define mulscale(a,b,c) (((long long)a * (long long) b) >> c)
-#define mulscale1(a,b) (((long long)a * (long long) b) >> 1)
-#define mulscale2(a,b) (((long long)a * (long long) b) >> 2)
-#define mulscale3(a,b) (((long long)a * (long long) b) >> 3)
-#define mulscale4(a,b) (((long long)a * (long long) b) >> 4)
-#define mulscale5(a,b) (((long long)a * (long long) b) >> 5)
-#define mulscale6(a,b) (((long long)a * (long long) b) >> 6)
-#define mulscale7(a,b) (((long long)a * (long long) b) >> 7)
-#define mulscale8(a,b) (((long long)a * (long long) b) >> 8)
-#define mulscale9(a,b) (((long long)a * (long long) b) >> 9)
-#define mulscale10(a,b) (((long long)a * (long long) b) >> 10)
-#define mulscale11(a,b) (((long long)a * (long long) b) >> 11)
-#define mulscale12(a,b) (((long long)a * (long long) b) >> 12)
-#define mulscale13(a,b) (((long long)a * (long long) b) >> 13)
-#define mulscale14(a,b) (((long long)a * (long long) b) >> 14)
-#define mulscale15(a,b) (((long long)a * (long long) b) >> 15)
-#define mulscale16(a,b) (((long long)a * (long long) b) >> 16)
-#define mulscale17(a,b) (((long long)a * (long long) b) >> 17)
-#define mulscale18(a,b) (((long long)a * (long long) b) >> 18)
-#define mulscale19(a,b) (((long long)a * (long long) b) >> 19)
-#define mulscale20(a,b) (((long long)a * (long long) b) >> 20)
-#define mulscale21(a,b) (((long long)a * (long long) b) >> 21)
-#define mulscale22(a,b) (((long long)a * (long long) b) >> 22)
-#define mulscale23(a,b) (((long long)a * (long long) b) >> 23)
-#define mulscale24(a,b) (((long long)a * (long long) b) >> 24)
-#define mulscale25(a,b) (((long long)a * (long long) b) >> 25)
-#define mulscale26(a,b) (((long long)a * (long long) b) >> 26)
-#define mulscale27(a,b) (((long long)a * (long long) b) >> 27)
-#define mulscale28(a,b) (((long long)a * (long long) b) >> 28)
-#define mulscale29(a,b) (((long long)a * (long long) b) >> 29)
-#define mulscale30(a,b) (((long long)a * (long long) b) >> 30)
-#define mulscale31(a,b) (((long long)a * (long long) b) >> 31)
-#define mulscale32(a,b) ((long long) a * (long long) b)
-#define dmulscale(a,b,c,d,e) (((long long)a*(long long)b + (long long)c*(long long)d) >> e)
-#define dmulscale1(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 1)
-#define dmulscale2(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 2)
-#define dmulscale3(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 3)
-#define dmulscale4(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 4)
-#define dmulscale5(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 5)
-#define dmulscale6(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 6)
-#define dmulscale7(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 7)
-#define dmulscale8(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 8)
-#define dmulscale9(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 9)
-#define dmulscale10(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 10)
-#define dmulscale11(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 11)
-#define dmulscale12(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 12)
-#define dmulscale13(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 13)
-#define dmulscale14(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 14)
-#define dmulscale15(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 15)
-#define dmulscale16(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 16)
-#define dmulscale17(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 17)
-#define dmulscale18(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 18)
-#define dmulscale19(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 19)
-#define dmulscale20(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 20)
-#define dmulscale21(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 21)
-#define dmulscale22(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 22)
-#define dmulscale23(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 23)
-#define dmulscale24(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 24)
-#define dmulscale25(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 25)
-#define dmulscale26(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 26)
-#define dmulscale27(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 27)
-#define dmulscale28(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 28)
-#define dmulscale29(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 29)
-#define dmulscale30(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 30)
-#define dmulscale31(a,b,c,d) (((long long)a*(long long)b + (long long)c*(long long)d) >> 31)
+#define mulscale(a,b,c) (((__int64)a * (__int64) b) >> c)
+#define mulscale1(a,b) (((__int64)a * (__int64) b) >> 1)
+#define mulscale2(a,b) (((__int64)a * (__int64) b) >> 2)
+#define mulscale3(a,b) (((__int64)a * (__int64) b) >> 3)
+#define mulscale4(a,b) (((__int64)a * (__int64) b) >> 4)
+#define mulscale5(a,b) (((__int64)a * (__int64) b) >> 5)
+#define mulscale6(a,b) (((__int64)a * (__int64) b) >> 6)
+#define mulscale7(a,b) (((__int64)a * (__int64) b) >> 7)
+#define mulscale8(a,b) (((__int64)a * (__int64) b) >> 8)
+#define mulscale9(a,b) (((__int64)a * (__int64) b) >> 9)
+#define mulscale10(a,b) (((__int64)a * (__int64) b) >> 10)
+#define mulscale11(a,b) (((__int64)a * (__int64) b) >> 11)
+#define mulscale12(a,b) (((__int64)a * (__int64) b) >> 12)
+#define mulscale13(a,b) (((__int64)a * (__int64) b) >> 13)
+#define mulscale14(a,b) (((__int64)a * (__int64) b) >> 14)
+#define mulscale15(a,b) (((__int64)a * (__int64) b) >> 15)
+#define mulscale16(a,b) (((__int64)a * (__int64) b) >> 16)
+#define mulscale17(a,b) (((__int64)a * (__int64) b) >> 17)
+#define mulscale18(a,b) (((__int64)a * (__int64) b) >> 18)
+#define mulscale19(a,b) (((__int64)a * (__int64) b) >> 19)
+#define mulscale20(a,b) (((__int64)a * (__int64) b) >> 20)
+#define mulscale21(a,b) (((__int64)a * (__int64) b) >> 21)
+#define mulscale22(a,b) (((__int64)a * (__int64) b) >> 22)
+#define mulscale23(a,b) (((__int64)a * (__int64) b) >> 23)
+#define mulscale24(a,b) (((__int64)a * (__int64) b) >> 24)
+#define mulscale25(a,b) (((__int64)a * (__int64) b) >> 25)
+#define mulscale26(a,b) (((__int64)a * (__int64) b) >> 26)
+#define mulscale27(a,b) (((__int64)a * (__int64) b) >> 27)
+#define mulscale28(a,b) (((__int64)a * (__int64) b) >> 28)
+#define mulscale29(a,b) (((__int64)a * (__int64) b) >> 29)
+#define mulscale30(a,b) (((__int64)a * (__int64) b) >> 30)
+#define mulscale31(a,b) (((__int64)a * (__int64) b) >> 31)
+#define mulscale32(a,b) ((__int64) a * (__int64) b)
+#define dmulscale(a,b,c,d,e) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> e)
+#define dmulscale1(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 1)
+#define dmulscale2(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 2)
+#define dmulscale3(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 3)
+#define dmulscale4(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 4)
+#define dmulscale5(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 5)
+#define dmulscale6(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 6)
+#define dmulscale7(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 7)
+#define dmulscale8(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 8)
+#define dmulscale9(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 9)
+#define dmulscale10(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 10)
+#define dmulscale11(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 11)
+#define dmulscale12(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 12)
+#define dmulscale13(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 13)
+#define dmulscale14(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 14)
+#define dmulscale15(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 15)
+#define dmulscale16(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 16)
+#define dmulscale17(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 17)
+#define dmulscale18(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 18)
+#define dmulscale19(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 19)
+#define dmulscale20(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 20)
+#define dmulscale21(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 21)
+#define dmulscale22(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 22)
+#define dmulscale23(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 23)
+#define dmulscale24(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 24)
+#define dmulscale25(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 25)
+#define dmulscale26(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 26)
+#define dmulscale27(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 27)
+#define dmulscale28(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 28)
+#define dmulscale29(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 29)
+#define dmulscale30(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 30)
+#define dmulscale31(a,b,c,d) (((__int64)a*(__int64)b + (__int64)c*(__int64)d) >> 31)
 #define dmulscale32(a,b,c,d) ((a*b + c*d))
 #define tmulscale1(a,b,c,d,e,f) ((a*b + c*d + e*f) >> 1)
 #define tmulscale2(a,b,c,d,e,f) ((a*b + c*d + e*f) >> 2)
@@ -2715,10 +2719,10 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);
 #define mul5(a) (a*5)
 #define mul9(a) (a*9)
 
-        //returns eax/ebx, dmval = eax%edx;
+        /* returns eax/ebx, dmval = eax%edx; */
 #define divmod(a,b) (a/b; dmval=a%b) 
 
-        //returns eax%ebx, dmval = eax/edx;
+        /* returns eax%ebx, dmval = eax/edx; */
 #define moddiv(a,b) (a%b; dmval = a/b) 
 
 #define clearbufbyte(buf, size, fillval) memset((char *) (buf), size, fillval)
@@ -2727,11 +2731,12 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);
 #define copybuf(src, dst, size)          memcpy((char *) (src), (char *) (dst), size)
 #define klabs(x) ( ((double) (x) < 0.0) ? (-(x)) : (x) )
 
-#endif // USE_I386_ASM
-#endif // __WATCOMC__
+#endif /* defined USE_I386_ASM */
+#endif /* defined __WATCOMC__ */
 
-#endif // _INCLUDE_PRAGMAS_H_
+#endif /* !defined_INCLUDE_PRAGMAS_H_ */
 
-// end of pragmas.h ...
+/* end of pragmas.h ... */
+
 
 

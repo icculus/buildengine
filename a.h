@@ -1,7 +1,9 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file IS NOT A PART OF Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file IS NOT A PART OF Ken Silverman's original release
+ */
 
 #ifndef __LINUX_A_H__
 #define __LINUX_A_H__
@@ -63,7 +65,7 @@ long drawslab(long,long,long,long,long,long);
 long stretchhline(long,long,long,long,long,long);
 long is_vmware_running(void);
 
-    // !!! This part might be better stated as "USE_ASM".  --ryan.
+    /* !!! This part might be better stated as "USE_ASM".  --ryan. */
 #ifdef USE_I386_ASM
   long asm_mmxoverlay(void);
   long asm_sethlinesizes(long,long,long);
@@ -110,8 +112,10 @@ long is_vmware_running(void);
   long asm_stretchhline(long,long,long,long,long,long);
   long asm_isvmwarerunning(void);
 
-  // !!! I need a reference to this, for mprotect(), but the actual function
-  // !!!  is never called in BUILD...just from other ASM routines. --ryan.
+  /*
+   * !!! I need a reference to this, for mprotect(), but the actual function
+   * !!!  is never called in BUILD...just from other ASM routines. --ryan.
+   */
   long asm_prohlineasm4(void);
 
   #if ((defined __GNUC__) && (!defined C_IDENTIFIERS_UNDERSCORED))
@@ -160,18 +164,22 @@ long is_vmware_running(void);
     long asm_drawslab(long,long,long,long,long,long) __attribute__ ((alias ("_asm_drawslab")));
     long asm_stretchhline(long,long,long,long,long,long) __attribute__ ((alias ("_asm_stretchhline")));
     long asm_isvmwarerunning(void) __attribute__ ((alias ("_asm_isvmwarerunning")));
-    // !!! I need a reference to this, for mprotect(), but the actual function
-    // !!!  is never called in BUILD...just from other ASM routines. --ryan.
+
+    /*
+	 * !!! I need a reference to this, for mprotect(), but the actual function
+     * !!!  is never called in BUILD...just from other ASM routines. --ryan.
+	 */
     long asm_prohlineasm4(void) __attribute__ ((alias ("_asm_prohlineasm4")));
 
-  #endif // ELF/GCC
-#endif // USE_i386_ASM
+  #endif /* ELF/GCC */
+#endif /* defined USE_I386_ASM */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // include-once-blocker.
+#endif /* include-once-blocker. */
 
-// end of a.h ...
+/* end of a.h ... */
+
 
