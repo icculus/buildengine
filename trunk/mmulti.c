@@ -1106,6 +1106,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip, int bcast)
 
     heard_from[max] = my_id; /* so we sort, too... */
     allowed_addresses[max].host = myip;
+    allowed_addresses[max].port = udpport;
 
     do
     {
