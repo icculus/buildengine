@@ -1206,111 +1206,172 @@ _asm_setupmvlineasm:
 /* #pragma aux mvlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void mvlineasm4(long i1, long i2)
 {
+    long temp1,temp2,temp3,temp4;
+    temp1 = vplce[0]; temp2 = vplce[1];
+    temp3 = vplce[2]; temp4 = vplce[3];
+    /*
     __asm__ __volatile__ (
         "call _asm_mvlineasm4   \n\t"
         : : "c" (i1), "D" (i2)
         : "cc", "ebx", "edx", "esi", "memory");
-    	return;
+	*/
     {
-    unsigned long index = (i2 + ylookup[i1])/4;
-    long machvbuf1 = bufplce[2];
-    long machvbuf2 = bufplce[3];
-    long machvbuf3 = bufplce[0];
-    long machvbuf4 = bufplce[1];
-    long machvpal1 = palookupoffse[2];
-    long machvpal2 = palookupoffse[3];
-    long machvpal3 = palookupoffse[0];
-    long machvpal4 = palookupoffse[1];
-    long machvinc1, machvinc2, machvinc5;
-    //unsigned char machvinc3, machvinc4;
-    unsigned short machvinc34;
-    unsigned long eax, ebx, edx, esi, ebp;
-    unsigned long out;
-    unsigned long *dest = (unsigned long *)(-ylookup[i1]);
+    long machmv1 = bufplce[0];
+    long machmv4 = bufplce[1];
+    long machmv7 = bufplce[2];
+    long machmv10 = bufplce[3];
+    long machmv2 = palookupoffse[0];
+    long machmv5 = palookupoffse[1];
+    long machmv8 = palookupoffse[2];
+    long machmv11 = palookupoffse[3];
+    long machmv3 = vince[0]&0xffffff00;
+    long machmv6 = vince[1]&0xffffff00;
+    long machmv9 = vince[2];
+    long machmv12 = vince[3];
+    unsigned long eax,ebx,ecx,edi,edx,esi,ebp;
 
-    ebp = vince[0]&0xfffffe00;
-    ebx = vince[1];
-    esi = vince[2]&0xfffffe00;
-    eax = vince[3];
-
-    eax = ((eax<<(256-mach3_al))|(((unsigned)eax)>>(32-(256-mach3_al))));
-    ebx = ((ebx<<(256-mach3_al))|(((unsigned)ebx)>>(32-(256-mach3_al))));
-    edx = (eax&0xffff0000) + (((unsigned)ebx)>>16);
-    esi += (eax&0x1ff);
-    ebp += (ebx&0x1ff);
-
-    machvinc1 = (edx&0xffff0000);
-    machvinc2 = esi;
-    //machvinc3 = (edx&0xff);
-    //machvinc4 = ((edx&0xffff00ff)>>8);
-    machvinc34= (edx&0xffff);
-    machvinc5 = ebp;
-
-    ebp = vplce[0]&0xfffffe00;
-    ebx = vplce[1];
-    esi = vplce[2]&0xfffffe00;
-    eax = vplce[3];
-
-    eax = ((eax<<(256-mach3_al))|(((unsigned)eax)>>(32-(256-mach3_al))));
-    ebx = ((ebx<<(256-mach3_al))|(((unsigned)ebx)>>(32-(256-mach3_al))));
-    edx = (eax&0xffff0000) + (((unsigned)ebx)>>16);
-    esi += (eax&0x1ff);
-    ebp += (ebx&0x1ff);
-
-mdumbbegin1:
-    // XX______
-    eax = esi >> machmv;
-    eax = ((eax&0xffffff00)|((unsigned char*)machvbuf1)[eax]);
-    out = ((out&0xffffff00)|((unsigned char*)machvpal1)[eax]);
-
-    // __XX____
-    ebx = esi & mach3_eax;
-    ebx = ((ebx&0xffffff00)|((unsigned char*)machvbuf2)[ebx]);
-    out = ((out&0xffff00ff)|((((unsigned char*)machvpal2)[ebx])<<8));
-
-    if ((edx + machvinc1) < edx) esi++;
-    edx += machvinc1;
-    esi += machvinc2;
-
-    out <<= 16;
-
-    // ____XX__
-    eax = ebp >> machmv;
-    eax = ((eax&0xffffff00)|((unsigned char*)machvbuf3)[eax]);
-    out = ((out&0xffffff00)|((unsigned char*)machvpal3)[eax]);
-
-    // ______XX
-    ebx = ebp & mach3_eax;
-    ebx = ((ebx&0xffffff00)|((unsigned char*)machvbuf4)[ebx]);
-    out = ((out&0xffff00ff)|((((unsigned char*)machvpal4)[ebx])<<8));
-
+    ebx = i1;
+    edi = i2;
+    ecx = temp1;
+    edx = temp2;
+    esi = temp3;
+    ebp = temp4;
     /*
-    edx += ((machvinc4<<8)|machvinc3);
-    if ((edx - ((machvinc4<<8)|machvinc3)) > edx) ebp++;
+    ecx = vplce[0];
+    edx = vplce[1];
+    esi = vplce[2];
+    ebp = vplce[3];
     */
-    edx += machvinc34;
-    if (((edx&0xffff) - machvinc34) > (edx&0xffff)) ebp++;
-    ebp += machvinc5;
+    ecx = ((ecx&0xffffff00)|(ebx&0xff));
+    ecx = ((ecx&0xffffff00)|((ecx+1)&0xff));
+    ebx = ((ebx&0xffff00ff)|((ebx+0x100)&0xff00));
+    asm3 = ((ebx&0xff00)>>8);
+    edi -= fixchain;
 
-    //if (dest[index] != out) printf ("(0x%x,0x%x) 0x%x 0x%x\n",i1,i2,dest[index],out);
-    dest[index] = out;
-    dest += (fixchain/4);
-    if (((unsigned)dest - fixchain) < ((unsigned)dest)) goto mdumbbegin1;
+beginmvlineasm4:
+    ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
+    if ((ecx&0xff)==0) goto endmvlineasm4;
+beginmvlineasm42:
+    eax = ebp;
+    ebx = esi;
+    eax >>= machmv;
+    ebx >>= machmv;
+    ebp += machmv12;
+    esi += machmv9;
+    eax = ((eax&0xffffff00)|((unsigned char*)machmv10)[eax]);
+    ebx = ((ebx&0xffffff00)|((unsigned char*)machmv7)[ebx]);
 
-    //if (vplce[2] != esi) printf ("vplce[2] off: 0x%x 0x%x\n",vplce[2], esi);
-    vplce[2]=esi;
-    //if (vplce[0] != ebp) printf ("vplce[0] off: 0x%x 0x%x\n",vplce[0], ebp);
-    vplce[0]=ebp;
+    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
+    if ((eax&0xff)<255) edx++;
 
-    esi <<= mach3_al;
-    esi += (edx >> (256-mach3_al));
-    //if (vplce[3] != esi) printf ("vplce[3] off: 0x%x 0x%x\n",vplce[3], esi);
-    vplce[3] = esi;
+    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
+    if ((ebx&0xff)<255) edx++;
 
-    ebp <<= mach3_al;
-    ebp += (edx&0xffff) << mach3_ah;
-    //if (vplce[1] != ebp) printf ("vplce[1] off: 0x%x 0x%x\n",vplce[1], ebp);
-    vplce[1] = ebp;
+    ebx = ((ebx&0xffffff00)|((unsigned char*)machmv8)[ebx]);
+    ebx = ((ebx&0xffff00ff)|(((unsigned char*)machmv11)[eax])<<8);
+
+    eax = edx;
+    eax >>= machmv;
+    ebx <<= 16;
+    eax = ((eax&0xffffff00)|((unsigned char*)machmv4)[eax]);
+
+    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
+    if ((eax&0xff)<255) edx++;
+
+    edx += machmv6;
+    ebx = ((ebx&0xffff00ff)|(((unsigned char*)machmv5)[eax])<<8);
+
+    eax = ecx;
+    eax >>= machmv;
+    ecx += machmv3;
+    eax = ((eax&0xffffff00)|((unsigned char*)machmv1)[eax]);
+
+    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
+    if ((eax&0xff)<255) edx++;
+
+    ebx = ((ebx&0xffffff00)|((unsigned char*)machmv2)[eax]);
+
+    edx = ((edx&0xffffff00)|((edx<<4)&0xff));
+    eax = 0;
+    edi += fixchain;
+    eax = ((eax&0xffffff00)|(edx&0xff));
+    switch (eax)
+    {
+	    case 0:
+		    break;
+	    case 1:
+		    *((unsigned char*)edi) = (ebx&0xff);
+		    break;
+	    case 2:
+		    *(((unsigned char*)edi)+1) = ((ebx&0xff00)>>8);
+		    break;
+	    case 3:
+		    *((unsigned short*)edi) = (ebx&0xffff);
+		    break;
+	    case 4:
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+2) = (ebx&0xff);
+		    break;
+	    case 5:
+		    *((unsigned char*)edi) = (ebx&0xff);
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+2) = (ebx&0xff);
+		    break;
+	    case 6:
+		    ebx >>= 8;
+		    *((unsigned short*)(edi+1)) = (ebx&0xffff);
+		    break;
+	    case 7:
+		    *((unsigned short*)edi) = (ebx&0xffff);
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+2) = (ebx&0xff);
+		    break;
+	    case 8:
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
+		    break;
+	    case 9:
+		    *((unsigned char*)edi) = (ebx&0xff);
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
+		    break;
+	    case 10:
+		    *(((unsigned char*)edi)+1) = ((ebx&0xff00)>>8);
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
+		    break;
+	    case 11:
+		    *((unsigned short*)edi) = (ebx&0xffff);
+		    ebx >>= 16;
+		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
+		    break;
+	    case 12:
+		    ebx >>= 16;
+		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
+		    break;
+	    case 13:
+		    *((unsigned char*)edi) = (ebx&0xff);
+		    ebx >>= 16;
+		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
+		    break;
+	    case 14:
+		    *(((unsigned char*)edi)+1) = ((ebx&0xff00)>>8);
+		    ebx >>= 16;
+		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
+		    break;
+	    case 15:
+		    *(((unsigned int*)edi)+1) = ebx;
+		    break;
+    }
+    goto beginmvlineasm4;
+endmvlineasm4:
+    asm3--;
+    if (asm3 != 0) goto beginmvlineasm42;
+
+    vplce[0] = ecx;
+    vplce[1] = edx;
+    vplce[2] = esi;
+    vplce[3] = ebp;
     }
 /*
 _asm_mvlineasm4:
