@@ -498,7 +498,7 @@ static void init_new_res_vars(int davidoption)
 
     if (davidoption != -1)
     {
-        vidoption = davidoption;
+//        vidoption = davidoption;
     	switch(vidoption)
     	{
     		case 1:i = xdim*ydim; break;
@@ -596,7 +596,7 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
 {
     if (in_egapalette)
         restore256_palette();	    
-    go_to_new_vid_mode((int) davidoption, 320, 200);
+    go_to_new_vid_mode((int) davidoption, daxdim, daydim);
     qsetmode = 200;
     last_render_ticks = SDL_GetTicks();
     return(0);
@@ -626,12 +626,21 @@ void getvalidvesamodes(void)
     const SDL_VideoInfo *vidInfo = NULL;
     SDL_Rect **modes = NULL;
     static int already_checked = 0;
+    int inserted = 0;
+    int pos = 0;
 
     if (already_checked)
         return;
 
     already_checked = 1;
    	validmodecnt = 0;
+
+
+
+    vidoption = 1;  //!!! tmp
+
+
+
 
     vidInfo = SDL_GetVideoInfo();
     modes = SDL_ListModes(vidInfo->vfmt, sdl_flags);
@@ -665,19 +674,42 @@ void getvalidvesamodes(void)
        	validmodexdim[2] = 640;
        	validmodeydim[2] = 480;
         validmodecnt++;
+        validmode[3] = 3;
+       	validmodexdim[3] = 800;
+       	validmodeydim[3] = 600;
+        validmodecnt++;
+        validmode[4] = 4;
+       	validmodexdim[4] = 1024;
+       	validmodeydim[4] = 768;
+        validmodecnt++;
     } // if
     else
     {
         // BUILD wants this array sorted smallest to largest. SDL gives it
         //  to us largest to smallest. Argh.
+        //  320 by 200 needs to be in here. SDL will emulate if need be.
 
         for (i = 0; modes[i] != NULL; i++);   // get to end of array.
 
-        for (i--; i >= 0; i--)
+        for (i--; i >= 0; i--, pos++)
         {
-            validmode[i] = i;
-            validmodexdim[i] = modes[i]->w;
-           	validmodeydim[i] = modes[i]->h;
+            validmode[pos] = 1;
+
+            if ((modes[i]->w == 320) && (modes[i]->h == 200))
+                inserted = 1;   // don't need to insert it ourselves.
+
+            if ((modes[i]->w > 320) && (modes[i]->h > 200) && (inserted == 0))
+            {
+                validmodexdim[pos] = 320;
+               	validmodeydim[pos] = 200;
+                inserted = 1;
+            } // if
+            else
+            {
+                validmodexdim[pos] = modes[i]->w;
+               	validmodeydim[pos] = modes[i]->h;
+            } // else
+
            	validmodecnt++;
         } // for
     } // else
@@ -1155,7 +1187,18 @@ void limitrate(void)
 
 Uint32 _timer_catcher(Uint32 interval, void *bleh)
 {
-    timerhandler();
+    // SDL (or rather, Linux) cannot fire timer events as fast as BUILD needs
+    //  them, so we fire two in a row if we get behind.
+
+    static long total_fires = 0;
+    long ticks = SDL_GetTicks();
+
+    do
+    {
+        timerhandler();
+        total_fires++;
+    } while ( ( ((double) ticks) / ((double) total_fires) ) >= (1000.0 / 120.0) );
+
     return(1);
 } // _timer_catcher
 
@@ -1253,4 +1296,9 @@ void restore256_palette (void)
 	memcpy (&palette, &backup_palette, 16*3);
 	in_egapalette = 0;
 }
+
+unsigned long getticks()
+{
+    return(SDL_GetTicks());
+} // getticks
 
