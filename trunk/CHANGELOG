@@ -469,6 +469,12 @@
             BUILD_SDLDEBUG variable now needs a value: the file to write debug
             information to. The value can be "-" to write to stdout. This is
             for that obnoxious win32 platform.  :)
+05292001 - Added a hack for Windows systems using the "windib" driver.
+            Apparently windib has no way to distinguish between the return key
+            and the keypad enter, and they both come up as the former. Now, if
+            you hold down SHIFT while hitting either return or the keypad
+            enter, sdl_driver.c reports to the engine that the keypad enter
+            was pressed. Now I can get into 3D mode on WinNT 4.0.  :)
 
 --ryan. (icculus@linuxgames.com)
 
