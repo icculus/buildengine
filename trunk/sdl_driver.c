@@ -136,8 +136,6 @@ static int audio_disabled = 0;
 void restore256_palette (void);
 void set16color_palette (void);
 
-static int root_sdl_event_filter(const SDL_Event *event);
-
 
 #define print_sdl_surface_flag(x) if (_surface->flags & x) fprintf( stderr, " %s", #x )
 
@@ -281,8 +279,6 @@ static void init_new_res_vars(int davidoption)
 	setbrightness((char)curbrightness,(char *)&palette[0]);
 
 	if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
-
-    SDL_SetEventFilter(root_sdl_event_filter);
 } // init_new_res_vars
 
 
@@ -369,7 +365,14 @@ static int sdl_mouse_motion_filter(SDL_Event const *event)
  *  that pointers (i.e., the surface's pixels field) will be the same
  *  after this call.
  *
- * Thread safe? Likely not.
+ * Caveats: Your surface pointers will be changing; if you have any other
+ *           copies laying about, they are invalidated.
+ *
+ *          Do NOT call this from an SDL event filter on Windows. You can
+ *           call it based on the return values from SDL_PollEvent, etc, just
+ *           not during the function you passed to SDL_SetEventFilter().
+ *
+ *          Thread safe? Likely not.
  *
  *   @param surface pointer to surface ptr to toggle. May be different
  *                  pointer on return. MAY BE NULL ON RETURN IF FAILURE!
@@ -403,13 +406,10 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
     if (flags == NULL)  // use the surface's flags.
         flags = &tmpflags;
 
-    if (!SDL_VideoModeOK(w, h, bpp, (*flags) ^ SDL_FULLSCREEN))
-        return(0);
-
     SDL_GetClipRect(*surface, &clip);
 
         // save the contents of the screen.
-    framesize = (w * h) * bpp;
+    framesize = (w * h) * ((*surface)->format->BytesPerPixel);
     pixels = malloc(framesize);
     if (pixels == NULL)
         return(0);
@@ -456,6 +456,7 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
     SDL_SetClipRect(*surface, &clip);
 
     output_surface_info(*surface);
+
     return(1);
 } // attempt_fullscreen_toggle
 
@@ -464,6 +465,7 @@ static int sdl_key_filter(const SDL_Event *event)
 {
     SDL_GrabMode grab_mode = SDL_GRAB_OFF;
     int extended;
+    int tmp;
 
     if ( (event->key.keysym.sym == SDLK_g) &&
          (event->key.state == SDL_PRESSED) &&
@@ -481,8 +483,11 @@ static int sdl_key_filter(const SDL_Event *event)
               (event->key.state == SDL_PRESSED) &&
               (event->key.keysym.mod & KMOD_ALT) )
     {
+        tmp = ((void *) frameplace == (void *) surface->pixels);
         attempt_fullscreen_toggle(&surface, &sdl_flags);
         assert(surface != NULL);
+        if (tmp)
+            frameplace = (long) surface->pixels;
         return(0);
     } // if
 
@@ -506,16 +511,6 @@ static int sdl_key_filter(const SDL_Event *event)
 } // sdl_key_filter
 
 
-unsigned char _readlastkeyhit(void)
-{
-    return(lastkey);
-} // _readlastkeyhit
-
-
-#if (defined __WATCOMC__)
-#pragma aux (__cdecl) root_sdl_event_filter
-#endif
-
 static int root_sdl_event_filter(const SDL_Event *event)
 {
     switch (event->type)
@@ -535,6 +530,21 @@ static int root_sdl_event_filter(const SDL_Event *event)
 
     return(1);
 } // root_sdl_event_filter
+
+
+static void handle_events(void)
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event))
+        root_sdl_event_filter(&event);
+} // handle_events
+
+
+unsigned char _readlastkeyhit(void)
+{
+    return(lastkey);
+} // _readlastkeyhit
 
 
 // !!! I'd like this to be temporary. --ryan.
@@ -1193,7 +1203,7 @@ void _nextpage(void)
 {
     Uint32 ticks;
 
-    SDL_PumpEvents();
+    handle_events();
 
     if (qsetmode != 200)
     {
@@ -1545,7 +1555,7 @@ void clear2dscreen(void)
 
 void _idle(void)
 {
-    SDL_PumpEvents();
+    handle_events();
     SDL_Delay(1);
 } // _idle
 
