@@ -18,5 +18,14 @@ CHANGELOG for BUILD Utils Package
 	tell, kgroup is stable.
 
 09042000 - Christian Zander contributed a new (GPL'd) kextract from scratch,
-    which I've named grpextract. It works under Linux, unlike kextract.
-    Added Ken's license text.
+	which I've named grpextract. It works under Linux, unlike kextract.
+	Added Ken's license text.
+
+09102000 - Editart now compiles (doesn't link yet).  Working on that, hopefully
+	it will link soon, but a lot of work will still need to be done.  Ken
+	used some VGA tricks that don't translate to SDL too well.  I don't
+	doubt that it will immediately segfault once it links, but I guess
+	we'll see.  Other stuff was done, mostly cleanups with the other utils,
+	such as *_compat.h instead of duplicating a ton of code in each util.
+	kextract still mystifies me, but that's not as important since we now
+	have grpextract. Map utils still waiting for opendir stuff.

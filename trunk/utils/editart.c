@@ -1,17 +1,28 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
 
-#include <direct.h>
 #include <stdio.h>
-#include <dos.h>
 #include <string.h>
 #include <fcntl.h>
+#ifdef PLATFORM_DOS
+#include <direct.h>
+#include <dos.h>
 #include <io.h>
 #include <sys\types.h>
 #include <sys\stat.h>
 #include <conio.h>
+#include "dos_compat.h"
+#else
+#include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "pragmas.h"
+#include "sdl_driver.h"
+#include "unix_compat.h"
+#include <fnmatch.h>	// This needs to be last - DDOI
+#endif
 
 #define MAXTILES 9216
 #define MAXMENUFILES 256
@@ -19,6 +30,53 @@
 #define NUMPALOOKUPS 32
 #define GIFBUFLEN 4096
 #define MAXMAPS 64
+
+// Function Declarations
+void reportmaps(void);
+void captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, char capfilmode);
+void updatescript(long picnumrangestart, long picnumrangeend);
+int loadtileofscript(long tilenume, char *filespec, long *x1, long *y1, long *x2 , long *y2);
+int selectbox(long *dax1, long *day1, long *dax2, long *day2);
+void updatepalette(void);
+void updatemaps(void);
+int swapwalls(long swapwall1, long swapwall2);
+long convalloc32(long size);
+char gettrans(char dat1, char dat2);
+void gettextcolors(void);
+int resizetile(long picnume, long oldx, long oldy, long newx, long newy);
+int screencapture(void);
+void printmessage(char name[82]);
+int printext256(long xpos, long ypos, short col, short backcol, char *name);
+int menuselect(void);
+void sortfilenames(void);
+int getfilenames(char *kind);
+void initmenupaths(char *filename);
+void savenames(void);
+int loadnames(void);
+int drawtilescreen(long pictopleft);
+long gettile(long tilenum);
+void getpalookup(void);
+int fillregion(long x, long y, char col, char bound);
+void getpaletteconversion(void);
+int drawmaskedbox(long x1, long y1, long x2, long y2, char col, char mask1, char mask2);
+int drawxorbox(long x1, long y1, long x2, long y2, char col);
+void drawmainscreen(void);
+int loadgif(char *filename);
+int loadpcx(char *filename);
+int loadbmp(char *filename);
+void loadpicture(char *filename);
+void drawcolordot(char thecol);
+void updatepanningforumode(long dax, long day);
+void updatepanning(void);
+int drawdot(char col);
+void copywalltoscreen(char *bufptr, long dapicnum, char maskmode);
+int showall(char *bufptr);
+int savewall(char *bufptr, long wallnum);
+int loadwall(char *bufptr, long wallnum);
+int savepics(void);
+int loadpics(long dapicnum);
+int loadtables(void);
+
 
 static struct sectortype
 {
@@ -120,6 +178,8 @@ static long totalclock;
 static void (__interrupt __far *oldtimerhandler)();
 static void __interrupt __far timerhandler(void);
 
+#ifdef PLATFORM_DOS
+/* Most of these will be caught in pragmas.c - DDOI */
 #pragma aux scale =\
 	"imul ebx",\
 	"idiv ecx",\
@@ -271,16 +331,20 @@ static void __interrupt __far timerhandler(void);
 	parm [eax][ebx][ecx]\
 	modify [eax ebx ecx]\
 
+#endif	// PLATFORM_DOS
+
 void __interrupt __far timerhandler()
 {
 	totalclock++;
+#ifdef PLATFORM_DOS
 	_chain_intr(oldtimerhandler);
+#endif
 }
 
-main(short argc, char **argv)
+int main(int argc, char **argv)
 {
-	char ch, *keystateptr, keystate, tempchar, filename[160];
-	char buffer[160], buffer2[160], dacol, col1, col2;
+	unsigned char ch, *keystateptr, keystate, tempchar, filename[160];
+	unsigned char buffer[160], buffer2[160], dacol, col1, col2;
 	long i, j, k, l, m, n, x, y, x1, y1, x2, y2, xoff, yoff;
 	long fil, templong, dat, good, vidpos;
 	long markx, marky, markxlen, markylen;
@@ -302,9 +366,11 @@ main(short argc, char **argv)
 	//printf("------------------------------------------------------------------------------\n");
 	//getch();
 
+	_platform_init(argc, argv);
 	if (argc >= 2)
 	{
-		strcpy(&artfilename,argv[1]);
+		// Weird... GCC wants me to add these casts - DDOI
+		strcpy((char *)&artfilename,argv[1]);
 		i = 0;
 		while ((artfilename[i] != 0) && (i < 5))
 			i++;
@@ -323,7 +389,7 @@ main(short argc, char **argv)
 		artfilename[12] = 0;
 	}
 	else
-		strcpy(&artfilename,"tiles000.art");
+		strcpy((char *)&artfilename,"tiles000.art");
 
 	panxdim = 1024L;
 
@@ -334,7 +400,7 @@ main(short argc, char **argv)
 	outp(0x3d4,0x13); outp(0x3d5,panxdim>>3);
 
 	outp(0x3c4,2); outp(0x3c5,15);
-	clearbuf(0xa0000,16384,0L);
+	clearbuf(VIDEOBASE,16384,0L);
 
 	loadtables();
 
@@ -545,7 +611,7 @@ main(short argc, char **argv)
 			}
 			if (ch == '|')
 			{
-				sprintf(&printbuf,"Coordinates: (%d,%d)",c,d);
+				sprintf((char *)&printbuf,"Coordinates: (%d,%d)",c,d);
 				printmessage(&printbuf);
 			}
 			if (ch == 8)
@@ -1040,7 +1106,7 @@ main(short argc, char **argv)
 				ch = 0;
 				while ((ch != 13) && (ch != 27))
 				{
-					sprintf(&buffer,"Xdim: %d_ ",xdim);
+					sprintf((char *)&buffer,"Xdim: %d_ ",xdim);
 					printmessage(buffer);
 
 					ch = getch();
@@ -1060,7 +1126,7 @@ main(short argc, char **argv)
 					ch = 0;
 					while ((ch != 13) && (ch != 27))
 					{
-						sprintf(&buffer,"Ydim: %d_ ",ydim);
+						sprintf((char *)&buffer,"Ydim: %d_ ",ydim);
 						printmessage(buffer);
 
 						ch = getch();
@@ -1098,7 +1164,7 @@ main(short argc, char **argv)
 				j = picnum;
 				while ((ch != 13) && (ch != 27))
 				{
-					sprintf(&buffer,"Goto tile: %d_ ",j);
+					sprintf((char *)&buffer,"Goto tile: %d_ ",j);
 					printmessage(buffer);
 
 					ch = getch();
@@ -1288,14 +1354,17 @@ main(short argc, char **argv)
 			if (((ch == 'a') || (ch == 'A')) && ((picanm[picnum]&192) > 0) && ((picanm[picnum]&63) > 0))
 			{
 				savewall(buf,picnum);
-				sprintf(&printbuf,"Use +/- to change speed");
+				sprintf((char *)&printbuf,"Use +/- to change speed");
 				printmessage(&printbuf);
 				i = 1;
 				ch = 0;
 
+#ifdef PLATFORM_DOS
+				// These should be NOPs for Unix - DDOI
 				oldtimerhandler = _dos_getvect(0x8);
 				_dos_setvect(0x8, timerhandler);
 				outp(0x43,54); outp(0x40,9942&255); outp(0x40,9942>>8);
+#endif
 				totalclock = 0L;
 
 				animspeed = ((((unsigned long)picanm[picnum])>>24)&15);
@@ -1345,9 +1414,12 @@ main(short argc, char **argv)
 					}
 				}
 
+#ifdef PLATFORM_DOS
+				// NOPs for Unix - DDOI		
 				_dos_setvect(0x8, oldtimerhandler);
 				outp(0x43,54); outp(0x40,255); outp(0x40,255);
-
+#endif
+				
 				cleartopbox();
 
 				cleartext();
@@ -1366,7 +1438,7 @@ main(short argc, char **argv)
 			{
 				if ((xdim <= 320) && (ydim <= 200))
 				{
-					sprintf(&printbuf,"Use arrows to change center",animspeed);
+					sprintf((char *)&printbuf,"Use arrows to change center",animspeed);
 					printmessage(&printbuf);
 					templong = picanm[picnum];
 					ch = 0;
@@ -1417,10 +1489,10 @@ main(short argc, char **argv)
 
 						outp(0x3c4,2); outp(0x3c5,15);
 						for(i=0;i<320;i+=4)
-							drawpixel(((((100+16-panyoff)*panxdim)+i)>>2)+0xa0000,k);
+							drawpixel(((((100+16-panyoff)*panxdim)+i)>>2)+(long)VIDEOBASE,k);
 						outp(0x3c4,2); outp(0x3c5,1);
 						for(j=0;j<200;j++)
-							drawpixel(((((j+16-panyoff)*panxdim)+160)>>2)+0xa0000,k);
+							drawpixel(((((j+16-panyoff)*panxdim)+160)>>2)+(long)VIDEOBASE,k);
 
 						k ^= whitecol^blackcol;
 					}
@@ -1436,14 +1508,14 @@ main(short argc, char **argv)
 			}
 			if ((ch == 'n') || (ch == 'N'))
 			{
-				strcpy(&buffer,&names[picnum][0]);
+				strcpy((char *)&buffer,&names[picnum][0]);
 				i = 0;
 				while (buffer[i] != 0)
 					i++;
 				buffer[i] = '_';
 				buffer[i+1] = 0;
-				strcpy(&buffer2,"Name: ");
-				strcat(&buffer2,buffer);
+				strcpy((char *)&buffer2,"Name: ");
+				strcat((char *)&buffer2,buffer);
 				printmessage(&buffer2[0]);
 				ch = 0;
 				while ((ch != 13) && (ch != 27))
@@ -1456,8 +1528,8 @@ main(short argc, char **argv)
 						buffer[i+2] = 32;
 						buffer[i+3] = 0;
 						i++;
-						strcpy(&buffer2,"Name: ");
-						strcat(&buffer2,buffer);
+						strcpy((char *)&buffer2,"Name: ");
+						strcat((char *)&buffer2,buffer);
 						printmessage(&buffer2[0]);
 					}
 					if ((ch == 8) && (i > 0))
@@ -1466,8 +1538,8 @@ main(short argc, char **argv)
 						buffer[i] = '_';
 						buffer[i+1] = 32;
 						buffer[i+2] = 0;
-						strcpy(&buffer2,"Name: ");
-						strcat(&buffer2,buffer);
+						strcpy((char *)&buffer2,"Name: ");
+						strcat((char *)&buffer2,buffer);
 						printmessage(&buffer2[0]);
 					}
 				}
@@ -1480,8 +1552,8 @@ main(short argc, char **argv)
 				cleartext();
 				if (names[picnum][0] != 0)
 				{
-					strcpy(&buffer2,"Name: ");
-					strcat(&buffer2,&names[picnum][0]);
+					strcpy((char *)&buffer2,"Name: ");
+					strcat((char *)&buffer2,&names[picnum][0]);
 					printmessage(&buffer2[0]);
 				}
 			}
@@ -1546,7 +1618,7 @@ main(short argc, char **argv)
 	return(0);
 }
 
-loadtables()
+int loadtables(void)
 {
 	short int fil;
 
@@ -1560,7 +1632,7 @@ loadtables()
 	return(0);
 }
 
-loadpics(long dapicnum)
+int loadpics(long dapicnum)
 {
 	long i, offscount, siz, danum;
 	short int fil;
@@ -1669,7 +1741,7 @@ loadpics(long dapicnum)
 	return(0);
 }
 
-savepics()
+int savepics(void)
 {
 	char ch, dabuffer[160];
 	long i, templong, offscount, siz, danum;
@@ -1702,7 +1774,7 @@ savepics()
 				artfilename[6] = ((danum/10)%10)+48;
 				artfilename[5] = ((danum/100)%10)+48;
 
-				if ((fil = open(artfilename,O_BINARY|O_WRONLY,S_IWRITE))!=-1)
+				if ((fil = open(artfilename,O_BINARY|O_WRONLY,UC_PERMS))!=-1)
 				{
 					write(fil,&artversion,4);
 					write(fil,&numtiles,4);
@@ -1730,7 +1802,7 @@ savepics()
 	if (localtileend[danum] >= MAXTILES)
 		localtileend[danum] = MAXTILES-1;
 
-	if ((fil = open(artfilename,O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,S_IWRITE))==-1)
+	if ((fil = open(artfilename,O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,UC_PERMS))==-1)
 		return(-1);
 	write(fil,&artversion,4);
 	write(fil,&numtiles,4);
@@ -1754,7 +1826,7 @@ savepics()
 	return(0);
 }
 
-loadwall(char *bufptr, long wallnum)
+int loadwall(char *bufptr, long wallnum)
 {
 	long i, j, vidpos, dat;
 	char *picptr;
@@ -1783,7 +1855,7 @@ loadwall(char *bufptr, long wallnum)
 	return(0);
 }
 
-savewall(char *bufptr, long wallnum)
+int savewall(char *bufptr, long wallnum)
 {
 	long i, j, vidpos, dat;
 	char *picptr, ch;
@@ -1834,7 +1906,7 @@ savewall(char *bufptr, long wallnum)
 	return(0);
 }
 
-showall(char *bufptr)
+int showall(char *bufptr)
 {
 	//if ((xdim < lastshowallxdim) || (ydim < lastshowallydim))
 		cleartopbox();
@@ -1947,7 +2019,7 @@ showall(char *bufptr)
 	return(0);
 }
 
-copywalltoscreen(char *bufptr, long dapicnum, char maskmode)
+void copywalltoscreen(char *bufptr, long dapicnum, char maskmode)
 {
 	char *ptr;
 	long plane, i, j, jstart, jend, vidpos, dat, daydim, cnt, xoff, yoff;
@@ -1977,7 +2049,7 @@ copywalltoscreen(char *bufptr, long dapicnum, char maskmode)
 		if (jend-panyoff+yoff > 240) jend = 240+panyoff-yoff;
 		for(j=jstart;j<jend;j++)
 		{
-			vidpos = (((16+j-panyoff+yoff)*panxdim+plane+xoff)>>2)+0xa0000;
+			vidpos = (((16+j-panyoff+yoff)*panxdim+plane+xoff)>>2)+VIDEOBASE;
 
 			cnt = xdim-plane;
 			ptr = (char *)(bufptr+plane+(j<<10));
@@ -2004,7 +2076,7 @@ copywalltoscreen(char *bufptr, long dapicnum, char maskmode)
 	}
 }
 
-drawdot(char col)
+int drawdot(char col)
 {
 	long vidpos, dat, xoff, yoff;
 
@@ -2020,13 +2092,13 @@ drawdot(char col)
 	dat = col;
 	if ((xdim|ydim) == 0) return(-1);
 	outp(0x3c4,2); outp(0x3c5,1<<((c+xoff)&3));
-	vidpos = (((((d+yoff)+16-panyoff)*panxdim)+(c+xoff))>>2)+0xa0000;
+	vidpos = (((((d+yoff)+16-panyoff)*panxdim)+(c+xoff))>>2)+VIDEOBASE;
 	drawpixel(vidpos,dat);
 
 	return(0);
 }
 
-updatepanning()
+void updatepanning(void)
 {
 	long num, opanyoff;
 
@@ -2058,7 +2130,8 @@ updatepanning()
 		copywalltoscreen(buf,picnum,0);
 }
 
-updatepanningforumode(long dax, long day)
+/* Panning... ick! This should be fun stuff to port - DDOI */
+void updatepanningforumode(long dax, long day)
 {
 	long num;
 
@@ -2083,22 +2156,22 @@ updatepanningforumode(long dax, long day)
 	outp(0x3c0,inp(0x3c0)|0x13); outp(0x3c0,(num&3)<<1);
 }
 
-drawcolordot(char thecol)
+void drawcolordot(char thecol)
 {
 	long vidpos, dat;
 
 	outp(0x3c4,2); outp(0x3c5,1<<(((col&31)*3+1)&3));
-	vidpos = ((((col>>5)*2)*panxdim+((col&31)*3+225))>>2)+0xa0000;
+	vidpos = ((((col>>5)*2)*panxdim+((col&31)*3+225))>>2)+VIDEOBASE;
 	drawpixel(vidpos,(long)thecol);
 	drawpixel(vidpos+(panxdim>>2),(long)thecol);
 }
 
-loadpicture(char *filename)
+void loadpicture(char *filename)
 {
 	long i;
 
 	outp(0x3c4,2); outp(0x3c5,0xf);
-	clearbuf(0xa0000,16384L,0L); //clear frame (for small pictures)
+	clearbuf(VIDEOBASE,16384L,0L); //clear frame (for small pictures)
 
 	i = 0;
 	while (filename[i] != '.') i++;
@@ -2115,7 +2188,7 @@ loadpicture(char *filename)
 	getpaletteconversion();
 }
 
-loadbmp(char *filename)
+int loadbmp(char *filename)
 {
 	long fil, i, j;
 
@@ -2153,14 +2226,14 @@ loadbmp(char *filename)
 		for(i=0;i<320;i++)
 		{
 			outp(0x3c4,2); outp(0x3c5,1<<(i&3));
-			drawpixel((((199-j)*panxdim+i)>>2)+0xa0000,tempbuf[i]);
+			drawpixel((((199-j)*panxdim+i)>>2)+(long)VIDEOBASE,tempbuf[i]);
 		}
 	}
 	close(fil);
 	return(0);
 }
 
-loadpcx(char *filename)
+int loadpcx(char *filename)
 {
 	unsigned char dat;
 	long fil, i, x, y, datcnt, leng;
@@ -2191,7 +2264,7 @@ loadpcx(char *filename)
 				if (y < 256)
 				{
 					outp(0x3c4,0x2); outp(0x3c5,1<<(x&3));
-					drawpixel((((y*panxdim)+x)>>2)+0xa0000,dat);
+					drawpixel((((y*panxdim)+x)>>2)+(long)VIDEOBASE,dat);
 				}
 				x++;
 				if (x >= xres)
@@ -2206,7 +2279,7 @@ loadpcx(char *filename)
 			if (y < 256)
 			{
 				outp(0x3c4,0x2); outp(0x3c5,1<<(x&3));
-				drawpixel((((y*panxdim)+x)>>2)+0xa0000,dat);
+				drawpixel((((y*panxdim)+x)>>2)+(long)VIDEOBASE,dat);
 			}
 			x++;
 			if (x >= xres)
@@ -2235,7 +2308,7 @@ loadpcx(char *filename)
 	return(0);
 }
 
-loadgif(char *filename)
+int loadgif(char *filename)
 {
 	unsigned char header[13], imagestat[10], bitcnt, numbits;
 	unsigned char globalflag, chunkind;
@@ -2378,7 +2451,7 @@ loadgif(char *filename)
 					if (y < 256)
 					{
 						outp(0x3c4,0x2); outp(0x3c5,1<<(x&3));
-						drawpixel((((y*panxdim)+x)>>2)+0xa0000,giftempstack[i]);
+						drawpixel((((y*panxdim)+x)>>2)+(long)VIDEOBASE,giftempstack[i]);
 					}
 					x++;
 					if (x >= xres)
@@ -2395,13 +2468,14 @@ loadgif(char *filename)
 	return(0);
 }
 
-drawmainscreen()
+void drawmainscreen(void)
 {
 	long i, j, lin, templong, dat;
 
 	outp(0x3c4,2); outp(0x3c5,15);
-	clearbuf(0xa0000,16384,0L);
+	clearbuf(VIDEOBASE,16384,0L);
 
+	/* Doh! 'Line compare' aren't words I like to see here - DDOI */
 	inp(0x3da); outp(0x3c0,0x30); outp(0x3c0,113);  //FIX FOR LINE COMPARE
 	outp(0x3d4,0x11); outp(0x3d5,inp(0x3d5)&(255-128)); //Unlock indeces 0-7
 	outp(0x3d4,21); outp(0x3d5,142);
@@ -2432,7 +2506,7 @@ drawmainscreen()
 	drawcolordot((col+16)&255);
 }
 
-drawxorbox(long x1, long y1, long x2, long y2, char col)
+int drawxorbox(long x1, long y1, long x2, long y2, char col)
 {
 	long i, p, dat, temp;
 
@@ -2443,7 +2517,7 @@ drawxorbox(long x1, long y1, long x2, long y2, char col)
 
 	outp(0x3c4,2); outp(0x3c5,1<<(x1&3));
 	outp(0x3ce,4); outp(0x3cf,x1&3);
-	p = 0xa0000 + (((y1+1)*panxdim+x1)>>2);
+	p = VIDEOBASE + (((y1+1)*panxdim+x1)>>2);
 	for(i=y1+1;i<y2;i++)
 	{
 		drawpixel(p,getpixel(p)^col);
@@ -2452,7 +2526,7 @@ drawxorbox(long x1, long y1, long x2, long y2, char col)
 
 	outp(0x3c4,2); outp(0x3c5,1<<(x2&3));
 	outp(0x3ce,4); outp(0x3cf,x2&3);
-	p = 0xa0000 + (((y1+1)*panxdim+x2)>>2);
+	p = VIDEOBASE + (((y1+1)*panxdim+x2)>>2);
 	for(i=y1+1;i<y2;i++)
 	{
 		drawpixel(p,getpixel(p)^col);
@@ -2464,17 +2538,17 @@ drawxorbox(long x1, long y1, long x2, long y2, char col)
 		outp(0x3c4,2); outp(0x3c5,1<<(i&3));
 		outp(0x3ce,4); outp(0x3cf,i&3);
 
-		p = 0xa0000 + ((y1*panxdim+i)>>2);
+		p = VIDEOBASE + ((y1*panxdim+i)>>2);
 		drawpixel(p,getpixel(p)^col);
 
-		p = 0xa0000 + ((y2*panxdim+i)>>2);
+		p = VIDEOBASE + ((y2*panxdim+i)>>2);
 		drawpixel(p,getpixel(p)^col);
 	}
 
 	return(0);
 }
 
-drawmaskedbox(long x1, long y1, long x2, long y2, char col, char mask1, char mask2)
+int drawmaskedbox(long x1, long y1, long x2, long y2, char col, char mask1, char mask2)
 {
 	long i, j, p, pinc, dat, temp;
 
@@ -2488,21 +2562,21 @@ drawmaskedbox(long x1, long y1, long x2, long y2, char col, char mask1, char mas
 	outp(0x3c5,mask1);
 	for(j=y1;j<y2;j+=2)
 	{
-		p = 0xa0000 + ((j*panxdim+x1)>>2);
+		p = VIDEOBASE + ((j*panxdim+x1)>>2);
 		for(i=((x2-x1)>>4);i>0;i--) { drawpixelses(p,dat); p += 4; }
 	}
 
 	outp(0x3c5,mask2);
 	for(j=(y1+1);j<y2;j+=2)
 	{
-		p = 0xa0000 + ((j*panxdim+x1)>>2);
+		p = VIDEOBASE + ((j*panxdim+x1)>>2);
 		for(i=((x2-x1)>>4);i>0;i--) { drawpixelses(p,dat); p += 4; }
 	}
 
 	return(0);
 }
 
-getpaletteconversion()
+void getpaletteconversion(void)
 {
 	long i, j, totintens1, totintens2, brichang, c1, c2, c3, bestcol, dadist;
 	long zx;
@@ -2535,7 +2609,7 @@ getpaletteconversion()
 	palookupe[255] = 255;
 }
 
-fillregion(long x, long y, char col, char bound)
+int fillregion(long x, long y, char col, char bound)
 {
 	unsigned char tstat, bstat, tlast, blast;
 	int i, leftz, z, zz, c;
@@ -2602,7 +2676,7 @@ fillregion(long x, long y, char col, char bound)
 	return(0);
 }
 
-getpalookup()
+void getpalookup(void)
 {
 	long i, j, k, dist, mindist, c1, c2, c3, closest;
 
@@ -2632,7 +2706,7 @@ getpalookup()
 	}
 }
 
-gettile(long tilenum)
+long gettile(long tilenum)
 {
 	char ch, xorcol;
 	long i, j, lin, num, otilenum, topleft, x1, y1, x2, y2;
@@ -2966,14 +3040,14 @@ gettile(long tilenum)
 	return(tilenum);
 }
 
-drawtilescreen(long pictopleft)
+int drawtilescreen(long pictopleft)
 {
 	long i, j, k, vidpos, vidpos2, wallnum, xdime, ydime, cnt, scaledown;
 	long dat, dat2, ocurtilefile;
 	char *picptr, buffer[16];
 
 	outp(0x3c4,2); outp(0x3c5,0xf);
-	clearbuf(0xa0000,(512L*400L)>>4,0L); //clear frame first
+	clearbuf(VIDEOBASE,(512L*400L)>>4,0L); //clear frame first
 
 	loadpics(pictopleft);
 
@@ -3011,7 +3085,7 @@ drawtilescreen(long pictopleft)
 				for(i=0;i<xdime;i++)
 				{
 					outp(0x3c4,2); outp(0x3c5,1<<(vidpos&3));
-					vidpos2 = (vidpos>>2)+0xa0000;
+					vidpos2 = (vidpos>>2)+VIDEOBASE;
 					for(j=0;j<ydime;j++)
 					{
 						dat = *picptr++;
@@ -3034,7 +3108,7 @@ drawtilescreen(long pictopleft)
 					picptr = (char *)(waloff[wallnum]) + ydime*i;
 
 					outp(0x3c4,2); outp(0x3c5,1<<(vidpos&3));
-					vidpos2 = (vidpos>>2)+0xa0000;
+					vidpos2 = (vidpos>>2)+VIDEOBASE;
 
 					j = 0;
 					while (j < ydime)
@@ -3073,7 +3147,7 @@ drawtilescreen(long pictopleft)
 	return(0);
 }
 
-loadnames()
+int loadnames(void)
 {
 	char buffer[160], firstch, ch;
 	short int fil, i, num, buffercnt;
@@ -3125,7 +3199,7 @@ loadnames()
 	return(0);
 }
 
-savenames()
+void savenames(void)
 {
 	char buffer[160];
 	short int fil, i, j;
@@ -3140,14 +3214,14 @@ savenames()
 	chdir(curpath);
 	curpath[i] = 0;
 
-	if ((fil = open("names.h",O_BINARY|O_TRUNC|O_CREAT|O_WRONLY,S_IWRITE)) == -1)
+	if ((fil = open("names.h",O_BINARY|O_TRUNC|O_CREAT|O_WRONLY,UC_PERMS)) == -1)
 		return;
 
-	strcpy(&buffer,"//Be careful when changing this file - it is parsed by Editart and Build.");
+	strcpy((char *)&buffer,"//Be careful when changing this file - it is parsed by Editart and Build.");
 	buffer[73] = 13, buffer[74] = 10, buffer[75] = 0;
 	write(fil,&buffer[0],75);
 
-	strcpy(&buffer,"#define ");
+	strcpy((char *)&buffer,"#define ");
 	for(i=0;i<MAXTILES;i++)
 		if (names[i][0] != 0)
 		{
@@ -3174,20 +3248,21 @@ savenames()
 	return;
 }
 
-initmenupaths(char *filename)
+void initmenupaths(char *filename)
 {
 	long i;
 
-	strcpy(&curpath,filename);
+	strcpy((char *)&curpath,filename);
 	i = 0;
 	while ((i < 160) && (curpath[i] != 0)) i++;
 	while ((i > 0) && (curpath[i] != 92)) i--;
 	curpath[i] = 0;
-	strcpy(&menupath,curpath);
+	strcpy((char *)&menupath,curpath);
 }
 
-getfilenames(char *kind)
+int getfilenames(char *kind)
 {
+#ifdef PLATFORM_DOS
 	short type;
 	struct find_t fileinfo;
 
@@ -3220,11 +3295,53 @@ getfilenames(char *kind)
 			}
 	}
 	while (_dos_findnext(&fileinfo) == 0);
+#else
+	// Similar to the one in build.c, which makes things easy :) - DDOI
+	DIR *dir;
+	struct dirent *dent;
+	struct stat statbuf;
+	int add_this;
+	int subdirs = 0;
 
+	if (strcmp (kind, "SUBD") == 0)
+		subdirs = 1;
+	dir = opendir (".");
+	if (dir == NULL)
+		return (-1);
+
+	do
+	{
+		add_this = 0;
+		dent = readdir(dir);
+		if (dent != NULL)
+		{
+			if (stat(dent->d_name, &statbuf) == 0)
+			{
+				if ((subdirs) && (S_ISDIR(statbuf.st_mode)))
+					add_this = 1;
+				else if (fnmatch(kind, dent->d_name, FNM_CASEFOLD) == 0)
+					add_this = 1;
+
+				if (add_this)
+				{
+					if (menunamecnt >= 256) {
+						printmessage("Too many files! (max=256)");
+					} else {
+						strcpy (menuname[menunamecnt], dent->d_name);
+						menuname[menunamecnt][16] = subdirs;
+						menunamecnt++;
+					}
+				}
+			}
+		}
+	} while (dent != NULL);
+
+	closedir (dir);
+#endif
 	return(0);
 }
 
-sortfilenames()
+void sortfilenames(void)
 {
 	char sortbuffer[17];
 	long i, j, k, m;
@@ -3244,7 +3361,7 @@ sortfilenames()
 		}
 }
 
-menuselect()
+int menuselect(void)
 {
 	long newhighlight, i, j, topplc;
 	char ch, buffer[42];
@@ -3361,14 +3478,15 @@ menuselect()
 	return(-1);
 }
 
-printext256(long xpos, long ypos, short col, short backcol, char *name)
+// Grab this from sdl_driver.c if you can - DDOI
+int printext256(long xpos, long ypos, short col, short backcol, char *name)
 {
 	char ch, damask;
 	short shift;
 	long p, startp, z, zz, zzz;
 
 	outp(0x3c4,2);
-	startp = ((ypos*panxdim+xpos)>>2)+0xa0000;
+	startp = ((ypos*panxdim+xpos)>>2)+VIDEOBASE;
 
 	z = 0;
 	while (name[z] != 0)
@@ -3488,13 +3606,14 @@ printext256(long xpos, long ypos, short col, short backcol, char *name)
 	return(0);
 }
 
-printmessage(char name[82])
+// Figure out if this is w.r.t screen or line compare - DDOI
+void printmessage(char name[82])
 {
 	cleartext();
 	printext256(0L,8L,yellowcol,browncol,name);
 }
 
-screencapture()
+int screencapture(void)
 {
 	char filename[15], *ptr;
 	long fil, i, bufplc, p, col, ncol, leng, x, y, capturecount;
@@ -3524,7 +3643,7 @@ screencapture()
 	filename[5] = ((capturecount/100)%10)+48;
 	filename[6] = ((capturecount/10)%10)+48;
 	filename[7] = (capturecount%10)+48;
-	if ((fil=open(filename,O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,S_IWRITE))==-1)
+	if ((fil=open(filename,O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,UC_PERMS))==-1)
 		return(-1);
 
 	pcxheader[8] = ((xdim-1)&255); pcxheader[9] = (((xdim-1)>>8)&255);
@@ -3603,7 +3722,7 @@ screencapture()
 	return(0);
 }
 
-resizetile(long picnume, long oldx, long oldy, long newx, long newy)
+int resizetile(long picnume, long oldx, long oldy, long newx, long newy)
 {
 	char *charptr1, *charptr2;
 	long *longptr1, *longptr2;
@@ -3671,7 +3790,7 @@ resizetile(long picnume, long oldx, long oldy, long newx, long newy)
 	return(0);
 }
 
-gettextcolors()
+void gettextcolors(void)
 {
 	long i, j, whitedist, browndist, yellowdist, greendist, blackdist, dist;
 	long r, g, b, dr, dg, db;
@@ -3705,7 +3824,7 @@ gettextcolors()
 	}
 }
 
-gettrans(char dat1, char dat2)
+char gettrans(char dat1, char dat2)
 {
 	char retcol;
 	long ravg, gavg, bavg;
@@ -3738,7 +3857,8 @@ gettrans(char dat1, char dat2)
 	return(retcol);
 }
 
-convalloc32(long size)
+#ifdef PLATFORM_DOS
+long convalloc32(long size)
 {
 	 union REGS r;
 
@@ -3750,8 +3870,15 @@ convalloc32(long size)
 		 return ((long)0);
 	 return ((long)((r.x.eax&0xffff)<<4));   //Returns full 32-bit offset
 }
+#else
+long convalloc32(long size)
+{
+#warning convalloc32() needs filling
+	fprintf (stderr, "Stub, convalloc32: %s line %d\n", __FILE__, __LINE__);
+}
+#endif
 
-swapwalls(long swapwall1, long swapwall2)
+int swapwalls(long swapwall1, long swapwall2)
 {
 	char tempchar, *charptr1, *charptr2, *bakcharptr1, *bakcharptr2;
 	long i, j, templong, numbytes1, numbytes2, numbytes3;
@@ -3855,12 +3982,14 @@ swapwalls(long swapwall1, long swapwall2)
 	return(1);
 }
 
-updatemaps()
+void updatemaps(void)
 {
 	char ch;
 	long i, j, k, fil, bad, mapversion;
 	short type, mapnumsectors, mapnumwalls, mapnumsprites;
+#ifdef PLATFORM_DOS
 	struct find_t fileinfo;
+#endif
 
 	i = 0;
 	while (curpath[i] != 0) i++;
@@ -3891,6 +4020,7 @@ updatemaps()
 			for(i=0;i<MAXTILES;i++)
 				tilookup2[tilookup[i]] = i;
 
+#ifdef PLATFORM_DOS
 			if (_dos_findfirst("*.MAP",_A_NORMAL,&fileinfo) == 0)
 			{
 				do
@@ -3971,6 +4101,9 @@ updatemaps()
 				}
 				while (_dos_findnext(&fileinfo) == 0);
 			}
+#else
+#warning Fix updatemaps()
+#endif
 			printf("MAPS UPDATED.\n");
 			printf("Don't forget to recompile - NAMES.H may have changed!\n");
 		}
@@ -3979,9 +4112,9 @@ updatemaps()
 	}
 }
 
-updatepalette()
+void updatepalette(void)
 {
-	char ch, *ptr;
+	unsigned char ch, *ptr;
 	long i, j, k, m, fil;
 
 	for(i=0;i<768;i++)          //Swap palette and palette2
@@ -3993,7 +4126,7 @@ updatepalette()
 	getpaletteconversion();
 
 	getpalookup();
-	if ((fil = open("palette.dat",O_BINARY|O_CREAT|O_WRONLY,S_IWRITE)) != -1)
+	if ((fil = open("palette.dat",O_BINARY|O_CREAT|O_WRONLY,UC_PERMS)) != -1)
 	{
 		write(fil,&palette[0],768);
 		write(fil,&palookup[0][0],NUMPALOOKUPS*256);
@@ -4030,10 +4163,10 @@ updatepalette()
 	asksave = 1;
 }
 
-selectbox(long *dax1, long *day1, long *dax2, long *day2)
+int selectbox(long *dax1, long *day1, long *dax2, long *day2)
 {
-	char ch, xorcol, *ptr;
-	long i, x1, y1, x2, y2, fil, templong, lin, num, updatx, updaty;
+	char ch, xorcol;
+	long i, x1, y1, x2, y2, templong, lin, num, updatx, updaty;
 
 	lin = 400;
 	outp(0x3d4,0x18); outp(0x3d5,lin&255);
@@ -4201,7 +4334,7 @@ selectbox(long *dax1, long *day1, long *dax2, long *day2)
 	return(0);
 }
 
-updatescript(long picnumrangestart, long picnumrangeend)
+void updatescript(long picnumrangestart, long picnumrangeend)
 {
 	char buffer[160], dafilename[160];
 	long i, j, k, datilenum, x1, y1, x2, y2;
@@ -4213,7 +4346,7 @@ updatescript(long picnumrangestart, long picnumrangeend)
 	}
 
 	lseek(capfil,0L,SEEK_SET);
-	while (eof(capfil) == 0)
+	while (eof(capfil) == 0)	// FIXME - DDOI
 	{
 		i = 0;
 		do
@@ -4280,7 +4413,7 @@ updatescript(long picnumrangestart, long picnumrangeend)
 	chdir(curpath);
 }
 
-loadtileofscript(long tilenume, char *filespec, long *x1, long *y1, long *x2, long *y2)
+int loadtileofscript(long tilenume, char *filespec, long *x1, long *y1, long *x2, long *y2)
 {
 	char buffer[160];
 	long i, j, k, datilenum;
@@ -4347,7 +4480,7 @@ loadtileofscript(long tilenume, char *filespec, long *x1, long *y1, long *x2, lo
 	return(0);
 }
 
-captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, char capfilmode)
+void captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, char capfilmode)
 {
 	char buffer[160];
 	long i, j, k, vidpos, bad, dafileng, daothertilenum;
@@ -4384,7 +4517,7 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 				while (((buf[k] == 10) || (buf[k] == 13)) && (k < dafileng)) k++;
 			}
 
-			capfil = open("capfil.txt",O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,S_IWRITE);
+			capfil = open("capfil.txt",O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,UC_PERMS);
 
 			if (j > 0) write(capfil,&buf[0],j);
 			sprintf(buffer,"%ld,%s,%ld,%ld,%ld,%ld\r\n",datilenum,dafilename,x1,y1,x2-x1,y2-y1);
@@ -4396,7 +4529,7 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 		}
 		else
 		{
-			capfil = open("capfil.txt",O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,S_IWRITE);
+			capfil = open("capfil.txt",O_BINARY|O_CREAT|O_TRUNC|O_WRONLY,UC_PERMS);
 
 			sprintf(buffer,"%ld,%s,%ld,%ld,%ld,%ld\r\n",datilenum,dafilename,x1,y1,x2-x1,y2-y1);
 			write(capfil,buffer,strlen(buffer));
@@ -4423,7 +4556,7 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 					vidpos = (y1+j)*panxdim+(x1-1);
 
 					outp(0x3cf,vidpos&3);
-					if (getpixel((vidpos>>2)+0xa0000) != 255)
+					if (getpixel((vidpos>>2)+VIDEOBASE) != 255)
 					{
 						x1--, bad = 1;
 						break;
@@ -4437,7 +4570,7 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 					vidpos = (y1+j)*panxdim+(x2+1);
 
 					outp(0x3cf,vidpos&3);
-					if (getpixel((vidpos>>2)+0xa0000) != 255)
+					if (getpixel((vidpos>>2)+VIDEOBASE) != 255)
 					{
 						x2++, bad = 1;
 						break;
@@ -4451,7 +4584,7 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 					vidpos = (y1-1)*panxdim+(x1+i);
 
 					outp(0x3cf,vidpos&3);
-					if (getpixel((vidpos>>2)+0xa0000) != 255)
+					if (getpixel((vidpos>>2)+VIDEOBASE) != 255)
 					{
 						y1--, bad = 1;
 						break;
@@ -4465,7 +4598,7 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 					vidpos = (y2+1)*panxdim+(x1+i);
 
 					outp(0x3cf,vidpos&3);
-					if (getpixel((vidpos>>2)+0xa0000) != 255)
+					if (getpixel((vidpos>>2)+VIDEOBASE) != 255)
 					{
 						y2++, bad = 1;
 						break;
@@ -4488,19 +4621,23 @@ captureit(long x1, long y1, long x2, long y2, long datilenum, char *dafilename, 
 		for(i=0;i<xdim;i++)
 		{
 			outp(0x3cf,vidpos&3);
-			buf[((j+pany)<<10)+(i+panx)] = palookupe[getpixel((vidpos>>2)+0xa0000)];
+			buf[((j+pany)<<10)+(i+panx)] = palookupe[getpixel((vidpos>>2)+VIDEOBASE)];
 			vidpos++;
 		}
 	}
 	asksave = 1;
 }
 
-reportmaps()
+void reportmaps(void)
 {
-	char ch;
-	long i, j, k, fil, bad, mapversion;
-	short type, mapnumsectors, mapnumwalls, mapnumsprites;
+	long i, j, k, fil, mapversion;
+	short mapnumsectors, mapnumwalls, mapnumsprites;
+#ifdef PLATFORM_DOS
 	struct find_t fileinfo;
+#else
+	DIR *dir;
+	struct dirent *dent;
+#endif
 
 	i = 0;
 	while (curpath[i] != 0) i++;
@@ -4511,7 +4648,7 @@ reportmaps()
 
 	for(i=MAXTILES-1;i>=0;i--)
 		tilookup2[i] = 0;
-
+#ifdef PLATFORM_DOS
 	if (_dos_findfirst("*.MAP",_A_NORMAL,&fileinfo) == 0)
 	{
 		do
@@ -4577,4 +4714,73 @@ reportmaps()
 			}
 		} while (_dos_findnext(&fileinfo) == 0);
 	}
+#else
+	dir = opendir(".");
+	if (dir == NULL) return;
+
+	do {
+		dent = readdir(dir);
+		if (dent != NULL) {
+			if (fnmatch("*.MAP", dent->d_name, FNM_CASEFOLD))
+			{
+				// Where the real fun starts - DDOI
+				if ((fil = open(dent->d_name, O_RDWR, S_IREAD)) != -1) {
+				   read(fil, &mapversion, 4);
+				   if (mapversion == 0x00000007)	// Build map format
+				   {
+				      lseek(fil,4+4+4+4+2+2, SEEK_SET);
+				      read(fil, &mapnumsectors, 2);
+				      for (i=0;i<mapnumsectors;i++)
+				      {
+				        read(fil,&mapsector,sizeof(struct sectortype));
+					tilookup2[mapsector.ceilingpicnum]++;
+					tilookup2[mapsector.floorpicnum]++;
+				      } // for
+				      read(fil,&mapnumwalls,2);
+				      for(i=0;i<mapnumwalls;i++)
+				      {
+				        read(fil,&mapwall,sizeof(struct walltype));
+					tilookup2[mapwall.picnum]++;
+					if (mapwall.cstat&48) tilookup2[mapwall.overpicnum]++;
+				      } // for
+			      	      read(fil,&mapnumsprites,2);
+				      for(i=0;i<mapnumsprites;i++)
+				      {
+					      read(fil,&mapsprite,sizeof(struct spritetype));
+					      tilookup2[mapsprite.picnum]++;
+				      }	// for
+				   } // if
+				   else if((mapversion>>16) == 1) //2Draw map format
+				   {
+					   read(fil,&nummaps,2);
+					   read(fil,&numsprites[0],MAXMAPS<<1);
+
+					   i = 4+2+(MAXMAPS<<1);
+					   //Global header
+					   for(j=0;j<nummaps;j++)
+					   {
+						   lseek(fil,i+4+4+4+2,SEEK_SET);
+						   //used xfillbuf because 64*64 shorts
+						   read(fil,&xfillbuf,8192);
+						   for(k=0;k<4096;k++)
+							   xfillbuf[k] = tilookup2[xfillbuf[k]];
+
+						   for(k=0;k<numsprites[j];k++)
+						   {
+							   read(fil,&xfillbuf,18);
+							   xfillbuf[7] = tilookup2[xfillbuf[7]];
+						   } // for
+						   i += (4+4+4+2+8192+(numsprites[j]*18));	// Individual map header
+					   } // for
+				   } // else if
+				   else if ((mapversion>>16) == 2) //Polytex map format
+				   {
+				   } // else if
+				   close(fil);
+				} // if
+			} // if
+		} // if
+	} while (dent != NULL);
+	closedir(dir);
+#endif
 }

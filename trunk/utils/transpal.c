@@ -1,18 +1,26 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
 
 #include <fcntl.h>
+#ifdef PLATFORM_DOS
 #include <io.h>
 #include <sys\types.h>
 #include <sys\stat.h>
 #include <dos.h>
+#else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include "unix_compat.h"
+#endif
 #include <malloc.h>
 #include <stdlib.h>
 #include "pragmas.h"
 
+#ifdef PLATFORM_DOS
 #pragma intrinsic(min);
+#endif
 
 #define MAXPALOOKUPS 256
 
@@ -29,7 +37,7 @@ static long colnext[256];
 static char coldist[8] = {0,1,2,3,4,3,2,1};
 static long colscan[27];
 
-main(short int argc,char **argv)
+int main(short int argc,char **argv)
 {
 	char col, ch;
 	short orignumpalookups;

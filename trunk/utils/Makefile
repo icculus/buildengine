@@ -5,17 +5,16 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
-# // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-# // Ken Silverman's official web site: "http://www.advsys.net/ken"
-# // See the included license file "BUILDLIC.TXT" for license info.
-
 # Programs to build
-BINARIES = grpextract kgroup
+BINARIES = grpextract kgroup editart
 
 CC = gcc
 LINKER = gcc
-CFLAGS = -g -O2 -Wall -DPLATFORM_UNIX
+CFLAGS = -g -O2 -DPLATFORM_UNIX -DUSE_I386_ASM `sdl-config --cflags`
 LDFLAGS = 
+
+# Editart is a beast of a different color
+EALDFLAGS = $(LDFLAGS) `sdl-config --libs`
 
 # Rules for turning source files into .o files
 %.o: %.c
@@ -35,15 +34,11 @@ convmap6 : convmap6.o
 convmap7 : convmap7.o
 	$(LINKER) -o convmap7 $(LDFLAGS) convmap7.o
 
-editart : editart.o
-	$(LINKER) -o editart $(LDFLAGS) editart.o
+editart : editart.o pragmas.o sdl_driver.o
+	$(LINKER) -o editart $(EALDFLAGS) editart.o pragmas.o sdl_driver.o
 
 kextract : kextract.o
-	@echo WARNING! kextract is BROKEN. Use grpextract instead!
 	$(LINKER) -o kextract $(LDFLAGS) kextract.o
-
-grpextract : grpextract.o
-	$(LINKER) -o grpextract $(LDFLAGS) grpextract.o
 
 kgroup : kgroup.o
 	$(LINKER) -o kgroup $(LDFLAGS) kgroup.o

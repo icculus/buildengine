@@ -4,14 +4,7 @@
 
 TODO for BUILD Utilities Package
 
-- A findfirst()/findnext() implementation
-- Utils that generate files should lowercase the names
-- Fix some asm in editart.c
-- Port setup to ncurses (is it even needed anymore?)
-- Maybe a nice GTK+ front end to manage Group files?
+- Insert and clean up opendir stuff all around
+- Start on the utils that haven't been ported yet (obviously)
 
-As with the BUILD source, send patches to Ryan (icculus@lokigames.com)
-
---
-Dan (theoddone33) Olson <dolson@raven-games.com>
-
+Send patches to icculus@lokigames.com or dolson@raven-games.com
