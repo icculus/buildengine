@@ -50,7 +50,7 @@
 // External functions
 extern void copybufbyte(void *source, void *dest, int size);
 extern void copybuf(void *source, void *dest, int size);
-extern void clearbuf(void *buffer, int size, long fill_value);
+extern void clearbuf(long *buffer, int size, long fill_value);
 
 static long cachesize = 0;
 long cachecount = 0;
@@ -83,14 +83,13 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 	if ((unsigned)newbytes > (unsigned)cachesize)
 	{
 		printf("Cachesize: %ld\n",cachesize);
-		// -DDOI- Commented out to prevent a warning
-		//printf("*Newhandle: 0x%x, Newbytes: %ld, *Newlock: %d\n",newhandle,newbytes,*newlockptr);
-		reportandexit("BUFFER TOO BIG TO FIT IN CACHE!");
+		printf("*Newhandle: 0x%x, Newbytes: %ld, *Newlock: %d\n",(unsigned int)newhandle,newbytes,*newlockptr);
+		reportandexit("BUFFER TOO BIG TO FIT IN CACHE!\n");
 	}
 
 	if (*newlockptr == 0)
 	{
-		reportandexit("ALLOCACHE CALLED WITH LOCK OF 0!");
+		reportandexit("ALLOCACHE CALLED WITH LOCK OF 0!\n");
 	}
 
 		//Find best place
@@ -118,7 +117,7 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 	//printf("%ld %ld %ld\n",besto,newbytes,*newlockptr);
 
 	if (bestval == 0x7fffffff)
-		reportandexit("CACHE SPACE ALL LOCKED UP!");
+		reportandexit("CACHE SPACE ALL LOCKED UP!\n");
 
 		//Suck things out
 	for(sucklen=-newbytes,suckz=bestz;sucklen<0;sucklen+=cac[suckz++].leng)
@@ -138,7 +137,7 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 	bestz++;
 	if (bestz == cacnum)
 	{
-		cacnum++; if (cacnum > MAXCACHEOBJECTS) reportandexit("Too many objects in cache! (cacnum > MAXCACHEOBJECTS)");
+		cacnum++; if (cacnum > MAXCACHEOBJECTS) reportandexit("Too many objects in cache! (cacnum > MAXCACHEOBJECTS)\n");
 		cac[bestz].leng = sucklen;
 		cac[bestz].lock = &zerochar;
 		return;
@@ -146,7 +145,7 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 
 	if (*cac[bestz].lock == 0) { cac[bestz].leng += sucklen; return; }
 
-	cacnum++; if (cacnum > MAXCACHEOBJECTS) reportandexit("Too many objects in cache! (cacnum > MAXCACHEOBJECTS)");
+	cacnum++; if (cacnum > MAXCACHEOBJECTS) reportandexit("Too many objects in cache! (cacnum > MAXCACHEOBJECTS)\n");
 	for(z=cacnum-1;z>bestz;z--) cac[z] = cac[z-1];
 	cac[bestz].leng = sucklen;
 	cac[bestz].lock = &zerochar;
