@@ -55,15 +55,12 @@ const char *renderer_name[RENDERER_TOTAL];
 static sdl_renderer_type renderer = RENDERER_SOFTWARE;
 
 /* !!! ugh. Clean this up. */
-#if (defined USE_I386_ASM)
 #if (!defined __WATCOMC__)
 #include "a.h"
 #else
 extern long setvlinebpl(long);
 #pragma aux setvlinebpl parm [eax];
 #endif  /* __WATCOMC__ */
-#endif  /* USE_I386_ASM */
-
 
 #include "cache1d.h"
 
@@ -796,6 +793,7 @@ unsigned char _readlastkeyhit(void)
 
 #endif
 
+#ifdef USE_I386_ASM
 int mprotect_align(const void *addr, size_t len, int prot)
 {
     int retval;
@@ -809,7 +807,6 @@ int mprotect_align(const void *addr, size_t len, int prot)
 
 void unprotect_ASM_pages(void)
 {
-#ifdef USE_I386_ASM
     mprotect_align((const void *) asm_sethlinesizes, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_setpalookupaddress, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_setuphlineasm4, PAGESIZE, PROT_R_W_X);
@@ -822,8 +819,8 @@ void unprotect_ASM_pages(void)
     mprotect_align((const void *) asm_thline, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_prohlineasm4, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_stretchhline, PAGESIZE, PROT_R_W_X);
-#endif
 } /* unprotect_ASM_pages */
+#endif
 
 
 /*
