@@ -7162,7 +7162,7 @@ void draw2dgrid(long posxe, long posye, short ange, long zoome, short gride)
     					}
     					mask |= pow2char[(xp1&7)^7];
                     #else
-                        drawline16(xp1, 0, xp1, tempy, 8);
+			drawline16(xp1, yp1, xp1, yp2, 8); // bdragon's fix
                     #endif
 				}
 			}
