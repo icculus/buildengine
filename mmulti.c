@@ -574,7 +574,11 @@ void deinit_network_transport(gcomtype *gcom)
 
 static sockettype udpsocket = -1;
 static short udpport = BUILD_DEFAULT_UDP_PORT;
-static int allowed_addresses[MAX_PLAYERS];  /* only respond to these IPs. */
+
+static struct {
+  int host;
+  short port;
+} allowed_addresses[MAX_PLAYERS];  /* only respond to these IPs. */
 
 volatile int ctrlc_pressed = 0;
 
@@ -717,7 +721,7 @@ static int receive_udp_packet(int *ip, void *pkt, size_t pktsize)
     {
         for (i = 1; i <= gcom->numplayers; i++)
         {
-            if (allowed_addresses[i] == *ip)
+            if (allowed_addresses[i].host == *ip)
             {
                 valid = i;
                 break;
@@ -756,7 +760,7 @@ static int receive_udp_packet(int *ip, void *pkt, size_t pktsize)
              */
             if (gcom != NULL)
             {
-                allowed_addresses[valid] = 0;
+                allowed_addresses[valid].host = 0;
                 printf("%s:%d refused packets. Removed from game.\n",
                         static_ipstring(*ip), (int) port);
             }
@@ -845,7 +849,7 @@ static int set_socket_blockmode(int onOrOff)
     flags = (onOrOff) ? 1 : 0;
     rc = (ioctlsocket(udpsocket, FIONBIO, &flags) == 0);
 #else
-	flags = fcntl(udpsocket, F_GETFL, 0);
+    flags = fcntl(udpsocket, F_GETFL, 0);
     if (flags != -1)
     {
         if (onOrOff)
@@ -884,16 +888,16 @@ static int open_udp_socket(int ip, int port)
 
     #if !PLATFORM_WIN32
     {
-	/* !!! FIXME: Might be Linux (not Unix, not BSD, not WinSock) specific. */
+        /* !!! FIXME: Might be Linux (not Unix, not BSD, not WinSock) specific. */
         int flags = 1;
-	    setsockopt(udpsocket, SOL_IP, IP_RECVERR, &flags, sizeof (flags));
+        setsockopt(udpsocket, SOL_IP, IP_RECVERR, &flags, sizeof (flags));
     }
     #endif
 
     memset(&addr, '\0', sizeof (addr));
-	addr.sin_family = AF_INET;
-	addr.sin_addr.s_addr = htonl(ip);
-	addr.sin_port = htons(port);
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(ip);
+    addr.sin_port = htons(port);
     if (bind(udpsocket, (struct sockaddr *) &addr, sizeof (addr)) == -1)
     {
         printf("socket binding failed: %s\n", netstrerror());
@@ -972,9 +976,9 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
                 {
                     printf("%sending greeting to %s:%d...\n",
                             first_send ? "S" : "Res",
-                            static_ipstring(allowed_addresses[i]),
-                            udpport);
-                    send_peer_greeting(allowed_addresses[i], udpport, my_id);
+                            static_ipstring(allowed_addresses[i].host),
+                            allowed_addresses[i].port);
+                    send_peer_greeting(allowed_addresses[i].host, allowed_addresses[i].port, my_id);
                 }
             }
             first_send = 0;
@@ -990,7 +994,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
             char *ipstr = static_ipstring(ip);
             for (i = 0; i < max; i++)
             {
-                if (ip == allowed_addresses[i])
+                if (ip == allowed_addresses[i].host)
                     break;
             }
 
@@ -1016,7 +1020,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
 
                 /* make sure they've heard from us at all... */
                 /* !!! FIXME: This could be fatal if this packet is dropped... */
-                send_peer_greeting(allowed_addresses[i], udpport, my_id);
+                send_peer_greeting(allowed_addresses[i].host, allowed_addresses[i].port, my_id);
             }
         }
     }
@@ -1034,7 +1038,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
     /* ok, now everyone is talking to you. Sort them into player numbers... */
 
     heard_from[max] = my_id; /* so we sort, too... */
-    allowed_addresses[max] = myip;
+    allowed_addresses[max].host = myip;
 
     do
     {
@@ -1057,9 +1061,9 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
                 heard_from[i] = heard_from[i+1];
                 heard_from[i+1] = tmps;
 
-                tmpi = allowed_addresses[i];
-                allowed_addresses[i] = allowed_addresses[i+1];
-                allowed_addresses[i+1] = tmpi;
+                tmpi = allowed_addresses[i].host;
+                allowed_addresses[i].host = allowed_addresses[i+1].host;
+                allowed_addresses[i+1].host = tmpi;
 
                 remaining = 1;  /* yay for bubble sorting! */
             }
@@ -1074,12 +1078,12 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
 
     memmove(&allowed_addresses[1], &allowed_addresses[0],
             sizeof (allowed_addresses) - sizeof (allowed_addresses[0]));
-    allowed_addresses[0] = myip;
+    allowed_addresses[0].host = myip;
 
     gcom->myconnectindex = 0;
     for (i = 1; i <= gcom->numplayers; i++)
     {
-        ip = allowed_addresses[i];
+        ip = allowed_addresses[i].host;
         if (ip == myip)
             gcom->myconnectindex = i;
 
@@ -1096,7 +1100,10 @@ static int parse_ip(const char *str, int *ip)
 {
     int ip1, ip2, ip3, ip4;
     if (sscanf(str, "%d.%d.%d.%d", &ip1, &ip2, &ip3, &ip4) != 4)
+    {
+        printf("\"%s\" is not a valid IP address.\n", str);
         return(0);
+    }
 
     /* we _should_ check that 0 <= ip? <= 255, but it'll fail later anyhow. */
 
@@ -1115,15 +1122,11 @@ static int parse_interface(char *str, int *ip, short *udpport)
         *ptr = '\0';
 
     if (!parse_ip(str, ip))
-    {
-        printf("Bogus interface\n");
         return(0);
-    }
 
     if (ptr) /* portnum specified? */
         *udpport = (short) atoi(ptr + 1);
 
-    printf("Interface %s:%d chosen.\n", static_ipstring(*ip), (int) *udpport);
     return(1);
 }
 
@@ -1185,6 +1188,8 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
             {
                 bogus = 0;
             }
+            printf("Interface %s:%d chosen.\n",
+                    static_ipstring(ip), (int) udpport);
         }
 
         else if (stricmp(tok, "mode") == 0)
@@ -1208,15 +1213,18 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
 
         else if (stricmp(tok, "allow") == 0)
         {
-            int val;
+            int host;
+            short port=BUILD_DEFAULT_UDP_PORT;
             if ((tok = get_token(&ptr)) != NULL)
             {
                 if (gcom->numplayers >= MAX_PLAYERS - 1)
                     printf("WARNING: Too many allowed IP addresses.\n");
 
-                else if (parse_ip(tok, &val))
+                else if (parse_interface(tok, &host,&port))
                 {
-                    allowed_addresses[gcom->numplayers++] = val;
+                    allowed_addresses[gcom->numplayers].host = host;
+                    allowed_addresses[gcom->numplayers].port = port;
+                    gcom->numplayers++;
                     bogus = 0;
                 }
             }
@@ -1239,7 +1247,7 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
             return(connect_to_everyone(gcom, ip));
 
         printf("wtf?!");  /* Should be handled by a udpmode above... */
-	    assert(0);
+        assert(0);
     }
 
     return(0);
@@ -1278,6 +1286,7 @@ gcomtype *init_network_transport(char **ARGV, int argpos)
     return(retval);
 }
 
+
 void deinit_network_transport(gcomtype *gcom)
 {
     printf("\n\nUDP NETWORK TRANSPORT DEINITIALIZING...\n");
@@ -1302,9 +1311,11 @@ void deinit_network_transport(gcomtype *gcom)
     printf("UDP net deinitialized successfully.\n");
 }
 
+
 void callcommit(void)
 {
     int ip, i, rc;
+    short port;
 
     if (udpsocket == -1)
         return;
@@ -1320,7 +1331,7 @@ void callcommit(void)
                 gcom->numbytes = rc;  /* size of new packet. */
                 for (i = 1; i <= gcom->numplayers; i++)
                 {
-                    if (allowed_addresses[i] == ip)
+                    if (allowed_addresses[i].host == ip)
                     {
                         gcom->other = i;
                         return;
@@ -1340,14 +1351,16 @@ void callcommit(void)
                 return;
             }
 
-            ip = allowed_addresses[gcom->other];
+            ip = allowed_addresses[gcom->other].host;
             if (ip == 0)  /* dropped player? */
                 return;
 
-            if (!send_udp_packet(ip, udpport, gcom->buffer, gcom->numbytes))
+            port = allowed_addresses[gcom->other].port;
+
+            if (!send_udp_packet(ip, port, gcom->buffer, gcom->numbytes))
             {
                 printf("NET TRANSPORT ERROR: send failed to %s:%d\n",
-                        static_ipstring(ip), (int) udpport);
+                        static_ipstring(ip), (int) port);
             }
             break;
 
@@ -1355,14 +1368,16 @@ void callcommit(void)
             /* skip player zero, 'cause that's a duplicate of local IP. */
             for (i = 1; i <= gcom->numplayers; i++)
             {
-                ip = allowed_addresses[i];
+                ip = allowed_addresses[i].host;
                 if (ip == 0)  /* dropped player? */
                     continue;
 
-                if (!send_udp_packet(ip, udpport, gcom->buffer, gcom->numbytes))
+                port = allowed_addresses[i].port;
+
+                if (!send_udp_packet(ip, port, gcom->buffer, gcom->numbytes))
                 {
                     printf("NET TRANSPORT ERROR: send failed to %s:%d\n",
-                            static_ipstring(ip), (int) udpport);
+                            static_ipstring(ip), (int) port);
                 }
             }
             break;
@@ -1374,14 +1389,16 @@ void callcommit(void)
                 if (i == gcom->myconnectindex)  /* local player. */
                     continue;
 
-                ip = allowed_addresses[i];
+                ip = allowed_addresses[i].host;
                 if (ip == 0)  /* dropped player? */
                     continue;
 
-                if (!send_udp_packet(ip, udpport, gcom->buffer, gcom->numbytes))
+                port = allowed_addresses[i].port;
+
+                if (!send_udp_packet(ip, port, gcom->buffer, gcom->numbytes))
                 {
                     printf("NET TRANSPORT ERROR: send failed to %s:%d\n",
-                            static_ipstring(ip), (int) udpport);
+                            static_ipstring(ip), (int) port);
                 }
             }
             break;
