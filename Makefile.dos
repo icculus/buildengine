@@ -21,21 +21,21 @@ WATCOMDIR = C:\WATCOM
 #-----------------------------------------------------------------------------#
 # When debugging, use "-d2", otherwise use the blank line.
 #-----------------------------------------------------------------------------#
-DEBUGFLAGS = -d2
-#DEBUGFLAGS =
+#DEBUGFLAGS = -d2
+DEBUGFLAGS =
 
 #-----------------------------------------------------------------------------#
 # When debugging, use "d all", otherwise use the "op el" line.
 #-----------------------------------------------------------------------------#
-LINKDEBUGFLAGS = d all
-#LINKDEBUGFLAGS = op el
+#LINKDEBUGFLAGS = d all
+LINKDEBUGFLAGS = op el
 
 #-----------------------------------------------------------------------------#
 # Choose one, or mix and match. Releases should use the full line,
 #  debug builds should probably use the blank one.
 #-----------------------------------------------------------------------------#
-OPTIMIZEFLAGS =
-#OPTIMIZEFLAGS = -oa -oe -of+ -ol -ol+ -om -oc -oi -or -otexan
+#OPTIMIZEFLAGS =
+OPTIMIZEFLAGS = -oa -oe -of+ -ol -ol+ -om -oc -oi -or -otexan
 
 
 #-----------------------------------------------------------------------------#
