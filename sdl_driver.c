@@ -783,6 +783,111 @@ void _handle_events(void)
 } /* _handle_events */
 
 
+static SDL_Joystick *joystick = NULL;
+void _joystick_init(void)
+{
+    const char *envr = getenv(BUILD_SDLJOYSTICK);
+    int favored = 0;
+    int numsticks;
+    int i;
+
+    if (joystick != NULL)
+    {
+        sdldebug("Joystick appears to be already initialized.");
+        sdldebug("...deinitializing for stick redetection...");
+        _joystick_deinit();
+    } /* if */
+
+    if ((envr != NULL) && (strcmp(envr, "none") == 0))
+    {
+        sdldebug("Skipping joystick detection/initialization at user request");
+        return;
+    } /* if */
+
+    sdldebug("Initializing SDL joystick subsystem...");
+    sdldebug(" (export environment variable BUILD_SDLJOYSTICK=none to skip)");
+
+    if (SDL_Init(SDL_INIT_JOYSTICK) != 0)
+    {
+        sdldebug("SDL_Init(SDL_INIT_JOYSTICK) failed: [%s].", SDL_GetError());
+        return;
+    } /* if */
+
+    numsticks = SDL_NumJoysticks();
+    sdldebug("SDL sees %d joystick%s.", numsticks, numsticks == 1 ? "" : "s");
+    if (numsticks == 0)
+        return;
+
+    for (i = 0; i < numsticks; i++)
+    {
+        const char *stickname = SDL_JoystickName(i);
+        if ((envr != NULL) && (strcmp(envr, stickname) == 0))
+            favored = i;
+
+        sdldebug("Stick #%d: [%s]", i, stickname);
+    } /* for */
+
+    sdldebug("Using Stick #%d.", favored);
+    if ((envr == NULL) && (numsticks > 1))
+        sdldebug("Set BUILD_SDLJOYSTICK to one of the above names to change.");
+
+    joystick = SDL_JoystickOpen(favored);
+    if (joystick == NULL)
+    {
+        sdldebug("Joystick #%d failed to init: %s", favored, SDL_GetError());
+        return;
+    } /* if */
+
+    sdldebug("Joystick initialized. %d axes, %d buttons, %d hats, %d balls.",
+              SDL_JoystickNumAxes(joystick), SDL_JoystickNumButtons(joystick),
+              SDL_JoystickNumHats(joystick), SDL_JoystickNumBalls(joystick));
+
+    SDL_JoystickEventState(SDL_QUERY);
+} /* _joystick_init */
+
+
+void _joystick_deinit(void)
+{
+    if (joystick != NULL)
+    {
+        sdldebug("Closing joystick device...");
+        SDL_JoystickClose(joystick);
+        sdldebug("Joystick device closed. Deinitializing SDL subsystem...");
+        SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
+        sdldebug("SDL joystick subsystem deinitialized.");
+        joystick = NULL;
+    } /* if */
+} /* _joystick_deinit */
+
+
+int _joystick_update(void)
+{
+    if (joystick == NULL)
+        return(0);
+
+    SDL_JoystickUpdate();
+    return(1);
+} /* _joystick_update */
+
+
+int _joystick_axis(int axis)
+{
+    if (joystick == NULL)
+        return(0);
+
+    return(SDL_JoystickGetAxis(joystick, axis));
+} /* _joystick_axis */
+
+
+int _joystick_button(int button)
+{
+    if (joystick == NULL)
+        return(0);
+
+    return(SDL_JoystickGetButton(joystick, button) != 0);
+} /* _joystick_button */
+
+
 unsigned char _readlastkeyhit(void)
 {
     return(lastkey);

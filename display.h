@@ -24,6 +24,7 @@
 #define BUILD_MAXSCREENRES   "BUILD_MAXSCREENRES"
 #define BUILD_HALLOFMIRRORS  "BUILD_HALLOFMIRRORS"
 #define BUILD_GLDUMP         "BUILD_GLDUMP"
+#define BUILD_SDLJOYSTICK    "BUILD_SDLJOYSTICK"
 
 /* This part sucks. */
 #if (defined __WATCOMC__)
@@ -104,6 +105,11 @@ void initkeys(void);
 void uninitkeys(void);
 void _nextpage(void);
 void _uninitengine(void);
+void _joystick_init(void);
+void _joystick_deinit(void);
+int _joystick_update(void);
+int _joystick_axis(int axis);
+int _joystick_button(int button);
 
 /*
  * VESA replacement code: The Unix (not-actually-VESA) version of this is
