@@ -743,16 +743,33 @@ extern long drawslab(long,long,long,long,long,long);
 #endif /* defined USE_I386_ASM */
 
 
-unsigned short _swap16(unsigned short D)
+__inline unsigned short _swap16(unsigned short D)
 {
-	return((D<<8)|(D>>8));
+#ifdef PLATFORM_MACOSX
+    register unsigned short returnValue;
+    __asm__ volatile("lhbrx %0,0,%1"
+        : "=r" (returnValue)
+        : "r" (&D)
+    );
+    return returnValue;
+#else
+    return((D<<8)|(D>>8));
+#endif
 }
 
-unsigned int _swap32(unsigned int D)
+__inline unsigned int _swap32(unsigned int D)
 {
-	return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
+#ifdef PLATFORM_MACOSX
+    register unsigned int returnValue;
+    __asm__ volatile("lwbrx %0,0,%1"
+        : "=r" (returnValue)
+        : "r" (&D)
+    );
+    return returnValue;
+#else
+    return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
+#endif
 }
-
 
 static void scansector (short sectnum)
 {
