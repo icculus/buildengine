@@ -1,9 +1,13 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file has been modified from Ken Silverman's original release
+ */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <fcntl.h>
 
 #include <sys/types.h>
@@ -16,39 +20,41 @@
 #include "cache1d.h"
 
 
-//   This module keeps track of a standard linear cacheing system.
-//   To use this module, here's all you need to do:
-//
-//   Step 1: Allocate a nice BIG buffer, like from 1MB-4MB and
-//           Call initcache(long cachestart, long cachesize) where
-//
-//              cachestart = (long)(pointer to start of BIG buffer)
-//              cachesize = length of BIG buffer
-//
-//   Step 2: Call allocache(long *bufptr, long bufsiz, char *lockptr)
-//              whenever you need to allocate a buffer, where:
-//
-//              *bufptr = pointer to 4-byte pointer to buffer
-//                 Confused?  Using this method, cache2d can remove
-//                 previously allocated things from the cache safely by
-//                 setting the 4-byte pointer to 0.
-//              bufsiz = number of bytes to allocate
-//              *lockptr = pointer to locking char which tells whether
-//                 the region can be removed or not.  If *lockptr = 0 then
-//                 the region is not locked else its locked.
-//
-//   Step 3: If you need to remove everything from the cache, or every
-//           unlocked item from the cache, you can call uninitcache();
-//              Call uninitcache(0) to remove all unlocked items, or
-//              Call uninitcache(1) to remove everything.
-//           After calling uninitcache, it is still ok to call allocache
-//           without first calling initcache.
+/*
+ *   This module keeps track of a standard linear cacheing system.
+ *   To use this module, here's all you need to do:
+ *
+ *   Step 1: Allocate a nice BIG buffer, like from 1MB-4MB and
+ *           Call initcache(long cachestart, long cachesize) where
+ *
+ *              cachestart = (long)(pointer to start of BIG buffer)
+ *              cachesize = length of BIG buffer
+ *
+ *   Step 2: Call allocache(long *bufptr, long bufsiz, char *lockptr)
+ *              whenever you need to allocate a buffer, where:
+ *
+ *              *bufptr = pointer to 4-byte pointer to buffer
+ *                 Confused?  Using this method, cache2d can remove
+ *                 previously allocated things from the cache safely by
+ *                 setting the 4-byte pointer to 0.
+ *              bufsiz = number of bytes to allocate
+ *              *lockptr = pointer to locking char which tells whether
+ *                 the region can be removed or not.  If *lockptr = 0 then
+ *                 the region is not locked else its locked.
+ *
+ *   Step 3: If you need to remove everything from the cache, or every
+ *           unlocked item from the cache, you can call uninitcache();
+ *              Call uninitcache(0) to remove all unlocked items, or
+ *              Call uninitcache(1) to remove everything.
+ *           After calling uninitcache, it is still ok to call allocache
+ *           without first calling initcache.
+ */
 
 #define MAXCACHEOBJECTS 9216
 
 static long cachesize = 0;
 long cachecount = 0;
-char zerochar = 0;
+unsigned char zerochar = 0;
 long cachestart = 0, cacnum = 0, agecount = 0;
 typedef struct { long *hand, leng; unsigned char *lock; } cactype;
 cactype cac[MAXCACHEOBJECTS];
@@ -86,7 +92,7 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 		reportandexit("ALLOCACHE CALLED WITH LOCK OF 0!\n");
 	}
 
-		//Find best place
+		/* Find best place */
 	bestval = 0x7fffffff; o1 = cachesize;
 	for(z=cacnum-1;z>=0;z--)
 	{
@@ -98,7 +104,7 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 		{
 			if (*cac[zz].lock == 0) continue;
 			if (*cac[zz].lock >= 200) { daval = 0x7fffffff; break; }
-			daval += mulscale32(cac[zz].leng+65536,lockrecip[*cac[zz].lock]);
+			daval += (long) mulscale32(cac[zz].leng+65536,lockrecip[*cac[zz].lock]);
 			if (daval >= bestval) break;
 		}
 		if (daval < bestval)
@@ -108,16 +114,16 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 		}
 	}
 
-	//printf("%ld %ld %ld\n",besto,newbytes,*newlockptr);
+	/*printf("%ld %ld %ld\n",besto,newbytes,*newlockptr);*/
 
 	if (bestval == 0x7fffffff)
 		reportandexit("CACHE SPACE ALL LOCKED UP!\n");
 
-		//Suck things out
+		/* Suck things out */
 	for(sucklen=-newbytes,suckz=bestz;sucklen<0;sucklen+=cac[suckz++].leng)
 		if (*cac[suckz].lock) *cac[suckz].hand = 0;
 
-		//Remove all blocks except 1
+		/* Remove all blocks except 1 */
 	suckz -= (bestz+1); cacnum -= suckz;
 	copybufbyte(&cac[bestz+suckz],&cac[bestz],(cacnum-bestz)*sizeof(cactype));
 	cac[bestz].hand = newhandle; *newhandle = cachestart+besto;
@@ -125,7 +131,7 @@ void allocache (long *newhandle, long newbytes, unsigned char *newlockptr)
 	cac[bestz].lock = newlockptr;
 	cachecount++;
 
-		//Add new empty block if necessary
+		/* Add new empty block if necessary */
 	if (sucklen <= 0) return;
 
 	bestz++;
@@ -149,7 +155,7 @@ void suckcache (long *suckptr)
 {
 	long i;
 
-		//Can't exit early, because invalid pointer might be same even though lock = 0
+		/* Can't exit early, because invalid pointer might be same even though lock = 0 */
 	for(i=0;i<cacnum;i++)
 		if ((long)(*cac[i].hand) == (long)suckptr)
 		{
@@ -157,7 +163,7 @@ void suckcache (long *suckptr)
 			cac[i].lock = &zerochar;
 			cac[i].hand = 0;
 
-				//Combine empty blocks
+				/* Combine empty blocks */
 			if ((i > 0) && (*cac[i-1].lock == 0))
 			{
 				cac[i-1].leng += cac[i].leng;
@@ -181,7 +187,7 @@ void agecache(void)
 	{
 		ch = (*cac[agecount].lock);
 		if (((ch-2)&255) < 198)
-			(*cac[agecount].lock) = ch-1;
+			(*cac[agecount].lock) = (unsigned char) (ch-1);
 
 		agecount--; if (agecount < 0) agecount = cacnum-1;
 	}
@@ -209,10 +215,10 @@ void reportandexit(char *errormessage)
 }
 
 
-#define MAXGROUPFILES 4     //Warning: Fix groupfil if this is changed
-#define MAXOPENFILES 64     //Warning: Fix filehan if this is changed
+#define MAXGROUPFILES 4     /* Warning: Fix groupfil if this is changed */
+#define MAXOPENFILES 64     /* Warning: Fix filehan if this is changed  */
 
-static char toupperlookup[256] =
+static unsigned char toupperlookup[256] =
 {
 	0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
 	0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
@@ -307,10 +313,11 @@ void uninitgroupfile(void)
 		}
 }
 
-long kopen4load(const unsigned char *filename, char searchfirst)
+long kopen4load(const char *filename, char searchfirst)
 {
 	long i, j, k, fil, newhandle;
-	unsigned char bad, *gfileptr;
+	unsigned char bad;
+	char *gfileptr;
 
 	newhandle = MAXOPENFILES-1;
 	while (filehan[newhandle] != -1)
@@ -344,12 +351,12 @@ long kopen4load(const unsigned char *filename, char searchfirst)
 				for(j=0;j<13;j++)
 				{
 					if (!filename[j]) break;
-					if (toupperlookup[filename[j]] != toupperlookup[gfileptr[j]])
+					if (toupperlookup[(int) filename[j]] != toupperlookup[(int) gfileptr[j]])
 						{ bad = 1; break; }
 				}
 				if (bad) continue;
 
-				filegrp[newhandle] = k;
+				filegrp[newhandle] = (unsigned char) k;
 				filehan[newhandle] = i;
 				filepos[newhandle] = 0;
 				return(newhandle);
@@ -427,14 +434,16 @@ void kclose(long handle)
 
 
 
-	//Internal LZW variables
-#define LZWSIZE 16384           //Watch out for shorts!
-static unsigned char *lzwbuf1, *lzwbuf4, *lzwbuf5, lzwbuflock[5];
+	/* Internal LZW variables */
+#define LZWSIZE 16384           /* Watch out for shorts! */
+static char *lzwbuf1, *lzwbuf4, *lzwbuf5;
+static unsigned char lzwbuflock[5];
 static short *lzwbuf2, *lzwbuf3;
 
 void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 {
-	long i, j, k, kgoal;
+	size_t i, j;
+	long k, kgoal;
 	short leng;
 	char *ptr;
 
@@ -449,7 +458,8 @@ void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 	ptr = (char *)buffer;
 
 	kread(fil,&leng,2); kread(fil,lzwbuf5,(long)leng);
-	k = 0; kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
+	k = 0;
+	kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 
 	copybufbyte(lzwbuf4,ptr,(long)dasizeof);
 	k += (long)dasizeof;
@@ -461,7 +471,7 @@ void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 			kread(fil,&leng,2); kread(fil,lzwbuf5,(long)leng);
 			k = 0; kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 		}
-		for(j=0;j<dasizeof;j++) ptr[j+dasizeof] = ((ptr[j]+lzwbuf4[j+k])&255);
+		for(j=0;j<dasizeof;j++) ptr[j+dasizeof] = (unsigned char) ((ptr[j]+lzwbuf4[j+k])&255);
 		k += dasizeof;
 		ptr += dasizeof;
 	}
@@ -470,7 +480,8 @@ void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 
 void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 {
-	long i, j, k, kgoal;
+	size_t i, j;
+	long k, kgoal;
 	short leng;
 	char *ptr;
 
@@ -497,7 +508,7 @@ void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 			fread(&leng,2,1,fil); fread(lzwbuf5,(long)leng,1,fil);
 			k = 0; kgoal = uncompress(lzwbuf5,(long)leng,lzwbuf4);
 		}
-		for(j=0;j<dasizeof;j++) ptr[j+dasizeof] = ((ptr[j]+lzwbuf4[j+k])&255);
+		for(j=0;j<dasizeof;j++) ptr[j+dasizeof] = (unsigned char) ((ptr[j]+lzwbuf4[j+k])&255);
 		k += dasizeof;
 		ptr += dasizeof;
 	}
@@ -506,7 +517,7 @@ void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 
 void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 {
-	long i, j, k;
+	size_t i, j, k;
 	short leng;
 	char *ptr;
 
@@ -531,7 +542,7 @@ void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 
 	for(i=1;i<count;i++)
 	{
-		for(j=0;j<dasizeof;j++) lzwbuf4[j+k] = ((ptr[j+dasizeof]-ptr[j])&255);
+		for(j=0;j<dasizeof;j++) lzwbuf4[j+k] = (unsigned char) ((ptr[j+dasizeof]-ptr[j])&255);
 		k += dasizeof;
 		if (k > LZWSIZE-dasizeof)
 		{
@@ -554,7 +565,7 @@ long compress(char *lzwinbuf, long uncompleng, char *lzwoutbuf)
 	long bytecnt1, bitcnt, numbits, oneupnumbits;
 	short *shortptr;
 
-	for(i=255;i>=0;i--) { lzwbuf1[i] = i; lzwbuf3[i] = (i+1)&255; }
+	for(i=255;i>=0;i--) { lzwbuf1[i] = (char) i; lzwbuf3[i] = (short) ((i+1)&255); }
 	clearbuf((void *) FP_OFF(lzwbuf2),256>>1,0xffffffff);
 	clearbuf((void *) FP_OFF(lzwoutbuf),((uncompleng+15)+3)>>2,0L);
 
@@ -567,12 +578,12 @@ long compress(char *lzwinbuf, long uncompleng, char *lzwoutbuf)
 		{
 			bytecnt1++;
 			if (bytecnt1 == uncompleng) break;
-			if (lzwbuf2[addr] < 0) {lzwbuf2[addr] = addrcnt; break;}
+			if (lzwbuf2[addr] < 0) {lzwbuf2[addr] = (short) addrcnt; break;}
 			newaddr = lzwbuf2[addr];
 			while (lzwbuf1[newaddr] != lzwinbuf[bytecnt1])
 			{
 				zx = lzwbuf3[newaddr];
-				if (zx < 0) {lzwbuf3[newaddr] = addrcnt; break;}
+				if (zx < 0) {lzwbuf3[newaddr] = (short) addrcnt; break;}
 				newaddr = zx;
 			}
 			if (lzwbuf3[newaddr] == addrcnt) break;
@@ -621,9 +632,9 @@ long uncompress(char *lzwinbuf, long compleng, char *lzwoutbuf)
 	if (strtot == 0)
 	{
 		copybuf((void *)(FP_OFF(lzwinbuf)+4),(void *)(FP_OFF(lzwoutbuf)),((compleng-4)+3)>>2);
-		return((long)shortptr[0]); //uncompleng
+		return((long)shortptr[0]); /* uncompleng */
 	}
-	for(i=255;i>=0;i--) { lzwbuf2[i] = i; lzwbuf3[i] = i; }
+	for(i=255;i>=0;i--) { lzwbuf2[i] = (short) i; lzwbuf3[i] = (short) i; }
 	currstr = 256; bitcnt = (4<<3); outbytecnt = 0;
 	numbits = 8; oneupnumbits = (1<<8);
 	do
@@ -634,17 +645,17 @@ long uncompress(char *lzwinbuf, long compleng, char *lzwoutbuf)
 		if ((dat&((oneupnumbits>>1)-1)) > ((currstr-1)&((oneupnumbits>>1)-1)))
 			{ dat &= ((oneupnumbits>>1)-1); bitcnt--; }
 
-		lzwbuf3[currstr] = dat;
+		lzwbuf3[currstr] = (short) dat;
 
 		for(leng=0;dat>=256;leng++,dat=lzwbuf3[dat])
-			lzwbuf1[leng] = lzwbuf2[dat];
+			lzwbuf1[leng] = (char) lzwbuf2[dat];
 
-		lzwoutbuf[outbytecnt++] = dat;
+		lzwoutbuf[outbytecnt++] = (char) dat;
 		for(i=leng-1;i>=0;i--) lzwoutbuf[outbytecnt++] = lzwbuf1[i];
 
-		lzwbuf2[currstr-1] = dat; lzwbuf2[currstr] = dat;
+		lzwbuf2[currstr-1] = (short) dat; lzwbuf2[currstr] = (short) dat;
 		currstr++;
 		if (currstr > oneupnumbits) { numbits++; oneupnumbits <<= 1; }
 	} while (currstr < strtot);
-	return((long)shortptr[0]); //uncompleng
+	return((long)shortptr[0]); /* uncompleng */
 }

@@ -1,8 +1,10 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
-// (Actually, all the ASM was from a.asm, but that's obviously commented out.)
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file has been modified from Ken Silverman's original release
+ * (Actually, all the ASM was from a.asm, but that's obviously commented out.)
+ */
 
 #include "a.h"
 
@@ -885,18 +887,14 @@ long hlineasm4(unsigned long eax, unsigned long ebx, unsigned long ecx,
                unsigned long edx, unsigned long esi, unsigned long edi)
 {
     unsigned long ebp = eax + 1;
-    unsigned long long eaxedx;
-
-
-printf("hlineasm4 w00t.\n");
-
+    unsigned __int64 eaxedx;
 
     if (ebp <= 8)
     {
         // shorthline
         while (ebp != 0)
         {
-            eaxedx = ((unsigned long long) esi);
+            eaxedx = ((unsigned __int64) esi);
             eaxedx = ((eaxedx >> hxsiz_val) << 32) & 0xFFFFFFFF00000000 | edx;
             eaxedx <<= hysiz4;
             eax = ((eaxedx & 0xFFFFFFFF00000000) >> 32);
@@ -912,7 +910,7 @@ printf("hlineasm4 w00t.\n");
     if ((edi & 1) == 0)
     {
         eax = esi >> hxsiz_val;
-        eaxedx = ((((unsigned long long) eax) << 32) | edx) << hysiz_val;
+        eaxedx = ((((unsigned __int64) eax) << 32) | edx) << hysiz_val;
         eax = ((eaxedx & 0xFFFFFFFF00000000) >> 32);
         ecx = ((ecx & 0xFFFFFF00) | hoffs_val[eax]);
         ebx = ((ebx & 0xFFFFFF00) | pal_val[ecx]);
@@ -926,7 +924,7 @@ printf("hlineasm4 w00t.\n");
     if ((edi & 2) == 0)
     {
         eax = esi >> hxsiz_val;
-        eaxedx = ((((unsigned long long) eax) << 32) | edx) << hysiz_val;
+        eaxedx = ((((unsigned __int64) eax) << 32) | edx) << hysiz_val;
         eax = ((eaxedx & 0xFFFFFFFF00000000) >> 32);
         ecx = ((ecx & 0xFFFFFF00) | hoffs_val[eax]);
         ebx = ((ebx & 0x00FFFFFF) | pal_val[ecx] << 24);

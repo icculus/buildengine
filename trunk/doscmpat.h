@@ -25,6 +25,8 @@
 
 #define PLATFORM_TIMER_HZ 280
 
+#define __int64 long long
+
 // need these for something where we abstracted with SDL...
 typedef unsigned long Uint32;
 typedef unsigned short Uint16;

@@ -18,6 +18,8 @@
 #error PLATFORM_UNIX is not defined.
 #endif
 
+#define __int64 long long
+
 #define PLATFORM_SUPPORTS_SDL
 
 #include <stdio.h>

@@ -23,8 +23,8 @@
 #define snprintf _snprintf
 #endif
 
-#endif  // !defined _INCLUDE_PLATFORM_H_
+#endif  /* !defined _INCLUDE_PLATFORM_H_ */
 
-// end of platform.h ...
+/* end of platform.h ... */
 
 
