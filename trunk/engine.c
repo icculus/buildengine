@@ -884,6 +884,7 @@ static int animateoffs(short tilenum, short fakevar)
 }
 
 
+/* renders non-parallaxed ceilings. --ryan. */
 static void ceilscan (long x1, long x2, long sectnum)
 {
 	long i, j, ox, oy, x, y1, y2, twall, bwall;
@@ -1051,7 +1052,7 @@ static void ceilscan (long x1, long x2, long sectnum)
 }
 
 
-
+/* renders non-parallaxed floors. --ryan. */
 static void florscan (long x1, long x2, long sectnum)
 {
 	long i, j, ox, oy, x, y1, y2, twall, bwall;
@@ -1219,6 +1220,30 @@ static void florscan (long x1, long x2, long sectnum)
 }
 
 
+/*
+ * renders walls and parallaxed skies/floors. Look at parascan() for the
+ *  higher level of parallaxing.
+ *
+ *    x1 == offset of leftmost pixel of wall. 0 is left of surface.
+ *    x2 == offset of rightmost pixel of wall. 0 is left of surface.
+ *
+ *  apparently, walls are always vertical; there are sloping functions
+ *   (!!!) er...elsewhere. Only the sides need be vertical, as the top and
+ *   bottom of the polygon will need to be angled as the camera perspective
+ *   shifts (user spins in a circle, etc.)
+ *
+ *  uwal is an array of the upper most pixels, and dwal are the lower most.
+ *   This must be a list, as the top and bottom of the polygon are not
+ *   necessarily horizontal lines.
+ *
+ *   So, the screen coordinate of the top left of a wall is specified by
+ *   uwal[x1], the bottom left by dwal[x1], the top right by uwal[x2], and
+ *   the bottom right by dwal[x2]. Every physical point on the edge of the
+ *   wall in between is specified by traversing those arrays, one pixel per
+ *   element.
+ *
+ *  --ryan.
+ */
 static void wallscan(long x1, long x2,
                      short *uwal, short *dwal,
                      long *swal, long *lwal)
@@ -1344,6 +1369,7 @@ static void wallscan(long x1, long x2,
 }
 
 
+/* this renders masking sprites. See wallscan(). --ryan. */
 static void maskwallscan(long x1, long x2,
                          short *uwal, short *dwal,
                          long *swal, long *lwal)
@@ -1472,7 +1498,7 @@ static void maskwallscan(long x1, long x2,
 	faketimerhandler();
 }
 
-
+/* renders parallaxed skies/floors  --ryan. */
 static void parascan(long dax1, long dax2, long sectnum,
                      char dastat, long bunch)
 {
