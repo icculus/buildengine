@@ -368,9 +368,10 @@
 05102001 - Embedded a Perl interpreter that runs a function in game.pl once
             per frame into the KenBuild game. This is just a test for a future
             project, and probably shouldn't be compiled by the average person.
-            Changes to the Makefile, game.c and buildperl.[ch] was added.
-            Changed all occurances of my email address from lokigames.com to
-            linuxgames.com. One or two comment tweaks elsewhere.
+            Changes to the Makefile, game.c, game.pl, and buildperl.[ch] were
+            added. Changed all occurances of my email address from
+            lokigames.com to linuxgames.com. One or two comment tweaks
+            elsewhere. Updated README with SDL12 CVS instructions.
 
 --ryan. (icculus@linuxgames.com)
 
