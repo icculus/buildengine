@@ -513,7 +513,9 @@
             binaries only statically link what is absolutely necessary. Setting
             usedlls=false statically links all the Build code together,
             although currently external libraries like SDL are still
-            linked dynamically.
+            linked dynamically. Platform drivers now need to store _argv and
+            _argc. Commented a few functions in engine.c as I start to grok
+            what each bit of code does.
 
 --ryan. (icculus@linuxgames.com)
 
