@@ -709,6 +709,25 @@ static int sdl_key_filter(const SDL_Event *event)
     int extended;
     int tmp;
 
+    #if PLATFORM_MACOSX  /* Apple-Q */
+    {
+        static Uint32 cmdqticks = 0;
+        if ( (event->key.keysym.sym == SDLK_q) &&
+             (event->key.state == SDL_PRESSED) &&
+             (event->key.keysym.mod & KMOD_META) )
+        {
+            Uint32 t = SDL_GetTicks();
+            if (t - cmdqticks < 500)  /* 2 hits within .5 second? */
+            {
+                SDL_Quit();
+                exit(0);   
+            }
+            cmdqticks = t;
+        }
+    }
+    #endif
+
+
     if ( (event->key.keysym.sym == SDLK_g) &&
          (event->key.state == SDL_PRESSED) &&
          (event->key.keysym.mod & KMOD_CTRL) )
