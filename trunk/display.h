@@ -14,6 +14,7 @@
 #if (defined __WATCOMC__)
 #pragma aux (__cdecl) SDL_Init;
 #pragma aux (__cdecl) SDL_PumpEvents;
+#pragma aux (__cdecl) SDL_PollEvent;
 #pragma aux (__cdecl) SDL_GetMouseState;
 #pragma aux (__cdecl) SDL_WM_GrabInput;
 #pragma aux (__cdecl) SDL_GetError;
