@@ -53,6 +53,10 @@
 
 #endif  /* defined PLATFORM_SUPPORTS_SDL */
 
+/* set these in your _platform_init() implementation. */
+extern int _argc;
+extern char **_argv;
+
 /* !!! gads, look at all the namespace polution... */
 extern long xres, yres, bytesperline, imageSize, maxpages;
 extern char *screen, vesachecked;
