@@ -5,9 +5,6 @@
 (questions to Ryan C. Gordon, icculus@lokigames.com)
 
 NEXT ON TAP:
-- My god. Almost all of a_linux.asm is self-modifying code.
-  Nothing too complex as this stuff goes, but it should be removed,
-  none the less.
 - Litter the code with assertions.
 - ASM->C port for non-intel boxes?
 - Look for the string "!!!" ... these are TODOs in the source.
@@ -24,6 +21,11 @@ NEXT ON TAP:
 - Port to Visual C?
 - Port to Mingwin32?  (the mprotect()s need to be #ifdef'd out. That should
   be the biggest change.)
+- Port to BeOS?
+- Make a statically linked binary option in the Linux Makefile.
+- Make a linuxbins target (like msbins target) in the Linux Makefile.
+- Lose those sound stubs. SDL_mixer support is my vote.
 
 // end of TODO ...
+
 
