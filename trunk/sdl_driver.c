@@ -144,19 +144,20 @@ void restore256_palette (void);
 void set16color_palette (void);
 
 
-static int sdl_debugging = 0;
+static FILE *debug_file = NULL;
 
 static void sdldebug(const char *fmt, ...)
 {
     va_list ap;
 
-    if (sdl_debugging)
+    if (debug_file)
     {
-        fprintf(stderr, "BUILDSDL: ");
+        fprintf(debug_file, "BUILDSDL: ");
         va_start(ap, fmt);
-        vfprintf(stderr, fmt, ap);
+        vfprintf(debug_file, fmt, ap);
         va_end(ap);
-        fprintf(stderr, "\n");
+        fprintf(debug_file, "\n");
+        fflush(debug_file);
     } // if
 } // sdldebug
 
@@ -183,7 +184,7 @@ static void output_surface_info(SDL_Surface *_surface)
     const SDL_VideoInfo *info;
     char f[256];
 
-    if (!sdl_debugging)
+    if (!debug_file)
         return;
 
     if (_surface == NULL)
@@ -241,7 +242,7 @@ static void output_driver_info(void)
 {
     char buffer[256];
 
-    if (!sdl_debugging)
+    if (!debug_file)
         return;
 
     if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
@@ -842,11 +843,30 @@ static int load_opengl_library(void)
 
 #endif  // defined USE_OPENGL
 
+static inline void init_debugging(void)
+{
+    const char *envr = getenv(BUILD_SDLDEBUG); 
+    debug_hall_of_mirrors = (getenv(BUILD_HALLOFMIRRORS) != NULL);
+
+    if (debug_file != NULL)
+    {
+        fclose(debug_file);
+        debug_file = NULL;
+    } // if
+
+    if (envr != NULL)
+    {
+        if (strcmp(envr, "-") == 0)
+	    debug_file = stdout;
+        else
+            debug_file = fopen(envr, "w");
+    } // if
+
+} // init_debugging
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
-    sdl_debugging = (getenv(BUILD_SDLDEBUG) != NULL);
-    debug_hall_of_mirrors = (getenv(BUILD_HALLOFMIRRORS) != NULL);
+    init_debugging();
 
     #if ((PLATFORM_UNIX) && (defined USE_I386_ASM))
         unprotect_ASM_pages();
@@ -1314,7 +1334,7 @@ static inline void output_vesa_modelist(void)
     char numbuf[20];
     int i;
 
-    if (!sdl_debugging)
+    if (!debug_file)
         return;
 
     buffer[0] = '\0';
