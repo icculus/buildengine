@@ -249,7 +249,7 @@ static long filehan[MAXOPENFILES] =
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 };
 
-long initgroupfile(char *filename)
+long initgroupfile(const char *filename)
 {
 	char buf[16];
 	long i, j, k;
@@ -257,15 +257,7 @@ long initgroupfile(char *filename)
 	if (numgroupfiles >= MAXGROUPFILES) return(-1);
 
 	groupfil[numgroupfiles] = open(filename,O_BINARY|O_RDWR,S_IREAD);
-	//if (groupfil[numgroupfiles] != -1)
-
-    // rcg08122000 panic if groupfile is missing.
-	if (groupfil[numgroupfiles] < 0)
-    {
-        fprintf(stderr, "Cannot open \"%s\"! Aborting...\n", filename);
-        exit(55);
-    } // if
-    else
+	if (groupfil[numgroupfiles] >= 0)
 	{
 		groupfilpos[numgroupfiles] = 0;
 		read(groupfil[numgroupfiles],buf,16);
@@ -315,7 +307,7 @@ void uninitgroupfile(void)
 		}
 }
 
-long kopen4load(unsigned char *filename, char searchfirst)
+long kopen4load(const unsigned char *filename, char searchfirst)
 {
 	long i, j, k, fil, newhandle;
 	unsigned char bad, *gfileptr;
