@@ -2040,7 +2040,8 @@ void clear2dscreen(void)
 
 void _idle(void)
 {
-    handle_events();
+    if (surface != NULL)
+        handle_events();
     SDL_Delay(1);
 } /* _idle */
 
