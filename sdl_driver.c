@@ -884,6 +884,7 @@ static int load_opengl_library(void)
 static inline void init_debugging(void)
 {
     const char *envr = getenv(BUILD_SDLDEBUG); 
+
     debug_hall_of_mirrors = (getenv(BUILD_HALLOFMIRRORS) != NULL);
 
     if (debug_file != NULL)
@@ -907,6 +908,17 @@ static inline void init_debugging(void)
 } // init_debugging
 
 
+static inline void output_sdl_versions(void)
+{
+    const SDL_version *linked_ver = SDL_Linked_Version();
+    sdldebug("SDL display driver for the BUILD engine initializing.");
+    sdldebug("Compiled against SDL version %d.%d.%d ...",
+                SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+    sdldebug("Linked SDL version is %d.%d.%d ...",
+                linked_ver->major, linked_ver->minor, linked_ver->patch);
+} // output_sdl_versions
+
+
 static int in_vmware = 0;
 static inline void detect_vmware(void)
 {
@@ -921,6 +933,8 @@ static inline void detect_vmware(void)
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
     init_debugging();
+
+    output_sdl_versions();
 
     #if ((PLATFORM_UNIX) && (defined USE_I386_ASM))
         unprotect_ASM_pages();
