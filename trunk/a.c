@@ -92,18 +92,15 @@ _asm_sethlinesizes:
 
 /* #pragma aux setpalookupaddress parm [eax] */
 static unsigned char* pal_eax;
-long setpalookupaddress(char *i1)
+void setpalookupaddress(char *i1)
 {
-    long retval = 0;
     pal_eax = i1;
     /*
     __asm__ __volatile__ (
         "call _asm_setpalookupaddress   \n\t"
-       : "=a" (retval)
-        : "a" (i1)
+        : : "a" (i1)
         : "cc", "memory");
 	*/
-    return(retval);
 } /* setpalookupaddress */
 
 /* #pragma aux setuphlineasm4 parm [eax][ebx] */
@@ -855,7 +852,7 @@ long mvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 	    unsigned long temp = i4;
 	    temp >>= machmv;
 	    dest += fixchain;
-	    temp = (temp&0xffffff00) | (source[temp]&0xff);
+	    temp = source[temp];
 	    if (temp != 255)
 		    *dest = ((unsigned char*)i2)[temp];
 	    i4 += i1;
@@ -1235,13 +1232,6 @@ void mvlineasm4(long i1, long i2)
     long temp1,temp2,temp3,temp4;
     temp1 = vplce[0]; temp2 = vplce[1];
     temp3 = vplce[2]; temp4 = vplce[3];
-    /*
-    __asm__ __volatile__ (
-        "call _asm_mvlineasm4   \n\t"
-        : : "c" (i1), "D" (i2)
-        : "cc", "ebx", "edx", "esi", "memory");
-	*/
-    {
     long machmv1 = bufplce[0];
     long machmv4 = bufplce[1];
     long machmv7 = bufplce[2];
@@ -1258,16 +1248,10 @@ void mvlineasm4(long i1, long i2)
 
     ebx = i1;
     edi = i2;
-    ecx = temp1;
-    edx = temp2;
-    esi = temp3;
-    ebp = temp4;
-    /*
     ecx = vplce[0];
     edx = vplce[1];
     esi = vplce[2];
     ebp = vplce[3];
-    */
     ecx = ((ecx&0xffffff00)|(ebx&0xff));
     ecx = ((ecx&0xffffff00)|((ecx+1)&0xff));
     ebx = ((ebx&0xffff00ff)|((ebx+0x100)&0xff00));
@@ -1288,10 +1272,10 @@ beginmvlineasm42:
     ebx = ((ebx&0xffffff00)|((unsigned char*)machmv7)[ebx]);
 
     edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((eax&0xff)<255) edx++;
+    if ((eax&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
 
     edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((ebx&0xff)<255) edx++;
+    if ((ebx&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
 
     ebx = ((ebx&0xffffff00)|((unsigned char*)machmv8)[ebx]);
     ebx = ((ebx&0xffff00ff)|(((unsigned char*)machmv11)[eax])<<8);
@@ -1302,7 +1286,7 @@ beginmvlineasm42:
     eax = ((eax&0xffffff00)|((unsigned char*)machmv4)[eax]);
 
     edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((eax&0xff)<255) edx++;
+    if ((eax&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
 
     edx += machmv6;
     ebx = ((ebx&0xffff00ff)|(((unsigned char*)machmv5)[eax])<<8);
@@ -1313,24 +1297,15 @@ beginmvlineasm42:
     eax = ((eax&0xffffff00)|((unsigned char*)machmv1)[eax]);
 
     edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((eax&0xff)<255) edx++;
+    if ((eax&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
 
     ebx = ((ebx&0xffffff00)|((unsigned char*)machmv2)[eax]);
 
-    edx = ((edx&0xffffff00)|((edx<<4)&0xff));
     eax = 0;
-    edi += fixchain;
     eax = ((eax&0xffffff00)|(edx&0xff));
-    // DDOI - test
-    eax = 0;
-    if ((ebx&0xff000000)<0xff000000) eax |= 0xff000000;
-    if ((ebx&0xff0000)<0xff0000) eax |= 0xff0000;
-    if ((ebx&0xff00)<0xff00) eax |= 0xff00;
-    if ((ebx&0xff)<0xff) eax |= 0xff;
-    *((unsigned int *)edi) = ((*((unsigned int *)edi)&~eax)|(ebx&eax));
-    // DDOI - end test
+    edx = ((edx&0xffffff00)|((edx<<4)&0xff));
+    edi += fixchain;
     
-    /*
     switch (eax)
     {
 	    case 0:
@@ -1399,7 +1374,6 @@ beginmvlineasm42:
 		    *((unsigned int*)edi) = ebx;
 		    break;
     }
-    */
     goto beginmvlineasm4;
 endmvlineasm4:
     asm3--;
@@ -1409,191 +1383,6 @@ endmvlineasm4:
     vplce[1] = edx;
     vplce[2] = esi;
     vplce[3] = ebp;
-    }
-/*
-_asm_mvlineasm4:
-	push ebp
-
-	mov eax, dword [bufplce]
-	mov ebx, dword [bufplce + 4]
-	mov dword [machmv1+2], eax
-	mov dword [machmv4+2], ebx
-	mov eax, dword [bufplce + 8]
-	mov ebx, dword [bufplce + 12]
-	mov dword [machmv7+2], eax
-	mov dword [machmv10+2], ebx
-
-	mov eax, dword [palookupoffse]
-	mov ebx, dword [palookupoffse + 4]
-	mov dword [machmv2+2], eax
-	mov dword [machmv5+2], ebx
-	mov eax, dword [palookupoffse + 8]
-	mov ebx, dword [palookupoffse + 12]
-	mov dword [machmv8+2], eax
-	mov dword [machmv11+2], ebx
-
-	mov eax, dword [vince]        ;vince
-	mov ebx, dword [vince + 4]
-	xor al, al
-	xor bl, bl
-	mov dword [machmv3+2], eax
-	mov dword [machmv6+2], ebx
-	mov eax, dword [vince + 8]
-	mov ebx, dword [vince + 12]
-	mov dword [machmv9+2], eax
-	mov dword [machmv12+2], ebx
-
-	mov ebx, ecx
-	mov ecx, dword [vplce]
-	mov edx, dword [vplce + 4]
-	mov esi, dword [vplce + 8]
-	mov ebp, dword [vplce + 12]
-	mov cl, bl
-	inc cl
-	inc bh
-	mov byte [asm3], bh
-fixchain2ma: sub edi, 320
-
-	jmp short beginmvlineasm4
-ALIGN 16
-beginmvlineasm4:
-	dec cl
-	jz NEAR endmvlineasm4
-beginmvlineasm42:
-	mov eax, ebp
-	mov ebx, esi
-machmv16: shr eax, 32
-machmv15: shr ebx, 32
-machmv12: add ebp, 88888888h ;vince[3]
-machmv9: add esi, 88888888h ;vince[2]
-machmv10: mov al, byte [eax+88888888h] ;bufplce[3]
-machmv7: mov bl, byte [ebx+88888888h] ;bufplce[2]
-	cmp al, 255
-	adc dl, dl
-	cmp bl, 255
-	adc dl, dl
-machmv8: mov bl, byte [ebx+88888888h] ;palookupoffs[2]
-machmv11: mov bh, byte [eax+88888888h] ;palookupoffs[3]
-
-	mov eax, edx
-machmv14: shr eax, 32
-	shl ebx, 16
-machmv4: mov al, byte [eax+88888888h] ;bufplce[1]
-	cmp al, 255
-	adc dl, dl
-machmv6: add edx, 88888888h ;vince[1]
-machmv5: mov bh, byte [eax+88888888h] ;palookupoffs[1]
-
-	mov eax, ecx
-machmv13: shr eax, 32
-machmv3: add ecx, 88888888h ;vince[0]
-machmv1: mov al, byte [eax+88888888h] ;bufplce[0]
-	cmp al, 255
-	adc dl, dl
-machmv2: mov bl, byte [eax+88888888h] ;palookupoffs[0]
-
-	shl dl, 4
-	xor eax, eax
-fixchain2mb: add edi, 320
-	mov al, dl
-	add eax, offset mvcase0
-	jmp eax       ;16 byte cases
-
-ALIGN 16
-endmvlineasm4:
-	dec byte [asm3]
-	jnz NEAR beginmvlineasm42
-
-	mov dword [vplce], ecx
-	mov dword [vplce + 4], edx
-	mov dword [vplce + 8], esi
-	mov dword [vplce + 12], ebp
-	pop ebp
-	ret
-
-	;5,7,8,8,11,13,12,14,11,13,14,14,12,14,15,7
-ALIGN 16
-mvcase0:
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase1:
-	mov byte [edi], bl
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase2:
-	mov byte [edi+1], bh
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase3:
-	mov word [edi], bx
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase4:
-	shr ebx, 16
-	mov byte [edi+2], bl
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase5:
-	mov byte [edi], bl
-	shr ebx, 16
-	mov byte [edi+2], bl
-	jmp beginmvlineasm4
-ALIGN 16
-	mvcase6:
-	shr ebx, 8
-	mov word [edi+1], bx
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase7:
-	mov word [edi], bx
-	shr ebx, 16
-	mov byte [edi+2], bl
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase8:
-	shr ebx, 16
-	mov byte [edi+3], bh
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase9:
-	mov byte [edi], bl
-	shr ebx, 16
-	mov byte [edi+3], bh
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase10:
-	mov byte [edi+1], bh
-	shr ebx, 16
-	mov byte [edi+3], bh
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase11:
-	mov word [edi], bx
-	shr ebx, 16
-	mov byte [edi+3], bh
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase12:
-	shr ebx, 16
-	mov word [edi+2], bx
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase13:
-	mov byte [edi], bl
-	shr ebx, 16
-	mov word [edi+2], bx
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase14:
-	mov byte [edi+1], bh
-	shr ebx, 16
-	mov word [edi+2], bx
-	jmp beginmvlineasm4
-ALIGN 16
-mvcase15:
-	mov dword [edi], ebx
-	jmp beginmvlineasm4
-*/
 } /* mvlineasm4 */
 
 /* #pragma aux setupspritevline parm [eax][ebx][ecx][edx][esi][edi] */
