@@ -47,11 +47,6 @@
 
 #define MAXCACHEOBJECTS 9216
 
-// External functions
-extern void copybufbyte(void *source, void *dest, int size);
-extern void copybuf(void *source, void *dest, int size);
-extern void clearbuf(long *buffer, int size, long fill_value);
-
 static long cachesize = 0;
 long cachecount = 0;
 char zerochar = 0;
