@@ -23,6 +23,8 @@
 
 #include <GL/gl.h>
 
+extern int _do_3d_acceleration;
+
 typedef const GLubyte* (*glGetString_t)(GLenum name);
 extern glGetString_t dglGetString;
 
