@@ -758,6 +758,8 @@ short getnumber16(char namestart[80], short num, long maxnumber)
 		sprintf(buffer, "%s%ld_ ", namestart, danum);
 		printmessage16(buffer);
 
+        _idle(); /* rcg06232002 prevent hang while waiting for input. */
+
 		for(j=2;j<=11;j++)
 			if (keystatus[j] > 0)
 			{
