@@ -548,7 +548,8 @@
             http://www.icculus.org/physfs/   ... (committed on Aug 1st).
 07162001 - Moved CVS repository to icculus.org. Updated README.
 08012001 - Committed some stuff, fixed a bug in the PhysicsFS code. Flipped
-            the useopengl flag in the Makefile back to false for now.
+            the useopengl flag in the Makefile back to false for now. Added
+            PhysicsFS info to README.
 
 --ryan. (icculus@linuxgames.com)
 
