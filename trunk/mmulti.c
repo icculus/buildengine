@@ -679,7 +679,7 @@ static void process_udp_send_queue(void)
 }
 
 
-static int receive_udp_packet(int *ip, void *pkt, size_t pktsize)
+static int get_udp_packet(int *ip, short *_port, void *pkt, size_t pktsize)
 {
     int err = 0;
     struct sockaddr_in addr;
@@ -707,6 +707,8 @@ static int receive_udp_packet(int *ip, void *pkt, size_t pktsize)
 
     *ip = ntohl(addr.sin_addr.s_addr);
     port = ntohs(addr.sin_port);
+    if (_port)
+        *_port = port;
 
     /*
      * Reject packets from unallowed IPs. Prevents (ha) DoS attacks and
@@ -718,7 +720,8 @@ static int receive_udp_packet(int *ip, void *pkt, size_t pktsize)
     {
         for (i = 1; i <= gcom->numplayers; i++)
         {
-            if (allowed_addresses[i].host == *ip)
+            if ((allowed_addresses[i].host == *ip) &&
+                (allowed_addresses[i].port == port))
             {
                 valid = i;
                 break;
@@ -867,6 +870,23 @@ static int set_socket_blockmode(int onOrOff)
 }
 
 
+static int set_socket_broadcast(int onOrOff)
+{
+    int f = (onOrOff) ? 1 : 0;
+    int rc;
+
+    /* give socket clearance to broadcast. */
+    rc = setsockopt(udpsocket, SOL_SOCKET, SO_BROADCAST, &f, sizeof (f)) == 0;
+    if (!rc)
+    {
+        printf("%sset SO_BROADCAST failed: %s\n",
+            ((onOrOff) ? "" : "un"), netstrerror());
+    }
+
+    return(rc);
+}
+
+
 static int open_udp_socket(int ip, int port)
 {
     struct sockaddr_in addr;
@@ -904,13 +924,15 @@ static int open_udp_socket(int ip, int port)
     return(1);
 }
 
-static int wait_for_other_players(gcomtype *gcom, int myip)  /* server init. */
+/* server init. */
+static int wait_for_other_players(gcomtype *gcom, int myip)
 {
     printf("Server code NOT implemented!\n");
     return(0);
 }
 
-static int connect_to_server(gcomtype *gcom, int myip)  /* client init. */
+/* client init. */
+static int connect_to_server(gcomtype *gcom, int myip)
 {
     printf("Client code NOT implemented!\n");
     return(0);
@@ -931,49 +953,83 @@ static void send_peer_greeting(int ip, short port, short myid)
     PacketPeerGreeting packet;
     memset(&packet, '\0', sizeof (packet));
     packet.header = HEADER_PEER_GREETING;
-    packet.id = myid;  /* !!! FIXME: Byte ordering bug! */
+    packet.id = BUILDSWAP_INTEL16(myid);
     send_udp_packet(ip, port, &packet, sizeof (packet));
 }
 
 
-static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. */
+/* peer to peer init. */
+static int connect_to_everyone(gcomtype *gcom, int myip, int bcast)
 {
     PacketPeerGreeting packet;
     unsigned short my_id = 0;
     int i;
     int rc;
     int ip;
+    short port;
     int first_send = 1;
-    unsigned long resendat = getticks();
-    int max = gcom->numplayers - 1;
-    int remaining = max;
     unsigned short heard_from[MAX_PLAYERS];
+    unsigned long resendat;
+    int max;
+    int remaining;
 
-    void (*oldsigint)(int) = signal(SIGINT, siginthandler);
+    printf("peer-to-peer init. CTRL-C to abort...\n");
+
+    if (bcast)
+    {
+        if (gcom->numplayers > 1)
+        {
+            printf("ERROR: Can't do both 'broadcast' and 'allow'.\n");
+            return(0);
+        }
+
+        if (!set_socket_broadcast(1))
+            return(0);
+
+        gcom->numplayers = bcast + 1;
+    }
 
     memset(heard_from, '\0', sizeof (heard_from));
 
     while (my_id == 0)  /* player number is based on id, low to high. */
         my_id = (unsigned short) rand();
 
-    printf("peer-to-peer init. CTRL-C to abort...\n");
     printf("(This client's ID for this round is 0x%X.)\n\n", my_id);
 
+    resendat = getticks();
+    remaining = max = gcom->numplayers - 1;
+
     printf("Waiting for %d player%s...\n", remaining, remaining==1 ? "":"s");
+    if (remaining == 0)
+    {
+        printf("Hmmm...don't have time to play with myself.\n");
+        return(0);
+    }
 
     while ((remaining) && (!ctrlc_pressed))
     {
         if (resendat <= getticks())
         {
-            for (i = 0; i < max; i++)
+            if (bcast)
             {
-                if (!heard_from[i])
+                printf("%sroadcasting greeting...\n", first_send ? "B":"Reb");
+                /* !!! FIXME: This is...probably not right. */
+                send_peer_greeting(0xFFFFFFFF, udpport, my_id);
+            }
+            else
+            {
+                for (i = 0; i < max; i++)
                 {
-                    printf("%sending greeting to %s:%d...\n",
-                            first_send ? "S" : "Res",
-                            static_ipstring(allowed_addresses[i].host),
-                            allowed_addresses[i].port);
-                    send_peer_greeting(allowed_addresses[i].host, allowed_addresses[i].port, my_id);
+                    if (!heard_from[i])
+                    {
+                        printf("%sending greeting to %s:%d...\n",
+                                first_send ? "S" : "Res",
+                                static_ipstring(allowed_addresses[i].host),
+                                allowed_addresses[i].port);
+                        send_peer_greeting(allowed_addresses[i].host,
+                                           allowed_addresses[i].port,
+                                           my_id);
+                    }
                 }
             }
             first_send = 0;
@@ -983,17 +1039,22 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
         _idle();
         process_udp_send_queue();
 
-        rc = receive_udp_packet(&ip, &packet, sizeof (packet));
-        if (rc > 0)
+        rc = get_udp_packet(&ip, &port, &packet, sizeof (packet));
+        if ( (rc > 0) && (ip) && ((ip != myip) || (port != udpport)) )
         {
             char *ipstr = static_ipstring(ip);
+
             for (i = 0; i < max; i++)
             {
-                if (ip == allowed_addresses[i].host)
+                if ((ip == allowed_addresses[i].host) &&
+                    (port == allowed_addresses[i].port))
+                {
                     break;
-            }
+                }
 
-            /* !!! FIXME: byte ordering in packet! */
+                if ((bcast) && (allowed_addresses[i].host == 0))
+                    break;  /* select this slot. */
+            }
 
             if (i == max)
                 printf("%s is not an allowed player.\n", ipstr);
@@ -1006,7 +1067,10 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
 
             else if (heard_from[i] == 0)
             {
+                packet.id = BUILDSWAP_INTEL16(packet.id);
                 heard_from[i] = packet.id;
+                allowed_addresses[i].host = ip;   /* bcast needs this. */
+                allowed_addresses[i].port = port;
                 remaining--;
 
                 printf("Heard from %s (id 0x%X). %d player%s to go.\n",
@@ -1016,12 +1080,11 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
                 /* make sure they've heard from us at all... */
                 /* !!! FIXME: Could be fatal if packet is dropped... */
                 send_peer_greeting(allowed_addresses[i].host,
-                                   allowed_addresses[i].port, my_id);
+                                   allowed_addresses[i].port,
+                                   my_id);
             }
         }
     }
-
-    signal(SIGINT, oldsigint);
 
     if (ctrlc_pressed)
     {
@@ -1046,7 +1109,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
                 return(0);
             }
 
-            if (heard_from[i] > heard_from[i+1])
+            else if (heard_from[i] > heard_from[i+1])
             {
                 int tmpi;
                 short tmps;
@@ -1091,12 +1154,26 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
 
     printf("Everyone ready! We are player #%d\n", (int) gcom->myconnectindex);
 
+    /*
+     * Ok, we should have specific IPs and ports for all players, and
+     *  therefore shouldn't broadcast anymore. Disable permission to do so,
+     *  just in case, so we aren't flooding the LAN with broadcasted packets.
+     */
+    set_socket_broadcast(0);
+
     return(1);
 }
 
 static int parse_ip(const char *str, int *ip)
 {
     int ip1, ip2, ip3, ip4;
+
+    if (stricmp(str, "any") == 0)
+    {
+        *ip = 0;
+        return(1);
+    }
+
     if (sscanf(str, "%d.%d.%d.%d", &ip1, &ip2, &ip3, &ip4) != 4)
     {
         printf("\"%s\" is not a valid IP address.\n", str);
@@ -1122,7 +1199,15 @@ static int parse_interface(char *str, int *ip, short *udpport)
     if (!parse_ip(str, ip))
         return(0);
 
-    *udpport = (ptr != NULL) ? (short) atoi(ptr + 1) : BUILD_DEFAULT_UDP_PORT;
+    *udpport = BUILD_DEFAULT_UDP_PORT;
+    if (ptr != NULL)  /* port specified? */
+    {
+        ptr++;
+        if (stricmp(ptr, "any") == 0)
+            *udpport = 0;
+        else
+            *udpport = (short) atoi(ptr);
+    }
 
     return(1);
 }
@@ -1168,6 +1253,7 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
     char *tok;
     char *ptr;
     int ip = 0;  /* interface */
+    int bcast = 0;
 
     buf = read_whole_file(cfgfile);  /* we must free this. */
     if (buf == NULL)
@@ -1208,6 +1294,21 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
             }
         }
 
+        else if (stricmp(tok, "broadcast") == 0)
+        {
+            if ((tok = get_token(&ptr)) != NULL)
+            {
+                bcast = atoi(tok);
+                if (bcast > MAX_PLAYERS - 1)
+                {
+                    printf("WARNING: Too many broadcast players.\n");
+                    bcast = MAX_PLAYERS - 1;
+                }
+
+                bogus = 0;
+            }
+        }
+
         else if (stricmp(tok, "allow") == 0)
         {
             int host;
@@ -1241,7 +1342,7 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
         else if (udpmode == udpmode_client)
             return(connect_to_server(gcom, ip));
         else if (udpmode == udpmode_peer)
-            return(connect_to_everyone(gcom, ip));
+            return(connect_to_everyone(gcom, ip, bcast));
 
         printf("wtf?!");  /* Should be handled by a udpmode above... */
         assert(0);
@@ -1257,6 +1358,8 @@ gcomtype *init_network_transport(char **ARGV, int argpos)
 
     printf("\n\nUDP NETWORK TRANSPORT INITIALIZING...\n");
 
+    ctrlc_pressed = 0;
+
     if (!initialize_sockets())
         return(NULL);
 
@@ -1265,13 +1368,21 @@ gcomtype *init_network_transport(char **ARGV, int argpos)
     retval = (gcomtype *)malloc(sizeof (gcomtype));
     if (retval != NULL)
     {
+        int rc;
         char *cfgfile = ARGV[argpos];
+        void (*oldsigint)(int);
+
         memset(retval, '\0', sizeof (gcomtype));
         memset(allowed_addresses, '\0', sizeof (allowed_addresses));
         udpsocket = -1;
         udpport = BUILD_DEFAULT_UDP_PORT;
         udpmode = udpmode_peer;
-        if ((cfgfile == NULL) || (!parse_udp_config(cfgfile, retval)))
+
+        oldsigint = signal(SIGINT, siginthandler);
+        rc = parse_udp_config(cfgfile, retval);
+        signal(SIGINT, oldsigint);
+
+        if (!rc)
         {
             free(retval);
             deinit_network_transport(NULL);
@@ -1322,7 +1433,7 @@ void callcommit(void)
     switch (gcom->command)
     {
         case COMMIT_CMD_GET:
-            rc = receive_udp_packet(&ip, gcom->buffer, sizeof (gcom->buffer));
+            rc = get_udp_packet(&ip, NULL, gcom->buffer, sizeof(gcom->buffer));
             if (rc > 0)
             {
                 gcom->numbytes = rc;  /* size of new packet. */
