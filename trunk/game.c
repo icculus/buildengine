@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef USE_PERL
+#include "buildperl.h"
+#endif
+
 #include "platform.h"
 
 #include "pragmas.h"
@@ -433,6 +437,8 @@ static long animatevel[MAXANIMATES], animateacc[MAXANIMATES], animatecnt = 0;
 		show2dsprite[newspriteindex2>>3] |= (1<<(newspriteindex2&7));    \
 }                                                                      \
 
+
+
 int main(int argc, char **argv)
 {
 //	long i, j, k, l, fil, waitplayers, x1, y1, x2, y2;
@@ -440,6 +446,12 @@ int main(int argc, char **argv)
 //	short other, packleng;
 	short other;
 //	char *ptr;
+
+#ifdef USE_PERL
+    int perl_works = 0;
+    if (buildperl_init() == 0)
+        perl_works = 1;
+#endif
 
     _platform_init(argc, argv, "KenBuild by Ken Silverman", "KenBuild");
 
@@ -579,6 +591,11 @@ int main(int argc, char **argv)
 	ready2send = 1;
 	while (!keystatus[1])       //Main loop starts here
 	{
+        #ifdef USE_PERL
+            if (perl_works)
+                buildperl_frame();
+        #endif
+
 			// backslash (useful only with KDM)
 		if (keystatus[0x2b]) { keystatus[0x2b] = 0; preparesndbuf(); }
 
@@ -654,6 +671,12 @@ int main(int argc, char **argv)
 		printf("stereowidth was: %ld\n",stereowidth);
 		printf("stereopixelwidth was: %ld\n",stereopixelwidth);
 	}
+
+    #ifdef USE_PERL
+        if (perl_works)
+            buildperl_deinit();
+    #endif
+
 	return(0);
 }
 
