@@ -1526,10 +1526,9 @@ void callcommit(void)
             }
             break;
 
-        /* ?!
+        /* Gets used, but doesn't seem to do anything in Duke3D... */
         case COMMIT_CMD_SCORE:
             break;
-        */
 
         default:
             printf("NET TRANSPORT ERROR: Unknown command %d\n", gcom->command);
