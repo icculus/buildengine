@@ -57,6 +57,10 @@ GAMEOBJS := $(GAMEOBJS1:.asm=.o)
 BUILDOBJS1 := $(BUILDSRCS:.c=.o)
 BUILDOBJS := $(BUILDOBJS1:.asm=.o)
 
+CLEANUP = $(GAMEOBJS) $(BUILDOBJS) \
+          $(GAMEEXE) $(BUILDEXE) \
+          core
+
 all: $(BUILDEXE) $(GAMEEXE)
 
 $(GAMEEXE) : $(GAMEOBJS)
@@ -66,5 +70,5 @@ $(BUILDEXE) : $(BUILDOBJS)
 	$(LINKER) -o $(BUILDEXE) $(LDFLAGS) $(BUILDOBJS)
 
 clean:
-	rm -f $(GAMEOBJS) $(BUILDOBJS) $(GAMEEXE) $(BUILDEXE) core
+	rm -f $(CLEANUP)
 
