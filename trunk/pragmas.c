@@ -1264,33 +1264,6 @@ void copybufreverse(void *source, void *dest, int size) {
 	  *((unsigned int*)dest)++ = ((a<<24)|((a<<8)&0x00FF0000)|((a>>8)&0x0000FF00)|(a>>24));
 	  size--;
   }
-  return;
-
-  __asm__ __volatile__ (
-	"shrl $1, %%ecx   \n\t"
-	"jnc skipit1   \n\t"
-	"movb (%%esi), %%al   \n\t"
-	"decl %%esi   \n\t"
-	"movb %%al, (%%edi)   \n\t"
-	"incl %%edi   \n\t"
-	"skipit1: shrl $1, %%ecx   \n\t"
-	"jnc skipit2   \n\t"
-	"movw -1(%%esi), %%ax   \n\t"
-	"subl $2, %%esi   \n\t"
-	"rorw $8, %%ax   \n\t"
-	"movw %%ax, (%%edi)   \n\t"
-	"addl $2, %%edi   \n\t"
-	"skipit2: testl %%ecx, %%ecx   \n\t"
-	"jz endloop   \n\t"
-	"begloop: movl -3(%%esi), %%eax   \n\t"
-	"subl $4, %%esi   \n\t"
-	"bswapl %%eax   \n\t"
-	"movl %%eax, (%%edi)   \n\t"
-	"addl $4, %%edi   \n\t"
-	"decl %%ecx   \n\t"
-	"jnz begloop   \n\t"
-	"endloop:   \n\t"
-   : : "S" (source), "D" (dest), "c" (size) : "cc");
 }
 
 void qinterpolatedown16 (long *source, int size, int linum, int linum_inc) {
