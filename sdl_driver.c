@@ -477,21 +477,20 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
         return(0);
     } // if
 
+    if (SDL_WM_ToggleFullScreen(*surface))
+    {
+        sdldebug("SDL_WM_ToggleFullScreen() seems to work on this system.");
+        return(1);
+    } // if
+
     if ( !(SDL_GetVideoInfo()->wm_available) )
     {
         sdldebug("No window manager. Not toggling fullscreen flag.");
         return(0);
     } // if
 
-    tmpflags = (*surface)->flags;
-    SDL_WM_ToggleFullScreen(*surface);
-    if ( (tmpflags & SDL_FULLSCREEN) ^ ((*surface)->flags & SDL_FULLSCREEN) )
-    {
-        sdldebug("SDL_WM_ToggleFullScreen() seems to work on this system.");
-        return(1);
-    } // if
-
     sdldebug("toggling fullscreen flag The Hard Way...");
+    tmpflags = (*surface)->flags;
     w = (*surface)->w;
     h = (*surface)->h;
     bpp = (*surface)->format->BitsPerPixel;
