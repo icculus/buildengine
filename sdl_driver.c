@@ -570,6 +570,43 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
 } // attempt_fullscreen_toggle
 
 
+    // The windib driver can't alert us to the keypad enter key, which
+    //  Ken's code depends on heavily. It sends it as the same key as the
+    //  regular return key. These users will have to hit SHIFT-ENTER,
+    //  which we check for explicitly, and give the engine a keypad enter
+    //  enter event.
+static inline int handle_keypad_enter_hack(const SDL_Event *event)
+{
+    static int kp_enter_hack = 0;
+    int retval = 0;
+
+    if (event->key.keysym.sym == SDLK_RETURN)
+    {
+        if (event->key.state == SDL_PRESSED)
+        {
+            if (event->key.keysym.mod & KMOD_SHIFT)
+            {
+                kp_enter_hack = 1;
+                lastkey = scancodes[SDLK_KP_ENTER];
+                retval = 1;
+            } // if
+        } // if
+
+        else  // key released
+        {
+            if (kp_enter_hack)
+            {
+                kp_enter_hack = 0;
+                lastkey = scancodes[SDLK_KP_ENTER];
+                retval = 1;
+            } // if
+        } // if
+    } // if
+
+    return(retval);
+} // handle_keypad_enter_hack
+
+
 static int sdl_key_filter(const SDL_Event *event)
 {
     SDL_GrabMode grab_mode = SDL_GRAB_OFF;
@@ -600,7 +637,9 @@ static int sdl_key_filter(const SDL_Event *event)
         return(0);
     } // if
 
-    lastkey = scancodes[event->key.keysym.sym];
+    if (!handle_keypad_enter_hack(event))
+        lastkey = scancodes[event->key.keysym.sym];
+
     if (lastkey == 0x0000)   // No DOS equivalent defined.
         return(0);
 
