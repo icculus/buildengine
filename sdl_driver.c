@@ -1341,6 +1341,12 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
         sdl_flags |= SDL_OPENGL;
 #endif
 
+    if (daxdim > MAXXDIM || daydim > MAXYDIM)
+    {
+	    daxdim = 1600;
+	    daydim = 1200;
+    }
+
     if (in_egapalette)
         restore256_palette();	    
 
