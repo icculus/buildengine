@@ -40,12 +40,22 @@ void setbrightness(char dabrightness, unsigned char *dapal);
 
 
 // these need to be implemented by YOUR driver.
-void _platform_init(int argc, char **argv);
+void _platform_init(int argc, char **argv, const char *title, const char *icon);
 void _idle(void);
 void *_getVideoBase(void);
 void _initkeys(void);
 
 // !!! move the stuff from unix_compat.h into here. --ryan.
+
+
+// rcg08012000 this could use a better abstraction...maybe I want a non-SDL
+//  driver on UNIX?  GGI?
+#ifdef PLATFORM_DOS
+#define VIDEOBASE 0xa0000
+#else
+extern SDL_Surface *surface;
+#define VIDEOBASE surface->pixels
+#endif
 
 #endif
 
