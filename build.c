@@ -14,15 +14,18 @@
 
 #ifdef PLATFORM_UNIX
 #include <stdio.h>
-//#include <sys/io.h>
 #include <unistd.h>
 
-
-// !!! need this to get FNM_CASEFOLD to be defined in fnmatch.h ...
+// !!! need support for Windows.  --ryan.
+#ifndef CYGWIN
+// need this to get FNM_CASEFOLD to be defined in fnmatch.h ...
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-
+#endif
 
 #include <fnmatch.h>
+#endif
+
 #include <sys/types.h>
 #include <dirent.h>
 #include "unix_compat.h"
@@ -5990,8 +5993,11 @@ int getfilenames(char kind[6])
                 if ((subdirs) && (S_ISDIR(statbuf.st_mode)))
                     add_this = 1;
 
+                // !!! need support for Windows.  --ryan.
+                #ifndef CYGWIN
                 else if (fnmatch(kind, dent->d_name, FNM_CASEFOLD) == 0)
                     add_this = 1;
+                #endif
 
                 if (add_this)
     			{

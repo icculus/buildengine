@@ -99,7 +99,11 @@ long stretchhline(long,long,long,long,long,long);
   long asm_drawslab(long,long,long,long,long,long);
   long asm_stretchhline(long,long,long,long,long,long);
 
-  #if defined(__ELF__) && defined (__GNUC__)
+  // !!! I need a reference to this, for mprotect(), but the actual function
+  // !!!  is never called in BUILD...just from other ASM routines. --ryan.
+  long asm_prohlineasm4(void);
+
+  #if ((defined __GNUC__) && (!defined C_IDENTIFIERS_UNDERSCORED))
 
     long asm_mmxoverlay(void) __attribute__ ((alias ("_asm_mmxoverlay")));
     long asm_sethlinesizes(long,long,long) __attribute__ ((alias ("_asm_sethlinesizes")));

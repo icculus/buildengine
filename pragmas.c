@@ -21,6 +21,13 @@
 
 static long dmval;
 
+// rcg02132001 Cygwin support.
+#if (defined C_IDENTIFIERS_UNDERSCORED)
+#define SYM_dmval   "_dmval"
+#else
+#define SYM_dmval   "dmval"
+#endif
+
 static inline void _touch_dmval_stop_compiler_whining(void)
 {
     dmval = 0;
@@ -345,7 +352,7 @@ int divmod (int i1, int i2) {
   __asm__ __volatile__ ("
     xorl %%edx, %%edx
     divl %%ebx
-    movl %%edx, dmval
+    movl %%edx, " SYM_dmval "
   " : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "memory", "cc");
   return(retval);
 }
