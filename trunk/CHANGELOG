@@ -422,6 +422,11 @@
             Win32 version up to SDL 1.2.0 from SDL-1.1.8, and added a Watcom
             __cdecl pragma in display.h for SDL_VideoDriverName(). Updated
             TODO.
+05272001 - Added engine.h to dos_drvr.c to get the DOS binaries to compile.
+            Added README and CHANGELOG to the win32 and dos bin distros, and
+            updated README-dosbins.txt and README-win32bins.txt. Updated
+            README with info on Watcom 10 vs 11, porting to new OSes, etc.
+            Updated TODO, AGAIN. :)
 
 --ryan. (icculus@linuxgames.com)
 

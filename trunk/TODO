@@ -45,6 +45,6 @@ NEXT ON TAP:
 - Can we convert any existing tabs into equivalent spaces ASCII 32 chars, so
    the align at 4-space tabstops? Tabs suck.
 - Can we move those SDL __cdecl pragmas out of display.h?
-
+- Add info to README on porting to new compilers.
 // end of TODO ...
 
