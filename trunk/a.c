@@ -48,7 +48,7 @@ void hlineasm4(long count, unsigned long source, long shade, unsigned long i4, u
     while (count) {
 	    source = i5 >> ((256-machxbits_al) & 0x1f);
 	    source = shld(source,i4,machxbits_bl);
-	    source = ((unsigned char*)source)[machxbits_ecx];
+	    source = ((unsigned char*)machxbits_ecx)[source];
 	    *((unsigned char*)i6) = pal_eax[shade|source];
 	    i6--;
 	    i5 -= asm1;
@@ -205,7 +205,7 @@ long vlineasm1(long vince, long palookupoffse, long i3, long vplce, long bufplce
 static unsigned char transmach3_al = 32;
 void setuptvlineasm(long i1)
 {
-    transmach3_al = i1;
+    transmach3_al = (i1 & 0x1f);
 } /* setuptvlineasm */
 
 /* #pragma aux tvlineasm1 parm [eax][ebx][ecx][edx][esi][edi] */
@@ -242,7 +242,7 @@ static unsigned long tran2pal_ebx;
 static unsigned long tran2pal_ecx;
 void setuptvlineasm2(long i1, long i2, long i3)
 {
-	tran2shr = (i1&0xff);
+	tran2shr = (i1&0x1f);
 	tran2pal_ebx = i2;
 	tran2pal_ecx = i3;
 } /* */
@@ -326,7 +326,7 @@ long mvlineasm1(long vince, long palookupoffse, long i3, long vplce, long bufplc
 /* #pragma aux setupvlineasm parm [eax] */
 void setupvlineasm(long i1)
 {
-    mach3_al = i1;
+    mach3_al = (i1&0x1f);
 } /* setupvlineasm */
 
 extern long vplce[4], vince[4], palookupoffse[4], bufplce[4];
@@ -352,7 +352,7 @@ void vlineasm4(long i1, long i2)
 /* #pragma aux setupmvlineasm parm [eax] */
 void setupmvlineasm(long i1)
 {
-    machmv = i1;
+    machmv = (i1&0x1f);
 } /* setupmvlineasm */
 
 /* #pragma aux mvlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
@@ -550,8 +550,8 @@ void mhlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long
 void msethlineshift(long i1, long i2)
 {
     i1 = 256-i1;
-    mshift_al = (i1&0xff);
-    mshift_bl = (i2&0xff);
+    mshift_al = (i1&0x1f);
+    mshift_bl = (i2&0x1f);
 } /* msethlineshift */
 
 /* #pragma aux thline parm [eax][ebx][ecx][edx][esi][edi] */
@@ -600,8 +600,8 @@ void thlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long
 void tsethlineshift(long i1, long i2)
 {
     i1 = 256-i1;
-    tshift_al = (i1&0xff);
-    tshift_bl = (i2&0xff);
+    tshift_al = (i1&0x1f);
+    tshift_bl = (i2&0x1f);
 } /* tsethlineshift */
 
 /* #pragma aux setupslopevlin parm [eax][ebx][ecx] modify [edx] */
