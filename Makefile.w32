@@ -1,4 +1,4 @@
-[[[[#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
 # Makefile for creating Build with Watcom C for win32.
 #
 #  Written by Ryan C. Gordon. (icculus@lokigames.com)
@@ -31,22 +31,16 @@ SDLDIR = C:\SDL-1.1.8
 #-----------------------------------------------------------------------------#
 # When debugging, use "d all", otherwise use the "op el" line.
 #-----------------------------------------------------------------------------#
-LINKDEBUGFLAGS = d all
-#LINKDEBUGFLAGS = op el
+#LINKDEBUGFLAGS = d all
+LINKDEBUGFLAGS = op el
 
-
-#-----------------------------------------------------------------------------#
-# When debugging, use "d all", otherwise use the "op el" line.
-#-----------------------------------------------------------------------------#
-LINKDEBUGFLAGS = d all
-#LINKDEBUGFLAGS = op el
 
 #-----------------------------------------------------------------------------#
 # Choose one, or mix and match. Releases should use the full line,
 #  debug builds should probably use the blank one.
 #-----------------------------------------------------------------------------#
-OPTIMIZEFLAGS =
-#OPTIMIZEFLAGS = -oa -oe -of+ -ol -ol+ -om -oc -oi -or -otexan
+#OPTIMIZEFLAGS =
+OPTIMIZEFLAGS = -oa -oe -of+ -ol -ol+ -om -oc -oi -or -otexan
 
 #-----------------------------------------------------------------------------#
 # Set this to "nt" to create a console window for viewing stdio output
