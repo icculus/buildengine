@@ -2188,6 +2188,8 @@ static long timeroffs1mhz;
         parm nomemory [eax][ebx][ecx]\
         modify exact [eax ebx edx]\
 
+
+/* FIXME: Why are all these divscale functions in here a second time? */
 long divscale(long i1, long i2, long i3);
 #pragma aux divscale =\
         "mov edx, eax",\
@@ -2734,7 +2736,7 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);
 #endif /* defined USE_I386_ASM */
 #endif /* defined __WATCOMC__ */
 
-#endif /* !defined_INCLUDE_PRAGMAS_H_ */
+#endif /* !defined _INCLUDE_PRAGMAS_H_ */
 
 /* end of pragmas.h ... */
 

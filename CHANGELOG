@@ -551,6 +551,12 @@
             the useopengl flag in the Makefile back to false for now. Added
             PhysicsFS info to README. Changed all occurances of my email
             address from linuxgames.com to clutteredmind.org.
+08232001 - Moved a.c to a_gnu.c and pragmas.c to pragmas_gnu.c. Added
+            pragmas_visual.c and a_visualc.c, and got everything compiling on
+            Visual C. Added VisualC.zip. Unzip it and use those files to build
+            with Visual C. Updated Makefiles, READMEs, etc with the new
+            *_[gnu|visualc]* files. Cleanups elsewhere. Added a "distclean"
+            target which just calls "clean".
 
 --ryan. (icculus@clutteredmind.org)
 

@@ -213,7 +213,7 @@ TO PORT TO NEW COMPILERS AND TOOLCHAINS:
   with the original Build source release.
 - The alternative is to write portable C code to avoid all the self-modifying
   ASM. Have the appropriate amount of fun.
-- There is inline assembly in engine.c, game.c, pragmas.c, and pragmas.h.
+- There is inline assembly in engine.c, game.c, pragmas*.c, and pragmas.h.
   Every compiler has their own syntax for this. Have more fun.
 - Try to find clean syntax fixes that work everywhere instead of #ifdef'ing,
   if you can. Platform.h is a good starting point.

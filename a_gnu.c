@@ -8,7 +8,15 @@
 
 #include "a.h"
 
-#ifdef USE_I386_ASM
+#if (!defined USE_I386_ASM)
+#error Please define USE_I386_ASM if you want to compile this.
+#endif
+
+#if (!defined __GNUC__)
+#error This file is filled with GNU C-specific inline asm.
+#endif
+
+
 
 long is_vmware_running(void)
 {
@@ -536,6 +544,7 @@ long stretchhline(long i1, long i2, long i3, long i4, long i5, long i6)
 
 #else  /* below is the C version of all that nasty self-modifying ASM... */
 
+/* !!! FIXME: This should be moved to a_generic.c or something. */
 
 long is_vmware_running(void)
 {

@@ -130,7 +130,7 @@ NETDLL = $(strip $(NETBASE))$(strip $(DLL_EXT))
 endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
-ENGINESRCS += a_nasm.asm pragmas.c a.c
+ENGINESRCS += a_nasm.asm pragmas_gnu.c a_gnu.c
 
 ifeq ($(strip $(useopengl)),true)
 ENGINESRCS += buildgl.c
@@ -207,6 +207,8 @@ $(BUILDEXE) : $(ENGINEDLL) $(BUILDOBJS)
 
 listclean:
 	@echo "A 'make clean' would remove" $(CLEANUP)
+
+distclean: clean
 
 clean:
 	rm -f $(CLEANUP)
