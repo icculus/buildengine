@@ -22,9 +22,11 @@
 
 #include "bstub.h"
 
+/*
 #if !defined (getch) && defined(PLATFORM_UNIX)
 #define getch getchar
 #endif
+*/
 
 #define MAXMENUFILES 256
 #define updatecrc16(crc,dat) (crc = (((crc<<8)&65535)^crctable[((((unsigned short)crc)>>8)&65535)^dat]))
@@ -6818,7 +6820,7 @@ int main(int argc,char **argv)
 		printf("Save changes?\n");
 		do
 		{
-			ch = getch ();
+			ch = getchar();
 		}
 		while ((ch != 'y') && (ch != 'Y') && (ch != 'n') && (ch != 'N'));
 		if ((ch == 'y') || (ch == 'Y'))

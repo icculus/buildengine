@@ -889,7 +889,7 @@ static int set_socket_broadcast(int onOrOff)
     int rc;
 
     /* give socket clearance to broadcast. */
-    rc = setsockopt(udpsocket, SOL_SOCKET, SO_BROADCAST, &f, sizeof (f)) == 0;
+    rc = setsockopt(udpsocket, SOL_SOCKET, SO_BROADCAST, (const char *) &f, sizeof (f)) == 0;
     if (!rc)
     {
         printf("%sset SO_BROADCAST failed: %s\n",
