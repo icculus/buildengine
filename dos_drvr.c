@@ -942,5 +942,10 @@ void _updateScreenRect(long x, long y, long w, long h)
 {
 }
 
+int using_opengl(void)
+{
+    return(0);
+}
+
 // end of dos_driver.c ...
 
