@@ -47,14 +47,14 @@ endif
 
 ifeq ($(strip $(cygwin)),true)
   ifeq ($(strip $(SDL_INC_DIR)),please_set_me_cygwin_users)
-    $(error Cygwin users need to set SDL_INC_DIR in the Makefile.)
-  else 
+    $(error Cygwin users need to set the SDL_INC_DIR envr var.)
+  else
     SDL_CFLAGS := -I$(SDL_INC_DIR)
   endif
 
   ifeq ($(strip $(SDL_LIB_DIR)),please_set_me_cygwin_users)
-    $(error Cygwin users need to set SDL_LIB_DIR in the Makefile.)
-  else 
+    $(error Cygwin users need to set the SDL_LIB_DIR envr var.)
+  else
     SDL_LDFLAGS := -L$(SDL_LIB_DIR) -lSDL
   endif
 else
