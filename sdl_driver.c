@@ -73,13 +73,14 @@ extern long setvlinebpl(long);
 // !!!  needed safety right now. --ryan.
 
 
+// environment variables names.
 #define BUILD_NOMOUSEGRAB  "BUILD_NO_MOUSE_GRAB"
 #define BUILD_WINDOWED     "BUILD_WINDOWED"
+#define BUILD_SDLDEBUG     "BUILD_SDLDEBUG"
+#define BUILD_GLLIBRARY    "BUILD_GLLIBRARY"
+#define BUILD_SCREENRES    "BUILD_SCREENRES"
 
 #define UNLOCK_SURFACE_AND_RETURN  if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface); return;
-
-// !!! Take this out later.
-//#define DEBUG_HALL_OF_MIRRORS
 
 
     // !!! move these elsewhere?
@@ -89,6 +90,7 @@ long buffermode, origbuffermode, linearmode;
 char permanentupdate = 0, vgacompatible;
 
 SDL_Surface *surface = NULL; /* This isn't static so that we can use it elsewhere AH */
+static int debug_hall_of_mirrors = 0;
 static Uint32 sdl_flags = SDL_HWPALETTE;
 static long mouse_x = 0;
 static long mouse_y = 0;
@@ -138,9 +140,15 @@ void set16color_palette (void);
 
 
 #define print_sdl_surface_flag(x) if (_surface->flags & x) fprintf( stderr, " %s", #x )
+#define print_tf_state(str, val) fprintf( stderr, "BUILDSDL: %s: {%s}\n", str, (val) ? "true" : "false" )
 
 static void output_surface_info(SDL_Surface *_surface)
 {
+    const SDL_VideoInfo *info;
+
+    if (getenv(BUILD_SDLDEBUG) == NULL)
+        return;
+
     if (_surface == NULL)
     {
         fprintf(stderr, "BUILDSDL: -WARNING- You've got a NULL screen surface!\n");
@@ -168,6 +176,20 @@ static void output_surface_info(SDL_Surface *_surface)
         print_sdl_surface_flag(SDL_SRCALPHA);
         print_sdl_surface_flag(SDL_PREALLOC);
         fprintf(stderr, "\n");
+
+        info = SDL_GetVideoInfo();
+        assert(info != NULL);
+
+        print_tf_state("hardware surface available", info->hw_available);
+        print_tf_state("window manager available", info->wm_available);
+        print_tf_state("accelerated hardware->hardware blits", info->blit_hw);
+        print_tf_state("accelerated hardware->hardware colorkey blits", info->blit_hw_CC);
+        print_tf_state("accelerated hardware->hardware alpha blits", info->blit_hw_A);
+        print_tf_state("accelerated software->hardware blits", info->blit_sw);
+        print_tf_state("accelerated software->hardware colorkey blits", info->blit_sw_CC);
+        print_tf_state("accelerated software->hardware alpha blits", info->blit_sw_A);
+        print_tf_state("accelerated color fills", info->blit_fill);
+        fprintf(stderr, "BUILDSDL: video memory: (%d)\n", info->video_mem);
     } // else
 } // output_surface_info
 
@@ -175,6 +197,9 @@ static void output_surface_info(SDL_Surface *_surface)
 static void output_driver_info(void)
 {
     char buffer[256];
+
+    if (getenv(BUILD_SDLDEBUG) == NULL)
+        return;
 
     if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
     {
@@ -703,7 +728,7 @@ static int try_opengl_libname(const char *libname)
 
 static int load_opengl_library(void)
 {
-    char *envlib = getenv("BUILD_GLLIBRARY");
+    char *envlib = getenv(BUILD_GLLIBRARY);
     int rc = 0;
     int i;
 
@@ -871,6 +896,8 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         exit(1);
     } // if
 
+    debug_hall_of_mirrors = (getenv(BUILD_SDLDEBUG) != NULL);
+
     output_driver_info();
 
     #ifdef USE_OPENGL
@@ -992,99 +1019,223 @@ void qsetmode640480(void)
 } // qsetmode640480
 
 
+// Let the user specify a specific mode via environment variable.
+static void add_user_defined_resolution(int debugging)
+{
+    const char *envr = getenv(BUILD_SCREENRES);
+    char *xptr = NULL;
+    char *ptr = NULL;
+    long w = -1;
+    long h = -1;
+    int bogus = 0;
+
+    if (envr == NULL)
+        return;
+
+    xptr = strchr(envr, 'x');
+    if (xptr == NULL)
+        bogus = 1;
+    else
+    {
+        w = strtol(envr, &ptr, 10);
+        if (ptr != xptr)
+            bogus = 1;
+        else
+        {
+            xptr++;
+            h = strtol(xptr, &ptr, 10);
+            if ( (*xptr == '\0') || (*ptr != '\0') )
+                bogus = 1;
+            else
+            {
+                if ((w <= 1) || (h <= 1))
+                    bogus = 1;
+            } // else
+        } // else
+    } // else
+
+    if (debugging)
+    {
+        if (bogus)
+        {
+            fprintf(stderr,
+                    "BUILDSDL: User defined resolution [%s] is bogus!\n",
+                    envr);
+        } // if
+        else
+        {
+            fprintf(stderr,
+                    "BUILDSDL: Added user defined resolution: (%ldx%ld)\n",
+                    w, h);
+        } // else
+    } // if
+
+    if (!bogus)
+    {
+        validmode[validmodecnt] = validmodecnt;
+       	validmodexdim[validmodecnt] = w;
+       	validmodeydim[validmodecnt] = h;
+        validmodecnt++;
+    } // if
+} // add_user_defined_resolution
+
+
+#define swap_macro(tmp, x, y) { tmp = x; x = y; y = tmp; }
+
+// !!! FIXME : Break this up into subfunctions.
 void getvalidvesamodes(void)
 {
+    static int already_checked = 0;
+    int debugging;
+    int tmp;
     int i = 0;
     const SDL_VideoInfo *vidInfo = NULL;
     SDL_Rect **modes = NULL;
-    static int already_checked = 0;
-    int inserted = 0;
+    int sorted = 0;
     int pos = 0;
+    int stdres[][2] = {   // !!! is this legal C?!
+                       {320, 200}, {640, 350}, {640, 480},
+                       {800, 600}, {1024, 768}, {999, 999}
+                     };
 
     if (already_checked)
         return;
 
     already_checked = 1;
    	validmodecnt = 0;
-
-
-
+    debugging = (getenv(BUILD_SDLDEBUG) != NULL);
     vidoption = 1;  //!!! tmp
 
-
-
-
     vidInfo = SDL_GetVideoInfo();
-    modes = SDL_ListModes(vidInfo->vfmt, sdl_flags);
+    modes = SDL_ListModes(vidInfo->vfmt, sdl_flags | SDL_FULLSCREEN);
     if (modes == NULL)
     {
         sdl_flags &= ~SDL_FULLSCREEN;
         modes = SDL_ListModes(vidInfo->vfmt, sdl_flags); // try without fullscreen.
         if (modes == NULL)
-        {
-            sdl_flags &= ~SDL_HWSURFACE;
-            modes = SDL_ListModes(vidInfo->vfmt, sdl_flags);   // give me ANYTHING.
-            if (modes == NULL)
-            {
-                fprintf(stderr, "BUILDSDL: SDL_ListModes() failed.\n");
-                return;
-            } // if
-        } // if
+            modes = (SDL_Rect **) -1;  // fuck it.
     } // if
 
-    if (modes == (SDL_Rect **) -1)   // anything is fine; put some standard
-    {                                //  sizes in here...
-        validmode[0] = 0;
-       	validmodexdim[0] = 320;
-       	validmodeydim[0] = 200;
-        validmodecnt++;
-        validmode[1] = 1;
-       	validmodexdim[1] = 640;
-       	validmodeydim[1] = 350;
-        validmodecnt++;
-        validmode[2] = 2;
-       	validmodexdim[2] = 640;
-       	validmodeydim[2] = 480;
-        validmodecnt++;
-        validmode[3] = 3;
-       	validmodexdim[3] = 800;
-       	validmodeydim[3] = 600;
-        validmodecnt++;
-        validmode[4] = 4;
-       	validmodexdim[4] = 1024;
-       	validmodeydim[4] = 768;
-        validmodecnt++;
-    } // if
-    else
-    {
         // BUILD wants this array sorted smallest to largest. SDL gives it
         //  to us largest to smallest. Argh.
         //  320 by 200 needs to be in here. SDL will emulate if need be.
 
-        for (i = 0; modes[i] != NULL; i++);   // get to end of array.
-
-        for (i--; i >= 0; i--, pos++)
+        // ...find the largest hardware resolution...
+    if (modes == (SDL_Rect **) -1)
+    {
+        pos = -1;
+        if (debugging)
+            fprintf(stderr, "BUILDSDL: Apparently we're windowed.\n");
+    } // if
+    else
+    {
+        pos = 0;
+        if (debugging)
         {
-            validmode[pos] = 1;
-
-            if ((modes[i]->w == 320) && (modes[i]->h == 200))
-                inserted = 1;   // don't need to insert it ourselves.
-
-            if ((modes[i]->w > 320) && (modes[i]->h > 200) && (inserted == 0))
-            {
-                validmodexdim[pos] = 320;
-               	validmodeydim[pos] = 200;
-                inserted = 1;
-            } // if
-            else
-            {
-                validmodexdim[pos] = modes[i]->w;
-               	validmodeydim[pos] = modes[i]->h;
-            } // else
-
-           	validmodecnt++;
-        } // for
+            fprintf(stderr, "BUILDSDL: Largest resolution: (%dx%d).\n",
+                    modes[0]->w, modes[0]->h);
+        } // if
     } // else
+
+        // fill in the standard resolutions...
+    for (i = 0; i < sizeof (stdres) / sizeof (stdres[0]); i++)
+    {
+        if ( (pos != -1) &&
+             ( (modes[pos]->w < stdres[i][0]) ||
+               (modes[pos]->h < stdres[i][1]) ) )
+        {
+            if (debugging)
+            {
+                fprintf(stderr,
+                    "BUILDSDL: Standard resolution (%dx%d) is too big.\n",
+                    stdres[i][0], stdres[i][1]);
+            } // if
+
+            continue;
+        } // if
+
+        if (debugging)
+        {
+            fprintf(stderr,
+                "BUILDSDL: Adding standard resolution (%dx%d).\n",
+                stdres[i][0], stdres[i][1]);
+        } // if
+
+        validmode[validmodecnt] = validmodecnt;
+       	validmodexdim[validmodecnt] = stdres[i][0];
+       	validmodeydim[validmodecnt] = stdres[i][1];
+        validmodecnt++;
+    } // for
+
+
+        //  Anything the hardware can specifically do is added now if it
+        //   isn't in our standard list already.
+
+    add_user_defined_resolution(debugging);
+
+    if (modes != (SDL_Rect **) -1)
+    {
+        for (i = 0; modes[i] != NULL; i++)
+        {
+                // make sure this resolution isn't already listed...
+            for (pos = 0; pos < validmodecnt; pos++)
+            {
+                if ( (modes[i]->w == validmodexdim[pos]) &&
+                     (modes[i]->h == validmodeydim[pos]) )
+                {
+                    if (debugging)
+                    {
+                        fprintf(stderr,
+                            "BUILDSDL: Hardware resolution (%dx%d) is standard.\n",
+                            modes[i]->w, modes[i]->h);
+                    } // if
+                    pos = -1;
+                    break;
+                } // if
+            } // for
+
+            if (pos != -1)
+            {
+                if (debugging)
+                {
+                    fprintf(stderr,
+                        "BUILDSDL: Adding hardware resolution (%dx%d).\n",
+                        modes[i]->w, modes[i]->h);
+                } // if
+                validmode[validmodecnt] = validmodecnt;
+                validmodexdim[validmodecnt] = modes[i]->w;
+                validmodeydim[validmodecnt] = modes[i]->h;
+                validmodecnt++;
+            } // if
+        } // for
+    } // if
+
+        // now, sort the list, smallest to largest, and be done with it.
+    do
+    {
+        sorted = 1;
+        for (i = 0; i < validmodecnt - 1; i++)
+        {
+            if ( (validmodexdim[i] >= validmodexdim[i+1]) &&
+                 (validmodeydim[i] >= validmodeydim[i+1]) )
+            {
+                sorted = 0;
+                swap_macro(tmp, validmode[i], validmode[i+1]);
+                swap_macro(tmp, validmodexdim[i], validmodexdim[i+1]);
+                swap_macro(tmp, validmodeydim[i], validmodeydim[i+1]);
+            } // if
+        } // for
+    } while (!sorted);
+
+    if (debugging)
+    {
+        fprintf(stderr, "BUILDSDL: Final sorted modelist:");
+        for (i = 0; i < validmodecnt; i++)
+            fprintf(stderr, " (%ldx%ld)", validmodexdim[i], validmodeydim[i]);
+        fprintf(stderr, "\n");
+    } // if
+
+    // (*whew!*)
 } // getvalidvesamodes
 
 
@@ -1195,9 +1346,8 @@ void readmousebstatus(short *bstatus)
 } // readmousebstatus
 
 
-#ifdef DEBUG_HALL_OF_MIRRORS
-    static unsigned char mirrorcolor = 0;
-#endif
+static unsigned char mirrorcolor = 0;
+
 
 void _nextpage(void)
 {
@@ -1216,10 +1366,11 @@ void _nextpage(void)
         if (surface->flags & SDL_OPENGL)
         {
             SDL_GL_SwapBuffers();
-            #ifdef DEBUG_HALL_OF_MIRRORS
+            if (debug_hall_of_mirrors)
+            {
                 dglClearColor3ub(mirrorcolor, 0, 0);
                 mirrorcolor++;
-            #endif
+            } // if
             dglClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             return;
         } // if
@@ -1227,10 +1378,11 @@ void _nextpage(void)
 
     memcpy(surface->pixels, (const void *) frameplace, surface->w * surface->h);
 
-    #ifdef DEBUG_HALL_OF_MIRRORS
+    if (debug_hall_of_mirrors)
+    {
         memset((void *) frameplace, mirrorcolor, surface->w * surface->h);
         mirrorcolor++;
-    #endif
+    } // if
 
     SDL_UpdateRect(surface, 0, 0, 0, 0);
     //SDL_Flip(surface);  // !!!
