@@ -12,10 +12,6 @@
 #error Do not include this header with Watcom C.
 #endif
 
-#if (!defined USE_I386_ASM)
-#error You do not have USE_I386_ASM defined. This might be a problem.
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

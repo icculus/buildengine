@@ -604,7 +604,15 @@ void initlava(void)
     #endif
 
 #else   /* USE_I386_ASM */
-    #error Please implement this function in C.
+        long addlava(int param)
+        {
+	    unsigned char al;
+	    unsigned char *s = (unsigned char *)param;
+	    unsigned char *t = (unsigned char *)(param-133);
+
+	    al = t[0] + t[132] + t[1] + s[131] + t[2] + s[132] + s[1];
+            return((param&0xffffff00)|al);
+        } /* addlava */
 #endif
 
 
