@@ -2084,6 +2084,21 @@ void copybufreverse(void *source, void *dest, int size) {
 }
 
 void qinterpolatedown16 (long *source, int size, int linum, int linum_inc) {
+#ifdef USE_DDOI_C
+	if (size == 0)
+	{
+		*source = (linum>>16);
+		return;
+	}
+
+	while (size)
+	{
+		*source = (linum>>16);
+		source++;
+		linum += linum_inc;
+		size--;
+	}
+#else
   __asm__ __volatile__ (
 	"movl %%ecx, %%ebx   \n\t"
 	"shrl $1, %%ecx   \n\t"
@@ -2103,6 +2118,7 @@ void qinterpolatedown16 (long *source, int size, int linum, int linum_inc) {
 	"movl %%edx, (%%eax)   \n\t"
 	"skipbegqcalc2:   \n\t"
   : :"a" (source), "c" (size), "d" (linum), "S" (linum_inc) : "ebx", "edi", "cc", "memory" );
+#endif
 }
 
 void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
@@ -2137,7 +2153,6 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 	}
 	if (size & 1)
 		*((unsigned short *)source) = ((linum>>16)&0xffff);
-
 #else
   __asm__ __volatile__ (
 	"testl %%ecx, %%ecx   \n\t"
@@ -2217,6 +2232,10 @@ void vlin16 (long i1, long i2) {
 }
 
 int klabs (int i1) {
+#ifdef USE_DDOI_C
+  if (i1 < 0) i1 = -i1;
+  return i1;
+#else
   int retval = 0;
   __asm__ __volatile__ (
 	"testl %%eax, %%eax   \n\t"
@@ -2225,6 +2244,7 @@ int klabs (int i1) {
 	"skipnegate:   \n\t"
    : "=a" (retval) : "a" (i1) : "cc");
   return(retval);
+#endif
 }
 
 int ksgn(int i1) {
