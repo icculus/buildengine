@@ -32,62 +32,13 @@ static unsigned char machxbits_al;
 static unsigned char machxbits_bl;
 static long machxbits_ecx;
 static unsigned long machxbits_edx;
-long sethlinesizes(long i1, long i2, long i3)
+void sethlinesizes(long i1, long i2, long i3)
 {
-    long retval = 0;
     machxbits_al = i1;
     machxbits_bl = i2;
     machxbits_ecx = i3;
     machxbits_edx = -1;
     machxbits_edx >>= (256-machxbits_al-machxbits_bl);
-    /*
-    __asm__ __volatile__ (
-        "call _asm_sethlinesizes   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3)
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_sethlinesizes:
-	mov byte [machxbits1+2], al
-	mov byte [machxbits2+2], al
-	mov byte [machxbits3+2], al
-	neg al
-	mov byte [hxsiz1+2], al
-	mov byte [hxsiz2+2], al
-	mov byte [hxsiz3+2], al
-	mov byte [hxsiz4+2], al
-	mov byte [machnegxbits1+2], al
-
-	mov byte [hysiz1+3], bl
-	mov byte [hysiz2+3], bl
-	mov byte [hysiz3+3], bl
-	mov byte [hysiz4+3], bl
-	mov byte [hmach3a+2], bl
-	mov byte [hmach3b+2], bl
-	mov byte [hmach3c+2], bl
-	mov byte [hmach3d+2], bl
-
-	mov dword [hoffs1+2], ecx
-	mov dword [hoffs2+2], ecx
-	mov dword [hoffs3+2], ecx
-	mov dword [hoffs4+2], ecx
-	mov dword [hoffs5+2], ecx
-	mov dword [hoffs6+2], ecx
-	mov dword [hoffs7+2], ecx
-	mov dword [hoffs8+2], ecx
-
-	mov edx, -1
-	mov cl, al
-	sub cl, bl
-	shr edx, cl
-	mov dword [hmach2a+1], edx
-	mov dword [hmach2b+1], edx
-	mov dword [hmach2c+1], edx
-	mov dword [hmach2d+1], edx
-   ret
-*/
 } /* sethlinesizes */
 
 /* #pragma aux setpalookupaddress parm [eax] */
@@ -95,30 +46,15 @@ static unsigned char* pal_eax;
 void setpalookupaddress(char *i1)
 {
     pal_eax = i1;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setpalookupaddress   \n\t"
-        : : "a" (i1)
-        : "cc", "memory");
-	*/
 } /* setpalookupaddress */
 
 /* #pragma aux setuphlineasm4 parm [eax][ebx] */
 static long hmach4_eax;
 static long hmach4_ebx;
-long setuphlineasm4(long i1, long i2)
+void setuphlineasm4(long i1, long i2)
 {
-    long retval = 0;
     hmach4_eax = ((i1<<machxbits_al)|(((unsigned)i1)>>(32-machxbits_al)));
     hmach4_ebx = ((i2&0xffffff00)|(hmach4_eax&0xff));
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setuphlineasm4   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2)
-        : "cc", "memory");
-	*/
-    return(retval);
 } /* setuphlineasm4 */
 
 /* #pragma aux hlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
@@ -151,57 +87,13 @@ static long rmach_edx;
 static long rmach_esi;
 void setuprhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-    /* i6 unused? */
     rmach_eax = i1;
     rmach_ebx = i2;
     rmach_ecx = i3;
     rmach_edx = i4;
     rmach_esi = i5;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setuprhlineasm4   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_setuprhlineasm4:
-	mov dword [rmach1a+2], eax
-	mov dword [rmach1b+2], eax
-	mov dword [rmach1c+2], eax
-	mov dword [rmach1d+2], eax
-	mov dword [rmach1e+2], eax
-
-	mov dword [rmach2a+2], ebx
-	mov dword [rmach2b+2], ebx
-	mov dword [rmach2c+2], ebx
-	mov dword [rmach2d+2], ebx
-	mov dword [rmach2e+2], ebx
-
-	mov dword [rmach3a+2], ecx
-	mov dword [rmach3b+2], ecx
-	mov dword [rmach3c+2], ecx
-	mov dword [rmach3d+2], ecx
-	mov dword [rmach3e+2], ecx
-
-	mov dword [rmach4a+2], edx
-	mov dword [rmach4b+2], edx
-	mov dword [rmach4c+2], edx
-	mov dword [rmach4d+2], edx
-	mov dword [rmach4e+2], edx
-
-	mov dword [rmach5a+2], esi
-	mov dword [rmach5b+2], esi
-	mov dword [rmach5c+2], esi
-	mov dword [rmach5d+2], esi
-	mov dword [rmach5e+2], esi
-	ret
-*/
 } /* setuprhlineasm4 */
 
-
-
-/* #pragma aux rhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
-/* DDOI - draws rotated lines, not needed in duke3d */
 void rhlineasm4(long i1, long i2, long i3, unsigned long i4, unsigned long i5, long i6)
 {
     unsigned long ebp = i6 - i1;
@@ -225,8 +117,6 @@ void rhlineasm4(long i1, long i2, long i3, unsigned long i4, unsigned long i5, l
     } while (i6);
 } /* rhlineasm4 */
 
-
-/* #pragma aux setuprmhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
 static long rmmach_eax;
 static long rmmach_ebx;
 static long rmmach_ecx;
@@ -239,33 +129,11 @@ void setuprmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
     rmmach_ecx = i3;
     rmmach_edx = i4;
     rmmach_esi = i5;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setuprmhlineasm4   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_setuprmhlineasm4:
-	mov dword [rmmach1+2], eax
-	mov dword [rmmach2+2], ebx
-	mov dword [rmmach3+2], ecx
-	mov dword [rmmach4+2], edx
-	mov dword [rmmach5+2], esi
-	ret
-*/
 } /* setuprmhlineasm4 */
 
 /* #pragma aux rmhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
-/* DDOI - rotated and masked hlines */
 void rmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-	/*
-    __asm__ __volatile__ (
-        "call _asm_rmhlineasm4   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
     unsigned long ebp = i6 - i1;
     unsigned long rmach6b = ebp-1;
 
@@ -306,35 +174,6 @@ void setupqrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
     qrmach_ebx2 = qrmach_ebx + qrmach_ebx;
     if (qrmach_ebx2 < qrmach_ebx) qrmach_ecx2 = qrmach_ecx + qrmach_ecx + 1;
     else qrmach_ecx2 = qrmach_ecx + qrmach_ecx;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setupqrhlineasm4   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_setupqrhlineasm4:
-	mov dword [qrmach2e+2], ebx
-	mov dword [qrmach3e+2], ecx
-	xor edi, edi
-	sub edi, ecx
-	mov dword [qrmach7a+2], edi
-	mov dword [qrmach7b+2], edi
-
-	add ebx, ebx
-	adc ecx, ecx
-	mov dword [qrmach2a+2], ebx
-	mov dword [qrmach2b+2], ebx
-	mov dword [qrmach3a+2], ecx
-	mov dword [qrmach3b+2], ecx
-
-	mov dword [qrmach4a+2], edx
-	mov dword [qrmach4b+2], edx
-	mov dword [qrmach4c+2], edx
-	mov dword [qrmach4d+2], edx
-	mov dword [qrmach4e+2], edx
-	ret
-*/
 } /* setupqrhlineasm4 */
 
 
@@ -407,32 +246,6 @@ static long fixchain;
 void setvlinebpl(long i1)
 {
     fixchain = i1;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setvlinebpl   \n\t"
-        : : "a" (i1)
-        : "cc", "memory");
-	*/
-/*
-_asm_setvlinebpl:
-	mov dword [fixchain1a+2], eax
-	mov dword [fixchain1b+2], eax
-	mov dword [fixchain1m+2], eax
-	mov dword [fixchain1t+2], eax
-	mov dword [fixchain1s+2], eax
-	mov dword [mfixchain1s+2], eax
-	mov dword [tfixchain1s+2], eax
-	mov dword [fixchain2a+2], eax
-	mov dword [profixchain2a+2], eax
-	mov dword [fixchain2ma+2], eax
-	mov dword [fixchain2mb+2], eax
-	mov dword [fixchaint2a+1], eax
-	mov dword [fixchaint2b+2], eax
-	mov dword [fixchaint2c+2], eax
-	mov dword [fixchaint2d+2], eax
-	mov dword [fixchaint2e+2], eax
-    ret
-*/
 } /* setvlinebpl */
 
 /* #pragma aux fixtransluscence parm [eax] */
@@ -479,24 +292,6 @@ long prevlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
     } else {
 	    return vlineasm1(i1,i2,i3,i4,i5,i6);
     }
-/*
-_asm_prevlineasm1:
-	test ecx, ecx
-	jnz _asm_vlineasm1
-
-	add eax, edx
-premach3a: shr edx, 32
-	mov dl, byte [esi+edx]
-	mov cl, byte [ebx+edx]
-	mov byte [edi], cl
-	ret
-*/
-    /*
-    __asm__ __volatile__ (
-        "call _asm_prevlineasm1   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
 } /* prevlineasm1 */
 
 /* #pragma aux vlineasm1 parm [eax][ebx][ecx][edx][esi][edi] */
@@ -518,32 +313,6 @@ long vlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 	    i3--;
     }
     return i4;
-/*
-_asm_vlineasm1:
-	push ebp
-	mov ebp, ebx
-	inc ecx
-fixchain1a: sub edi, 320
-beginvline:
-	mov ebx, edx
-mach3a: shr ebx, 32
-fixchain1b: add edi, 320
-	mov bl, byte [esi+ebx]
-	add edx, eax
-	dec ecx
-	mov bl, byte [ebp+ebx]
-	mov byte [edi], bl
-	jnz short beginvline
-	pop ebp
-	mov eax, edx
-	ret
-*/
-    /*
-    __asm__ __volatile__ (
-        "call _asm_vlineasm1   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
 } /* vlineasm1 */
 
 
@@ -780,36 +549,6 @@ long mvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 	    i3--;
     }
     return i4;
-
-    /*
-    __asm__ __volatile__ (
-        "call _asm_mvlineasm1   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_mvlineasm1:
-	push ebp
-	mov ebp, ebx
-beginmvline:
-	mov ebx, edx
-maskmach3a: shr ebx, 32
-	mov bl, byte [esi+ebx]
-	cmp bl, 255
-	je short skipmask1
-maskmach3c: mov bl, [ebp+ebx]
-	mov byte [edi], bl
-skipmask1:
-	add edx, eax
-fixchain1m: add edi, 320
-	sub ecx, 1
-	jnc short beginmvline
-
-	pop ebp
-	mov eax, edx
-	ret
-*/
 } /* mvlineasm1 */
 
 /* #pragma aux setupvlineasm parm [eax] */
@@ -820,57 +559,12 @@ void setupvlineasm(long i1)
     mach3_al = i1;
     mach3_ah = mach3_al - 16;
     mach3_eax = (1<<(256-mach3_al)) - 1;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setupvlineasm   \n\t"
-        : : "a" (i1)
-        : "cc", "memory");
-	*/
-/*
-_asm_setupvlineasm:
-		;First 2 lines for VLINEASM1, rest for VLINEASM4
-	mov byte [premach3a+2], al
-	mov byte [mach3a+2], al
-
-	push ecx
-	mov byte [machvsh1+2], al      ;32-shy
-	mov byte [machvsh3+2], al      ;32-shy
-	mov byte [machvsh5+2], al      ;32-shy
-	mov byte [machvsh6+2], al      ;32-shy
-	mov ah, al
-	sub ah, 16
-	mov byte [machvsh8+2], ah      ;16-shy
-	neg al
-	mov byte [machvsh7+2], al      ;shy
-	mov byte [machvsh9+2], al      ;shy
-	mov byte [machvsh10+2], al     ;shy
-	mov byte [machvsh11+2], al     ;shy
-	mov byte [machvsh12+2], al     ;shy
-	mov cl, al
-	mov eax, 1
-	shl eax, cl
-	dec eax
-	mov dword [machvsh2+2], eax    ;(1<<shy)-1
-	mov dword [machvsh4+2], eax    ;(1<<shy)-1
-	pop ecx
-	ret
-*/
 } /* setupvlineasm */
 
 extern long vplce[4], vince[4], palookupoffse[4], bufplce[4];
 /* #pragma aux vlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void vlineasm4(long i1, long i2)
 {
-    long temp1,temp2,temp3,temp4;
-    temp1 = vplce[0]; temp2 = vplce[1];
-    temp3 = vplce[2]; temp4 = vplce[3];
-    /*
-    __asm__ __volatile__ (
-        "call _asm_vlineasm4   \n\t"
-        : : "c" (i1), "D" (i2)
-        : "cc", "ebx", "edx", "esi", "memory");
-	*/
-    {
     unsigned long index = (i2 + ylookup[i1])/4;
     long machvbuf1 = bufplce[2];
     long machvbuf2 = bufplce[3];
@@ -881,7 +575,6 @@ void vlineasm4(long i1, long i2)
     long machvpal3 = palookupoffse[0];
     long machvpal4 = palookupoffse[1];
     long machvinc1, machvinc2, machvinc5;
-    //unsigned char machvinc3, machvinc4;
     unsigned short machvinc34;
     unsigned long eax, ebx, edx, esi, ebp;
     unsigned long out = 0;
@@ -900,21 +593,13 @@ void vlineasm4(long i1, long i2)
 
     machvinc1 = (edx&0xffff0000);
     machvinc2 = esi;
-    //machvinc3 = (edx&0xff);
-    //machvinc4 = ((edx&0xffff00ff)>>8);
     machvinc34= (edx&0xffff);
     machvinc5 = ebp;
 
-    ebp = temp1&0xfffffe00;
-    ebx = temp2;
-    esi = temp3&0xfffffe00;
-    eax = temp4;
-    /*
     ebp = vplce[0]&0xfffffe00;
     ebx = vplce[1];
     esi = vplce[2]&0xfffffe00;
     eax = vplce[3];
-    */
 
     eax = ((eax<<(256-mach3_al))|(((unsigned)eax)>>(32-(256-mach3_al))));
     ebx = ((ebx<<(256-mach3_al))|(((unsigned)ebx)>>(32-(256-mach3_al))));
@@ -949,210 +634,35 @@ dumbbegin1:
     ebx = ((ebx&0xffffff00)|((unsigned char*)machvbuf4)[ebx]);
     out = ((out&0xffff00ff)|((((unsigned char*)machvpal4)[ebx])<<8));
 
-    /*
-    edx += ((machvinc4<<8)|machvinc3);
-    if ((edx - ((machvinc4<<8)|machvinc3)) > edx) ebp++;
-    */
     edx += machvinc34;
     if (((edx&0xffff) - machvinc34) > (edx&0xffff)) ebp++;
     ebp += machvinc5;
 
-    //if (dest[index] != out) printf ("(0x%x,0x%x) 0x%x 0x%x\n",i1,i2,dest[index],out);
     dest[index] = out;
     dest += (fixchain/4);
     if (((unsigned)dest - fixchain) < ((unsigned)dest)) goto dumbbegin1;
 
-    //if (vplce[2] != esi) printf ("vplce[2] off: 0x%x 0x%x\n",vplce[2], esi);
     vplce[2]=esi;
-    //if (vplce[0] != ebp) printf ("vplce[0] off: 0x%x 0x%x\n",vplce[0], ebp);
     vplce[0]=ebp;
 
     esi <<= mach3_al;
     esi += (edx >> (256-mach3_al));
-    //if (vplce[3] != esi) printf ("vplce[3] off: 0x%x 0x%x\n",vplce[3], esi);
     vplce[3] = esi;
 
     ebp <<= mach3_al;
     ebp += (edx&0xffff) << mach3_ah;
-    //if (vplce[1] != ebp) printf ("vplce[1] off: 0x%x 0x%x\n",vplce[1], ebp);
     vplce[1] = ebp;
-    }
-    return;
-
-/*
-_asm_vlineasm4:
-	push ebp
-
-	mov eax, dword [ylookup + ecx*4]
-	add eax, edi
-	mov dword [machvline4end+2], eax
-	sub edi, eax
-
-	mov eax, dword [bufplce]
-	mov ebx, dword [bufplce + 4]
-	mov ecx, dword [bufplce + 8]
-	mov edx, dword [bufplce + 12]
-	mov dword [machvbuf1+2], ecx
-	mov dword [machvbuf2+2], edx
-	mov dword [machvbuf3+2], eax
-	mov dword [machvbuf4+2], ebx
-
-	mov eax, dword [palookupoffse]
-	mov ebx, dword [palookupoffse + 4]
-	mov ecx, dword [palookupoffse + 8]
-	mov edx, dword [palookupoffse + 12]
-	mov dword [machvpal1+2], ecx
-	mov dword [machvpal2+2], edx
-	mov dword [machvpal3+2], eax
-	mov dword [machvpal4+2], ebx
-
-		;     ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-		;edx: ³v3lo           ³v1lo           ³
-		;     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄ´
-		;esi: ³v2hi  v2lo             ³   v3hi³
-		;     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄ´
-		;ebp: ³v0hi  v0lo             ³   v1hi³
-		;     ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÙ
-
-	mov ebp, dword [vince]
-	mov ebx, dword [vince + 4]
-	mov esi, dword [vince + 8]
-	mov eax, dword [vince + 12]
-	and esi, 0fffffe00h
-	and ebp, 0fffffe00h
-machvsh9: rol eax, 88h                 ;sh
-machvsh10: rol ebx, 88h                ;sh
-	mov edx, eax
-	mov ecx, ebx
-	shr ecx, 16
-	and edx, 0ffff0000h
-	add edx, ecx
-	and eax, 000001ffh
-	and ebx, 000001ffh
-	add esi, eax
-	add ebp, ebx
-	;
-	mov eax, edx
-	and eax, 0ffff0000h
-	mov dword [machvinc1+2], eax
-	mov dword [machvinc2+2], esi
-	mov byte [machvinc3+2], dl
-	mov byte [machvinc4+2], dh
-	mov dword [machvinc5+2], ebp
-
-	mov ebp, dword [vplce]
-	mov ebx, dword [vplce + 4]
-	mov esi, dword [vplce + 8]
-	mov eax, dword [vplce + 12]
-	and esi, 0fffffe00h
-	and ebp, 0fffffe00h
-machvsh11: rol eax, 88h                ;sh
-machvsh12: rol ebx, 88h                ;sh
-	mov edx, eax
-	mov ecx, ebx
-	shr ecx, 16
-	and edx, 0ffff0000h
-	add edx, ecx
-	and eax, 000001ffh
-	and ebx, 000001ffh
-	add esi, eax
-	add ebp, ebx
-
-	mov ecx, esi
-	jmp short beginvlineasm4
-
-ALIGN 16
-	nop
-	nop
-	nop
-beginvlineasm4:
-machvsh1: shr ecx, 88h          ;32-sh
-	mov ebx, esi
-machvsh2: and ebx, 00000088h    ;(1<<sh)-1
-machvinc1: add edx, 88880000h
-machvinc2: adc esi, 88888088h
-machvbuf1: mov cl, byte [ecx+88888888h]
-machvbuf2: mov bl, byte [ebx+88888888h]
-	mov eax, ebp
-machvsh3: shr eax, 88h          ;32-sh
-machvpal1: mov cl, byte [ecx+88888888h]
-machvpal2: mov ch, byte [ebx+88888888h]
-	mov ebx, ebp
-	shl ecx, 16
-machvsh4: and ebx, 00000088h    ;(1<<sh)-1
-machvinc3: add dl, 88h
-machvbuf3: mov al, byte [eax+88888888h]
-machvinc4: adc dh, 88h
-machvbuf4: mov bl, byte [ebx+88888888h]
-machvinc5: adc ebp, 88888088h
-machvpal3: mov cl, byte [eax+88888888h]
-machvpal4: mov ch, byte [ebx+88888888h]
-machvline4end: mov dword [edi+88888888h], ecx
-fixchain2a: add edi, 88888888h
-	mov ecx, esi
-	jnc short beginvlineasm4
-
-		;     ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-		;edx: ³v3lo           ³v1lo           ³
-		;     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄ´
-		;esi: ³v2hi  v2lo             ³   v3hi³
-		;     ÃÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄ´
-		;ebp: ³v0hi  v0lo             ³   v1hi³
-		;     ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÙ
-
-	mov dword [vplce + 8], esi
-	mov dword [vplce], ebp
-		;vplc2 = (esi<<(32-sh))+(edx>>sh)
-		;vplc3 = (ebp<<(32-sh))+((edx&65535)<<(16-sh))
-machvsh5: shl esi, 88h     ;32-sh
-	mov eax, edx
-machvsh6: shl ebp, 88h     ;32-sh
-	and edx, 0000ffffh
-machvsh7: shr eax, 88h     ;sh
-	add esi, eax
-machvsh8: shl edx, 88h     ;16-sh
-	add ebp, edx
-	mov dword [vplce + 12], esi
-	mov dword [vplce + 4], ebp
-
-	pop ebp
-	ret
-*/
-	/*
-    __asm__ __volatile__ (
-        "call _asm_vlineasm4   \n\t"
-        : : "c" (i1), "D" (i2)
-        : "cc", "ebx", "edx", "esi", "memory");
-	*/
 } /* vlineasm4 */
 
 /* #pragma aux setupmvlineasm parm [eax] */
 void setupmvlineasm(long i1)
 {
     machmv = i1;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setupmvlineasm   \n\t"
-        : : "a" (i1)
-        : "cc", "memory");
-	*/
-/*
-_asm_setupmvlineasm:
-	mov byte [maskmach3a+2], al
-	mov byte [machmv13+2], al
-	mov byte [machmv14+2], al
-	mov byte [machmv15+2], al
-	mov byte [machmv16+2], al
-	ret
-*/
 } /* setupmvlineasm */
 
 /* #pragma aux mvlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void mvlineasm4(long i1, long i2)
 {
-    long temp1,temp2,temp3,temp4;
-    temp1 = vplce[0]; temp2 = vplce[1];
-    temp3 = vplce[2]; temp4 = vplce[3];
     long machmv1 = bufplce[0];
     long machmv4 = bufplce[1];
     long machmv7 = bufplce[2];
@@ -1319,31 +829,6 @@ void setupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
     smach2_eax = (i5>>16)+i2;
     smach5_eax = smach2_eax + i4;
     smach_ecx = i3;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setupspritevline   \n\t"
-       :
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_setupspritevline:
-	mov dword [spal+2], eax
-
-	mov eax, esi                      ;xinc's
-	shl eax, 16
-	mov dword [smach1+2], eax
-	mov dword [smach4+2], eax
-	mov eax, esi
-	sar eax, 16
-	add eax, ebx                      ;watch out with ebx - it's passed
-	mov dword [smach2+2], eax
-	add eax, edx
-	mov dword [smach5+2], eax
-
-	mov dword [smach3+2], ecx  ;yinc's
-	ret
-*/
 } /* setupspritevline */
 
 /* #pragma aux spritevline parm [eax][ebx][ecx][edx][esi][edi] */
@@ -1372,37 +857,6 @@ dumblabel2:
     if ((i2 - smach_eax) > i2) source += smach5_eax + 1;
     else source += smach5_eax;
     goto dumblabel2;
-
-/*
-prestartsvline:
-smach1: add ebx, 88888888h              ;xincshl16
-	mov al, byte [esi]
-smach2: adc esi, 88888888h              ;xincshr16+yalwaysinc
-
-startsvline:
-spal: mov al, [eax+88888888h]           ;palookup
-	mov byte [edi], al
-fixchain1s: add edi, 320
-
-_asm_spritevline:
-smach3: add edx, 88888888h              ;dayinc
-	dec ecx
-	ja short prestartsvline     ;jump if (no carry (add)) and (not zero (dec))!
-	jz short endsvline
-smach4: add ebx, 88888888h              ;xincshl16
-	mov al, byte [esi]
-smach5: adc esi, 88888888h              ;xincshr16+yalwaysinc+daydime
-	jmp short startsvline
-endsvline:
-	ret
-*/
-    /*
-    __asm__ __volatile__ (
-        "call _asm_spritevline   \n\t"
-       :
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
 } /* spritevline */
 
 /* #pragma aux msetupspritevline parm [eax][ebx][ecx][edx][esi][edi] */
@@ -1418,31 +872,6 @@ void msetupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
     msmach2_eax = (i5>>16)+i2;
     msmach5_eax = smach2_eax + i4;
     msmach_ecx = i3;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_msetupspritevline   \n\t"
-       :
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_msetupspritevline:
-	mov dword [mspal+2], eax
-
-	mov eax, esi                      ;xinc's
-	shl eax, 16
-	mov dword [msmach1+2], eax
-	mov dword [msmach4+2], eax
-	mov eax, esi
-	sar eax, 16
-	add eax, ebx                      ;watch out with ebx - it's passed
-	mov dword [msmach2+2], eax
-	add eax, edx
-	mov dword [msmach5+2], eax
-
-	mov dword [msmach3+2], ecx  ;yinc's
-	ret
-*/
 } /* msetupspritevline */
 
 /* #pragma aux mspritevline parm [eax][ebx][ecx][edx][esi][edi] */
@@ -1474,39 +903,6 @@ msdumblabel2:
     if ((i2 - smach_eax) > i2) source += smach5_eax + 1;
     else source += smach5_eax;
     goto msdumblabel2;
-/*
-mprestartsvline:
-msmach1: add ebx, 88888888h              ;xincshl16
-	mov al, byte [esi]
-msmach2: adc esi, 88888888h              ;xincshr16+yalwaysinc
-
-mstartsvline:
-	cmp al, 255
-	je short mskipsvline
-mspal: mov al, [eax+88888888h]           ;palookup
-	mov byte [edi], al
-mskipsvline:
-mfixchain1s: add edi, 320
-
-_asm_mspritevline:
-msmach3: add edx, 88888888h              ;dayinc
-	dec ecx
-	ja short mprestartsvline     ;jump if (no carry (add)) and (not zero (dec))!
-	jz short mendsvline
-msmach4: add ebx, 88888888h              ;xincshl16
-	mov al, byte [esi]
-msmach5: adc esi, 88888888h              ;xincshr16+yalwaysinc+daydime
-	jmp short mstartsvline
-mendsvline:
-	ret
-*/
-    /*
-    __asm__ __volatile__ (
-        "call _asm_mspritevline   \n\t"
-       :
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
 } /* mspritevline */
 
 /* #pragma aux tsetupspritevline parm [eax][ebx][ecx][edx][esi][edi] */
