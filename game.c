@@ -17,7 +17,7 @@
 #include "build.h"
 #include "names.h"
 
-#define TIMERINTSPERSECOND 280
+#define TIMERINTSPERSECOND PLATFORM_TIMER_HZ 
 #define MOVESPERSECOND 40
 #define TICSPERFRAME 3
 #define MOVEFIFOSIZ 256
@@ -3551,9 +3551,6 @@ void drawscreen(short snum, long dasmoothratio)
 	spritetype *tspr;
 
 	smoothratio = max(min(dasmoothratio,65536),0);
-
-// !!! temp. Why is my Event Thread not picking up events?  --ryan.
-SDL_PumpEvents();
 
 	dointerpolations();
 
