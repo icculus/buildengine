@@ -111,7 +111,6 @@ long getcrc(char *buffer, short bufleng)
 void initmultiplayers(char damultioption, char dacomrateoption, char dapriority)
 {
 	long i;
-	char *parm, delims[4] = {'\\','-','/','\0'};
 
 	initcrc();
 	for(i=0;i<MAXPLAYERS;i++)
@@ -122,9 +121,17 @@ void initmultiplayers(char damultioption, char dacomrateoption, char dapriority)
 		bakpacketlen[i][255] = -1;
 	}
 
-	for(i=_argc-1;i>0;i--)
-		if ((parm = strtok(_argv[i],&delims[0])) != NULL)
-			if (!stricmp("net",parm)) break;
+	for (i = _argc - 1; i > 0; i--)
+    {
+        const char *arg = _argv[i];
+        char ch = *arg;
+        if ((ch == '-') || (ch == '/'))
+        {
+			if (stricmp(arg + 1, "net") == 0)
+                break;
+        }
+    }
+
 	if ((i == 0) || (i+1 == _argc))
 	{
 		numplayers = 1; myconnectindex = 0;
@@ -791,7 +798,10 @@ static char *read_whole_file(const char *cfgfile)
 
     handle = kopen4load(cfgfile, 0);
     if (handle == -1)
+    {
+        printf("ERROR: Failed to open config file [%s].\n", cfgfile);
         return(NULL);
+    }
 
     len = kfilelength(handle);
     buf = (char *) malloc(len + 2);
