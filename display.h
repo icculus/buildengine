@@ -115,6 +115,7 @@ void fillscreen16 (long input1, long input2, long input3);
 void limitrate(void);
 void setactivepage(long dapagenum);
 void clear2dscreen(void);
+void _updateScreenRect(long x, long y, long w, long h);
 
 /* mouse/keystuff stuff. Also implemented in sdl_driver.c ... */
 int setupmouse(void);

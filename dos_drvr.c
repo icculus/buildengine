@@ -938,5 +938,9 @@ void *_getVideoBase(void)
     return((void *) 0xa0000);
 }
 
+void _updateScreenRect(long x, long y, long w, long h)
+{
+}
+
 // end of dos_driver.c ...
 
