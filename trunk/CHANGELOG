@@ -17,7 +17,7 @@
             the SDL driver.
 07212000 - A BUTTLOAD of updates. "build" links, and segfaults, because I
             screwed up all the inline ASM that I did. Will be correcting,
-            shorting. "game" doesn't link yet. Haven't looked at it in detail.
+            shortly. "game" doesn't link yet. Haven't looked at it in detail.
             Moved anything with i/o port calls into dos_driver.c, and put
             stub equivalents in sdl_driver.c ... The setupmouse() function got
             commented out because it was getting called before the video got
@@ -165,7 +165,7 @@
             default) segfault, and you can stumble around. Some walls seem to
             render correctly. Lots of things cause segfaults. Disabled the MMX
             overlays for now, as that is a little less self-modified code in
-            use. Dan fixed some keyboard scancodes (an also independently
+            use. Dan fixed some keyboard scancodes (and also independently
             fixed the same 3D mode things. hah. :)  )
 08192000 - Back from LinuxWorld. Added an obnoxious hall of mirrors detector
             for 3D mode. _asm_slopevlin now returns immediately, which for now
@@ -216,6 +216,18 @@
             But you can try compiling your own local copies. Where the hell
             did CONTRIB go? Quick rewrite of that file. Minor glitches and
             sound (and networking?) are the only things pending.
+08302000 - Temporary fix; either nsqrtasm() or its tables are not correct
+            (our C rewrite gives exactly the same results as the ASM version,
+            too), so we've replaced it with a call to the C runtime's sqrt()
+            function, which seems to work fine. I hacked at getting better
+            calls to timerhandler(); still not happy with the results.
+            I also fixed some stuff in sdl_driver.c, so you can have
+            resolutions > 320x200 in 3D mode. Use F4 in the game to change
+            modes. Dunno how you change it in the editor, but you'll note that
+            the 3D mode defaults to 640x480 now...this is where the editor
+            SHOULD be, but I had 320, 320 hardcoded in _setgamemode() for some
+            strange reason. Oh, and CONTRIB was lowercased. That's where it
+            went. URL for this project is now listed on Ken's homepage.
 
 --ryan. (icculus@lokigames.com)
 
