@@ -208,8 +208,27 @@ long pow2long[32] =
 };
 long reciptable[2048], fpuasm;
 
-
 char kensmessage[128];
+
+
+
+// rcg02132001 Cygwin support.
+#if (defined C_IDENTIFIERS_UNDERSCORED)
+#define SYM_sqrtable   "_sqrtable"
+#define SYM_walock     "_walock"
+#define SYM_shlookup   "_shlookup"
+#define SYM_pow2char   "_pow2char"
+#define SYM_gotpic     "_gotpic"
+#define SYM_dmval      "_dmval"
+#else
+#define SYM_sqrtable   "sqrtable"
+#define SYM_walock     "walock"
+#define SYM_shlookup   "shlookup"
+#define SYM_pow2char   "pow2char"
+#define SYM_gotpic     "gotpic"
+#define SYM_dmval      "dmval"
+#endif
+
 
 #ifdef PLATFORM_DOS
 #pragma aux getkensmessagecrc =\
@@ -230,9 +249,9 @@ char kensmessage[128];
             __asm__ __volatile__ ("
                 xorl %%eax, %%eax
     	        movl $32, %%ecx
-	            kensmsgbeg: movl -4(%%ebx,%%ecx,4), %%edx
-	            rorl %%cl, %%edx
-	            adcl %%edx, %%eax
+	        kensmsgbeg: movl -4(%%ebx,%%ecx,4), %%edx
+	        rorl %%cl, %%edx
+	        adcl %%edx, %%eax
     	        bswapl %%eax
     	        loop kensmsgbeg
             " : "=a" (retval) : "b" (param) : "ecx", "edx", "cc");
@@ -479,10 +498,10 @@ extern long drawslab(long,long,long,long,long,long);
 	"mov ebx, eax",\
 	"jnz short over24",\
 	"shr ebx, 12",\
-	"mov cx, word ptr shlookup[ebx*2]",\
+	"mov cx, word ptr _shlookup[ebx*2]",\
 	"jmp short under24",\
 	"over24: shr ebx, 24",\
-	"mov cx, word ptr shlookup[ebx*2+8192]",\
+	"mov cx, word ptr _shlookup[ebx*2+8192]",\
 	"under24: shr eax, cl",\
 	"mov cl, ch",\
 	"mov ax, word ptr sqrtable[eax*2]",\
@@ -502,13 +521,13 @@ extern long drawslab(long,long,long,long,long,long);
 	            movl %%eax, %%ebx
     	        jnz nsqrover24
         	    shrl $12, %%ebx
-            	movw shlookup(, %%ebx, 2), %%cx
+            	movw " SYM_shlookup "(, %%ebx, 2), %%cx
 	            jmp nsqrunder24
         	    nsqrover24: shr $24, %%ebx
-    	        movw (shlookup + 8192)(, %%ebx, 2), %%cx
+    	        movw (" SYM_shlookup "+ 8192)(, %%ebx, 2), %%cx
         	    nsqrunder24: shrl %%cl, %%eax
     	        movb %%ch, %%cl
-        	    movw sqrtable(, %%eax, 2), %%ax
+        	    movw " SYM_sqrtable "(, %%eax, 2), %%ax
     	        shrl %%cl, %%eax
             " : "=a" (retval) : "a" (i1) : "ebx", "ecx", "cc");
             return(retval);
@@ -680,15 +699,15 @@ extern long drawslab(long,long,long,long,long,long);
             int retval = 0;
             __asm__ __volatile__ ("
                 movl %%eax, %%ebx
-            	cmpb $200, walock(%%eax)
+            	cmpb $200, " SYM_walock "(%%eax)
             	jae setgotpic_skipit
-            	movb $199, walock(%%eax)
+            	movb $199, " SYM_walock "(%%eax)
             	setgotpic_skipit: shrl $3, %%eax
             	andl $7, %%ebx
-            	movb gotpic(%%eax), %%dl
-            	movb pow2char(%%ebx), %%bl
+            	movb " SYM_gotpic "(%%eax), %%dl
+            	movb " SYM_pow2char "(%%ebx), %%bl
             	orb %%bl, %%dl
-            	movb %%dl, (gotpic)(%%eax)
+            	movb %%dl, (" SYM_gotpic ")(%%eax)
             " : "=a" (retval) : "a" (i1) : "ebx", "ecx", "edx", "cc", "memory");
             return(retval);
         } // if

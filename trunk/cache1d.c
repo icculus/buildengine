@@ -7,15 +7,25 @@
 #include <dos.h>
 #endif
 
+#include <stdio.h>
+#include <fcntl.h>
+
+#ifdef PLATFORM_DOS
+#include <io.h>
+#endif
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #ifdef PLATFORM_UNIX
 #include <stdlib.h>
 #include <unistd.h>
 #include "unix_compat.h"
 #endif
 
-#include <stdio.h>
 #include "pragmas.h"
 #include "cache1d.h"
+
 
 //   This module keeps track of a standard linear cacheing system.
 //   To use this module, here's all you need to do:
@@ -209,19 +219,6 @@ void reportandexit(char *errormessage)
 	exit(0);
 }
 
-
-
-
-#include <fcntl.h>
-
-#ifdef PLATFORM_DOS
-#include <io.h>
-#elif (defined PLATFORM_UNIX)
-//#include <sys/io.h>
-#endif
-
-#include <sys/types.h>
-#include <sys/stat.h>
 
 #define MAXGROUPFILES 4     //Warning: Fix groupfil if this is changed
 #define MAXOPENFILES 64     //Warning: Fix filehan if this is changed
