@@ -769,8 +769,8 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
  */
 {
     SDL_Color fmt_swap[256];  // !!! used to be: [start + num];
-    SDL_Color *sdlp = fmt_swap + start;
-    char *p = palettebuffer + (start * 4);
+    SDL_Color *sdlp = &fmt_swap[start];
+    char *p = palettebuffer;
     int i;
 
     assert( (start + num) <= (sizeof (fmt_swap) / sizeof (SDL_Color)) );
