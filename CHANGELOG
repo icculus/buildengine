@@ -339,7 +339,12 @@
             incorrect assumption in sdl_driver.c's VBE_setPalette() that was
             exposed by game.c under Watcom/win32. One quick addition of the
             keyword "extern" to game.c, and we have a working game.exe under
-            Windows that isn't GPL encumbered. Woohoo!
+            Windows that isn't GPL encumbered. Woohoo! Added a Watcom/win32
+            Makefile, updated the README, and released win32 binaries.
+02202001 - Turned on more optimizations in the Watcom makefile, and cleaned
+            it up/abstracted it for public use. Added an nt_win option to that
+            makefile to make it not pop up a console window when started from
+            an icon. Added README-win32bins.txt to the CVS repository.
 
 --ryan. (icculus@lokigames.com)
 
