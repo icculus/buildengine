@@ -1753,14 +1753,14 @@ unsigned char readpixel(long offset)
     return( *((unsigned char *) offset) );
 } /* readpixel */
 
-void drawpixel(long offset, Uint8 pixel)
+void drawpixel(long offset, unsigned char pixel)
 {
     *((unsigned char *) offset) = pixel;
 } /* drawpixel */
 
 
 /* !!! These are incorrect. */
-void drawpixels(long offset, Uint16 pixels)
+void drawpixels(long offset, unsigned short pixels)
 {
     Uint8 *surface_end;
     Uint16 *pos;
@@ -1781,7 +1781,7 @@ void drawpixels(long offset, Uint16 pixels)
 } /* drawpixels */
 
 
-void drawpixelses(long offset, Uint32 pixelses)
+void drawpixelses(long offset, unsigned int pixelses)
 {
     Uint8 *surface_end;
     Uint32 *pos;
@@ -2087,7 +2087,7 @@ void limitrate(void)
     /* this is a no-op in SDL. It was for buggy VGA cards in DOS. */
 } /* limitrate */
 
-Uint32 _timer_catcher(Uint32 interval, void *bleh)
+static Uint32 _timer_catcher(Uint32 interval, void *bleh)
 {
     timerhandler();
     return(1);

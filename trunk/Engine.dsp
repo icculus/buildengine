@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="Engine" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 60000
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Static Library" 0x0104
@@ -86,6 +86,35 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=a_nasm.asm
+
+!IF  "$(CFG)" == "Engine - Win32 Release"
+
+# Begin Custom Build
+TargetDir=.\ReleaseVC6
+InputPath=a_nasm.asm
+
+"$(TargetDir)\a_nasm.obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	nasmw.exe -f win32 -DC_IDENTIFIERS_UNDERSCORED -o $(TargetDir)\a_nasm.obj $(InputPath)
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "Engine - Win32 Debug"
+
+# Begin Custom Build
+TargetDir=.\DebugVC6
+InputPath=a_nasm.asm
+
+"$(TargetDir)\a_nasm.obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	nasmw.exe -f win32 -DC_IDENTIFIERS_UNDERSCORED -o $(TargetDir)\a_nasm.obj $(InputPath)
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\a_visualc.c
 # End Source File
 # Begin Source File
@@ -165,34 +194,5 @@ SOURCE=.\ves2.h
 SOURCE=.\win32_compat.h
 # End Source File
 # End Group
-# Begin Source File
-
-SOURCE=a_nasm.asm
-
-!IF  "$(CFG)" == "Engine - Win32 Release"
-
-# Begin Custom Build
-TargetDir=.\ReleaseVC6
-InputPath=a_nasm.asm
-
-"$(TargetDir)\a_nasm.obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	nasmw.exe -f win32 -dC_IDENTIFIERS_UNDERSCORED -o $(TargetDir)/a_nasm.obj $(InputPath)
-
-# End Custom Build
-
-!ELSEIF  "$(CFG)" == "Engine - Win32 Debug"
-
-# Begin Custom Build
-TargetDir=.\DebugVC6
-InputPath=a_nasm.asm
-
-"$(TargetDir)\a_nasm.obj" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	nasmw.exe -f win32 -dC_IDENTIFIERS_UNDERSCORED -o $(TargetDir)/a_nasm.obj $(InputPath)
-
-# End Custom Build
-
-!ENDIF 
-
-# End Source File
 # End Target
 # End Project
