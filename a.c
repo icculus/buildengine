@@ -330,23 +330,76 @@ void setupvlineasm(long i1)
 } /* setupvlineasm */
 
 extern long vplce[4], vince[4], palookupoffse[4], bufplce[4];
+
+#ifdef PLATFORM_MACOSX
+/* About 25% faster than the scalar version on my 12" Powerbook. --ryan. */
+static void vlineasm4_altivec(long i1, long i2)
+{
+    unsigned int mach_array[4] = { (unsigned int) mach3_al,
+                                   (unsigned int) mach3_al,
+                                   (unsigned int) mach3_al,
+                                   (unsigned int) mach3_al };
+
+    unsigned int temp[4];
+    unsigned long index = (i2 + ylookup[i1]);
+    unsigned char *dest = (unsigned char*)(-ylookup[i1]);
+
+    register vector unsigned int vec_temp;
+    register vector signed int vec_vplce;
+    register vector signed int vec_vince;
+    register vector signed int vec_bufplce;
+    register vector unsigned int vec_shifter;
+
+    register unsigned char *pal0 = (unsigned char *) palookupoffse[0];
+    register unsigned char *pal1 = (unsigned char *) palookupoffse[1];
+    register unsigned char *pal2 = (unsigned char *) palookupoffse[2];
+    register unsigned char *pal3 = (unsigned char *) palookupoffse[3];
+
+    vec_shifter = vec_ld(0, mach_array);
+    vec_vplce = vec_ld(0, vplce);
+    vec_vince = vec_ld(0, vince);
+    vec_bufplce = vec_ld(0, bufplce);
+
+    do {
+        vec_temp = (vector unsigned int) vec_sr(vec_vplce, vec_shifter);
+        vec_temp = (vector unsigned int) vec_add(vec_bufplce, (vector signed int) vec_temp);
+        vec_st(vec_temp, 0x00, temp);
+        vec_vplce = vec_add(vec_vplce, vec_vince);
+	    dest[index] = pal0[*((unsigned char *) temp[0])];
+	    dest[index+1] = pal1[*((unsigned char *) temp[1])];
+	    dest[index+2] = pal2[*((unsigned char *) temp[2])];
+	    dest[index+3] = pal3[*((unsigned char *) temp[3])];
+        dest += fixchain;
+    } while (((unsigned)dest - fixchain) < ((unsigned)dest));
+
+    vec_st(vec_vplce, 0, vplce);
+}
+#endif
+
 /* #pragma aux vlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void vlineasm4(long i1, long i2)
 {
-    int i;
-    unsigned long temp;
-    unsigned long index = (i2 + ylookup[i1]);
-    unsigned char *dest = (unsigned char*)(-ylookup[i1]);
-    do {
-        for (i = 0; i < 4; i++)
-        {
-	    temp = ((unsigned)vplce[i]) >> mach3_al;
-	    temp = (((unsigned char*)(bufplce[i]))[temp]);
-	    dest[index+i] = ((unsigned char*)(palookupoffse[i]))[temp];
-	    vplce[i] += vince[i];
-        }
-        dest += fixchain;
-    } while (((unsigned)dest - fixchain) < ((unsigned)dest));
+#ifdef PLATFORM_MACOSX
+    if (has_altivec)
+        vlineasm4_altivec(i1, i2);
+    else
+#endif
+    {
+        int i;
+        unsigned long temp;
+        unsigned long index = (i2 + ylookup[i1]);
+        unsigned char *dest = (unsigned char*)(-ylookup[i1]);
+        do {
+            for (i = 0; i < 4; i++)
+            {
+        	    temp = ((unsigned)vplce[i]) >> mach3_al;
+        	    temp = (((unsigned char*)(bufplce[i]))[temp]);
+        	    dest[index+i] = ((unsigned char*)(palookupoffse[i]))[temp];
+	            vplce[i] += vince[i];
+            }
+            dest += fixchain;
+        } while (((unsigned)dest - fixchain) < ((unsigned)dest));
+    }
 } /* vlineasm4 */
 
 /* #pragma aux setupmvlineasm parm [eax] */

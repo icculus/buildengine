@@ -65,6 +65,8 @@ static __inline unsigned int _swap32(unsigned int D)
 #define BUILDSWAP_INTEL32(x) (x)
 #endif
 
+extern int has_altivec;  /* PowerPC-specific. */
+
 #endif  /* !defined _INCLUDE_PLATFORM_H_ */
 
 /* end of platform.h ... */

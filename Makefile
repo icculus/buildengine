@@ -122,7 +122,7 @@ else
 endif
 
 ifeq ($(strip $(macosx)),true)
-  CFLAGS += -DPLATFORM_MACOSX=1
+  CFLAGS += -DPLATFORM_MACOSX=1 -faltivec
   LDFLAGS += -framework AppKit -lSDL -lSDLmain
 endif
 
