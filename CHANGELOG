@@ -438,7 +438,17 @@
             handle_events() to sdl_driver.c, and replaced all the PumpEvents
             calls with that. This gets its events via SDL_PollEvent(), and
             passes them on to our filter manually. That's just generally better
-            practice anyhow.
+            practice anyhow. Put hardcoded environment variables in
+            sdl_driver.c into constants. Hall of mirror debugging, and all the
+            BUILDSDL output to stderr is now all compiled in, and trigged by
+            the existence of the BUILD_SDLDEBUG environment variable. Build
+            now always claims to have standard resolutions (up to the largest
+            your system claims to handle) available, and SDL will fake it if
+            they aren't there. This should fix the Win32 F4 problem, and
+            people without other modelines listed in their XF86Config. Also,
+            by setting the environment variable BUILD_SCREENRES, you can add
+            one window of any dimension to the list. For example,
+            "export BUILD_SCREENRES=666x666".
 
 --ryan. (icculus@linuxgames.com)
 
