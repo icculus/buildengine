@@ -21,8 +21,6 @@
   #endif
 #endif
 
-#include "platform.h"
-
 #if (defined USE_I386_ASM)
 
 #if (!defined __GNUC__)
@@ -37,9 +35,6 @@ static long dmval;
 #else
 #define SYM_dmval   "dmval"
 #endif
-
-#define high32(a) ((int)((a&(__int64)0xffffffff00000000)>>32))
-#define low32(a) ((a&0xffffffff))
 
 static __inline__ void _touch_dmval_stop_compiler_whining(void)
 {
@@ -63,27 +58,6 @@ unsigned long getkensmessagecrc(long param) {
 long msqrtasm(int i1)
 {
     int retval;
-#ifdef USE_DDOI_C
-    int temp;
-
-    retval = 0x40000000;
-    temp = 0x20000000;
-
-    while (temp != 0)
-    {
-	    if (i1 >= retval)
-	    {
-		    i1 -= retval;
-		    retval += temp*4;
-	    }
-	    retval -= temp;
-	    retval >>= 1;
-	    temp >>= 2;
-    }
-
-    if (i1 >= retval) retval--;
-    retval >>= 1;
-#else
     __asm__ __volatile__ (
       "movl $0x40000000, %%eax   \n\t"
           "movl $0x20000000, %%ebx   \n\t"
@@ -99,519 +73,334 @@ long msqrtasm(int i1)
           "sbbl $-1, %%eax   \n\t"
           "shrl $1, %%eax   \n\t"
      : "=a" (retval) : "c" (i1) : "cc", "ebx");
-#endif
     return(retval);
 } /* msqrtasm */
 
 int sqr (int i1) {
   int retval;
-#ifdef USE_DDOI_C
-  retval = i1 * i1;
-#else
   __asm__ __volatile__ (
     "imull 	%%eax, %%eax   \n\t"
    : "=a" (retval) : "a" (i1) : "cc");
-#endif
   return(retval);
 }
 
 int scale (int i1, int i2, int i3) {
   int retval;
-#ifdef USE_DDOI_C
-  retval = (int)((__int64)i1 * (__int64)i2 / (__int64) i3);
-#else
   __asm__ __volatile__ (
     "imull 	%%edx   \n\t"
     "idivl 	%%ecx	   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "c" (i3) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale (int i1, int i2, short i3) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>i3));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl %%cl, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "c" (i3) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale1 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>1));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $1, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale2 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>2));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $2, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale3 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>3));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $3, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale4 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>4));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $4, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale5 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>5));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $5, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale6 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>6));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $6, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale7 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>7));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $7, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale8 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>8));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $8, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale9 (int i1, int i2) {
-  unsigned int retval;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>9));
-#else
+  int retval;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $9, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale10 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>10));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $10, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale11 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>11));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $11, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale12 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>12));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $12, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale13 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>13));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $13, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale14 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>14));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $14, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale15 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>15));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $15, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale16 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>16));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $16, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale17 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>17));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $17, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale18 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>18));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $18, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale19 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>19));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $19, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale20 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>20));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $20, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale21 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>21));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $21, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale22 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>22));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $22, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale23 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>23));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $23, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale24 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>24));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $24, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale25 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>25));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $25, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale26 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>26));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $26, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale27 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>27));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $27, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale28 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>28));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $28, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale29 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>29));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $29, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale30 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>30));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $30, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale31 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>31));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
     "shrdl $31, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int mulscale32 (int i1, int i2) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  retval = low32 ((scratch1>>32));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
     "imull %%edx   \n\t"
    : "=d" (retval) : "a" (i1), "d" (i2) : "cc");
-#endif
   return(retval);
 }
 
 int divmod (int i1, int i2) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  dmval = i1%i2;
-  retval = i1/i2;
-#else
   __asm__ __volatile__ (
     "xorl %%edx, %%edx   \n\t"
     "divl %%ebx   \n\t"
     "movl %%edx, " SYM_dmval "  \n\t"
   : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "memory", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale(int i1, int i2, int i3, int i4, int i5) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>i5));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -623,18 +412,11 @@ int dmulscale(int i1, int i2, int i3, int i4, int i5) {
 	"shrdl %%cl, %%edx, %%eax        \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4), "c" (i5)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale1(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>1));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -646,18 +428,11 @@ int dmulscale1(int i1, int i2, int i3, int i4) {
 	"shrdl $1, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale2(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>2));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -669,18 +444,11 @@ int dmulscale2(int i1, int i2, int i3, int i4) {
 	"shrdl $2, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale3(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>3));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -692,18 +460,11 @@ int dmulscale3(int i1, int i2, int i3, int i4) {
 	"shrdl $3, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale4(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>4));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -715,18 +476,11 @@ int dmulscale4(int i1, int i2, int i3, int i4) {
 	"shrdl $4, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale5(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>5));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -738,18 +492,11 @@ int dmulscale5(int i1, int i2, int i3, int i4) {
 	"shrdl $5, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale6(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>6));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -761,18 +508,11 @@ int dmulscale6(int i1, int i2, int i3, int i4) {
 	"shrdl $6, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale7(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>7));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -784,18 +524,11 @@ int dmulscale7(int i1, int i2, int i3, int i4) {
 	"shrdl $7, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale8(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>8));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -807,18 +540,11 @@ int dmulscale8(int i1, int i2, int i3, int i4) {
 	"shrdl $8, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale9(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>9));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -830,18 +556,11 @@ int dmulscale9(int i1, int i2, int i3, int i4) {
 	"shrdl $9, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale10(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>10));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -853,18 +572,11 @@ int dmulscale10(int i1, int i2, int i3, int i4) {
 	"shrdl $10, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale11(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>11));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -876,18 +588,11 @@ int dmulscale11(int i1, int i2, int i3, int i4) {
 	"shrdl $11, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale12(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>12));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -899,18 +604,11 @@ int dmulscale12(int i1, int i2, int i3, int i4) {
 	"shrdl $12, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale13(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>13));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -922,18 +620,11 @@ int dmulscale13(int i1, int i2, int i3, int i4) {
 	"shrdl $13, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale14(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>14));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -945,18 +636,11 @@ int dmulscale14(int i1, int i2, int i3, int i4) {
 	"shrdl $14, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale15(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>15));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -968,18 +652,11 @@ int dmulscale15(int i1, int i2, int i3, int i4) {
 	"shrdl $15, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale16(int i1, int i2, int i3, int i4) {
-  unsigned int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>16));
-#else
+  int retval = 0;
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -991,18 +668,11 @@ int dmulscale16(int i1, int i2, int i3, int i4) {
 	"shrdl $16, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale17(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>17));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1014,18 +684,11 @@ int dmulscale17(int i1, int i2, int i3, int i4) {
 	"shrdl $17, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale18(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>18));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1037,18 +700,11 @@ int dmulscale18(int i1, int i2, int i3, int i4) {
 	"shrdl $18, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale19(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>19));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1060,18 +716,11 @@ int dmulscale19(int i1, int i2, int i3, int i4) {
 	"shrdl $19, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale20(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>20));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1083,18 +732,11 @@ int dmulscale20(int i1, int i2, int i3, int i4) {
 	"shrdl $20, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale21(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>21));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1106,18 +748,11 @@ int dmulscale21(int i1, int i2, int i3, int i4) {
 	"shrdl $21, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale22(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>22));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1129,18 +764,11 @@ int dmulscale22(int i1, int i2, int i3, int i4) {
 	"shrdl $22, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale23(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>23));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1152,18 +780,11 @@ int dmulscale23(int i1, int i2, int i3, int i4) {
 	"shrdl $23, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale24(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>24));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1175,18 +796,11 @@ int dmulscale24(int i1, int i2, int i3, int i4) {
 	"shrdl $24, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale25(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>25));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1198,18 +812,11 @@ int dmulscale25(int i1, int i2, int i3, int i4) {
 	"shrdl $25, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale26(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>26));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1221,18 +828,11 @@ int dmulscale26(int i1, int i2, int i3, int i4) {
 	"shrdl $26, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale27(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>27));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1244,18 +844,11 @@ int dmulscale27(int i1, int i2, int i3, int i4) {
 	"shrdl $27, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale28(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>28));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1267,18 +860,11 @@ int dmulscale28(int i1, int i2, int i3, int i4) {
 	"shrdl $28, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale29(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>29));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1290,19 +876,12 @@ int dmulscale29(int i1, int i2, int i3, int i4) {
 	"shrdl $29, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 
 int dmulscale30(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>30));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1314,18 +893,11 @@ int dmulscale30(int i1, int i2, int i3, int i4) {
 	"shrdl $30, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale31(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>31));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1337,18 +909,11 @@ int dmulscale31(int i1, int i2, int i3, int i4) {
 	"shrdl $31, %%edx, %%eax   \n\t"
    : "=a" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int dmulscale32(int i1, int i2, int i3, int i4) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  scratch1 = scratch1 + scratch2;
-  retval = low32 ((scratch1>>32));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"movl %%eax, %%ebx   \n\t"
@@ -1359,19 +924,11 @@ int dmulscale32(int i1, int i2, int i3, int i4) {
 	"adcl %%esi, %%edx   \n\t"
    : "=d" (retval) : "a" (i1), "d" (i2), "S" (i3), "D" (i4)
     : "ebx", "cc");
-#endif
   return(retval);
 }
 
 int tmulscale1(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>1));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1387,19 +944,11 @@ int tmulscale1(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale2(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>2));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1415,19 +964,11 @@ int tmulscale2(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale3(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>3));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1443,19 +984,11 @@ int tmulscale3(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale4(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>4));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1471,19 +1004,11 @@ int tmulscale4(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale5(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>5));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1499,19 +1024,11 @@ int tmulscale5(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale6(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>6));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1527,19 +1044,11 @@ int tmulscale6(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale7(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>7));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1555,19 +1064,11 @@ int tmulscale7(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale8(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>8));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1583,19 +1084,11 @@ int tmulscale8(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale9(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>9));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1611,19 +1104,11 @@ int tmulscale9(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale10(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>10));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1639,19 +1124,11 @@ int tmulscale10(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale11(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>11));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1667,19 +1144,11 @@ int tmulscale11(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale12(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>12));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1695,19 +1164,11 @@ int tmulscale12(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale13(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>13));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1723,19 +1184,11 @@ int tmulscale13(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale14(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>14));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1751,19 +1204,11 @@ int tmulscale14(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale15(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>15));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1779,19 +1224,11 @@ int tmulscale15(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale16(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>16));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1807,19 +1244,11 @@ int tmulscale16(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale17(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>17));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1835,19 +1264,11 @@ int tmulscale17(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale18(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>18));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1863,19 +1284,11 @@ int tmulscale18(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale19(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>19));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1891,19 +1304,11 @@ int tmulscale19(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale20(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>20));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1919,19 +1324,11 @@ int tmulscale20(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale21(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>21));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1947,19 +1344,11 @@ int tmulscale21(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale22(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>22));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -1975,19 +1364,11 @@ int tmulscale22(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale23(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>23));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2003,19 +1384,11 @@ int tmulscale23(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale24(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>24));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2031,19 +1404,11 @@ int tmulscale24(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale25(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>25));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2059,19 +1424,11 @@ int tmulscale25(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale26(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>26));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2087,19 +1444,11 @@ int tmulscale26(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale27(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>27));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2115,19 +1464,11 @@ int tmulscale27(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale28(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>28));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2143,19 +1484,11 @@ int tmulscale28(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale29(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>29));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2171,19 +1504,11 @@ int tmulscale29(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale30(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>30));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2199,19 +1524,11 @@ int tmulscale30(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale31(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>31));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2227,19 +1544,11 @@ int tmulscale31(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=a" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
 
 int tmulscale32(int i1, int i2, int i3, int i4, int i5, int i6) {
   int retval = 0;
-#ifdef USE_DDOI_C
-  __int64 scratch1 = (__int64) i1 * (__int64) i2;
-  __int64 scratch2 = (__int64) i3 * (__int64) i4;
-  __int64 scratch3 = (__int64) i5 * (__int64) i6;
-  scratch1 = scratch1 + scratch2 + scratch3;
-  retval = low32 ((scratch1>>32));
-#else
   __asm__ __volatile__ (
 	"imull %%edx   \n\t"
 	"xchgl %%ebx, %%eax   \n\t"
@@ -2254,9 +1563,9 @@ int tmulscale32(int i1, int i2, int i3, int i4, int i5, int i6) {
    : "=d" (retval)
     : "a" (i1), "d" (i2), "b" (i3), "c" (i4), "S" (i5), "D" (i6)
     : "cc");
-#endif
   return(retval);
 }
+
 
 int boundmulscale(int i1, int i2, int i3) {
   int retval = 0;
@@ -2282,6 +1591,10 @@ int boundmulscale(int i1, int i2, int i3) {
 
 int divscale(int i1, int i2, int i3) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-i3)))<<32)|(((__int64)(i1<<i3))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"shll %%cl, %%eax   \n\t"
@@ -2289,388 +1602,566 @@ int divscale(int i1, int i2, int i3) {
 	"sarl %%cl, %%edx   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2), "c" (i3) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale1(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-1)))<<32)|(((__int64)(i1<<1))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"addl %%eax, %%eax   \n\t"
 	"sbbl %%edx, %%edx   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 
 int divscale2(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-2)))<<32)|(((__int64)(i1<<2))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $30, %%edx   \n\t"
 	"leal (, %%eax, 4), %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale3(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-3)))<<32)|(((__int64)(i1<<3))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $29, %%edx   \n\t"
 	"leal (, %%eax, 8), %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale4(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-4)))<<32)|(((__int64)(i1<<4))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $28, %%edx   \n\t"
 	"shll $4, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale5(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-5)))<<32)|(((__int64)(i1<<5))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $27, %%edx   \n\t"
 	"shll $5, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale6(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-6)))<<32)|(((__int64)(i1<<6))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $26, %%edx   \n\t"
 	"shll $6, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale7(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-7)))<<32)|(((__int64)(i1<<7))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $25, %%edx   \n\t"
 	"shll $7, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale8(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-8)))<<32)|(((__int64)(i1<<8))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $24, %%edx   \n\t"
 	"shll $8, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale9(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-9)))<<32)|(((__int64)(i1<<9))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $23, %%edx   \n\t"
 	"shll $9, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale10(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-10)))<<32)|(((__int64)(i1<<10))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $22, %%edx   \n\t"
 	"shll $10, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale11(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-11)))<<32)|(((__int64)(i1<<11))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $21, %%edx   \n\t"
 	"shll $11, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale12(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-12)))<<32)|(((__int64)(i1<<12))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $20, %%edx   \n\t"
 	"shll $12, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale13(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-13)))<<32)|(((__int64)(i1<<13))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $19, %%edx   \n\t"
 	"shll $13, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale14(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-14)))<<32)|(((__int64)(i1<<14))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $18, %%edx   \n\t"
 	"shll $14, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale15(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-15)))<<32)|(((__int64)(i1<<15))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $17, %%edx   \n\t"
 	"shll $15, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale16(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-16)))<<32)|(((__int64)(i1<<16))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $16, %%edx   \n\t"
 	"shll $16, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale17(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-17)))<<32)|(((__int64)(i1<<17))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $15, %%edx   \n\t"
 	"shll $17, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale18(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-18)))<<32)|(((__int64)(i1<<18))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $14, %%edx   \n\t"
 	"shll $18, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale19(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-19)))<<32)|(((__int64)(i1<<19))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $13, %%edx   \n\t"
 	"shll $19, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale20(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-20)))<<32)|(((__int64)(i1<<20))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $12, %%edx   \n\t"
 	"shll $20, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale21(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-21)))<<32)|(((__int64)(i1<<21))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $11, %%edx   \n\t"
 	"shll $21, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale22(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-22)))<<32)|(((__int64)(i1<<22))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $10, %%edx   \n\t"
 	"shll $22, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale23(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-23)))<<32)|(((__int64)(i1<<23))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $9, %%edx   \n\t"
 	"shll $23, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale24(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-24)))<<32)|(((__int64)(i1<<24))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $8, %%edx   \n\t"
 	"shll $24, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale25(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-25)))<<32)|(((__int64)(i1<<25))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $7, %%edx   \n\t"
 	"shll $25, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale26(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-26)))<<32)|(((__int64)(i1<<26))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $6, %%edx   \n\t"
 	"shll $26, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale27(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-27)))<<32)|(((__int64)(i1<<27))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $5, %%edx   \n\t"
 	"shll $27, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale28(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-28)))<<32)|(((__int64)(i1<<28))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $4, %%edx   \n\t"
 	"shll $28, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale29(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-29)))<<32)|(((__int64)(i1<<29))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $3, %%edx   \n\t"
 	"shll $29, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale30(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-30)))<<32)|(((__int64)(i1<<30))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $2, %%edx   \n\t"
 	"shll $30, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale31(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1>>(32-31)))<<32)|(((__int64)(i1<<31))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"movl %%eax, %%edx   \n\t"
 	"sarl $1, %%edx   \n\t"
 	"shll $31, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "a" (i1), "b" (i2) : "edx", "cc");
+#endif
   return(retval);
 }
 
 int divscale32(int i1, int i2) {
   int retval = 0;
+#ifdef USE_DDOI_C
+  __int64 temp = ((((__int64)(i1)))<<32) / (__int64)i2;
+  retval = low32(temp);
+#else
   __asm__ __volatile__ (
 	"xorl %%eax, %%eax   \n\t"
 	"idivl %%ebx   \n\t"
    : "=a" (retval) : "d" (i1), "b" (i2): "cc");
+#endif
   return(retval);
 }
 
 int mul3 (int i1) {
+#ifdef USE_DDOI_C
+  return i1*3;
+#else
   int output;
   __asm__ __volatile__ (
     "leal (%1, %1, 2), %1   \n\t"
    : "=r" (output) : "r" (i1) : "cc");
   return (output);
+#endif
 }
 
 int mul5 (int i1) {
+#ifdef USE_DDOI_C
+  return i1*5;
+#else
   int output;
   __asm__ __volatile__ (
     "leal (%1, %1, 4), %1   \n\t"
    : "=r" (output) : "r" (i1) : "cc");
   return (output);
+#endif
 }
 
 int mul9 (int i1) {
+#ifdef USE_DDOI_C
+  return i1*9;
+#else
   int output;
   __asm__ __volatile__ (
     "leal (%1, %1, 8), %1   \n\t"
    : "=r" (output) : "r" (i1) : "cc");
   return (output);
+#endif
 }
 
 void clearbuf(void *buffer, int size, long fill_value) {
+#ifdef USE_DDOI_C
+  int i;
+  for (i = 0; i < size; i++) ((long*)buffer)[i] = fill_value;
+#else
   __asm__ __volatile__ (
 	"rep   \n\t"
     "stosl   \n\t"
    : : "D" (buffer), "c" (size), "a" (fill_value) : "cc");
+#endif
 }
 
 void clearbufbyte(void *buffer, int size, long fill_value) {
@@ -2707,10 +2198,15 @@ void clearbufbyte(void *buffer, int size, long fill_value) {
 }
 
 void copybuf(void *source, void *dest, int size) {
+#ifdef USE_DDOI_C
+  int i;
+  for (i = 0; i < size; i++) ((long*)dest)[i] = ((long*)source)[i];
+#else
   __asm__ __volatile__ (
 	"rep   \n\t"
     "movsl   \n\t"
    : : "S" (source), "D" (dest), "c" (size) : "cc");
+#endif
 }
 
 void copybufbyte(void *source, void *dest, int size) {
@@ -2775,21 +2271,6 @@ void copybufreverse(void *source, void *dest, int size) {
 }
 
 void qinterpolatedown16 (long *source, int size, int linum, int linum_inc) {
-#ifdef USE_DDOI_C
-	if (size == 0)
-	{
-		*source = (linum>>16);
-		return;
-	}
-
-	while (size)
-	{
-		*source = (linum>>16);
-		source++;
-		linum += linum_inc;
-		size--;
-	}
-#else
   __asm__ __volatile__ (
 	"movl %%ecx, %%ebx   \n\t"
 	"shrl $1, %%ecx   \n\t"
@@ -2809,42 +2290,10 @@ void qinterpolatedown16 (long *source, int size, int linum, int linum_inc) {
 	"movl %%edx, (%%eax)   \n\t"
 	"skipbegqcalc2:   \n\t"
   : :"a" (source), "c" (size), "d" (linum), "S" (linum_inc) : "ebx", "edi", "cc", "memory" );
-#endif
 }
 
 void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 {
-#ifdef USE_DDOI_C
-	if (size == 0) return;
-
-	if ((long)source & 0x2)
-	{
-		*((unsigned short *)source) = ((linum>>16)&0xffff);
-		linum += linum_inc;
-		((unsigned char*)source) = ((unsigned char*)source) + 2;
-		size--;
-		if (size == 0) return;
-	}
-	size -= 2;
-	if (size < 0)
-	{
-		*((unsigned short *)source) = ((linum>>16)&0xffff);
-		return;
-	}
-
-	while (size >= 0)
-	{
-		int temp = linum>>16;
-		linum += linum_inc;
-		temp += (linum&0xffff0000);
-		linum += linum_inc;
-		*source = temp;
-		source++;
-		size -= 2;
-	}
-	if (size & 1)
-		*((unsigned short *)source) = ((linum>>16)&0xffff);
-#else
   __asm__ __volatile__ (
 	"testl %%ecx, %%ecx   \n\t"
 	"jz endit   \n\t"
@@ -2877,7 +2326,6 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 	"movw %%bx, (%%eax)   \n\t"
 	"endit:   \n\t"
   : :"a" (source), "c" (size), "d" (linum), "S" (linum_inc) : "ebx", "edi", "cc", "memory");
-#endif
 }
 
 void vlin16first (long i1, long i2) {
@@ -2923,10 +2371,6 @@ void vlin16 (long i1, long i2) {
 }
 
 int klabs (int i1) {
-#ifdef USE_DDOI_C
-  if (i1 < 0) i1 = -i1;
-  return i1;
-#else
   int retval = 0;
   __asm__ __volatile__ (
 	"testl %%eax, %%eax   \n\t"
@@ -2935,7 +2379,6 @@ int klabs (int i1) {
 	"skipnegate:   \n\t"
    : "=a" (retval) : "a" (i1) : "cc");
   return(retval);
-#endif
 }
 
 int ksgn(int i1) {
@@ -3243,44 +2686,6 @@ void swapchar2(unsigned char *p1, unsigned char *p2, int xsiz)
     swapchar(p1, p2);
     swapchar(p1 + 1, p2 + xsiz);
 } /* swapchar2 */
-
-
-void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
-{
-    /* Attempt at a convert to C :/ - DDOI */
-    int tmp;
-
-	if (size == 0)
-        return;
-
-        /* casting sucks ass.  --ryan. */
-	if ( (((unsigned long) source) & 0xFF) != 2)
-    {
-		*((short *) source) = (short) ( (linum >> 16) & 0xFFFF ) ;
-        source = (long *) ( ((short *) source) + 2 );
-		linum += linum_inc;
-		size--;
-	} /* if */
-
-	size -= 2;
-	if (size < 0)
-        *((short *) source) = (short) ((linum << 16) & 0xFFFF);
-    else
-    {
-        while ( size >= 0)
-        {
-            tmp = linum;
-            linum += linum_inc;
-            *source = ((tmp >> 16) + (linum & 0xffff0000));
-            linum += linum_inc;
-            size -= 2;
-            source++;
-        } /* while */
-
-        if (size != 1)
-            *((short *) source) = (short) ((linum << 16) & 0xFFFF);
-    } /* else */
-} /* qinterpolatedown16short */
 
 #endif
 
