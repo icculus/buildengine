@@ -913,9 +913,9 @@ static int open_udp_socket(int ip, int port)
     if (!set_socket_blockmode(0))
         return(0);
 
-    #if !PLATFORM_WIN32
+    #if (defined __linux__)
     {
-        /* !!! FIXME: Might be Linux (not Unix, not BSD, not WinSock) specific. */
+        /* Linux-specific. */
         int flags = 1;
         setsockopt(udpsocket, SOL_IP, IP_RECVERR, &flags, sizeof (flags));
     }
