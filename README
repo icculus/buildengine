@@ -12,8 +12,12 @@
 You NEED gcc 2.95.2 (or maybe later) to compile this code correctly.
 You'll also need Netwide Assembler (NASM). Get it at:
 
-  http://nasm.sourceforge.net/
+  http://www.kernel.org/pub/software/devel/nasm/
 
+
+(May I reiterate? Earlier than 2.95.2 revisions of GCC and EGCS do NOT
+compile this code correctly! It will run, but there will be all sorts of
+strange graphic glitches and odd crashes.)
 
 This code uses Simple Directmedia Layer (SDL) for graphics, sound, and other
 platform abstractions. Build relies on a fairly recent SDL code snapshot.
@@ -63,8 +67,8 @@ INFO:
   need their editor to do certain things or do certain things correctly.
 
 Either way, there's lots of screenshots up at:
-http://www.lokigames.com/~icculus/BUILD/screenshots/duke3d_data_files/
-http://www.lokigames.com/~icculus/BUILD/screenshots/shadow_warrior_data_files/
+http://www.icculus.org/BUILD/screenshots/duke3d_data_files/
+http://www.icculus.org/BUILD/screenshots/shadow_warrior_data_files/
 
  Is this enough to play Duke/Shadow/Blood? No. But it's a good start.
 
