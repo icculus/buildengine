@@ -344,7 +344,10 @@
 02202001 - Turned on more optimizations in the Watcom makefile, and cleaned
             it up/abstracted it for public use. Added an nt_win option to that
             makefile to make it not pop up a console window when started from
-            an icon. Added README-win32bins.txt to the CVS repository.
+            an icon. Added README-win32bins.txt to the CVS repository. Fixme
+            note to self added in engine.c, and an incorrect use of ASM in
+            pragmas.h was repaired. Now the drawpixel16 function is working,
+            closing the last bug specific to the Watcom/win32 port. Yay.
 
 --ryan. (icculus@lokigames.com)
 
