@@ -99,14 +99,12 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #define printext16 printext256
 #define printext16_noupdate printext256_noupdate
 
-#if (!defined __WATCOMC__)
 #ifndef max
 #define max(x, y)  (((x) > (y)) ? (x) : (y))
 #endif
 
 #ifndef min
 #define min(x, y)  (((x) < (y)) ? (x) : (y))
-#endif
 #endif
 
 #if (defined __WATCOMC__)
