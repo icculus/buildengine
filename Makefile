@@ -46,6 +46,11 @@ USE_ASM := -DUSE_I386_ASM
 #useperl := true
 useperl := false
 
+#useopengl := true
+useopengl := false
+GL_INCLDIR := /usr/X11R6/include
+
+
 
 #-----------------------------------------------------------------------------#
 # Everything below this line is probably okay.
@@ -91,11 +96,16 @@ else
   ASMOBJFMT = elf
 endif
 
+ifeq ($(strip $(useopengl)),true)
+  CFLAGS += -DUSE_OPENGL -I$(GL_INCLDIR)
+endif
+
 ifeq ($(strip $(useperl)),true)
   CFLAGS += -DUSE_PERL
   LDPERL := $(shell perl -MExtUtils::Embed -e ldopts)
   CCPERL := $(shell perl -MExtUtils::Embed -e ccopts)
-  PERLOBJS += buildperl.o
+    # !!! can I lose the explicit path somehow?
+  PERLOBJS += buildperl.o /usr/lib/perl5/i386-linux/CORE/libperl.a
 endif
 
 LINKER = gcc
@@ -139,9 +149,8 @@ buildperl.o : buildperl.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(CCPERL)
 endif
 
-    # !!! can I lose the explicit path somehow?
 $(GAMEEXE) : $(GAMEOBJS) $(PERLOBJS)
-	$(LINKER) -o $(GAMEEXE) $(LDFLAGS) $(LDPERL) $(PERLOBJS) $(GAMEOBJS) /usr/lib/perl5/i386-linux/CORE/libperl.a
+	$(LINKER) -o $(GAMEEXE) $(LDFLAGS) $(LDPERL) $(PERLOBJS) $(GAMEOBJS)
 
 $(BUILDEXE) : $(BUILDOBJS)
 	$(LINKER) -o $(BUILDEXE) $(LDFLAGS) $(BUILDOBJS)
