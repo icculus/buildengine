@@ -61,18 +61,34 @@ INFO:
 - This is NOT a Loki-sponsored project. We are (er...WERE) Loki employees
   that get off on this stuff. Don't harrass info@lokigames.com about it.
 - Yes, you CAN edit Duke3D maps with this. Sort of.
-  Get your DUKE3D.GRP file, and then rename it to stuff.dat. Go get a Duke3D
-  map off the net and open it in build. This segfaults a lot, still.
-  I haven't tried Blood, Shadow Warrior, or anything else. Anything with
-  voxels is going to need a more robust bstub.c than the one that KenBuild
-  uses. I'm not sure what the ramifications for Duke3D are, either; you might
-  need their editor to do certain things or do certain things correctly.
+  Find your DUKE3D.GRP file, and set this environment variable:
+
+    (on Windows: "set BUILD_GROUPFILE=C:\where\grpfile\is\DUKE3D.GRP")
+    (on Linux/bash: "export BUILD_GROUPFILE=/where/grpfile/is/DUKE3D.GRP")
+
+    Without this environment variable, Build looks for "stuff.dat" in the
+    current directory; that's KenBuild's groupfile.
+
+  Now Go get a Duke3D map off the net and open it in build.
+  I haven't tried Blood, Shadow Warrior, or anything else, but someone sent
+  me screenshots of Shadow Warrior. Your mileage may vary.
 
    Either way, there's lots of screenshots up at:
     http://www.icculus.org/BUILD/screenshots/duke3d_data_files/
     http://www.icculus.org/BUILD/screenshots/shadow_warrior_data_files/
 
- Is this enough to play Duke/Shadow/Blood? No. But it's a good start.
+ There is still much missing from Build that is needed to use it as a Duke3D
+  editor, and that is not the focus of this project. It is DEFINITELY not
+  enough to PLAY duke3d, as there is no CON interpreter or correct physics
+  or enemy AI or equivilent sector tags etc.
+
+ If an editor is all you want, there is a project called Mapster
+  (http://mapster-rtcm.totalconversions.com/) that is a KenBuild source
+  modification to support all of DukeBUILD's features, and add some new
+  enhancements, too. Stay tuned, as there may be a win32 (and Linux?) version
+  of Mapster sooner or later.
+
+ In short, is this enough to play Duke/Shadow/Blood? No. But it's a good start.
 
 - Can Windows users use this code? You bet. Binaries available.
 
