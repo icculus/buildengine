@@ -2383,10 +2383,11 @@ int divscale30 (int input1, int input2);
 int divscale31 (int input1, int input2);
 int divscale32 (int input1, int input2);
 
-void copybuf(long source, void *dest, int size);
-void clearbuf(long buffer, int size, long fill_value);
-void clearbufbyte(long buffer, int size, long fill_value);
-void copybufbyte(long source, void *dest, int size);
+void copybufreverse(void *source, void *dest, int size);
+void copybuf(void *source, void *dest, int size);
+void clearbuf(void *buffer, int size, long fill_value);
+void clearbufbyte(void *buffer, int size, long fill_value);
+void copybufbyte(void *source, void *dest, int size);
 int ksgn(int i1);
 int klabs (int i1);
 int mul3 (int i1);
