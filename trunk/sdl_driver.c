@@ -664,8 +664,14 @@ static void init_new_res_vars(int davidoption)
     linearmode = 1;
 	qsetmode = surface->h;
 	activepage = visualpage = 0;
-    frameplace = (long) ( ((Uint8 *) surface->pixels) );
     horizlookup = horizlookup2 = NULL;
+
+    // !!! add me in!
+    //if (surface->flags & SDL_OPENGL)
+    //    frameplace = NULL;
+    //else
+        frameplace = (long) ( ((Uint8 *) surface->pixels) );
+
 
   	if (screen != NULL)
    	{
@@ -692,9 +698,15 @@ static void init_new_res_vars(int davidoption)
     		 screenalloctype = 1;
     	}
 
-        frameplace = FP_OFF(screen);
-      	horizlookup = (long *)(frameplace+i);
-       	horizlookup2 = (long *)(frameplace+i+j);
+        // !!! add me in!
+        //if (surface->flags & SDL_OPENGL)
+        //    frameplace = NULL;
+        //else
+        //{
+            frameplace = FP_OFF(screen);
+          	horizlookup = (long *)(frameplace+i);
+           	horizlookup2 = (long *)(frameplace+i+j);
+        //} // else
     } // if
 
     j = 0;
