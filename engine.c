@@ -2939,7 +2939,10 @@ static void transmaskwallscan(long x1, long x2)
 int loadboard(char *filename, long *daposx, long *daposy,
               long *daposz, short *daang, short *dacursectnum)
 {
+    int x;
 	short fil, i, numsprites;
+
+    x = 0;
 
 	i = strlen(filename)-1;
 	if (filename[i] == 255) { filename[i] = 0; i = 1; } else i = 0;
@@ -2947,6 +2950,7 @@ int loadboard(char *filename, long *daposx, long *daposy,
 		{ mapversion = 7L; return(-1); }
 
 	kread(fil,&mapversion,4);
+	mapversion = BUILDSWAP_INTEL32(mapversion);
 	if (mapversion != 7L) return(-1);
 
 	initspritelists();
@@ -2956,19 +2960,91 @@ int loadboard(char *filename, long *daposx, long *daposy,
 	clearbuf(&show2dwall[0],(long)((MAXWALLS+3)>>5),0L);
 
 	kread(fil,daposx,4);
+	*daposx = BUILDSWAP_INTEL32(*daposx);
+
 	kread(fil,daposy,4);
+	*daposy = BUILDSWAP_INTEL32(*daposy);
+
 	kread(fil,daposz,4);
+	*daposz = BUILDSWAP_INTEL32(*daposz);
+
 	kread(fil,daang,2);
+	*daang = BUILDSWAP_INTEL16(*daang);
+
 	kread(fil,dacursectnum,2);
+	*dacursectnum = BUILDSWAP_INTEL16(*dacursectnum);
 
 	kread(fil,&numsectors,2);
+    numsectors = BUILDSWAP_INTEL16(numsectors);
+
 	kread(fil,&sector[0],sizeof(sectortype)*numsectors);
+	#if PLATFORM_BIGENDIAN
+	for (x = 0; x < numsectors; x++)
+	{
+		sectortype *sect = &sector[x];
+		sect->wallptr = BUILDSWAP_INTEL16(sect->wallptr);
+		sect->wallnum = BUILDSWAP_INTEL16(sect->wallnum);
+		sect->ceilingz = BUILDSWAP_INTEL32(sect->ceilingz);
+		sect->floorz = BUILDSWAP_INTEL32(sect->floorz);
+		sect->ceilingstat = BUILDSWAP_INTEL16(sect->ceilingstat);
+		sect->floorstat = BUILDSWAP_INTEL16(sect->floorstat);
+		sect->ceilingpicnum = BUILDSWAP_INTEL16(sect->ceilingpicnum);
+		sect->ceilingheinum = BUILDSWAP_INTEL16(sect->ceilingheinum);
+		sect->floorpicnum = BUILDSWAP_INTEL16(sect->floorpicnum);
+		sect->floorheinum = BUILDSWAP_INTEL16(sect->floorheinum);
+		sect->lotag = BUILDSWAP_INTEL16(sect->lotag);
+		sect->hitag = BUILDSWAP_INTEL16(sect->hitag);
+		sect->extra = BUILDSWAP_INTEL16(sect->extra);
+	}
+	#endif
 
 	kread(fil,&numwalls,2);
+    numwalls = BUILDSWAP_INTEL16(numwalls);
+
 	kread(fil,&wall[0],sizeof(walltype)*numwalls);
+	#if PLATFORM_BIGENDIAN
+	for (x = 0; x < numwalls; x++)
+	{
+		walltype *w = &wall[x];
+		w->x = BUILDSWAP_INTEL32(w->x);
+		w->y = BUILDSWAP_INTEL32(w->y);
+		w->point2 = BUILDSWAP_INTEL16(w->point2);
+		w->nextwall = BUILDSWAP_INTEL16(w->nextwall);
+		w->nextsector = BUILDSWAP_INTEL16(w->nextsector);
+		w->cstat = BUILDSWAP_INTEL16(w->cstat);
+		w->picnum = BUILDSWAP_INTEL16(w->picnum);
+		w->overpicnum = BUILDSWAP_INTEL16(w->overpicnum);
+		w->lotag = BUILDSWAP_INTEL16(w->lotag);
+		w->hitag = BUILDSWAP_INTEL16(w->hitag);
+		w->extra = BUILDSWAP_INTEL16(w->extra);
+	}
+	#endif
 
 	kread(fil,&numsprites,2);
+    numsprites = BUILDSWAP_INTEL16(numsprites);
+
 	kread(fil,&sprite[0],sizeof(spritetype)*numsprites);
+	#if PLATFORM_BIGENDIAN
+	for (x = 0; x < numsprites; x++)
+	{
+		spritetype *s = &sprite[x];
+		s->x = BUILDSWAP_INTEL32(s->x);
+		s->y = BUILDSWAP_INTEL32(s->y);
+		s->z = BUILDSWAP_INTEL32(s->z);
+		s->cstat = BUILDSWAP_INTEL16(s->cstat);
+		s->picnum = BUILDSWAP_INTEL16(s->picnum);
+		s->sectnum = BUILDSWAP_INTEL16(s->sectnum);
+		s->statnum = BUILDSWAP_INTEL16(s->statnum);
+		s->ang = BUILDSWAP_INTEL16(s->ang);
+		s->owner = BUILDSWAP_INTEL16(s->owner);
+		s->xvel = BUILDSWAP_INTEL16(s->xvel);
+		s->yvel = BUILDSWAP_INTEL16(s->yvel);
+		s->zvel = BUILDSWAP_INTEL16(s->zvel);
+		s->lotag = BUILDSWAP_INTEL16(s->lotag);
+		s->hitag = BUILDSWAP_INTEL16(s->hitag);
+		s->extra = BUILDSWAP_INTEL16(s->extra);
+	}
+	#endif
 
 	for(i=0;i<numsprites;i++)
 		insertsprite(sprite[i].sectnum,sprite[i].statnum);
@@ -2999,6 +3075,10 @@ int saveboard(char *filename, long *daposx, long *daposy,
     {
 		return(-1);
     }
+
+#if PLATFORM_BIGENDIAN
+printf("BYTE ORDER BUG at %s:%d\n", __FILE__, __LINE__);
+#endif
 
 	write(fil,&mapversion,4);
 
@@ -3069,7 +3149,17 @@ static void loadtables(void)
 		if ((fil = kopen4load("tables.dat",0)) != -1)
 		{
 			kread(fil,sintable,2048*2);
+			#if PLATFORM_BIGENDIAN
+            for (i = 0; i < (sizeof (sintable) / sizeof (sintable[0])); i++)
+				sintable[i] = BUILDSWAP_INTEL16(sintable[i]);
+			#endif
+
 			kread(fil,radarang,640*2);
+			#if PLATFORM_BIGENDIAN
+            for (i = 0; i < (sizeof (radarang) / sizeof (radarang[0])); i++)
+				radarang[i] = BUILDSWAP_INTEL16(radarang[i]);
+			#endif
+
 			for(i=0;i<640;i++) radarang[1279-i] = -radarang[i];
 			kread(fil,textfont,1024);
 			kread(fil,smalltextfont,1024);
@@ -3127,6 +3217,7 @@ static void loadpalette(void)
 
 	kread(fil,palette,768);
 	kread(fil,&numpalookups,2);
+    numpalookups = BUILDSWAP_INTEL16(numpalookups);
 
 	if ((palookup[0] = (char *)kkmalloc(numpalookups<<8)) == NULL)
 		allocache((long *)&palookup[0],numpalookups<<8,&permanentlock);
@@ -3139,7 +3230,14 @@ static void loadpalette(void)
 	fixtransluscence((long)FP_OFF(transluc));
 
 	kread(fil,palookup[globalpal],numpalookups<<8);
+
+
 	kread(fil,transluc,65536);
+	#if PLATFORM_BIGENDIAN
+	for (k = 0; k < (65536 / 4); k++)
+	    ((long *) transluc)[k] = BUILDSWAP_INTEL32(((long *) transluc)[k]);
+	#endif
+
 	kclose(fil);
 
 	initfastcolorlookup(30L,59L,11L);
@@ -3882,8 +3980,22 @@ int loadpics(char *filename)
 			localtileend = BUILDSWAP_INTEL32(localtileend);
 
 			kread(fil,&tilesizx[localtilestart],(localtileend-localtilestart+1)<<1);
+			#if PLATFORM_BIGENDIAN
+			for (i = localtilestart; i <= localtileend; i++)
+			    tilesizx[i] = BUILDSWAP_INTEL16(tilesizx[i]);
+			#endif
+
 			kread(fil,&tilesizy[localtilestart],(localtileend-localtilestart+1)<<1);
+			#if PLATFORM_BIGENDIAN
+			for (i = localtilestart; i <= localtileend; i++)
+			    tilesizy[i] = BUILDSWAP_INTEL16(tilesizy[i]);
+			#endif
+
 			kread(fil,&picanm[localtilestart],(localtileend-localtilestart+1)<<2);
+			#if PLATFORM_BIGENDIAN
+			for (i = localtilestart; i <= localtileend; i++)
+			    picanm[i] = BUILDSWAP_INTEL32(picanm[i]);
+			#endif
 
 			offscount = 4+4+4+4+((localtileend-localtilestart+1)<<3);
 			for(i=localtilestart;i<=localtileend;i++)
@@ -3944,6 +4056,8 @@ void qloadkvx(long voxindex, char *filename)
 	for(i=0;i<MAXVOXMIPS;i++)
 	{
 		kread(fil,&dasiz,4);
+		dasiz = BUILDSWAP_INTEL32(dasiz);
+
 			/* Must store filenames to use cacheing system :( */
 		voxlock[voxindex][i] = 200;
 		allocache(&voxoff[voxindex][i],dasiz,(unsigned char *)&voxlock[voxindex][i]);
