@@ -41,18 +41,31 @@ void sethlinesizes(long i1, long i2, long i3)
 static unsigned char* pal_eax;
 void setuphlineasm4(long i1, long i2) { }
 void setpalookupaddress(unsigned char *i1) { pal_eax = i1; }
-void hlineasm4(long count, unsigned long source, long shade, unsigned long i4, unsigned long i5, long i6)
+
+void hlineasm4(long _count, unsigned long unused_source, long _shade, unsigned long _i4, unsigned long _i5, long i6)
 {
-    shade &= 0xffffff00;
-    count += 1;
+    /* force into registers (probably only useful on PowerPC)... */
+    register unsigned char *dest = (unsigned char *) i6;
+    register unsigned long i4 = _i4;
+    register unsigned long i5 = _i5;
+    register int shifter = ((256-machxbits_al) & 0x1f);
+    register unsigned long source;
+    register long shade = _shade & 0xffffff00;
+    register long count = _count + 1;
+    register unsigned char bits = machxbits_bl;
+    register unsigned char *lookup = (unsigned char *) machxbits_ecx;
+    register unsigned char *pal = (unsigned char *) pal_eax;
+    register long _asm1 = asm1;
+    register long _asm2 = asm2;
+
     while (count) {
-	    source = i5 >> ((256-machxbits_al) & 0x1f);
-	    source = shld(source,i4,machxbits_bl);
-	    source = ((unsigned char*)machxbits_ecx)[source];
-	    *((unsigned char*)i6) = pal_eax[shade|source];
-	    i6--;
-	    i5 -= asm1;
-	    i4 -= asm2;
+	    source = i5 >> shifter;
+	    source = shld(source,i4,bits);
+	    source = lookup[source];
+	    *dest = pal[shade|source];
+	    dest--;
+	    i5 -= _asm1;
+	    i4 -= _asm2;
 	    count--;
     }
 }
