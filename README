@@ -28,8 +28,8 @@ Get SDL from CVS like this:
 
 cvs -d :pserver:guest@cvs.lokigames.com:/cvs login
 # password is "guest", without the quotes.
-cvs -z3 -d :pserver:guest@cvs.lokigames.com:/cvs checkout -r devel_1_1_0 SDL
-cd SDL; ./autogen.sh; make; make install
+cvs -z3 -d :pserver:guest@cvs.lokigames.com:/cvs checkout SDL12
+cd SDL12; ./autogen.sh; make; make install
 
 
 CVS is also good if you want the up-to-the-minute changes of BUILD:
@@ -44,11 +44,11 @@ PLEASE READ THE CHANGELOG AND TODO FILE FOR DETAILS ON WHAT'S NEW AND
 
 Have fun!
 
---ryan. (icculus@lokigames.com)
+--ryan. (icculus@linuxgames.com)
 
 
 INFO:
-- Patches go to Ryan at icculus@lokigames.com.
+- Patches go to Ryan at icculus@linuxgames.com.
 - Please try to keep it so the original source can still be compiled with
   Watcom C for DOS. Maybe if we do a good enough job, we can just get Ken
   to make this his official version, although this is not the goal right now.
@@ -58,8 +58,8 @@ INFO:
   __interrupt to be blank, etc...) Reference unix_compat.[ch] and sdl_driver.c
   for examples of this behaviour.
 - See us in #loki at irc.openprojects.net with questions.
-- This is NOT a Loki-sponsored project. We're Loki employees that get off on
-  this stuff. Don't harrass info@lokigames.com about it.
+- This is NOT a Loki-sponsored project. We are (er...WERE) Loki employees
+  that get off on this stuff. Don't harrass info@lokigames.com about it.
 - Yes, you CAN edit Duke3D maps with this. Sort of.
   Get your DUKE3D.GRP file, and then rename it to stuff.dat. Go get a Duke3D
   map off the net and open it in build. This segfaults a lot, still.

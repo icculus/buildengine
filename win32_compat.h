@@ -4,7 +4,7 @@
  * Note that this is used with Watcom C's win32 target. Your mileage
  *  with another compiler WILL vary.
  *
- *  Written by Ryan C. Gordon (icculus@lokigames.com)
+ *  Written by Ryan C. Gordon (icculus@linuxgames.com)
  *
  * Please do NOT harrass Ken Silverman about any code modifications
  *  (including this file) to BUILD.

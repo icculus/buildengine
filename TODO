@@ -2,7 +2,7 @@
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
 
-(questions to Ryan C. Gordon, icculus@lokigames.com)
+(questions to Ryan C. Gordon, icculus@linuxgames.com)
 
 NEXT ON TAP:
 - Litter the code with assertions.
@@ -27,5 +27,4 @@ NEXT ON TAP:
 - Lose those sound stubs. SDL_mixer support is my vote.
 
 // end of TODO ...
-
 
