@@ -75,7 +75,7 @@ long buffermode, origbuffermode, linearmode;
 char permanentupdate = 0, vgacompatible;
 
 SDL_Surface *surface = NULL; /* This isn't static so that we can use it elsewhere AH */
-static Uint32 sdl_flags = 0;
+static Uint32 sdl_flags = SDL_HWPALETTE;
 static long mouse_x = 0;
 static long mouse_y = 0;
 static long mouse_relative_x = 0;
@@ -348,6 +348,22 @@ void unprotect_ASM_pages(void)
 
 #endif
 
+
+static void output_video_info(void)
+{
+    char buffer[256];
+
+    if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
+    {
+        fprintf(stderr, "WARNING: SDL_VideoDriverName() returned NULL!\n");
+    } // if
+    else
+    {
+        printf("SDL: Using video driver \"%s\".\n", buffer);
+    } // else
+} // output_video_info
+
+
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
     #if ((PLATFORM_UNIX) && (defined USE_I386_ASM))
@@ -372,6 +388,10 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         mouse_grabbed = 0;
 
     sdl_flags = ((getenv(BUILD_WINDOWED) == NULL) ? SDL_FULLSCREEN : 0);
+
+    sdl_flags |= SDL_HWPALETTE;
+    //sdl_flags |= SDL_HWSURFACE;  // !!!
+    //sdl_flags |= SDL_DOUBLEBUF;
 
     memset(scancodes, '\0', sizeof (scancodes));
     scancodes[SDLK_ESCAPE]          = 0x01;
@@ -479,6 +499,8 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
         exit(1);
     } // if
+
+    output_video_info();
 } // _platform_init
 
 
@@ -582,6 +604,8 @@ static void init_new_res_vars(int davidoption)
 } // init_new_res_vars
 
 
+#define print_flag(x) if (surface->flags & x) printf( "  %s\n", #x )
+
 void go_to_new_vid_mode(int vidoption, int w, int h)
 {
     getvalidvesamodes();
@@ -594,6 +618,27 @@ void go_to_new_vid_mode(int vidoption, int w, int h)
         SDL_Quit();
         exit(13);
     } // if
+
+#if 1
+    printf("new vidmode flags:\n");
+    print_flag(SDL_SWSURFACE);
+    print_flag(SDL_HWSURFACE);
+    print_flag(SDL_ASYNCBLIT);
+    print_flag(SDL_ANYFORMAT);
+    print_flag(SDL_HWPALETTE);
+    print_flag(SDL_DOUBLEBUF);
+    print_flag(SDL_FULLSCREEN);
+    print_flag(SDL_OPENGL);
+    print_flag(SDL_OPENGLBLIT);
+    print_flag(SDL_RESIZABLE);
+    print_flag(SDL_NOFRAME);
+    print_flag(SDL_HWACCEL);
+    print_flag(SDL_SRCCOLORKEY);
+    print_flag(SDL_RLEACCELOK);
+    print_flag(SDL_RLEACCEL);
+    print_flag(SDL_SRCALPHA);
+    print_flag(SDL_PREALLOC);
+#endif
 
     init_new_res_vars(vidoption);
 } // go_to_new_vid_mode
@@ -882,6 +927,7 @@ void _nextpage(void)
     }
 
     SDL_UpdateRect(surface, 0, 0, 0, 0);
+    //SDL_Flip(surface);  // !!!
 
     if (qsetmode == 200)
     {
