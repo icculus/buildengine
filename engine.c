@@ -2755,7 +2755,7 @@ static void transmaskwallscan(long x1, long x2)
 }
 
 
-int loadboard(unsigned char *filename, long *daposx, long *daposy,
+int loadboard(char *filename, long *daposx, long *daposy,
               long *daposz, short *daang, short *dacursectnum)
 {
 	short fil, i, numsprites;
@@ -3621,7 +3621,7 @@ void loadtile(short tilenume)
 	if (waloff[tilenume] == 0)
 	{
 		walock[tilenume] = 199;
-		allocache(&waloff[tilenume],dasiz,&walock[tilenume]);
+		allocache(&waloff[tilenume],dasiz,(unsigned char *) &walock[tilenume]);
 	}
 
 	if (artfilplc != tilefileoffs[tilenume])
@@ -3646,7 +3646,7 @@ int allocatepermanenttile(short tilenume, long xsiz, long ysiz)
 	dasiz = xsiz*ysiz;
 
 	walock[tilenume] = 255;
-	allocache(&waloff[tilenume],dasiz,&walock[tilenume]);
+	allocache(&waloff[tilenume],dasiz,(unsigned char *) &walock[tilenume]);
 
 	tilesizx[tilenume] = xsiz;
 	tilesizy[tilenume] = ysiz;
@@ -3964,8 +3964,8 @@ void copytilepiece(long tilenume1, long sx1, long sy1, long xsiz, long ysiz,
 				y2 = sy2+j;
 				if ((x2 >= 0) && (y2 >= 0) && (x2 < xsiz2) && (y2 < ysiz2))
 				{
-					ptr1 = (char *)(waloff[tilenume1] + x1*ysiz1 + y1);
-					ptr2 = (char *)(waloff[tilenume2] + x2*ysiz2 + y2);
+					ptr1 = (unsigned char *) (waloff[tilenume1] + x1*ysiz1 + y1);
+					ptr2 = (unsigned char *) (waloff[tilenume2] + x2*ysiz2 + y2);
 					dat = *ptr1;
 					if (dat != 255)
 						*ptr2 = *ptr1;
@@ -7550,7 +7550,7 @@ void setbrightness(char dabrightness, unsigned char *dapal)
 		}
 	}
 
-	VBE_setPalette(0,256,tempbuf);
+	VBE_setPalette(0, 256, (char *) tempbuf);
 }
 
 
@@ -8236,7 +8236,7 @@ void setviewback(void)
 void squarerotatetile(short tilenume)
 {
 	long i, j, k, xsiz, ysiz;
-	char *ptr1, *ptr2;
+	unsigned char *ptr1, *ptr2;
 
 	xsiz = tilesizx[tilenume]; ysiz = tilesizy[tilenume];
 
@@ -8246,7 +8246,8 @@ void squarerotatetile(short tilenume)
 		k = (xsiz<<1);
 		for(i=xsiz-1;i>=0;i--)
 		{
-			ptr1 = (char *)(waloff[tilenume]+i*(xsiz+1)); ptr2 = ptr1;
+			ptr1 = (unsigned char *) (waloff[tilenume]+i*(xsiz+1));
+            ptr2 = ptr1;
 			if ((i&1) != 0) { ptr1--; ptr2 -= xsiz; swapchar(ptr1,ptr2); }
 			for(j=(i>>1)-1;j>=0;j--)
 				{ ptr1 -= 2; ptr2 -= k; swapchar2(ptr1,ptr2,xsiz); }

@@ -49,6 +49,7 @@ NEXT ON TAP:
 - Long filenames confuse the editor's file "dialog".
 - Might be worth moving all that resolution management code from sdl_driver.c
    to engine.c ...
+- boardfilename (and others) in build.c and elsewhere are hardcoded to 13 chars.
 
 // end of TODO ...
 

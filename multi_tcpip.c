@@ -4,9 +4,12 @@
  *  that KenBuild needs implemented. Have fun.  --ryan.
  */
 
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file IS NOT A PART OF Ken Silverman's original release
+ */
 
 #include "build.h"
 
@@ -27,33 +30,33 @@ void initmultiplayers(char damultioption, char dacomrateoption, char dapriority)
 		connectpoint2[i] = -1, connectnum[i] = 0x7fffffff;
 
 	numplayers = 1;
-}
+} /* initmultiplayers */
 
 void uninitmultiplayers()
 {
-}
+} /* uninitmultiplayers */
 
 void sendlogon(void)
 {
-} // sendlogon
+} /* sendlogon */
 
 void sendlogoff(void)
 {
-} // sendlogoff
+} /* sendlogoff */
 
 int getoutputcirclesize(void)
 {
     return(0);
-} // getoutputcirclesize
+} /* getoutputcirclesize */
 
 void sendpacket (short otherconnectindex, char *bufptr, short messleng)
 {
-} // sendpacket
+} /* sendpacket */
 
 short getpacket (short *other, char *bufptr)
 {
     return(0);
-} // getpacket
+} /* getpacket */
 
 /* end of multi_tcpip.c ... */
 

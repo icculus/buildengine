@@ -7,9 +7,12 @@
  *  (including this file) to BUILD.
  */
 
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file IS NOT A PART OF Ken Silverman's original release
+ */
 
 #ifndef _INCLUDE_UNIX_COMPAT_H_
 #define _INCLUDE_UNIX_COMPAT_H_
@@ -38,9 +41,9 @@ extern const int hbits[];
 (((value) >> (distance))| \
  (hbits[(distance) + (((value) & 0x80000000) >> 26)]))
 
-// !!! remove me later!
-// !!! remove me later!
-// !!! remove me later!
+/* !!! remove me later! */
+/* !!! remove me later! */
+/* !!! remove me later! */
 #define outpw(x, y)   printf("outpw(0x%X, 0x%X) call in %s, line %d.\n", \
                               (x), (y), __FILE__, __LINE__)
 
@@ -57,18 +60,18 @@ extern const int hbits[];
                               (x), (y), __FILE__, __LINE__)
 
 #define koutp(x, y)
-
- //printf("koutp(0x%X, 0x%X) call in %s, line %d.\n",
-                      //        (x), (y), __FILE__, __LINE__)
+/* !!! */
+ /*printf("koutp(0x%X, 0x%X) call in %s, line %d.\n",
+                      //        (x), (y), __FILE__, __LINE__) */
 
 #define kinp(x)       _kinp_handler((x), __FILE__, __LINE__)
 #define inp(x)        _inp_handler((x), __FILE__, __LINE__)
 
 int _inp_handler(int port, char *source_file, int source_line);
 int _kinp_handler(int port, char *source_file, int source_line);
-// !!! remove me later!
-// !!! remove me later!
-// !!! remove me later!
+/* !!! remove me later! */
+/* !!! remove me later! */
+/* !!! remove me later! */
 
 
 
@@ -87,18 +90,25 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #define O_BINARY 0
 #endif
 
-#ifndef stricmp
-#define stricmp(a,b) strcasecmp(a,b)
+/* damned -ansi flag... :) */
+int stricmp(const char *x, const char *y);
+
+#if (defined __STRICT_ANSI__)
+#define inline __inline__
 #endif
 
 #define printext16 printext256
 #define printext16_noupdate printext256_noupdate
 
-// Other DOSisms. See unix_compat.c for implementation.
+/* Other DOSisms. See unix_compat.c for implementation. */
 long filelength(int fhandle);
 
-// !!! need an implementation of findfirst()/findnext()!
-//     Look for references to _dos_findfirst() in build.c!
+/* !!! need an implementation of findfirst()/findnext()! */
+/*     Look for references to _dos_findfirst() in build.c! */
+
+#if (!defined S_IREAD)
+#define S_IREAD S_IRUSR
+#endif
 
 #ifndef getch
 #define getch() getchar()
@@ -114,5 +124,6 @@ long filelength(int fhandle);
 
 #endif
 
-// end of unix_compat.h ...
+/* end of unix_compat.h ... */
+
 

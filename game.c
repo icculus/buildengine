@@ -1,7 +1,9 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file has been modified from Ken Silverman's original release
+ */
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -16,6 +18,7 @@
 
 #include "platform.h"
 
+#include "cache1d.h"
 #include "pragmas.h"
 #include "display.h"
 #include "build.h"
@@ -26,120 +29,97 @@
 #define MOVESPERSECOND 40
 #define TICSPERFRAME 3
 #define MOVEFIFOSIZ 256
-#define EYEHEIGHT (32<<8)   //Normally (32<<8), (51<<8) to make mirrors happy
+#define EYEHEIGHT (32<<8)   /* Normally (32<<8), (51<<8) to make mirrors happy */
 
-extern int ksqrt(long num);
-extern void drawmasks(void);
-extern void allocache (long *newhandle, long newbytes, unsigned char *newlockptr);
-extern int pushmove (long *x, long *y, long *z, short *sectnum, long walldist, long ceildist, long flordist, unsigned long cliptype);
-extern int initmouse(void);
-extern void initengine(void);
-extern void initkeys(void);
-extern void inittimer(void);
-extern void initmultiplayers(char damultioption, char dacomrateoption, char dapriority);
-extern void uninitmultiplayers(void);
-extern void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeakers, char dabytespersample, char daintspersec, char daquality);
-extern int loadsong(char *filename);
-extern void musicon(void);
-extern int loadpics(char *filename);
-extern void qloadkvx(long voxindex, char *filename);
-extern int allocatepermanenttile(short tilenume, long xsiz, long ysiz);
-extern void copytilepiece(long tilenume1, long sx1, long sy1, long xsiz, long ysiz, long tilenume2, long sx2, long sy2);
-extern void initlava(void);
-extern void makepalookup(long palnum, char *remapbuf, signed char r, signed char g, signed char b, char dastat);
-extern long initgroupfile(char *filename);
-extern void sendlogon(void);
-extern void printext256(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
-extern void getpackets(void);
-extern void sendlogoff(void);
-extern void musicoff(void);
-extern void uninittimer(void);
-extern void uninitkeys(void);
-extern void uninitengine(void);
-extern void uninitsb(void);
-extern void uninitgroupfile(void);
-extern void initplayersprite(short snum);
-extern void preparesndbuf(void);
-extern void fakedomovethings(void);
-extern short getpacket (short *other, char *bufptr);
-extern int nextsectorneighborz(short sectnum, long thez, short topbottom, short direction);
-extern void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat);
-extern int krand(void);
-extern int loadboard(unsigned char *filename, long *daposx, long *daposy, long *daposz, short *daang, short *dacursectnum);
-extern int lastwall(short point);
-extern int changespritestat(short spritenum, short newstatnum);
-extern void setviewback(void);
-extern void setviewtotile(short tilenume, long xsiz, long ysiz);
-extern void setview(long x1, long y1, long x2, long y2);
-extern int deletesprite(short spritenum);
-extern int hitscan(long xs, long ys, long zs, short sectnum, long vx, long vy, long vz, short *hitsect, short *hitwall, short *hitsprite, long *hitx, long *hity, long *hitz, unsigned long cliptype);
-extern int insertsprite(short sectnum, short statnum);
-extern void dragpoint(short pointhighlight, long dax, long day);
-extern int setsprite(short spritenum, long newx, long newy, long newz);
-extern void rotatepoint(long xpivot, long ypivot, long x, long y, short daang, long *x2, long *y2);
-extern int clipinsidebox(long x, long y, short wallnum, long walldist);
-extern int cansee(long x1, long y1, long z1, short sect1, long x2, long y2, long z2, short sect2);
-extern void loadtile (short tilenume);
-extern int clipmove (long *x, long *y, long *z, short *sectnum, long xvect, long yvect, long walldist, long ceildist, long flordist, unsigned long cliptype);
-extern int getangle(long xvect, long yvect);
-extern void getzsofslope(short sectnum, long dax, long day, long *ceilz, long *florz);
-extern void getzrange(long x, long y, long z, short sectnum, long *ceilz, long *ceilhit, long *florz, long *florhit, long walldist, unsigned long cliptype);
-extern int getflorzofslope(short sectnum, long dax, long day);
-extern int changespritesect(short spritenum, short newsectnum);
-extern int neartag (long xs, long ys, long zs, short sectnum, short ange, short *neartagsector, short *neartagwall, short *neartagsprite, long *neartaghitdist, long neartagrange, char tagsearch);
-extern int inside (long x, long y, short sectnum);
-extern void setears(long daposx, long daposy, long daxvect, long dayvect);
-extern void setaspect(long daxrange, long daaspect);
-extern void preparemirror(long dax, long day, long daz, short daang, long dahoriz, short dawall, short dasector, long *tposx, long *tposy,  short *tang);
-extern void completemirror(void);
-extern void movelava(char *dapic);
-extern void clearview(long dacol);
-extern void restoreinterpolations();
-extern void updateinterpolations();
-extern void doanimations();
-extern void checkmasterslaveswitch();
-extern void getmousevalues(short *mousx, short *mousy, short *bstatus);
-extern void sendpacket (short otherconnectindex, char *bufptr, short messleng);
-extern long kopen4load(unsigned char *filename, char searchfirst);
-extern void kdfread(void *buffer, size_t dasizeof, size_t count, long fil);
-extern void drawline256 (long x1, long y1, long x2, long y2, unsigned char col);
-extern void kclose(long handle);
-extern void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil);
-extern int getoutputcirclesize(void);
-extern void wsay(char *dafilename, long dafreq, long volume1, long volume2);
-extern void updatesector(long x, long y, short *sectnum);
-extern void drawmapview (long dax, long day, long zoome, short ang);
-extern void drawoverheadmap(long cposx, long cposy, long czoom, short cang);
-extern int screencapture(char *filename, char inverseit);
-extern void flushperms(void);
-extern void  rotatesprite (long sx, long sy, long z, short a, short picnum,  signed char dashade, char dapalnum, char dastat, long cx1, long cy1, long cx2, long cy2);
-void drawscreen(short snum, long dasmoothratio);
-void domovethings(void);
-void prepareboard(char *daboardfilename);
-void drawtilebackground (long thex, long they, short tilenum, signed char shade, long cx1, long cy1, long cx2, long cy2, char dapalnum);
-void playback(void);
-void drawstatusbar(short snum);
-void setinterpolation(long *posptr);
-void shootgun(short snum, long x, long y, long z, short daang, long dahoriz, short dasectnum, char guntype);
-void printext(long x, long y, char *buffer, short tilenum, char invisiblecol);
-void setup3dscreen(void);
-void searchmap(short startsector);
-void activatehitag(short dahitag);
-void warpsprite(short spritenum);
-void stopinterpolation(long *posptr);
-void bombexplode(long i);
-void findrandomspot(long *x, long *y, short *sectnum);
-void updatesectorz(long x, long y, long z, short *sectnum);
-void dointerpolations();
 
-int loadgame(void);
-int savegame(void);
-int testneighborsectors(short sect1, short sect2);
+/* KenBuild-specific networking functions. */
+void initmultiplayers(char damultioption, char dacomrateoption, char dapriority);
+void uninitmultiplayers(void);
+void sendlogon(void);
+void sendlogoff(void);
+short getpacket(short *otherconnectindex, char *bufptr);
+void sendpacket(short otherconnectindex, unsigned char *bufptr, short messleng);
+int getoutputcirclesize(void);
 
-long getanimationgoal(long animptr);
-long setanimation(long *animptr, long thegoal, long thevel, long theacc);
 
-short movesprite(short spritenum, long dx, long dy, long dz, long ceildist, long flordist, long clipmask);
+/*
+ * Not interested in implementing these sound functions in a
+ *  platform-independent manner for KenBuild. Anyone?  --ryan.
+ */
+#if (!defined PLATFORM_DOS)
+
+#ifndef __FILE__
+#define __FILE__ "game.c"
+#endif
+
+#ifndef __LINE__
+#define __LINE__ -1
+#endif
+
+static int audio_disabled = 0;
+
+void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeakers, char dabytespersample, char daintspersec, char daquality)
+{
+#if 0
+    audio_disabled = (SDL_Init(SDL_INIT_AUDIO) == -1);
+
+    if (audio_disabled)
+    {
+        fprintf(stderr, "BUILDSDL: SDL_Init(SDL_INIT_AUDIO) failed!\n");
+        fprintf(stderr, "BUILDSDL: SDL_GetError() says \"%s\".\n", SDL_GetError());
+        fprintf(stderr, "BUILDSDL: We'll continue without sound.\n");
+        audio_disabled = 1;
+        return;
+    } /* if */
+#else
+    audio_disabled = 1;
+    fprintf(stderr, "%s, line %d; initsb(): STUB.\n", __FILE__, __LINE__);
+#endif
+} /* initsb */
+
+void uninitsb(void)
+{
+    fprintf(stderr, "%s, line %d; uninitsb(): STUB.\n", __FILE__, __LINE__);
+} /* uninitsb */
+
+
+int loadsong(char *filename)
+{
+    fprintf(stderr, "%s, line %d; loadsong(): STUB.\n", __FILE__, __LINE__);
+    return 0;
+} /* loadsong */
+
+void musicon(void)
+{
+    fprintf(stderr, "%s, line %d; musicon(): STUB.\n", __FILE__, __LINE__);
+} /* musicon */
+
+void musicoff(void)
+{
+    fprintf(stderr, "%s, line %d; musicoff(): STUB.\n", __FILE__, __LINE__);
+} /* musicoff */
+
+void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat)
+{
+    fprintf(stderr, "%s, line %d; wsayfollow(): STUB.\n", __FILE__, __LINE__);
+} /* wsayfollow */
+
+void wsay(char *dafilename, long dafreq, long volume1, long volume2)
+{
+    fprintf(stderr, "%s, line %d; wsay(): STUB.\n", __FILE__, __LINE__);
+} /* wsay */
+
+void preparesndbuf(void)
+{
+    fprintf(stderr,"%s, line %d; preparesndbuf(): STUB.\n", __FILE__, __LINE__);
+} /* preparesndbuf */
+
+void setears(long daposx, long daposy, long daxvect, long dayvect)
+{
+/*    fprintf(stderr, "%s, line %d; setears(): STUB.\n", __FILE__, __LINE__); */
+} /* setears */
+
+#endif /* !defined PLATFORM_DOS */
 
 
 /***************************************************************************
@@ -261,7 +241,7 @@ static long lavadropx[LAVAMAXDROPS], lavadropy[LAVAMAXDROPS];
 static long lavadropsiz[LAVAMAXDROPS], lavadropsizlookup[LAVAMAXDROPS];
 static long lavaradx[24][96], lavarady[24][96], lavaradcnt[32];
 
-	//Shared player variables
+	/* Shared player variables */
 static long posx[MAXPLAYERS], posy[MAXPLAYERS], posz[MAXPLAYERS];
 static long horiz[MAXPLAYERS], zoom[MAXPLAYERS], hvel[MAXPLAYERS];
 static short ang[MAXPLAYERS], cursectnum[MAXPLAYERS], ocursectnum[MAXPLAYERS];
@@ -270,33 +250,36 @@ static long lastchaingun[MAXPLAYERS];
 static long health[MAXPLAYERS], flytime[MAXPLAYERS];
 static short oflags[MAXPLAYERS];
 static short numbombs[MAXPLAYERS];
-static short numgrabbers[MAXPLAYERS];   // Andy did this
-static short nummissiles[MAXPLAYERS];   // Andy did this
+static short numgrabbers[MAXPLAYERS];   /* Andy did this */
+static short nummissiles[MAXPLAYERS];   /* Andy did this */
 static char dimensionmode[MAXPLAYERS];
 static char revolvedoorstat[MAXPLAYERS];
 static short revolvedoorang[MAXPLAYERS], revolvedoorrotang[MAXPLAYERS];
 static long revolvedoorx[MAXPLAYERS], revolvedoory[MAXPLAYERS];
 
-	//ENGINE CONTROLLED MULTIPLAYER VARIABLES:
+	/* ENGINE CONTROLLED MULTIPLAYER VARIABLES: */
 extern short numplayers, myconnectindex;
-extern short connecthead, connectpoint2[MAXPLAYERS];   //Player linked list variables (indeces, not connection numbers)
+extern short connecthead, connectpoint2[MAXPLAYERS];   /* Player linked list variables (indeces, not connection numbers) */
 
 static long nummoves;
-// Bug: NUMSTATS used to be equal to the greatest tag number,
-// so that the last statrate[] entry was random memory junk
-// because stats 0-NUMSTATS required NUMSTATS+1 bytes.   -Andy
+
+/*
+ * Bug: NUMSTATS used to be equal to the greatest tag number,
+ * so that the last statrate[] entry was random memory junk
+ * because stats 0-NUMSTATS required NUMSTATS+1 bytes.   -Andy
+ */
 #define NUMSTATS 13
 static signed char statrate[NUMSTATS] = {-1,0,-1,0,0,0,1,3,0,3,15,-1,-1};
 
-	//Input structures
-static char networkmode;     //0 is 2(n-1) mode, 1 is n(n-1) mode
+	/* Input structures */
+static char networkmode;     /* 0 is 2(n-1) mode, 1 is n(n-1) mode */
 static long locselectedgun, locselectedgun2;
 static input loc, oloc, loc2;
 static input ffsync[MAXPLAYERS], osync[MAXPLAYERS], _sync[MAXPLAYERS];
-	//Input faketimerhandler -> movethings fifo
+	/* Input faketimerhandler -> movethings fifo */
 static long movefifoplc, movefifoend[MAXPLAYERS];
 static input baksync[MOVEFIFOSIZ][MAXPLAYERS];
-	//Game recording variables
+	/* Game recording variables */
 static long reccnt, recstat = 1;
 static input recsync[16384][2];
 
@@ -311,9 +294,9 @@ static long myxbak[MOVEFIFOSIZ], myybak[MOVEFIFOSIZ], myzbak[MOVEFIFOSIZ];
 static long myhorizbak[MOVEFIFOSIZ];
 static short myangbak[MOVEFIFOSIZ];
 
-	//MULTI.OBJ sync state variables
+	/* MULTI.OBJ sync state variables */
 extern char syncstate;
-	//GAME.C sync state variables
+	/* GAME.C sync state variables */
 static char syncstat, syncval[MOVEFIFOSIZ], othersyncval[MOVEFIFOSIZ];
 static long syncvaltottail, syncvalhead, othersyncvalhead, syncvaltail;
 
@@ -335,7 +318,7 @@ extern long cachecount, transarea;
 
 static char playerreadyflag[MAXPLAYERS];
 
-	//Miscellaneous variables
+	/* Miscellaneous variables */
 static char packbuf[MAXXDIM];
 static char tempbuf[MAXXDIM], boardfilename[80];
 static short tempshort[MAXSECTORS];
@@ -345,14 +328,14 @@ static short neartagsector, neartagwall, neartagsprite;
 static long lockclock, neartagdist, neartaghitdist;
 extern long frameplace, pageoffset, ydim16;
 static long globhiz, globloz, globhihit, globlohit;
-//volatile long stereomode = 0;
+/* volatile long stereomode = 0; */
 extern long stereowidth, stereopixelwidth;
 extern volatile long activepage;
 
-	//Over the shoulder mode variables
+	/* Over the shoulder mode variables */
 static long cameradist = -1, cameraang = 0, cameraclock = 0;
 
-	//Board animation variables
+	/* Board animation variables */
 #define MAXMIRRORS 64
 static short mirrorwall[MAXMIRRORS], mirrorsector[MAXMIRRORS], mirrorcnt;
 static short floormirrorsector[64], floormirrorcnt;
@@ -378,7 +361,7 @@ static long subwayx[4], subwaygoalstop[4], subwayvel[4], subwaypausetime[4];
 static short waterfountainwall[MAXPLAYERS], waterfountaincnt[MAXPLAYERS];
 static short slimesoundcnt[MAXPLAYERS];
 
-	//Variables that let you type messages to other player
+	/* Variables that let you type messages to other player */
 static char getmessage[162], getmessageleng;
 static long getmessagetimeoff;
 static char typemessage[162], typemessageleng = 0, typemode = 0;
@@ -405,14 +388,16 @@ static char scantoascwithshift[128] =
 	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 };
 
-	//These variables are for animating x, y, or z-coordinates of sectors,
-	//walls, or sprites (They are NOT to be used for changing the [].picnum's)
-	//See the setanimation(), and getanimategoal() functions for more details.
+	/*
+     * These variables are for animating x, y, or z-coordinates of sectors,
+	 * walls, or sprites (They are NOT to be used for changing the [].picnum's)
+	 * See the setanimation(), and getanimategoal() functions for more details.
+     */
 #define MAXANIMATES 512
 static long *animateptr[MAXANIMATES], animategoal[MAXANIMATES];
 static long animatevel[MAXANIMATES], animateacc[MAXANIMATES], animatecnt = 0;
 
-	//These parameters are in exact order of sprite structure in BUILD.H
+	/* These parameters are in exact order of sprite structure in BUILD.H */
 #define spawnsprite(newspriteindex2,x2,y2,z2,cstat2,shade2,pal2,       \
 		clipdist2,xrepeat2,yrepeat2,xoffset2,yoffset2,picnum2,ang2,      \
 		xvel2,yvel2,zvel2,owner2,sectnum2,statnum2,lotag2,hitag2,extra2) \
@@ -436,582 +421,260 @@ static long animatevel[MAXANIMATES], animateacc[MAXANIMATES], animatecnt = 0;
 }                                                                      \
 
 
-
-int main(int argc, char **argv)
+void __interrupt __far timerhandler(void)
 {
-//	long i, j, k, l, fil, waitplayers, x1, y1, x2, y2;
-	long i, j, k, fil, waitplayers, x1, y1, x2, y2;
-//	short other, packleng;
-	short other;
-//	char *ptr;
+	totalclock++;
+	/* _chain_intr(oldtimerhandler); */
 
-#ifdef USE_PERL
-    int perl_works = 0;
-    if (buildperl_init() == 0)
-        perl_works = 1;
-#endif
+    #ifdef PLATFORM_DOS
+    	outp(0x20,0x20);
+    #endif
+}
 
-    _platform_init(argc, argv, "KenBuild by Ken Silverman", "KenBuild");
 
-	initgroupfile("stuff.dat");
+static void _initkeys(void)
+{
+	long i;
 
-	if ((argc >= 2) && (stricmp("-net",argv[1]) != 0) && (stricmp("/net",argv[1]) != 0))
-	{
-		strcpy((char*)&boardfilename,argv[1]);
-		if(strchr(boardfilename,'.') == 0)
-			strcat(boardfilename,".map");
-	}
-	else
-		strcpy((char*)&boardfilename,"nukeland.map");
+	keyfifoplc = 0; keyfifoend = 0;
+	for(i=0;i<256;i++) keystatus[i] = 0;
+    initkeys();  /* rcg06082001 platform driver-specific initialization. */
+}
 
-	if ((fil = open("setup.dat",O_BINARY|O_RDWR,S_IREAD)) != -1)
-	{
-		read(fil,&option[0],NUMOPTIONS);
-		read(fil,&keys[0],NUMKEYS);
-		close(fil);
-	}
-	if (option[3] != 0) initmouse();
 
-	initengine();
-	initkeys();
-	inittimer();
-	initmultiplayers(option[4],option[5],0);
-
-	pskyoff[0] = 0; pskyoff[1] = 0; pskybits = 1;
-
-	initsb(option[1],option[2],digihz[option[7]>>4],((option[7]&4)>0)+1,((option[7]&2)>0)+1,60,option[7]&1);
-	if (strcmp(boardfilename,"klab.map") == 0)
-		loadsong("klabsong.kdm");
-	else
-		loadsong("neatsong.kdm");
-	musicon();
-
-	loadpics("tiles000.art");                      //Load artwork
-	qloadkvx(0L,"voxel000.kvx");
-	qloadkvx(1L,"voxel001.kvx");
-
-		//Here's an example of TRUE ornamented walls
-		//The allocatepermanenttile should be called right after loadpics
-		//Since it resets the tile cache for each call.
-	if (allocatepermanenttile(SLIME,128,128) == 0)    //If enough memory
-	{
-		printf("Not enough memory for slime!\n");
-		exit(0);
-	}
-	if (allocatepermanenttile(MAXTILES-1,64,64) != 0)    //If enough memory
-	{
-			//My face with an explosion written over it
-		copytilepiece(KENPICTURE,0,0,64,64,MAXTILES-1,0,0);
-		copytilepiece(EXPLOSION,0,0,64,64,MAXTILES-1,0,0);
-	}
-
-	initlava();
-
-	for(j=0;j<256;j++)
-		tempbuf[j] = ((j+32)&255);  //remap colors for screwy palette sectors
-	makepalookup(16,tempbuf,0,0,0,1);
-
-	for(j=0;j<256;j++) tempbuf[j] = j;
-	makepalookup(17,tempbuf,24,24,24,1);
-
-	for(j=0;j<256;j++) tempbuf[j] = j; //(j&31)+32;
-	makepalookup(18,tempbuf,8,8,48,1);
-
-	prepareboard(boardfilename);                   //Load board
-
-	if (option[4] > 0)
-	{
-		x1 = ((xdim-screensize)>>1);
-		x2 = x1+screensize-1;
-		y1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
-		y2 = y1 + scale(screensize,ydim-32,xdim)-1;
-		drawtilebackground(0L,0L,BACKGROUND,8,x1,y1,x2,y2,0);
-
-		sendlogon();
-		if (option[4] < 5) waitplayers = 2; else waitplayers = option[4]-3;
-		while (numplayers < waitplayers)
-		{
-			sprintf(tempbuf,"%d of %ld players in...",numplayers,waitplayers);
-			printext256(68L,84L,31,0,tempbuf,0);
-			nextpage();
-
-			if (getpacket(&other,packbuf) > 0)
-				if (packbuf[0] == 255)
-					keystatus[1] = 1;
-
-			if (keystatus[1])
-			{
-				sendlogoff();         //Signing off
-				musicoff();
-				uninitmultiplayers();
-				uninittimer();
-				uninitkeys();
-				uninitengine();
-				uninitsb();
-				uninitgroupfile();
-				setvmode(0x3);        //Set back to text mode
-				exit(0);
-			}
-		}
-		screenpeek = myconnectindex;
-
-		if (numplayers <= 3)
-			networkmode = 1;
-		else
-			networkmode = 0;
-
-		j = 1;
-		for(i=connecthead;i>=0;i=connectpoint2[i])
-		{
-			if (myconnectindex == i) break;
-			j++;
-		}
-		sprintf(getmessage,"Player %ld",j);
-		if (networkmode == 0)
-		{
-			if (j == 1) strcat(getmessage," (Master)");
-					 else strcat(getmessage," (Slave)");
-		}
-		else
-			strcat(getmessage," (Even)");
-		getmessageleng = strlen(getmessage);
-		getmessagetimeoff = totalclock+120;
-	}
-
-	reccnt = 0;
-	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
-
-	//waitforeverybody();
-	totalclock = ototalclock = 0; gotlastpacketclock = 0; nummoves = 0;
-
-	drawscreen(screenpeek,65536L);
-
-	ready2send = 1;
-	while (!keystatus[1])       //Main loop starts here
-	{
-        #ifdef USE_PERL
-            if (perl_works)
-                buildperl_frame();
-        #endif
-
-			// backslash (useful only with KDM)
-		if (keystatus[0x2b]) { keystatus[0x2b] = 0; preparesndbuf(); }
-
-		if ((networkmode == 1) || (myconnectindex != connecthead))
-			while (fakemovefifoplc != movefifoend[myconnectindex]) fakedomovethings();
-
-		getpackets();
-
-		if (typemode == 0)           //if normal game keys active
-		{
-			if ((keystatus[0x2a]&keystatus[0x36]&keystatus[0x13]) > 0)   //Sh.Sh.R (replay)
-			{
-				keystatus[0x13] = 0;
-				playback();
-			}
-
-			if (keystatus[0x26]&(keystatus[0x1d]|keystatus[0x9d])) //Load game
-			{
-				keystatus[0x26] = 0;
-				loadgame();
-				drawstatusbar(screenpeek);   // Andy did this
-			}
-
-			if (keystatus[0x1f]&(keystatus[0x1d]|keystatus[0x9d])) //Save game
-			{
-				keystatus[0x1f] = 0;
-				savegame();
-			}
-		}
-
-		if ((networkmode == 0) || (option[4] == 0))
-		{
-			while (movefifoplc != movefifoend[0]) domovethings();
-		}
-		else
-		{
-			j = connecthead;
-			if (j == myconnectindex) j = connectpoint2[j];
-			averagelag[j] = ((averagelag[j]*7+(((movefifoend[myconnectindex]-movefifoend[j]+otherlag[j]+2)&255)<<8))>>3);
-			j = max(averagelag[j]>>9,1);
-			while (((movefifoend[myconnectindex]-movefifoplc)&(MOVEFIFOSIZ-1)) > j)
-			{
-				for(i=connecthead;i>=0;i=connectpoint2[i])
-					if (movefifoplc == movefifoend[i]) break;
-				if (i >= 0) break;
-				if (myconnectindex != connecthead)
-				{
-					k = ((movefifoend[myconnectindex]-movefifoend[connecthead]-otherlag[connecthead]+128)&255);
-					if (k > 128+1) ototalclock++;
-					if (k < 128-1) ototalclock--;
-				}
-				domovethings();
-			}
-		}
-		i = (totalclock-gotlastpacketclock)*(65536/(TIMERINTSPERSECOND/MOVESPERSECOND));
-		drawscreen(screenpeek,i);
-		if (((stereomode) || (option[0] == 6)) && ((activepage&1)))
-			drawscreen(screenpeek,i);
-	}
-
-	sendlogoff();         //Signing off
-	musicoff();
-	uninitmultiplayers();
-	uninittimer();
-	uninitkeys();
-	uninitengine();
-	uninitsb();
-	uninitgroupfile();
-	setvmode(0x3);        //Set back to text mode
-
-	if (stereomode)
-	{
-		printf("stereowidth was: %ld\n",stereowidth);
-		printf("stereopixelwidth was: %ld\n",stereopixelwidth);
-	}
-
-    #ifdef USE_PERL
-        if (perl_works)
-            buildperl_deinit();
+void __interrupt __far keyhandler(void)
+{
+        /*
+         * ryan sez: End Of Interrupt call on DOS. This seems like a
+         *  dangerous place to put it, if you ask me, but oh well.  --ryan.
+         */
+    #ifdef PLATFORM_DOS
+    	koutp(0x20,0x20);
     #endif
 
-	return(0);
+	oldreadch = readch; readch = _readlastkeyhit();
+
+    #if 0
+        printf("keyhandler() got a (0x%X) ... \n", readch);
+    #endif
+
+        /*
+         * ryan sez: these inp/outp calls read the keyboard state,
+         *  reset the keyboard, and put the original state back in.
+         *  This is apparently needed on some XTs, but not newer boxes, and
+         *  obviously never on Linux.  --ryan.
+         */
+    #ifdef PLATFORM_DOS
+    	keytemp = kinp(0x61); koutp(0x61,keytemp|128); koutp(0x61,keytemp&127);
+    #else
+        keytemp = readch;
+    #endif
+
+	if ((readch|1) == 0xe1) { extended = 128; return; }
+	if (oldreadch != readch)
+	{
+		if ((readch&128) == 0)
+		{
+			keytemp = readch+extended;
+			if (!keystatus[(int) keytemp])
+			{
+				keystatus[(int) keytemp] = 1;
+				keyfifo[(int) keyfifoend] = keytemp;
+				keyfifo[(int) (keyfifoend+1)&(KEYFIFOSIZ-1)] = 1;
+				keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
+			}
+		}
+		else
+		{
+			keytemp = (readch&127)+extended;
+			keystatus[(int) keytemp] = 0;
+			keyfifo[(int) keyfifoend] = keytemp;
+			keyfifo[(int) (keyfifoend+1)&(KEYFIFOSIZ-1)] = 0;
+			keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
+		}
+	}
+	extended = 0;
 }
 
-void operatesector(short dasector)
-{     //Door code
-//	long i, j, k, s, nexti, good, cnt, datag;
-	long i, j, datag;
-//	long dax, day, daz, dax2, day2, daz2, centx, centy;
-	long daz, dax2, day2, centx, centy;
-	short startwall, endwall, wallfind[2];
-
-	datag = sector[dasector].lotag;
-
-	startwall = sector[dasector].wallptr;
-	endwall = startwall + sector[dasector].wallnum;
-	centx = 0L, centy = 0L;
-	for(i=startwall;i<endwall;i++)
-	{
-		centx += wall[i].x;
-		centy += wall[i].y;
-	}
-	centx /= (endwall-startwall);
-	centy /= (endwall-startwall);
-
-		//Simple door that moves up  (tag 8 is a combination of tags 6 & 7)
-	if ((datag == 6) || (datag == 8))    //If the sector in front is a door
-	{
-		i = getanimationgoal((long)&sector[dasector].ceilingz);
-		if (i >= 0)      //If door already moving, reverse its direction
-		{
-			if (datag == 8)
-				daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
-			else
-				daz = sector[dasector].floorz;
-
-			if (animategoal[i] == daz)
-				animategoal[i] = sector[nextsectorneighborz(dasector,sector[dasector].floorz,-1,-1)].ceilingz;
-			else
-				animategoal[i] = daz;
-			animatevel[i] = 0;
-		}
-		else      //else insert the door's ceiling on the animation list
-		{
-			if (sector[dasector].ceilingz == sector[dasector].floorz)
-				daz = sector[nextsectorneighborz(dasector,sector[dasector].floorz,-1,-1)].ceilingz;
-			else
-			{
-				if (datag == 8)
-					daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
-				else
-					daz = sector[dasector].floorz;
-			}
-			if ((j = setanimation(&sector[dasector].ceilingz,daz,6L,6L)) >= 0)
-				wsayfollow("updowndr.wav",4096L+(krand()&255)-128,256L,&centx,&centy,0);
-		}
-	}
-		//Simple door that moves down
-	if ((datag == 7) || (datag == 8)) //If the sector in front's elevator
-	{
-		i = getanimationgoal((long)&sector[dasector].floorz);
-		if (i >= 0)      //If elevator already moving, reverse its direction
-		{
-			if (datag == 8)
-				daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
-			else
-				daz = sector[dasector].ceilingz;
-
-			if (animategoal[i] == daz)
-				animategoal[i] = sector[nextsectorneighborz(dasector,sector[dasector].ceilingz,1,1)].floorz;
-			else
-				animategoal[i] = daz;
-			animatevel[i] = 0;
-		}
-		else      //else insert the elevator's ceiling on the animation list
-		{
-			if (sector[dasector].floorz == sector[dasector].ceilingz)
-				daz = sector[nextsectorneighborz(dasector,sector[dasector].ceilingz,1,1)].floorz;
-			else
-			{
-				if (datag == 8)
-					daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
-				else
-					daz = sector[dasector].ceilingz;
-			}
-			if ((j = setanimation(&sector[dasector].floorz,daz,6L,6L)) >= 0)
-				wsayfollow("updowndr.wav",4096L+(krand()&255)-128,256L,&centx,&centy,0);
-		}
-	}
-
-	if (datag == 9)   //Smooshy-wall sideways double-door
-	{
-		//find any points with either same x or same y coordinate
-		//  as center (centx, centy) - should be 2 points found.
-		wallfind[0] = -1;
-		wallfind[1] = -1;
-		for(i=startwall;i<endwall;i++)
-			if ((wall[i].x == centx) || (wall[i].y == centy))
-			{
-				if (wallfind[0] == -1)
-					wallfind[0] = i;
-				else
-					wallfind[1] = i;
-			}
-
-		for(j=0;j<2;j++)
-		{
-			if ((wall[wallfind[j]].x == centx) && (wall[wallfind[j]].y == centy))
-			{
-				//find what direction door should open by averaging the
-				//  2 neighboring points of wallfind[0] & wallfind[1].
-				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
-				dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
-				day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
-				if (dax2 != 0)
-				{
-					dax2 = wall[wall[wall[wallfind[j]].point2].point2].x;
-					dax2 -= wall[wall[wallfind[j]].point2].x;
-					setanimation(&wall[wallfind[j]].x,wall[wallfind[j]].x+dax2,4L,0L);
-					setanimation(&wall[i].x,wall[i].x+dax2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].x,wall[wall[wallfind[j]].point2].x+dax2,4L,0L);
-				}
-				else if (day2 != 0)
-				{
-					day2 = wall[wall[wall[wallfind[j]].point2].point2].y;
-					day2 -= wall[wall[wallfind[j]].point2].y;
-					setanimation(&wall[wallfind[j]].y,wall[wallfind[j]].y+day2,4L,0L);
-					setanimation(&wall[i].y,wall[i].y+day2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].y,wall[wall[wallfind[j]].point2].y+day2,4L,0L);
-				}
-			}
-			else
-			{
-				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
-				dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
-				day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
-				if (dax2 != 0)
-				{
-					setanimation(&wall[wallfind[j]].x,centx,4L,0L);
-					setanimation(&wall[i].x,centx+dax2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].x,centx+dax2,4L,0L);
-				}
-				else if (day2 != 0)
-				{
-					setanimation(&wall[wallfind[j]].y,centy,4L,0L);
-					setanimation(&wall[i].y,centy+day2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].y,centy+day2,4L,0L);
-				}
-			}
-		}
-		wsayfollow("updowndr.wav",4096L-256L,256L,&centx,&centy,0);
-		wsayfollow("updowndr.wav",4096L+256L,256L,&centx,&centy,0);
-	}
-
-	if (datag == 13)  //Swinging door
-	{
-		for(i=0;i<swingcnt;i++)
-		{
-			if (swingsector[i] == dasector)
-			{
-				if (swinganginc[i] == 0)
-				{
-					if (swingang[i] == swingangclosed[i])
-					{
-						swinganginc[i] = swingangopendir[i];
-						wsayfollow("opendoor.wav",4096L+(krand()&511)-256,256L,&centx,&centy,0);
-					}
-					else
-						swinganginc[i] = -swingangopendir[i];
-				}
-				else
-					swinganginc[i] = -swinganginc[i];
-
-				for(j=1;j<=3;j++)
-				{
-					setinterpolation(&wall[swingwall[i][j]].x);
-					setinterpolation(&wall[swingwall[i][j]].y);
-				}
-			}
-		}
-	}
-
-	if (datag == 16)  //True sideways double-sliding door
-	{
-		 //get 2 closest line segments to center (dax, day)
-		wallfind[0] = -1;
-		wallfind[1] = -1;
-		for(i=startwall;i<endwall;i++)
-			if (wall[i].lotag == 6)
-			{
-				if (wallfind[0] == -1)
-					wallfind[0] = i;
-				else
-					wallfind[1] = i;
-			}
-
-		for(j=0;j<2;j++)
-		{
-			if ((((wall[wallfind[j]].x+wall[wall[wallfind[j]].point2].x)>>1) == centx) && (((wall[wallfind[j]].y+wall[wall[wallfind[j]].point2].y)>>1) == centy))
-			{     //door was closed
-					//find what direction door should open
-				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
-				dax2 = wall[i].x-wall[wallfind[j]].x;
-				day2 = wall[i].y-wall[wallfind[j]].y;
-				if (dax2 != 0)
-				{
-					dax2 = wall[wall[wall[wall[wallfind[j]].point2].point2].point2].x;
-					dax2 -= wall[wall[wall[wallfind[j]].point2].point2].x;
-					setanimation(&wall[wallfind[j]].x,wall[wallfind[j]].x+dax2,4L,0L);
-					setanimation(&wall[i].x,wall[i].x+dax2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].x,wall[wall[wallfind[j]].point2].x+dax2,4L,0L);
-					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].x,wall[wall[wall[wallfind[j]].point2].point2].x+dax2,4L,0L);
-				}
-				else if (day2 != 0)
-				{
-					day2 = wall[wall[wall[wall[wallfind[j]].point2].point2].point2].y;
-					day2 -= wall[wall[wall[wallfind[j]].point2].point2].y;
-					setanimation(&wall[wallfind[j]].y,wall[wallfind[j]].y+day2,4L,0L);
-					setanimation(&wall[i].y,wall[i].y+day2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].y,wall[wall[wallfind[j]].point2].y+day2,4L,0L);
-					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].y,wall[wall[wall[wallfind[j]].point2].point2].y+day2,4L,0L);
-				}
-			}
-			else
-			{    //door was not closed
-				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
-				dax2 = wall[i].x-wall[wallfind[j]].x;
-				day2 = wall[i].y-wall[wallfind[j]].y;
-				if (dax2 != 0)
-				{
-					setanimation(&wall[wallfind[j]].x,centx,4L,0L);
-					setanimation(&wall[i].x,centx+dax2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].x,centx,4L,0L);
-					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].x,centx+dax2,4L,0L);
-				}
-				else if (day2 != 0)
-				{
-					setanimation(&wall[wallfind[j]].y,centy,4L,0L);
-					setanimation(&wall[i].y,centy+day2,4L,0L);
-					setanimation(&wall[wall[wallfind[j]].point2].y,centy,4L,0L);
-					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].y,centy+day2,4L,0L);
-				}
-			}
-		}
-		wsayfollow("updowndr.wav",4096L-64L,256L,&centx,&centy,0);
-		wsayfollow("updowndr.wav",4096L+64L,256L,&centx,&centy,0);
-	}
-}
-
-void operatesprite(short dasprite)
+void initlava(void)
 {
-	long datag;
+	long x, y, z, r;
 
-	datag = sprite[dasprite].lotag;
+	for(z=0;z<32;z++) lavaradcnt[z] = 0;
+	for(x=-16;x<=16;x++)
+		for(y=-16;y<=16;y++)
+		{
+			r = ksqrt(x*x + y*y);
+			lavaradx[r][lavaradcnt[r]] = x;
+			lavarady[r][lavaradcnt[r]] = y;
+			lavaradcnt[r]++;
+		}
 
-	if (datag == 2)    //A sprite that shoots a bomb
-	{
-		shootgun(dasprite,
-					sprite[dasprite].x,sprite[dasprite].y,sprite[dasprite].z,
-					sprite[dasprite].ang,100L,sprite[dasprite].sectnum,2);
-	}
+	for(z=0;z<16;z++)
+		lavadropsizlookup[z] = 8 / (ksqrt(z)+1);
+
+	for(z=0;z<LAVASIZ;z++)
+		lavainc[z] = klabs((((z^17)>>4)&7)-4)+12;
+
+	lavanumdrops = 0;
+	lavanumframes = 0;
 }
 
-long changehealth(short snum, short deltahealth)
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
+
+        long addlava(int param);
+    #pragma aux addlava =\
+	"mov al, byte ptr [ebx-133]",\
+	"mov dl, byte ptr [ebx-1]",\
+	"add al, byte ptr [ebx-132]",\
+	"add dl, byte ptr [ebx+131]",\
+	"add al, byte ptr [ebx-131]",\
+	"add dl, byte ptr [ebx+132]",\
+	"add al, byte ptr [ebx+1]",\
+	"add al, dl",\
+	parm [ebx]\
+	modify exact [eax edx]
+
+  #elif (defined __GNUC__)
+	static long addlava (int i1)
+	{
+        long retval;
+        __asm__ __volatile__ (
+            "\n\t"
+            "movb -133(%%ebx), %%al\n\t"
+            "movb -1(%%ebx), %%dl\n\t"
+            "addb -132(%%ebx), %%al\n\t"
+            "addb 131(%%ebx), %%dl\n\t"
+            "addb -131(%%ebx), %%al\n\t"
+            "addb 132(%%ebx), %%dl\n\t"
+            "addb 1(%%ebx), %%al\n\t"
+            "addb %%dl, %%al\n\t"
+        : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
+        return (retval);
+	}	
+
+  #else
+      #error Please write Assembly code for your platform!
+    #endif
+
+#else   /* USE_I386_ASM */
+    #error Please implement this function in C.
+#endif
+
+
+void movelava(char *dapic)
 {
-//	long dax, day;
-//	short good, k, startwall, endwall, s;
+	long i, j, x, y, z, zz, dalavadropsiz, dadropsizlookup;
+	long dalavax, dalavay, *ptr, *ptr2;
 
-	if (health[snum] > 0)
+	for(z=min(LAVAMAXDROPS-lavanumdrops-1,3);z>=0;z--)
 	{
-		health[snum] += deltahealth;
-		if (health[snum] > 999) health[snum] = 999;
+		lavadropx[lavanumdrops] = (rand()&(LAVASIZ-1));
+		lavadropy[lavanumdrops] = (rand()&(LAVASIZ-1));
+		lavadropsiz[lavanumdrops] = 1;
+		lavanumdrops++;
+	}
 
-		if (health[snum] <= 0)
+	for(z=lavanumdrops-1;z>=0;z--)
+	{
+		dadropsizlookup = lavadropsizlookup[lavadropsiz[z]]*(((z&1)<<1)-1);
+		dalavadropsiz = lavadropsiz[z];
+		dalavax = lavadropx[z]; dalavay = lavadropy[z];
+		for(zz=lavaradcnt[lavadropsiz[z]]-1;zz>=0;zz--)
 		{
-			health[snum] = -1;
-			wsayfollow("death.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-			sprite[playersprite[snum]].picnum = SKELETON;
+			i = (((lavaradx[dalavadropsiz][zz]+dalavax)&(LAVASIZ-1))<<LAVALOGSIZ);
+			i += ((lavarady[dalavadropsiz][zz]+dalavay)&(LAVASIZ-1));
+			dapic[i] += dadropsizlookup;
+			if (dapic[i] < 192) dapic[i] = 192;
 		}
 
-		if ((snum == screenpeek) && (screensize <= xdim))
+		lavadropsiz[z]++;
+		if (lavadropsiz[z] > 10)
 		{
-			if (health[snum] > 0)
-				sprintf((char*)&tempbuf,"Health:%3ld",health[snum]);
-			else
-				sprintf((char*)&tempbuf,"YOU STINK!");
-
-			printext((xdim>>1)-(strlen(tempbuf)<<2),ydim-24,tempbuf,ALPHABET,80);
+			lavanumdrops--;
+			lavadropx[z] = lavadropx[lavanumdrops];
+			lavadropy[z] = lavadropy[lavanumdrops];
+			lavadropsiz[z] = lavadropsiz[lavanumdrops];
 		}
 	}
-	return(health[snum] <= 0);      //You were just injured
+
+		/* Back up dapic with 1 pixel extra on each boundary */
+		/* (to prevent anding for wrap-around) */
+	ptr = (long *)dapic;
+	ptr2 = (long *)((LAVASIZ+4)+1+((long)lavabakpic));
+	for(x=0;x<LAVASIZ;x++)
+	{
+		for(y=(LAVASIZ>>2);y>0;y--) *ptr2++ = ((*ptr++)&0x1f1f1f1f);
+		ptr2++;
+	}
+	for(y=0;y<LAVASIZ;y++)
+	{
+		lavabakpic[y+1] = (dapic[y+((LAVASIZ-1)<<LAVALOGSIZ)]&31);
+		lavabakpic[y+1+(LAVASIZ+1)*(LAVASIZ+4)] = (dapic[y]&31);
+	}
+	for(x=0;x<LAVASIZ;x++)
+	{
+		lavabakpic[(x+1)*(LAVASIZ+4)] = (dapic[(x<<LAVALOGSIZ)+(LAVASIZ-1)]&31);
+		lavabakpic[(x+1)*(LAVASIZ+4)+(LAVASIZ+1)] = (dapic[x<<LAVALOGSIZ]&31);
+	}
+	lavabakpic[0] = (dapic[LAVASIZ*LAVASIZ-1]&31);
+	lavabakpic[LAVASIZ+1] = (dapic[LAVASIZ*(LAVASIZ-1)]&31);
+	lavabakpic[(LAVASIZ+4)*(LAVASIZ+1)] = (dapic[LAVASIZ-1]&31);
+	lavabakpic[(LAVASIZ+4)*(LAVASIZ+2)-1] = (dapic[0]&31);
+
+	ptr = (long *)dapic;
+	for(x=0;x<LAVASIZ;x++)
+	{
+		i = (long)&lavabakpic[(x+1)*(LAVASIZ+4)+1];
+		j = i+LAVASIZ;
+		for(y=i;y<j;y+=4)
+		{
+			*ptr++ = ((addlava(y+0)&0xf8)>>3)+
+						((addlava(y+1)&0xf8)<<5)+
+						((addlava(y+2)&0xf8)<<13)+
+						((addlava(y+3)&0xf8)<<21)+
+						0xc2c2c2c2;
+		}
+	}
+
+	lavanumframes++;
 }
 
-void changenumbombs(short snum, short deltanumbombs) {   // Andy did this
-	numbombs[snum] += deltanumbombs;
-	if (numbombs[snum] > 999) numbombs[snum] = 999;
-	if (numbombs[snum] <= 0) {
-		wsayfollow("doh.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-		numbombs[snum] = 0;
-	}
 
-	if ((snum == screenpeek) && (screensize <= xdim)) {
-		sprintf((char*)&tempbuf,"B:%3d",numbombs[snum]);
-		printext(8L,(ydim - 28L),tempbuf,ALPHABET,80);
+void drawtilebackground (long thex, long they, short tilenum,
+								  signed char shade, long cx1, long cy1,
+								  long cx2, long cy2, char dapalnum)
+{
+	long x, y, xsiz, ysiz, tx1, ty1, tx2, ty2;
+
+	xsiz = tilesizx[tilenum]; tx1 = cx1/xsiz; tx2 = cx2/xsiz;
+	ysiz = tilesizy[tilenum]; ty1 = cy1/ysiz; ty2 = cy2/ysiz;
+
+	for(x=tx1;x<=tx2;x++)
+		for(y=ty1;y<=ty2;y++)
+			rotatesprite(x*xsiz<<16,y*ysiz<<16,65536L,0,tilenum,shade,dapalnum,8+16+64+128,cx1,cy1,cx2,cy2);
+}
+
+
+void printext(long x, long y, char *buffer, short tilenum, char invisiblecol)
+{
+	long i;
+	char ch;
+
+	for(i=0;buffer[i]!=0;i++)
+	{
+		ch = buffer[i];
+		rotatesprite((x-((8&15)<<3))<<16,(y-((8>>4)<<3))<<16,65536L,0,tilenum,0,0,8+16+64+128,x,y,x+7,y+7);
+		rotatesprite((x-((ch&15)<<3))<<16,(y-((ch>>4)<<3))<<16,65536L,0,tilenum,0,0,8+16+128,x,y,x+7,y+7);
+		x += 8;
 	}
 }
 
-void changenummissiles(short snum, short deltanummissiles) {   // Andy did this
-	nummissiles[snum] += deltanummissiles;
-	if (nummissiles[snum] > 999) nummissiles[snum] = 999;
-	if (nummissiles[snum] <= 0) {
-		wsayfollow("doh.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-		nummissiles[snum] = 0;
-	}
-
-	if ((snum == screenpeek) && (screensize <= xdim)) {
-		sprintf((char*)&tempbuf,"M:%3d",nummissiles[snum]);
-		printext(8L,(ydim - 20L),tempbuf,ALPHABET,80);
-	}
-}
-
-void changenumgrabbers(short snum, short deltanumgrabbers) {   // Andy did this
-	numgrabbers[snum] += deltanumgrabbers;
-	if (numgrabbers[snum] > 999) numgrabbers[snum] = 999;
-	if (numgrabbers[snum] <= 0) {
-		wsayfollow("doh.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-		numgrabbers[snum] = 0;
-	}
-
-	if ((snum == screenpeek) && (screensize <= xdim)) {
-		sprintf((char*)&tempbuf,"G:%3d",numgrabbers[snum]);
-		printext(8L,(ydim - 12L),tempbuf,ALPHABET,80);
-	}
-}
 
 static long ostatusflytime = 0x80000000;
 
-void drawstatusflytime(short snum) {   // Andy did this
+void drawstatusflytime(short snum) {   /* Andy did this */
 	long nstatusflytime;
 
 	if ((snum == screenpeek) && (screensize <= xdim)) {
@@ -1027,7 +690,8 @@ void drawstatusflytime(short snum) {   // Andy did this
 	}
 }
 
-void drawstatusbar(short snum) {   // Andy did this
+
+void drawstatusbar(short snum) {   /* Andy did this */
 	long nstatusflytime;
 
 	if ((snum == screenpeek) && (screensize <= xdim)) {
@@ -1060,10 +724,195 @@ void drawstatusbar(short snum) {   // Andy did this
 	}
 }
 
+
+void setup3dscreen(void)
+{
+	long i, dax, day, dax2, day2;
+
+	i = setgamemode(option[0],vesares[option[6]&15][0],vesares[option[6]&15][1]);
+	if (i < 0)
+	{
+		printf("VESA driver for (%ld * %ld) not found/supported.\n",xdim,ydim);
+		printf("   Press ENTER to play in NORMAL mode instead\n");
+		printf("   Press ESC to quit to DOS\n");
+		keystatus[1] = keystatus[0x1c] = keystatus[0x9c] = 0;
+		while (!keystatus[1])
+			if (keystatus[0x1c]|keystatus[0x9c])
+				{ option[0] = vidoption = 2; i = setgamemode(option[0],vesares[option[6]&15][0],vesares[option[6]&15][1]); break; }
+	}
+	if (i < 0)
+	{
+		sendlogoff();
+		musicoff();
+		uninitmultiplayers();
+		uninittimer();
+		uninitkeys();
+		uninitengine();
+		uninitsb();
+		uninitgroupfile();
+		exit(0);
+	}
+
+	  /* Make that ugly pink into black in case it ever shows up! */
+	i = 0L;
+	VBE_setPalette(255,1,(char *)&i);
+	/*outp(0x3c8,255); outp(0x3c9,0); outp(0x3c9,0); outp(0x3c9,0);*/
+
+	screensize = xdim;
+	if (screensize > xdim)
+	{
+		dax = 0; day = 0;
+		dax2 = xdim-1; day2 = ydim-1;
+	}
+	else
+	{
+		dax = ((xdim-screensize)>>1);
+		dax2 = dax+screensize-1;
+		day = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
+		day2 = day + scale(screensize,ydim-32,xdim)-1;
+		setview(dax,day,dax2,day2);
+	}
+
+	flushperms();
+
+	if (screensize < xdim)
+		drawtilebackground(0L,0L,BACKGROUND,8,0L,0L,xdim-1L,ydim-1L,0);      /* Draw background */
+
+	if (screensize <= xdim)
+	{
+		rotatesprite((xdim-320)<<15,(ydim-32)<<16,65536L,0,STATUSBAR,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
+		i = ((xdim-320)>>1);
+		while (i >= 8) i -= 8, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
+		if (i >= 4) i -= 4, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
+		i = ((xdim-320)>>1)+320;
+		while (i <= xdim-8) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 8;
+		if (i <= xdim-4) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 4;
+
+		drawstatusbar(screenpeek);   /* Andy did this */
+	}
+}
+
+
+void setinterpolation(long *posptr)
+{
+	long i;
+
+	if (numinterpolations >= MAXINTERPOLATIONS) return;
+	for(i=numinterpolations-1;i>=0;i--)
+		if (curipos[i] == posptr) return;
+	curipos[numinterpolations] = posptr;
+	oldipos[numinterpolations] = *posptr;
+	numinterpolations++;
+}
+
+
+void stopinterpolation(long *posptr)
+{
+	long i;
+
+	for(i=numinterpolations-1;i>=startofdynamicinterpolations;i--)
+		if (curipos[i] == posptr)
+		{
+			numinterpolations--;
+			oldipos[i] = oldipos[numinterpolations];
+			bakipos[i] = bakipos[numinterpolations];
+			curipos[i] = curipos[numinterpolations];
+		}
+}
+
+
+void updateinterpolations()  /* Stick at beginning of domovethings */
+{
+	long i;
+
+	for(i=numinterpolations-1;i>=0;i--) oldipos[i] = *curipos[i];
+}
+
+
+void dointerpolations()       /* Stick at beginning of drawscreen */
+{
+	long i, j, odelta, ndelta;
+
+	ndelta = 0; j = 0;
+	for(i=numinterpolations-1;i>=0;i--)
+	{
+		bakipos[i] = *curipos[i];
+		odelta = ndelta; ndelta = (*curipos[i])-oldipos[i];
+		if (odelta != ndelta) j = mulscale16(ndelta,smoothratio);
+		*curipos[i] = oldipos[i]+j;
+	}
+}
+
+
+void restoreinterpolations()  /* Stick at end of drawscreen */
+{
+	long i;
+
+	for(i=numinterpolations-1;i>=0;i--) *curipos[i] = bakipos[i];
+}
+
+
+void searchmap(short startsector)
+{
+	long i, j, dasect, splc, send, startwall, endwall;
+	short dapic;
+	walltype *wal;
+
+	if ((startsector < 0) || (startsector >= numsectors)) return;
+	for(i=0;i<(MAXSECTORS>>3);i++) show2dsector[i] = 0;
+	for(i=0;i<(MAXWALLS>>3);i++) show2dwall[i] = 0;
+	for(i=0;i<(MAXSPRITES>>3);i++) show2dsprite[i] = 0;
+
+	automapping = 0;
+
+		/* Search your area recursively & set all show2dsector/show2dwalls */
+	tempshort[0] = startsector;
+	show2dsector[startsector>>3] |= (1<<(startsector&7));
+	dapic = sector[startsector].ceilingpicnum;
+	if (waloff[dapic] == 0) loadtile(dapic);
+	dapic = sector[startsector].floorpicnum;
+	if (waloff[dapic] == 0) loadtile(dapic);
+	for(splc=0,send=1;splc<send;splc++)
+	{
+		dasect = tempshort[splc];
+		startwall = sector[dasect].wallptr;
+		endwall = startwall + sector[dasect].wallnum;
+		for(i=startwall,wal=&wall[startwall];i<endwall;i++,wal++)
+		{
+			show2dwall[i>>3] |= (1<<(i&7));
+			dapic = wall[i].picnum;
+			if (waloff[dapic] == 0) loadtile(dapic);
+			dapic = wall[i].overpicnum;
+			if (((dapic&0xfffff000) == 0) && (waloff[dapic] == 0)) loadtile(dapic);
+
+			j = wal->nextsector;
+			if ((j >= 0) && ((show2dsector[j>>3]&(1<<(j&7))) == 0))
+			{
+				show2dsector[j>>3] |= (1<<(j&7));
+
+				dapic = sector[j].ceilingpicnum;
+				if (waloff[dapic] == 0) loadtile(dapic);
+				dapic = sector[j].floorpicnum;
+				if (waloff[dapic] == 0) loadtile(dapic);
+
+				tempshort[send++] = (short)j;
+			}
+		}
+
+		for(i=headspritesect[dasect];i>=0;i=nextspritesect[i])
+		{
+			show2dsprite[i>>3] |= (1<<(i&7));
+			dapic = sprite[i].picnum;
+			if (waloff[dapic] == 0) loadtile(dapic);
+		}
+	}
+}
+
+
 void prepareboard(char *daboardfilename)
 {
 	short startwall, endwall, dasector;
-//	long i, j, k, s, dax, day, daz, dax2, day2;
+	/*long i, j, k, s, dax, day, daz, dax2, day2;*/
 	long i, j, k=0, s, dax, day, dax2, day2;
 
 	getmessageleng = 0;
@@ -1071,7 +920,7 @@ void prepareboard(char *daboardfilename)
 
 	randomseed = 17L;
 
-		//Clear (do)animation's list
+		/* Clear (do)animation's list */
 	animatecnt = 0;
 	typemode = 0;
 	locselectedgun = 0;
@@ -1086,7 +935,7 @@ void prepareboard(char *daboardfilename)
 		uninitengine();
 		uninitsb();
 		uninitgroupfile();
-		setvmode(0x3);        //Set back to text mode
+		setvmode(0x3);        /* Set back to text mode */
 		printf("Board not found\n");
 		exit(0);
 	}
@@ -1144,7 +993,7 @@ void prepareboard(char *daboardfilename)
 		clearbufbyte(&osync[i],sizeof(input),0L);
 	}
 
-		//Scan sector tags
+		/* Scan sector tags */
 
 	for(i=0;i<MAXPLAYERS;i++)
 	{
@@ -1152,13 +1001,13 @@ void prepareboard(char *daboardfilename)
 		waterfountaincnt[i] = 0;
 	}
 	slimesoundcnt[i] = 0;
-	warpsectorcnt = 0;      //Make a list of warping sectors
-	xpanningsectorcnt = 0;  //Make a list of wall x-panning sectors
-	floorpanningcnt = 0;    //Make a list of slime sectors
-	dragsectorcnt = 0;      //Make a list of moving platforms
-	swingcnt = 0;           //Make a list of swinging doors
-	revolvecnt = 0;         //Make a list of revolving doors
-	subwaytrackcnt = 0;     //Make a list of subways
+	warpsectorcnt = 0;      /* Make a list of warping sectors */
+	xpanningsectorcnt = 0;  /* Make a list of wall x-panning sectors */
+	floorpanningcnt = 0;    /* Make a list of slime sectors */
+	dragsectorcnt = 0;      /* Make a list of moving platforms */
+	swingcnt = 0;           /* Make a list of swinging doors */
+	revolvecnt = 0;         /* Make a list of revolving doors */
+	subwaytrackcnt = 0;     /* Make a list of subways */
 
 	floormirrorcnt = 0;
 	tilesizx[FLOORMIRROR] = 0;
@@ -1237,7 +1086,7 @@ void prepareboard(char *daboardfilename)
 					{
 						k = wall[wall[wall[wall[j].point2].point2].point2].point2;
 						if ((wall[j].x == wall[k].x) && (wall[j].y == wall[k].y))
-						{     //Door opens counterclockwise
+						{     /* Door opens counterclockwise */
 							swingwall[swingcnt][0] = j;
 							swingwall[swingcnt][1] = wall[j].point2;
 							swingwall[swingcnt][2] = wall[wall[j].point2].point2;
@@ -1247,7 +1096,7 @@ void prepareboard(char *daboardfilename)
 							swingangopendir[swingcnt] = -1;
 						}
 						else
-						{     //Door opens clockwise
+						{     /* Door opens clockwise */
 							swingwall[swingcnt][0] = wall[j].point2;
 							swingwall[swingcnt][1] = j;
 							swingwall[swingcnt][2] = lastwall(j);
@@ -1407,7 +1256,7 @@ void prepareboard(char *daboardfilename)
 			floormirrorsector[mirrorcnt++] = i;
 	}
 
-		//Scan wall tags
+		/* Scan wall tags */
 
 	mirrorcnt = 0;
 	tilesizx[MIRROR] = 0;
@@ -1440,7 +1289,7 @@ void prepareboard(char *daboardfilename)
 		}
 	}
 
-		//Invalidate textures in sector behind mirror
+		/* Invalidate textures in sector behind mirror */
 	for(i=0;i<mirrorcnt;i++)
 	{
 		k = mirrorsector[i];
@@ -1453,17 +1302,17 @@ void prepareboard(char *daboardfilename)
 		}
 	}
 
-		//Scan sprite tags&picnum's
+		/* Scan sprite tags&picnum's */
 
 	turnspritecnt = 0;
 	for(i=0;i<MAXSPRITES;i++)
 	{
 		if (sprite[i].lotag == 3) turnspritelist[turnspritecnt++] = i;
 
-		if (sprite[i].statnum < MAXSTATUS)    //That is, if sprite exists
+		if (sprite[i].statnum < MAXSTATUS)    /* That is, if sprite exists */
 			switch(sprite[i].picnum)
 			{
-				case BROWNMONSTER:              //All cases here put the sprite
+				case BROWNMONSTER:              /* All cases here put the sprite */
 					if ((sprite[i].cstat&128) == 0)
 					{
 						sprite[i].z -= ((tilesizy[sprite[i].picnum]*sprite[i].yrepeat)<<1);
@@ -1471,17 +1320,17 @@ void prepareboard(char *daboardfilename)
 					}
 					sprite[i].extra = sprite[i].ang;
 					sprite[i].clipdist = mulscale7(sprite[i].xrepeat,tilesizx[sprite[i].picnum]);
-					if (sprite[i].statnum != 1) changespritestat(i,2);   //on waiting for you (list 2)
+					if (sprite[i].statnum != 1) changespritestat(i,2);   /* on waiting for you (list 2) */
 					sprite[i].lotag = mulscale5(sprite[i].xrepeat,sprite[i].yrepeat);
-					sprite[i].cstat |= 0x101;    //Set the hitscan sensitivity bit
+					sprite[i].cstat |= 0x101;    /* Set the hitscan sensitivity bit */
 					break;
 				case AL:
-					sprite[i].cstat |= 0x101;    //Set the hitscan sensitivity bit
+					sprite[i].cstat |= 0x101;    /* Set the hitscan sensitivity bit */
 					sprite[i].lotag = 0x60;
 					changespritestat(i,0);
 					break;
 				case EVILAL:
-					sprite[i].cstat |= 0x101;    //Set the hitscan sensitivity bit
+					sprite[i].cstat |= 0x101;    /* Set the hitscan sensitivity bit */
 					sprite[i].lotag = 0x60;
 					changespritestat(i,10);
 					break;
@@ -1505,6 +1354,595 @@ void prepareboard(char *daboardfilename)
 
 	startofdynamicinterpolations = numinterpolations;
 }
+
+
+long changehealth(short snum, short deltahealth)
+{
+	/*long dax, day;*/
+	/*short good, k, startwall, endwall, s;*/
+
+	if (health[snum] > 0)
+	{
+		health[snum] += deltahealth;
+		if (health[snum] > 999) health[snum] = 999;
+
+		if (health[snum] <= 0)
+		{
+			health[snum] = -1;
+			wsayfollow("death.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+			sprite[playersprite[snum]].picnum = SKELETON;
+		}
+
+		if ((snum == screenpeek) && (screensize <= xdim))
+		{
+			if (health[snum] > 0)
+				sprintf((char*)&tempbuf,"Health:%3ld",health[snum]);
+			else
+				sprintf((char*)&tempbuf,"YOU STINK!");
+
+			printext((xdim>>1)-(strlen(tempbuf)<<2),ydim-24,tempbuf,ALPHABET,80);
+		}
+	}
+	return(health[snum] <= 0);      /* You were just injured */
+}
+
+
+void changenumbombs(short snum, short deltanumbombs) {   /* Andy did this */
+	numbombs[snum] += deltanumbombs;
+	if (numbombs[snum] > 999) numbombs[snum] = 999;
+	if (numbombs[snum] <= 0) {
+		wsayfollow("doh.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+		numbombs[snum] = 0;
+	}
+
+	if ((snum == screenpeek) && (screensize <= xdim)) {
+		sprintf((char*)&tempbuf,"B:%3d",numbombs[snum]);
+		printext(8L,(ydim - 28L),tempbuf,ALPHABET,80);
+	}
+}
+
+
+void changenummissiles(short snum, short deltanummissiles) {   /* Andy did this */
+	nummissiles[snum] += deltanummissiles;
+	if (nummissiles[snum] > 999) nummissiles[snum] = 999;
+	if (nummissiles[snum] <= 0) {
+		wsayfollow("doh.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+		nummissiles[snum] = 0;
+	}
+
+	if ((snum == screenpeek) && (screensize <= xdim)) {
+		sprintf((char*)&tempbuf,"M:%3d",nummissiles[snum]);
+		printext(8L,(ydim - 20L),tempbuf,ALPHABET,80);
+	}
+}
+
+
+void changenumgrabbers(short snum, short deltanumgrabbers) {   /* Andy did this */
+	numgrabbers[snum] += deltanumgrabbers;
+	if (numgrabbers[snum] > 999) numgrabbers[snum] = 999;
+	if (numgrabbers[snum] <= 0) {
+		wsayfollow("doh.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+		numgrabbers[snum] = 0;
+	}
+
+	if ((snum == screenpeek) && (screensize <= xdim)) {
+		sprintf((char*)&tempbuf,"G:%3d",numgrabbers[snum]);
+		printext(8L,(ydim - 12L),tempbuf,ALPHABET,80);
+	}
+}
+
+
+void findrandomspot(long *x, long *y, short *sectnum)
+{
+	short startwall, endwall, s, dasector;
+	long dax, day, daz, minx, maxx, miny, maxy, cnt;
+
+	for(cnt=256;cnt>=0;cnt--)
+	{
+		do
+		{
+			dasector = mulscale16(krand(),numsectors);
+		} while ((sector[dasector].ceilingz+(8<<8) >= sector[dasector].floorz) || ((sector[dasector].lotag|sector[dasector].hitag) != 0) || ((sector[dasector].floorstat&1) != 0));
+
+		startwall = sector[dasector].wallptr;
+		endwall = startwall+sector[dasector].wallnum;
+		if (endwall <= startwall) continue;
+
+		dax = 0L;
+		day = 0L;
+		minx = 0x7fffffff; maxx = 0x80000000;
+		miny = 0x7fffffff; maxy = 0x80000000;
+
+		for(s=startwall;s<endwall;s++)
+		{
+			dax += wall[s].x;
+			day += wall[s].y;
+			if (wall[s].x < minx) minx = wall[s].x;
+			if (wall[s].x > maxx) maxx = wall[s].x;
+			if (wall[s].y < miny) miny = wall[s].y;
+			if (wall[s].y > maxy) maxy = wall[s].y;
+		}
+
+		if ((maxx-minx <= 256) || (maxy-miny <= 256)) continue;
+
+		dax /= (endwall-startwall);
+		day /= (endwall-startwall);
+
+		if (inside(dax,day,dasector) == 0) continue;
+
+		daz = sector[dasector].floorz-(32<<8);
+		if (pushmove(&dax,&day,&daz,&dasector,128L,4<<8,4<<8,CLIPMASK0) < 0) continue;
+
+		*x = dax; *y = day; *sectnum = dasector;
+		return;
+	}
+}
+
+
+long getanimationgoal(long animptr)
+{
+	long i;
+
+	for(i=animatecnt-1;i>=0;i--)
+		if ((long *)animptr == animateptr[i]) return(i);
+	return(-1);
+}
+
+
+long setanimation(long *animptr, long thegoal, long thevel, long theacc)
+{
+	long i, j;
+
+	if (animatecnt >= MAXANIMATES) return(-1);
+
+	j = animatecnt;
+	for(i=animatecnt-1;i>=0;i--)
+		if (animptr == animateptr[i])
+			{ j = i; break; }
+
+	setinterpolation(animptr);
+
+	animateptr[j] = animptr;
+	animategoal[j] = thegoal;
+	animatevel[j] = thevel;
+	animateacc[j] = theacc;
+	if (j == animatecnt) animatecnt++;
+	return(j);
+}
+
+
+void operatesector(short dasector)
+{     /* Door code */
+	long i, j, datag;
+	long daz, dax2, day2, centx, centy;
+	short startwall, endwall, wallfind[2];
+
+	datag = sector[dasector].lotag;
+
+	startwall = sector[dasector].wallptr;
+	endwall = startwall + sector[dasector].wallnum;
+	centx = 0L, centy = 0L;
+	for(i=startwall;i<endwall;i++)
+	{
+		centx += wall[i].x;
+		centy += wall[i].y;
+	}
+	centx /= (endwall-startwall);
+	centy /= (endwall-startwall);
+
+		/* Simple door that moves up  (tag 8 is a combination of tags 6 & 7) */
+	if ((datag == 6) || (datag == 8))    /* If the sector in front is a door */
+	{
+		i = getanimationgoal((long)&sector[dasector].ceilingz);
+		if (i >= 0)      /* If door already moving, reverse its direction */
+		{
+			if (datag == 8)
+				daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
+			else
+				daz = sector[dasector].floorz;
+
+			if (animategoal[i] == daz)
+				animategoal[i] = sector[nextsectorneighborz(dasector,sector[dasector].floorz,-1,-1)].ceilingz;
+			else
+				animategoal[i] = daz;
+			animatevel[i] = 0;
+		}
+		else      /* else insert the door's ceiling on the animation list */
+		{
+			if (sector[dasector].ceilingz == sector[dasector].floorz)
+				daz = sector[nextsectorneighborz(dasector,sector[dasector].floorz,-1,-1)].ceilingz;
+			else
+			{
+				if (datag == 8)
+					daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
+				else
+					daz = sector[dasector].floorz;
+			}
+			if ((j = setanimation(&sector[dasector].ceilingz,daz,6L,6L)) >= 0)
+				wsayfollow("updowndr.wav",4096L+(krand()&255)-128,256L,&centx,&centy,0);
+		}
+	}
+		/* Simple door that moves down */
+	if ((datag == 7) || (datag == 8)) /* If the sector in front's elevator */
+	{
+		i = getanimationgoal((long)&sector[dasector].floorz);
+		if (i >= 0)      /* If elevator already moving, reverse its direction */
+		{
+			if (datag == 8)
+				daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
+			else
+				daz = sector[dasector].ceilingz;
+
+			if (animategoal[i] == daz)
+				animategoal[i] = sector[nextsectorneighborz(dasector,sector[dasector].ceilingz,1,1)].floorz;
+			else
+				animategoal[i] = daz;
+			animatevel[i] = 0;
+		}
+		else      /* else insert the elevator's ceiling on the animation list */
+		{
+			if (sector[dasector].floorz == sector[dasector].ceilingz)
+				daz = sector[nextsectorneighborz(dasector,sector[dasector].ceilingz,1,1)].floorz;
+			else
+			{
+				if (datag == 8)
+					daz = ((sector[dasector].ceilingz+sector[dasector].floorz)>>1);
+				else
+					daz = sector[dasector].ceilingz;
+			}
+			if ((j = setanimation(&sector[dasector].floorz,daz,6L,6L)) >= 0)
+				wsayfollow("updowndr.wav",4096L+(krand()&255)-128,256L,&centx,&centy,0);
+		}
+	}
+
+	if (datag == 9)   /* Smooshy-wall sideways double-door */
+	{
+		/*
+         * find any points with either same x or same y coordinate
+		 *  as center (centx, centy) - should be 2 points found.
+         */
+		wallfind[0] = -1;
+		wallfind[1] = -1;
+		for(i=startwall;i<endwall;i++)
+			if ((wall[i].x == centx) || (wall[i].y == centy))
+			{
+				if (wallfind[0] == -1)
+					wallfind[0] = i;
+				else
+					wallfind[1] = i;
+			}
+
+		for(j=0;j<2;j++)
+		{
+			if ((wall[wallfind[j]].x == centx) && (wall[wallfind[j]].y == centy))
+			{
+				/*
+                 * find what direction door should open by averaging the
+				 *  2 neighboring points of wallfind[0] & wallfind[1].
+                 */
+				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
+				dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
+				day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
+				if (dax2 != 0)
+				{
+					dax2 = wall[wall[wall[wallfind[j]].point2].point2].x;
+					dax2 -= wall[wall[wallfind[j]].point2].x;
+					setanimation(&wall[wallfind[j]].x,wall[wallfind[j]].x+dax2,4L,0L);
+					setanimation(&wall[i].x,wall[i].x+dax2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].x,wall[wall[wallfind[j]].point2].x+dax2,4L,0L);
+				}
+				else if (day2 != 0)
+				{
+					day2 = wall[wall[wall[wallfind[j]].point2].point2].y;
+					day2 -= wall[wall[wallfind[j]].point2].y;
+					setanimation(&wall[wallfind[j]].y,wall[wallfind[j]].y+day2,4L,0L);
+					setanimation(&wall[i].y,wall[i].y+day2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].y,wall[wall[wallfind[j]].point2].y+day2,4L,0L);
+				}
+			}
+			else
+			{
+				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
+				dax2 = ((wall[i].x+wall[wall[wallfind[j]].point2].x)>>1)-wall[wallfind[j]].x;
+				day2 = ((wall[i].y+wall[wall[wallfind[j]].point2].y)>>1)-wall[wallfind[j]].y;
+				if (dax2 != 0)
+				{
+					setanimation(&wall[wallfind[j]].x,centx,4L,0L);
+					setanimation(&wall[i].x,centx+dax2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].x,centx+dax2,4L,0L);
+				}
+				else if (day2 != 0)
+				{
+					setanimation(&wall[wallfind[j]].y,centy,4L,0L);
+					setanimation(&wall[i].y,centy+day2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].y,centy+day2,4L,0L);
+				}
+			}
+		}
+		wsayfollow("updowndr.wav",4096L-256L,256L,&centx,&centy,0);
+		wsayfollow("updowndr.wav",4096L+256L,256L,&centx,&centy,0);
+	}
+
+	if (datag == 13)  /* Swinging door */
+	{
+		for(i=0;i<swingcnt;i++)
+		{
+			if (swingsector[i] == dasector)
+			{
+				if (swinganginc[i] == 0)
+				{
+					if (swingang[i] == swingangclosed[i])
+					{
+						swinganginc[i] = swingangopendir[i];
+						wsayfollow("opendoor.wav",4096L+(krand()&511)-256,256L,&centx,&centy,0);
+					}
+					else
+						swinganginc[i] = -swingangopendir[i];
+				}
+				else
+					swinganginc[i] = -swinganginc[i];
+
+				for(j=1;j<=3;j++)
+				{
+					setinterpolation(&wall[swingwall[i][j]].x);
+					setinterpolation(&wall[swingwall[i][j]].y);
+				}
+			}
+		}
+	}
+
+	if (datag == 16)  /* True sideways double-sliding door */
+	{
+		 /* get 2 closest line segments to center (dax, day) */
+		wallfind[0] = -1;
+		wallfind[1] = -1;
+		for(i=startwall;i<endwall;i++)
+			if (wall[i].lotag == 6)
+			{
+				if (wallfind[0] == -1)
+					wallfind[0] = i;
+				else
+					wallfind[1] = i;
+			}
+
+		for(j=0;j<2;j++)
+		{
+			if ((((wall[wallfind[j]].x+wall[wall[wallfind[j]].point2].x)>>1) == centx) && (((wall[wallfind[j]].y+wall[wall[wallfind[j]].point2].y)>>1) == centy))
+			{     /* door was closed */
+					/* find what direction door should open */
+				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
+				dax2 = wall[i].x-wall[wallfind[j]].x;
+				day2 = wall[i].y-wall[wallfind[j]].y;
+				if (dax2 != 0)
+				{
+					dax2 = wall[wall[wall[wall[wallfind[j]].point2].point2].point2].x;
+					dax2 -= wall[wall[wall[wallfind[j]].point2].point2].x;
+					setanimation(&wall[wallfind[j]].x,wall[wallfind[j]].x+dax2,4L,0L);
+					setanimation(&wall[i].x,wall[i].x+dax2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].x,wall[wall[wallfind[j]].point2].x+dax2,4L,0L);
+					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].x,wall[wall[wall[wallfind[j]].point2].point2].x+dax2,4L,0L);
+				}
+				else if (day2 != 0)
+				{
+					day2 = wall[wall[wall[wall[wallfind[j]].point2].point2].point2].y;
+					day2 -= wall[wall[wall[wallfind[j]].point2].point2].y;
+					setanimation(&wall[wallfind[j]].y,wall[wallfind[j]].y+day2,4L,0L);
+					setanimation(&wall[i].y,wall[i].y+day2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].y,wall[wall[wallfind[j]].point2].y+day2,4L,0L);
+					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].y,wall[wall[wall[wallfind[j]].point2].point2].y+day2,4L,0L);
+				}
+			}
+			else
+			{    /* door was not closed */
+				i = wallfind[j]-1; if (i < startwall) i = endwall-1;
+				dax2 = wall[i].x-wall[wallfind[j]].x;
+				day2 = wall[i].y-wall[wallfind[j]].y;
+				if (dax2 != 0)
+				{
+					setanimation(&wall[wallfind[j]].x,centx,4L,0L);
+					setanimation(&wall[i].x,centx+dax2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].x,centx,4L,0L);
+					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].x,centx+dax2,4L,0L);
+				}
+				else if (day2 != 0)
+				{
+					setanimation(&wall[wallfind[j]].y,centy,4L,0L);
+					setanimation(&wall[i].y,centy+day2,4L,0L);
+					setanimation(&wall[wall[wallfind[j]].point2].y,centy,4L,0L);
+					setanimation(&wall[wall[wall[wallfind[j]].point2].point2].y,centy+day2,4L,0L);
+				}
+			}
+		}
+		wsayfollow("updowndr.wav",4096L-64L,256L,&centx,&centy,0);
+		wsayfollow("updowndr.wav",4096L+64L,256L,&centx,&centy,0);
+	}
+}
+
+
+	/*
+     * New movesprite using getzrange.  Note that I made the getzrange
+	 * parameters global (&globhiz,&globhihit,&globloz,&globlohit) so they
+	 * don't need to be passed everywhere.  Also this should make this
+	 * movesprite function compatible with the older movesprite functions.
+     */
+short movesprite(short spritenum, long dx, long dy, long dz, long ceildist, long flordist, long clipmask)
+{
+	long daz, zoffs;
+	short retval, dasectnum, datempshort;
+	spritetype *spr;
+
+	spr = &sprite[spritenum];
+
+	if ((spr->cstat&128) == 0)
+		zoffs = -((tilesizy[spr->picnum]*spr->yrepeat)<<1);
+	else
+		zoffs = 0;
+
+	dasectnum = spr->sectnum;  /* Can't modify sprite sectors directly becuase of linked lists */
+	daz = spr->z+zoffs;  /* Must do this if not using the new centered centering (of course) */
+	retval = clipmove(&spr->x,&spr->y,&daz,&dasectnum,dx,dy,
+							((long)spr->clipdist)<<2,ceildist,flordist,clipmask);
+
+	if (dasectnum < 0) retval = -1;
+
+	if ((dasectnum != spr->sectnum) && (dasectnum >= 0))
+		changespritesect(spritenum,dasectnum);
+
+		/*
+         * Set the blocking bit to 0 temporarly so getzrange doesn't pick up
+		 * its own sprite
+         */
+	datempshort = spr->cstat; spr->cstat &= ~1;
+	getzrange(spr->x,spr->y,spr->z-1,spr->sectnum,
+				 &globhiz,&globhihit,&globloz,&globlohit,
+				 ((long)spr->clipdist)<<2,clipmask);
+	spr->cstat = datempshort;
+
+	daz = spr->z+zoffs + dz;
+	if ((daz <= globhiz) || (daz > globloz))
+	{
+		if (retval != 0) return(retval);
+		return(16384+dasectnum);
+	}
+	spr->z = daz-zoffs;
+	return(retval);
+}
+
+
+void shootgun(short snum, long x, long y, long z,
+			short daang, long dahoriz, short dasectnum, char guntype)
+{
+	short hitsect, hitwall, hitsprite, daang2;
+	long j, daz2, hitx, hity, hitz;
+
+	switch(guntype)
+	{
+		case 0:    /* Shoot chain gun */
+			daang2 = ((daang + (krand()&31)-16)&2047);
+			daz2 = ((100-dahoriz)*2000) + ((krand()-32768)>>1);
+
+			hitscan(x,y,z,dasectnum,                   /* Start position */
+				sintable[(daang2+512)&2047],            /* X vector of 3D ang */
+				sintable[daang2&2047],                  /* Y vector of 3D ang */
+				daz2,                                   /* Z vector of 3D ang */
+				&hitsect,&hitwall,&hitsprite,&hitx,&hity,&hitz,CLIPMASK1);
+
+			if (wall[hitwall].picnum == KENPICTURE)
+			{
+				if (waloff[MAXTILES-1] != 0) wall[hitwall].picnum = MAXTILES-1;
+				wsayfollow("hello.wav",4096L+(krand()&127)-64,256L,&wall[hitwall].x,&wall[hitwall].y,0);
+			}
+			else if (((hitwall < 0) && (hitsprite < 0) && (hitz >= z) && ((sector[hitsect].floorpicnum == SLIME) || (sector[hitsect].floorpicnum == FLOORMIRROR))) || ((hitwall >= 0) && (wall[hitwall].picnum == SLIME)))
+			{    /* If you shoot slime, make a splash */
+				wsayfollow("splash.wav",4096L+(krand()&511)-256,256L,&hitx,&hity,0);
+				spawnsprite(j,hitx,hity,hitz,2,0,0,32,64,64,0,0,SPLASH,daang,
+					0,0,0,snum+4096,hitsect,4,63,0,0); /* 63=time left for splash */
+			}
+			else
+			{
+				wsayfollow("shoot.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
+
+				if ((hitsprite >= 0) && (sprite[hitsprite].statnum < MAXSTATUS))
+					switch(sprite[hitsprite].picnum)
+					{
+						case BROWNMONSTER:
+							if (sprite[hitsprite].lotag > 0) sprite[hitsprite].lotag -= 10;
+							if (sprite[hitsprite].lotag > 0)
+							{
+								wsayfollow("hurt.wav",4096L+(krand()&511)-256,256L,&hitx,&hity,0);
+								if (sprite[hitsprite].lotag <= 25)
+									sprite[hitsprite].cstat |= 2;
+							}
+							else
+							{
+								wsayfollow("mondie.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
+								sprite[hitsprite].z += ((tilesizy[sprite[hitsprite].picnum]*sprite[hitsprite].yrepeat)<<1);
+								sprite[hitsprite].picnum = GIFTBOX;
+								sprite[hitsprite].cstat &= ~0x83;    /* Should not clip, foot-z */
+								changespritestat(hitsprite,12);
+
+								spawnsprite(j,hitx,hity,hitz+(32<<8),0,-4,0,32,64,64,
+									0,0,EXPLOSION,daang,0,0,0,snum+4096,
+									hitsect,5,31,0,0);
+							}
+							break;
+						case EVILAL:
+							wsayfollow("blowup.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
+							sprite[hitsprite].picnum = EVILALGRAVE;
+							sprite[hitsprite].cstat = 0;
+							sprite[hitsprite].xvel = (krand()&255)-128;
+							sprite[hitsprite].yvel = (krand()&255)-128;
+							sprite[hitsprite].zvel = (krand()&4095)-3072;
+							changespritestat(hitsprite,9);
+
+							spawnsprite(j,hitx,hity,hitz+(32<<8),0,-4,0,32,64,64,0,
+								0,EXPLOSION,daang,0,0,0,snum+4096,hitsect,5,31,0,0);
+								 /* 31=time left for explosion */
+
+							break;
+						case PLAYER:
+							for(j=connecthead;j>=0;j=connectpoint2[j])
+								if (playersprite[j] == hitsprite)
+								{
+									wsayfollow("ouch.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
+									changehealth(j,-10);
+									break;
+								}
+							break;
+					}
+
+				spawnsprite(j,hitx,hity,hitz+(8<<8),2,-4,0,32,16,16,0,0,
+					EXPLOSION,daang,0,0,0,snum+4096,hitsect,3,63,0,0);
+
+					/*
+                     * Sprite starts out with center exactly on wall.
+					 *  This moves it back enough to see it at all angles.
+                     */
+				movesprite((short)j,-(((long)sintable[(512+daang)&2047]*TICSPERFRAME)<<4),-(((long)sintable[daang]*TICSPERFRAME)<<4),0L,4L<<8,4L<<8,CLIPMASK1);
+			}
+			break;
+		case 1:    /* Shoot silver sphere bullet */
+			spawnsprite(j,x,y,z,1+128,0,0,16,64,64,0,0,BULLET,daang,
+						  sintable[(daang+512)&2047]>>5,sintable[daang&2047]>>5,
+						  (100-dahoriz)<<6,snum+4096,dasectnum,6,0,0,0);
+			wsayfollow("shoot2.wav",4096L+(krand()&127)-64,128L,&sprite[j].x,&sprite[j].y,1);
+			break;
+		case 2:    /* Shoot bomb */
+		  spawnsprite(j,x,y,z,128,0,0,12,16,16,0,0,BOMB,daang,
+			  sintable[(daang+512)&2047]*5>>8,sintable[daang&2047]*5>>8,
+			  (80-dahoriz)<<6,snum+4096,dasectnum,6,0,0,0);
+			wsayfollow("shoot3.wav",4096L+(krand()&127)-64,192L,&sprite[j].x,&sprite[j].y,1);
+			break;
+		case 3:    /* Shoot missile (Andy did this) */
+			spawnsprite(j,x,y,z,1+128,0,0,16,32,32,0,0,MISSILE,daang,
+						  sintable[(daang+512)&2047]>>4,sintable[daang&2047]>>4,
+						  (100-dahoriz)<<7,snum+4096,dasectnum,6,0,0,0);
+			wsayfollow("shoot3.wav",4096L+(krand()&127)-64,192L,&sprite[j].x,&sprite[j].y,1);
+			break;
+		case 4:    /* Shoot grabber (Andy did this) */
+			spawnsprite(j,x,y,z,1+128,0,0,16,64,64,0,0,GRABBER,daang,
+						  sintable[(daang+512)&2047]>>5,sintable[daang&2047]>>5,
+						  (100-dahoriz)<<6,snum+4096,dasectnum,6,0,0,0);
+			wsayfollow("shoot4.wav",4096L+(krand()&127)-64,128L,&sprite[j].x,&sprite[j].y,1);
+			break;
+	}
+}
+
+
+void operatesprite(short dasprite)
+{
+	long datag;
+
+	datag = sprite[dasprite].lotag;
+
+	if (datag == 2)    /* A sprite that shoots a bomb */
+	{
+		shootgun(dasprite,
+					sprite[dasprite].x,sprite[dasprite].y,sprite[dasprite].z,
+					sprite[dasprite].ang,100L,sprite[dasprite].sectnum,2);
+	}
+}
+
 
 void checktouchsprite(short snum, short sectnum)
 {
@@ -1610,7 +2048,8 @@ void checktouchsprite(short snum, short sectnum)
 	}
 }
 
-void checkgrabbertouchsprite(short snum, short sectnum)   // Andy did this
+
+void checkgrabbertouchsprite(short snum, short sectnum)   /* Andy did this */
 {
 	long i, nexti;
 	short onum;
@@ -1716,210 +2155,700 @@ void checkgrabbertouchsprite(short snum, short sectnum)   // Andy did this
 	}
 }
 
-void shootgun(short snum, long x, long y, long z,
-			short daang, long dahoriz, short dasectnum, char guntype)
+
+void activatehitag(short dahitag)
 {
-	short hitsect, hitwall, hitsprite, daang2;
-//	long i, j, daz2, hitx, hity, hitz;
-	long j, daz2, hitx, hity, hitz;
+	long i, nexti;
 
-	switch(guntype)
+	for(i=0;i<numsectors;i++)
+		if (sector[i].hitag == dahitag) operatesector(i);
+
+	for(i=headspritestat[0];i>=0;i=nexti)
 	{
-		case 0:    //Shoot chain gun
-			daang2 = ((daang + (krand()&31)-16)&2047);
-			daz2 = ((100-dahoriz)*2000) + ((krand()-32768)>>1);
+		nexti = nextspritestat[i];
+		if (sprite[i].hitag == dahitag) operatesprite(i);
+	}
+}
 
-			hitscan(x,y,z,dasectnum,                   //Start position
-				sintable[(daang2+512)&2047],            //X vector of 3D ang
-				sintable[daang2&2047],                  //Y vector of 3D ang
-				daz2,                                   //Z vector of 3D ang
-				&hitsect,&hitwall,&hitsprite,&hitx,&hity,&hitz,CLIPMASK1);
 
-			if (wall[hitwall].picnum == KENPICTURE)
+void processinput(short snum)
+{
+	long i, j, k, doubvel, xvect, yvect, goalz;
+	long dax, day;
+
+		/* SHARED KEYS: */
+		/* Movement code */
+	if ((_sync[snum].fvel|_sync[snum].svel) != 0)
+	{
+		doubvel = (TICSPERFRAME<<((_sync[snum].bits&256)>0));
+
+		xvect = 0, yvect = 0;
+		if (_sync[snum].fvel != 0)
+		{
+			xvect += ((((long)_sync[snum].fvel)*doubvel*(long)sintable[(ang[snum]+512)&2047])>>3);
+			yvect += ((((long)_sync[snum].fvel)*doubvel*(long)sintable[ang[snum]&2047])>>3);
+		}
+		if (_sync[snum].svel != 0)
+		{
+			xvect += ((((long)_sync[snum].svel)*doubvel*(long)sintable[ang[snum]&2047])>>3);
+			yvect += ((((long)_sync[snum].svel)*doubvel*(long)sintable[(ang[snum]+1536)&2047])>>3);
+		}
+		if (flytime[snum] > lockclock) { xvect += xvect; yvect += yvect; }   /* DOuble flying speed */
+		clipmove(&posx[snum],&posy[snum],&posz[snum],&cursectnum[snum],xvect,yvect,128L,4<<8,4<<8,CLIPMASK0);
+		revolvedoorstat[snum] = 1;
+	}
+	else
+	{
+		revolvedoorstat[snum] = 0;
+	}
+
+	sprite[playersprite[snum]].cstat &= ~1;
+		/* Push player away from walls if clipmove doesn't work */
+	if (pushmove(&posx[snum],&posy[snum],&posz[snum],&cursectnum[snum],128L,4<<8,4<<8,CLIPMASK0) < 0)
+		changehealth(snum,-1000);  /* If this screws up, then instant death!!! */
+
+			/* Getzrange returns the highest and lowest z's for an entire box, */
+			/* NOT just a point.  This prevents you from falling off cliffs */
+			/* when you step only slightly over the cliff. */
+	getzrange(posx[snum],posy[snum],posz[snum],cursectnum[snum],&globhiz,&globhihit,&globloz,&globlohit,128L,CLIPMASK0);
+	sprite[playersprite[snum]].cstat |= 1;
+
+	if (_sync[snum].avel != 0)          /* ang += avel * constant */
+	{                         /* ENGINE calculates avel for you */
+		doubvel = TICSPERFRAME;
+		if ((_sync[snum].bits&256) > 0)  /* Lt. shift makes turn velocity 50% faster */
+			doubvel += (TICSPERFRAME>>1);
+		ang[snum] += ((((long)_sync[snum].avel)*doubvel)>>4);
+		ang[snum] &= 2047;
+	}
+
+	if (health[snum] < 0)
+	{
+		health[snum] -= TICSPERFRAME;
+		if (health[snum] <= -160)
+		{
+			hvel[snum] = 0;
+			if (snum == myconnectindex)
+				fvel = 0, svel = 0, avel = 0, keystatus[3] = 1;
+
+			deaths[snum]++;
+			health[snum] = 100;
+			numbombs[snum] = 0;
+			numgrabbers[snum] = 0;
+			nummissiles[snum] = 0;
+			flytime[snum] = 0;
+
+			findrandomspot(&posx[snum],&posy[snum],&cursectnum[snum]);
+			posz[snum] = getflorzofslope(cursectnum[snum],posx[snum],posy[snum])-(1<<8);
+			horiz[snum] = 100;
+			ang[snum] = (krand()&2047);
+
+			sprite[playersprite[snum]].x = posx[snum];
+			sprite[playersprite[snum]].y = posy[snum];
+			sprite[playersprite[snum]].z = posz[snum]+EYEHEIGHT;
+			sprite[playersprite[snum]].picnum = PLAYER;
+			sprite[playersprite[snum]].ang = ang[snum];
+			sprite[playersprite[snum]].xrepeat = 64;
+			sprite[playersprite[snum]].yrepeat = 64;
+			changespritesect(playersprite[snum],cursectnum[snum]);
+
+			drawstatusbar(snum);   /* Andy did this */
+
+			i = playersprite[snum];
+			wsayfollow("zipguns.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,1);
+			for(k=0;k<16;k++)
 			{
-				if (waloff[MAXTILES-1] != 0) wall[hitwall].picnum = MAXTILES-1;
-				wsayfollow("hello.wav",4096L+(krand()&127)-64,256L,&wall[hitwall].x,&wall[hitwall].y,0);
+				spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z+(8<<8),2,-4,0,
+					32,24,24,0,0,EXPLOSION,sprite[i].ang,
+					(krand()&511)-256,(krand()&511)-256,(krand()&16384)-8192,
+					sprite[i].owner,sprite[i].sectnum,7,96,0,0);
+						/* 96=Time left for smoke to be alive */
 			}
-			else if (((hitwall < 0) && (hitsprite < 0) && (hitz >= z) && ((sector[hitsect].floorpicnum == SLIME) || (sector[hitsect].floorpicnum == FLOORMIRROR))) || ((hitwall >= 0) && (wall[hitwall].picnum == SLIME)))
-			{    //If you shoot slime, make a splash
-				wsayfollow("splash.wav",4096L+(krand()&511)-256,256L,&hitx,&hity,0);
-				spawnsprite(j,hitx,hity,hitz,2,0,0,32,64,64,0,0,SPLASH,daang,
-					0,0,0,snum+4096,hitsect,4,63,0,0); //63=time left for splash
+		}
+		else
+		{
+			sprite[playersprite[snum]].xrepeat = max(((128+health[snum])>>1),0);
+			sprite[playersprite[snum]].yrepeat = max(((128+health[snum])>>1),0);
+
+			hvel[snum] += (TICSPERFRAME<<2);
+			horiz[snum] = max(horiz[snum]-4,0);
+			posz[snum] += hvel[snum];
+			if (posz[snum] > globloz-(4<<8))
+			{
+				posz[snum] = globloz-(4<<8);
+				horiz[snum] = min(horiz[snum]+5,200);
+				hvel[snum] = 0;
+			}
+		}
+	}
+
+	if (((_sync[snum].bits&8) > 0) && (horiz[snum] > 100-(200>>1))) horiz[snum] -= 4;     /* - */
+	if (((_sync[snum].bits&4) > 0) && (horiz[snum] < 100+(200>>1))) horiz[snum] += 4;   /* + */
+
+	goalz = globloz-EYEHEIGHT;
+	if (sector[cursectnum[snum]].lotag == 4)   /* slime sector */
+		if ((globlohit&0xc000) != 49152)            /* You're not on a sprite */
+		{
+			goalz = globloz-(8<<8);
+			if (posz[snum] >= goalz-(2<<8))
+			{
+				clipmove(&posx[snum],&posy[snum],&posz[snum],&cursectnum[snum],-TICSPERFRAME<<14,-TICSPERFRAME<<14,128L,4<<8,4<<8,CLIPMASK0);
+
+				if (slimesoundcnt[snum] >= 0)
+				{
+					slimesoundcnt[snum] -= TICSPERFRAME;
+					while (slimesoundcnt[snum] < 0)
+					{
+						slimesoundcnt[snum] += 120;
+						wsayfollow("slime.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+					}
+				}
+			}
+		}
+	if (goalz < globhiz+(16<<8))   /* ceiling&floor too close */
+		goalz = ((globloz+globhiz)>>1);
+	/* goalz += mousz; */
+	if (health[snum] >= 0)
+	{
+		if ((_sync[snum].bits&1) > 0)                         /* A (stand high) */
+		{
+			if (flytime[snum] <= lockclock)
+			{
+				if (posz[snum] >= globloz-(32<<8))
+				{
+					goalz -= (16<<8);
+					if (_sync[snum].bits&256) goalz -= (24<<8);
+				}
 			}
 			else
 			{
-				wsayfollow("shoot.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
-
-				if ((hitsprite >= 0) && (sprite[hitsprite].statnum < MAXSTATUS))
-					switch(sprite[hitsprite].picnum)
-					{
-						case BROWNMONSTER:
-							if (sprite[hitsprite].lotag > 0) sprite[hitsprite].lotag -= 10;
-							if (sprite[hitsprite].lotag > 0)
-							{
-								wsayfollow("hurt.wav",4096L+(krand()&511)-256,256L,&hitx,&hity,0);
-								if (sprite[hitsprite].lotag <= 25)
-									sprite[hitsprite].cstat |= 2;
-							}
-							else
-							{
-								wsayfollow("mondie.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
-								sprite[hitsprite].z += ((tilesizy[sprite[hitsprite].picnum]*sprite[hitsprite].yrepeat)<<1);
-								sprite[hitsprite].picnum = GIFTBOX;
-								sprite[hitsprite].cstat &= ~0x83;    //Should not clip, foot-z
-								changespritestat(hitsprite,12);
-
-								spawnsprite(j,hitx,hity,hitz+(32<<8),0,-4,0,32,64,64,
-									0,0,EXPLOSION,daang,0,0,0,snum+4096,
-									hitsect,5,31,0,0);
-							}
-							break;
-						case EVILAL:
-							wsayfollow("blowup.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
-							sprite[hitsprite].picnum = EVILALGRAVE;
-							sprite[hitsprite].cstat = 0;
-							sprite[hitsprite].xvel = (krand()&255)-128;
-							sprite[hitsprite].yvel = (krand()&255)-128;
-							sprite[hitsprite].zvel = (krand()&4095)-3072;
-							changespritestat(hitsprite,9);
-
-							spawnsprite(j,hitx,hity,hitz+(32<<8),0,-4,0,32,64,64,0,
-								0,EXPLOSION,daang,0,0,0,snum+4096,hitsect,5,31,0,0);
-								 //31=time left for explosion
-
-							break;
-						case PLAYER:
-							for(j=connecthead;j>=0;j=connectpoint2[j])
-								if (playersprite[j] == hitsprite)
-								{
-									wsayfollow("ouch.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
-									changehealth(j,-10);
-									break;
-								}
-							break;
-					}
-
-				spawnsprite(j,hitx,hity,hitz+(8<<8),2,-4,0,32,16,16,0,0,
-					EXPLOSION,daang,0,0,0,snum+4096,hitsect,3,63,0,0);
-
-					//Sprite starts out with center exactly on wall.
-					//This moves it back enough to see it at all angles.
-				movesprite((short)j,-(((long)sintable[(512+daang)&2047]*TICSPERFRAME)<<4),-(((long)sintable[daang]*TICSPERFRAME)<<4),0L,4L<<8,4L<<8,CLIPMASK1);
+				hvel[snum] -= 192;
+				if (_sync[snum].bits&256) hvel[snum] -= 192;
 			}
-			break;
-		case 1:    //Shoot silver sphere bullet
-			spawnsprite(j,x,y,z,1+128,0,0,16,64,64,0,0,BULLET,daang,
-						  sintable[(daang+512)&2047]>>5,sintable[daang&2047]>>5,
-						  (100-dahoriz)<<6,snum+4096,dasectnum,6,0,0,0);
-			wsayfollow("shoot2.wav",4096L+(krand()&127)-64,128L,&sprite[j].x,&sprite[j].y,1);
-			break;
-		case 2:    //Shoot bomb
-		  spawnsprite(j,x,y,z,128,0,0,12,16,16,0,0,BOMB,daang,
-			  sintable[(daang+512)&2047]*5>>8,sintable[daang&2047]*5>>8,
-			  (80-dahoriz)<<6,snum+4096,dasectnum,6,0,0,0);
-			wsayfollow("shoot3.wav",4096L+(krand()&127)-64,192L,&sprite[j].x,&sprite[j].y,1);
-			break;
-		case 3:    //Shoot missile (Andy did this)
-			spawnsprite(j,x,y,z,1+128,0,0,16,32,32,0,0,MISSILE,daang,
-						  sintable[(daang+512)&2047]>>4,sintable[daang&2047]>>4,
-						  (100-dahoriz)<<7,snum+4096,dasectnum,6,0,0,0);
-			wsayfollow("shoot3.wav",4096L+(krand()&127)-64,192L,&sprite[j].x,&sprite[j].y,1);
-			break;
-		case 4:    //Shoot grabber (Andy did this)
-			spawnsprite(j,x,y,z,1+128,0,0,16,64,64,0,0,GRABBER,daang,
-						  sintable[(daang+512)&2047]>>5,sintable[daang&2047]>>5,
-						  (100-dahoriz)<<6,snum+4096,dasectnum,6,0,0,0);
-			wsayfollow("shoot4.wav",4096L+(krand()&127)-64,128L,&sprite[j].x,&sprite[j].y,1);
-			break;
-	}
-}
-
-#define MAXVOXMIPS 5
-extern char *voxoff[][MAXVOXMIPS];
-void analyzesprites(long dax, long day)
-{
-	long i, j=0, k, *longptr;
-	point3d *ospr;
-	spritetype *tspr;
-
-		//This function is called between drawrooms() and drawmasks()
-		//It has a list of possible sprites that may be drawn on this frame
-
-	for(i=0,tspr=&tsprite[0];i<spritesortcnt;i++,tspr++)
-	{
-		switch(tspr->picnum)
-		{
-			case PLAYER:
-				//   //Get which of the 8 angles of the sprite to draw (0-7)
-				//   //k ranges from 0-7
-				//k = getangle(tspr->x-dax,tspr->y-day);
-				//k = (((tspr->ang+3072+128-k)&2047)>>8)&7;
-				//   //This guy has only 5 pictures for 8 angles (3 are x-flipped)
-				//if (k <= 4)
-				//{
-				//   tspr->picnum += (k<<2);
-				//   tspr->cstat &= ~4;   //clear x-flipping bit
-				//}
-				//else
-				//{
-				//   tspr->picnum += ((8-k)<<2);
-				//   tspr->cstat |= 4;    //set x-flipping bit
-				//}
-
-				if ((tspr->cstat&2) == 0)
-				{
-					tspr->cstat |= 48;
-					longptr = (long *)voxoff[0][0];
-					tspr->xrepeat = scale(tspr->xrepeat,56,longptr[2]);
-					tspr->yrepeat = scale(tspr->yrepeat,56,longptr[2]);
-					tspr->picnum = 0;
-					tspr->shade -= 6;
-				}
-				break;
-			case BROWNMONSTER:
-				tspr->cstat |= 48;
-				tspr->picnum = 1;
-				break;
 		}
-
-		k = statrate[tspr->statnum];
-		if (k >= 0)  //Interpolate moving sprite
+		if ((_sync[snum].bits&2) > 0)                         /* Z (stand low) */
 		{
-			ospr = &osprite[tspr->owner];
-			switch(k)
+			if (flytime[snum] <= lockclock)
 			{
-				case 0: j = smoothratio; break;
-				case 1: j = (smoothratio>>1)+(((nummoves-tspr->owner)&1)<<15); break;
-				case 3: j = (smoothratio>>2)+(((nummoves-tspr->owner)&3)<<14); break;
-				case 7: j = (smoothratio>>3)+(((nummoves-tspr->owner)&7)<<13); break;
-				case 15: j = (smoothratio>>4)+(((nummoves-tspr->owner)&15)<<12); break;
+				goalz += (12<<8);
+				if (_sync[snum].bits&256) goalz += (12<<8);
 			}
-			k = tspr->x-ospr->x; tspr->x = ospr->x;
-			if (k != 0) tspr->x += mulscale16(k,j);
-			k = tspr->y-ospr->y; tspr->y = ospr->y;
-			if (k != 0) tspr->y += mulscale16(k,j);
-			k = tspr->z-ospr->z; tspr->z = ospr->z;
-			if (k != 0) tspr->z += mulscale16(k,j);
+			else
+			{
+				hvel[snum] += 192;
+				if (_sync[snum].bits&256) hvel[snum] += 192;
+			}
+		}
+	}
+
+	if (flytime[snum] <= lockclock)
+	{
+		if (posz[snum] < goalz)
+			hvel[snum] += (TICSPERFRAME<<4);
+		else
+			hvel[snum] = (((goalz-posz[snum])*TICSPERFRAME)>>5);
+	}
+	else
+	{
+		hvel[snum] -= (hvel[snum]>>2);
+		hvel[snum] -= ksgn(hvel[snum]);
+	}
+
+	posz[snum] += hvel[snum];
+	if (posz[snum] > globloz-(4<<8)) posz[snum] = globloz-(4<<8), hvel[snum] = 0;
+	if (posz[snum] < globhiz+(4<<8)) posz[snum] = globhiz+(4<<8), hvel[snum] = 0;
+
+	if (dimensionmode[snum] != 3)
+	{
+		if (((_sync[snum].bits&32) > 0) && (zoom[snum] > 48)) zoom[snum] -= (zoom[snum]>>4);
+		if (((_sync[snum].bits&16) > 0) && (zoom[snum] < 4096)) zoom[snum] += (zoom[snum]>>4);
+	}
+
+		/* Update sprite representation of player */
+		/* -should be after movement, but before shooting code */
+	setsprite(playersprite[snum],posx[snum],posy[snum],posz[snum]+EYEHEIGHT);
+	sprite[playersprite[snum]].ang = ang[snum];
+
+	if (health[snum] >= 0)
+	{
+		if ((cursectnum[snum] < 0) || (cursectnum[snum] >= numsectors))
+		{       /* How did you get in the wrong sector? */
+			wsayfollow("ouch.wav",4096L+(krand()&127)-64,64L,&posx[snum],&posy[snum],1);
+			changehealth(snum,-TICSPERFRAME);
+		}
+		else if (globhiz+(8<<8) > globloz)
+		{       /* Ceiling and floor are smooshing you! */
+			wsayfollow("ouch.wav",4096L+(krand()&127)-64,64L,&posx[snum],&posy[snum],1);
+			changehealth(snum,-TICSPERFRAME);
+		}
+	}
+
+	if ((waterfountainwall[snum] >= 0) && (health[snum] >= 0))
+		if ((wall[neartagwall].lotag != 7) || ((_sync[snum].bits&1024) == 0))
+		{
+			i = waterfountainwall[snum];
+			if (wall[i].overpicnum == USEWATERFOUNTAIN)
+				wall[i].overpicnum = WATERFOUNTAIN;
+			else if (wall[i].picnum == USEWATERFOUNTAIN)
+				wall[i].picnum = WATERFOUNTAIN;
+
+			waterfountainwall[snum] = -1;
 		}
 
-			//Don't allow close explosion sprites to be transluscent
-		k = tspr->statnum;
-		if ((k == 3) || (k == 4) || (k == 5) || (k == 7))
-			if (klabs(dax-tspr->x) < 256)
-				if (klabs(day-tspr->y) < 256)
-					tspr->cstat &= ~2;
+	if ((_sync[snum].bits&1024) > 0)  /* Space bar */
+	{
+			/* Continuous triggers... */
 
-		tspr->shade += 6;
-		if (sector[tspr->sectnum].ceilingstat&1)
-			tspr->shade += sector[tspr->sectnum].ceilingshade;
-		else
-			tspr->shade += sector[tspr->sectnum].floorshade;
+		neartag(posx[snum],posy[snum],posz[snum],cursectnum[snum],ang[snum],&neartagsector,&neartagwall,&neartagsprite,&neartaghitdist,1024L,3);
+		if (neartagsector == -1)
+		{
+			i = cursectnum[snum];
+			if ((sector[i].lotag|sector[i].hitag) != 0)
+				neartagsector = i;
+		}
+
+		if (wall[neartagwall].lotag == 7)  /* Water fountain */
+		{
+			if (wall[neartagwall].overpicnum == WATERFOUNTAIN)
+			{
+				wsayfollow("water.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+				wall[neartagwall].overpicnum = USEWATERFOUNTAIN;
+				waterfountainwall[snum] = neartagwall;
+			}
+			else if (wall[neartagwall].picnum == WATERFOUNTAIN)
+			{
+				wsayfollow("water.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+				wall[neartagwall].picnum = USEWATERFOUNTAIN;
+				waterfountainwall[snum] = neartagwall;
+			}
+
+			if (waterfountainwall[snum] >= 0)
+			{
+				waterfountaincnt[snum] -= TICSPERFRAME;
+				while (waterfountaincnt[snum] < 0)
+				{
+					waterfountaincnt[snum] += 120;
+					wsayfollow("water.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
+					changehealth(snum,2);
+				}
+			}
+		}
+
+			/* 1-time triggers... */
+		if ((oflags[snum]&1024) == 0)
+		{
+			if (neartagsector >= 0)
+				if (sector[neartagsector].hitag == 0)
+					operatesector(neartagsector);
+
+			if (neartagwall >= 0)
+				if (wall[neartagwall].lotag == 2)  /* Switch */
+				{
+					activatehitag(wall[neartagwall].hitag);
+
+					j = wall[neartagwall].overpicnum;
+					if (j == SWITCH1ON)                     /* 1-time switch */
+					{
+						wall[neartagwall].overpicnum = GIFTBOX;
+						wall[neartagwall].lotag = 0;
+						wall[neartagwall].hitag = 0;
+					}
+					if (j == GIFTBOX)                       /* 1-time switch */
+					{
+						wall[neartagwall].overpicnum = SWITCH1ON;
+						wall[neartagwall].lotag = 0;
+						wall[neartagwall].hitag = 0;
+					}
+					if (j == SWITCH2ON) wall[neartagwall].overpicnum = SWITCH2OFF;
+					if (j == SWITCH2OFF) wall[neartagwall].overpicnum = SWITCH2ON;
+					if (j == SWITCH3ON) wall[neartagwall].overpicnum = SWITCH3OFF;
+					if (j == SWITCH3OFF) wall[neartagwall].overpicnum = SWITCH3ON;
+
+					i = wall[neartagwall].point2;
+					dax = ((wall[neartagwall].x+wall[i].x)>>1);
+					day = ((wall[neartagwall].y+wall[i].y)>>1);
+					wsayfollow("switch.wav",4096L+(krand()&255)-128,256L,&dax,&day,0);
+				}
+
+			if (neartagsprite >= 0)
+			{
+				if (sprite[neartagsprite].lotag == 1)
+				{  /* if you're shoving innocent little AL around, he gets mad! */
+					if (sprite[neartagsprite].picnum == AL)
+					{
+						sprite[neartagsprite].picnum = EVILAL;
+						sprite[neartagsprite].cstat |= 2;   /* Make him transluscent */
+						sprite[neartagsprite].xrepeat = 38;
+						sprite[neartagsprite].yrepeat = 38;
+						changespritestat(neartagsprite,10);
+					}
+				}
+				if (sprite[neartagsprite].lotag == 4)
+				{
+					activatehitag(sprite[neartagsprite].hitag);
+
+					j = sprite[neartagsprite].picnum;
+					if (j == SWITCH1ON)                     /* 1-time switch */
+					{
+						sprite[neartagsprite].picnum = GIFTBOX;
+						sprite[neartagsprite].lotag = 0;
+						sprite[neartagsprite].hitag = 0;
+					}
+					if (j == GIFTBOX)                       /* 1-time switch */
+					{
+						sprite[neartagsprite].picnum = SWITCH1ON;
+						sprite[neartagsprite].lotag = 0;
+						sprite[neartagsprite].hitag = 0;
+					}
+					if (j == SWITCH2ON) sprite[neartagsprite].picnum = SWITCH2OFF;
+					if (j == SWITCH2OFF) sprite[neartagsprite].picnum = SWITCH2ON;
+					if (j == SWITCH3ON) sprite[neartagsprite].picnum = SWITCH3OFF;
+					if (j == SWITCH3OFF) sprite[neartagsprite].picnum = SWITCH3ON;
+
+					dax = sprite[neartagsprite].x;
+					day = sprite[neartagsprite].y;
+					wsayfollow("switch.wav",4096L+(krand()&255)-128,256L,&dax,&day,0);
+				}
+			}
+		}
+	}
+
+	if ((_sync[snum].bits & 2048) > 0) {   /* Shoot a bullet */
+		if ((numbombs[snum] == 0) && (((_sync[snum].bits >> 13) & 7) == 2) && (myconnectindex == snum))
+			locselectedgun = 0;
+		if ((nummissiles[snum] == 0) && (((_sync[snum].bits >> 13) & 7) == 3) && (myconnectindex == snum))
+			locselectedgun = 1;
+		if ((numgrabbers[snum] == 0) && (((_sync[snum].bits >> 13) & 7) == 4) && (myconnectindex == snum))
+			locselectedgun = 1;
+
+		if ((health[snum] >= 0) || ((krand() & 127) > -health[snum]))
+			switch((_sync[snum].bits >> 13) & 7) {
+				case 0:
+					if (lockclock > lastchaingun[snum]+8) {
+						lastchaingun[snum] = lockclock;
+						shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],0);
+					}
+					break;
+				case 1:
+					if ((oflags[snum] & 2048) == 0)
+						shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],1);
+					break;
+				case 2:
+					if ((oflags[snum] & 2048) == 0)
+						if (numbombs[snum] > 0) {
+							shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],2);
+							changenumbombs(snum,-1);
+						}
+					break;
+				case 3:
+					if ((oflags[snum] & 2048) == 0)
+						if (nummissiles[snum] > 0) {
+							shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],3);
+							changenummissiles(snum,-1);
+						}
+					break;
+				case 4:
+					if ((oflags[snum] & 2048) == 0)
+						if (numgrabbers[snum] > 0) {
+							shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],4);
+							changenumgrabbers(snum,-1);
+						}
+					break;
+			}
+	}
+
+	if ((_sync[snum].bits&4096) > (oflags[snum]&4096))  /* Keypad enter */
+	{
+		dimensionmode[snum]++;
+		if (dimensionmode[snum] > 3) dimensionmode[snum] = 1;
+	}
+
+	oflags[snum] = _sync[snum].bits;
+}
+
+
+void movethings(void)
+{
+	long i;
+
+	gotlastpacketclock = totalclock;
+	for(i=connecthead;i>=0;i=connectpoint2[i])
+	{
+		copybufbyte(&ffsync[i],&baksync[movefifoend[i]][i],sizeof(input));
+		movefifoend[i] = ((movefifoend[i]+1)&(MOVEFIFOSIZ-1));
 	}
 }
+
+void fakedomovethings(void)
+{
+	input *syn;
+	/*long i, j, k, doubvel, xvect, yvect, goalz;*/
+	long doubvel, xvect, yvect, goalz;
+	short bakcstat;
+
+	syn = (input *)&baksync[fakemovefifoplc][myconnectindex];
+
+	omyx = myx;
+	omyy = myy;
+	omyz = myz;
+	omyang = myang;
+	omyhoriz = myhoriz;
+
+	bakcstat = sprite[playersprite[myconnectindex]].cstat;
+	sprite[playersprite[myconnectindex]].cstat &= ~0x101;
+
+	if ((syn->fvel|syn->svel) != 0)
+	{
+		doubvel = (TICSPERFRAME<<((syn->bits&256)>0));
+
+		xvect = 0, yvect = 0;
+		if (syn->fvel != 0)
+		{
+			xvect += ((((long)syn->fvel)*doubvel*(long)sintable[(myang+512)&2047])>>3);
+			yvect += ((((long)syn->fvel)*doubvel*(long)sintable[myang&2047])>>3);
+		}
+		if (syn->svel != 0)
+		{
+			xvect += ((((long)syn->svel)*doubvel*(long)sintable[myang&2047])>>3);
+			yvect += ((((long)syn->svel)*doubvel*(long)sintable[(myang+1536)&2047])>>3);
+		}
+		if (flytime[myconnectindex] > lockclock) { xvect += xvect; yvect += yvect; }   /* DOuble flying speed */
+		clipmove(&myx,&myy,&myz,&mycursectnum,xvect,yvect,128L,4<<8,4<<8,CLIPMASK0);
+	}
+
+	pushmove(&myx,&myy,&myz,&mycursectnum,128L,4<<8,4<<8,CLIPMASK0);
+	getzrange(myx,myy,myz,mycursectnum,&globhiz,&globhihit,&globloz,&globlohit,128L,CLIPMASK0);
+
+	if (syn->avel != 0)          /* ang += avel * constant */
+	{                         /* ENGINE calculates avel for you */
+		doubvel = TICSPERFRAME;
+		if ((syn->bits&256) > 0)  /* Lt. shift makes turn velocity 50% faster */
+			doubvel += (TICSPERFRAME>>1);
+		myang += ((((long)syn->avel)*doubvel)>>4);
+		myang &= 2047;
+	}
+
+	if (((syn->bits&8) > 0) && (myhoriz > 100-(200>>1))) myhoriz -= 4;   /* - */
+	if (((syn->bits&4) > 0) && (myhoriz < 100+(200>>1))) myhoriz += 4;   /* + */
+
+	goalz = globloz-EYEHEIGHT;
+	if (sector[mycursectnum].lotag == 4)   /* slime sector */
+		if ((globlohit&0xc000) != 49152)            /* You're not on a sprite */
+		{
+			goalz = globloz-(8<<8);
+			if (myz >= goalz-(2<<8))
+				clipmove(&myx,&myy,&myz,&mycursectnum,-TICSPERFRAME<<14,-TICSPERFRAME<<14,128L,4<<8,4<<8,CLIPMASK0);
+		}
+	if (goalz < globhiz+(16<<8))   /* ceiling&floor too close */
+		goalz = ((globloz+globhiz)>>1);
+
+	if (health[myconnectindex] >= 0)
+	{
+		if ((syn->bits&1) > 0)                         /* A (stand high) */
+		{
+			if (flytime[myconnectindex] <= lockclock)
+			{
+				if (myz >= globloz-(32<<8))
+				{
+					goalz -= (16<<8);
+					if (syn->bits&256) goalz -= (24<<8);
+				}
+			}
+			else
+			{
+				myzvel -= 192;
+				if (syn->bits&256) myzvel -= 192;
+			}
+		}
+		if ((syn->bits&2) > 0)                         /* Z (stand low) */
+		{
+			if (flytime[myconnectindex] <= lockclock)
+			{
+				goalz += (12<<8);
+				if (syn->bits&256) goalz += (12<<8);
+			}
+			else
+			{
+				myzvel += 192;
+				if (syn->bits&256) myzvel += 192;
+			}
+		}
+	}
+
+	if (flytime[myconnectindex] <= lockclock)
+	{
+		if (myz < goalz)
+			myzvel += (TICSPERFRAME<<4);
+		else
+			myzvel = (((goalz-myz)*TICSPERFRAME)>>5);
+	}
+	else
+	{
+		myzvel -= (myzvel>>2);
+		myzvel -= ksgn(myzvel);
+	}
+
+	myz += myzvel;
+	if (myz > globloz-(4<<8)) myz = globloz-(4<<8), myzvel = 0;
+	if (myz < globhiz+(4<<8)) myz = globhiz+(4<<8), myzvel = 0;
+
+	sprite[playersprite[myconnectindex]].cstat = bakcstat;
+
+	myxbak[fakemovefifoplc] = myx;
+	myybak[fakemovefifoplc] = myy;
+	myzbak[fakemovefifoplc] = myz;
+	myangbak[fakemovefifoplc] = myang;
+	myhorizbak[fakemovefifoplc] = myhoriz;
+	fakemovefifoplc = (fakemovefifoplc+1)&(MOVEFIFOSIZ-1);
+}
+
+	/* Prediction correction */
+void fakedomovethingscorrect(void)
+{
+	long i;
+
+	if ((networkmode == 0) && (myconnectindex == connecthead)) return;
+
+	i = ((movefifoplc-1)&(MOVEFIFOSIZ-1));
+
+	if ((posx[myconnectindex] == myxbak[i]) &&
+		 (posy[myconnectindex] == myybak[i]) &&
+		 (posz[myconnectindex] == myzbak[i]) &&
+		 (horiz[myconnectindex] == myhorizbak[i]) &&
+		 (ang[myconnectindex] == myangbak[i]))
+		 return;
+
+		/* Re-start fakedomovethings back to place of error */
+	myx = omyx = posx[myconnectindex];
+	myy = omyy = posy[myconnectindex];
+	myz = omyz = posz[myconnectindex]; myzvel = hvel[myconnectindex];
+	myang = omyang = ang[myconnectindex];
+	mycursectnum = mycursectnum;
+	myhoriz = omyhoriz = horiz[myconnectindex];
+
+	fakemovefifoplc = movefifoplc;
+	while (fakemovefifoplc != movefifoend[myconnectindex]) fakedomovethings();
+}
+
+
+void doanimations(void)
+{
+	long i, j;
+
+	for(i=animatecnt-1;i>=0;i--)
+	{
+		j = *animateptr[i];
+
+		if (j < animategoal[i])
+			j = min(j+animatevel[i]*TICSPERFRAME,animategoal[i]);
+		else
+			j = max(j-animatevel[i]*TICSPERFRAME,animategoal[i]);
+		animatevel[i] += animateacc[i];
+
+		*animateptr[i] = j;
+
+		if (j == animategoal[i])
+		{
+			animatecnt--;
+			if (i != animatecnt)
+			{
+				stopinterpolation(animateptr[i]);
+				animateptr[i] = animateptr[animatecnt];
+				animategoal[i] = animategoal[animatecnt];
+				animatevel[i] = animatevel[animatecnt];
+				animateacc[i] = animateacc[animatecnt];
+			}
+		}
+	}
+}
+
+
+void warp(long *x, long *y, long *z, short *daang, short *dasector)
+{
+	short startwall, endwall, s;
+	long i, j, dax, day, ox, oy;
+
+	ox = *x; oy = *y;
+
+	for(i=0;i<warpsectorcnt;i++)
+		if (warpsectorlist[i] == *dasector)
+		{
+			j = sector[*dasector].hitag;
+			do
+			{
+				i++;
+				if (i >= warpsectorcnt) i = 0;
+			} while (sector[warpsectorlist[i]].hitag != j);
+			*dasector = warpsectorlist[i];
+			break;
+		}
+
+		/* Find center of sector */
+	startwall = sector[*dasector].wallptr;
+	endwall = startwall+sector[*dasector].wallnum;
+	dax = 0L, day = 0L;
+	for(s=startwall;s<endwall;s++)
+	{
+		dax += wall[s].x, day += wall[s].y;
+		if (wall[s].nextsector >= 0)
+			i = s;
+	}
+	*x = dax / (endwall-startwall);
+	*y = day / (endwall-startwall);
+	*z = sector[*dasector].floorz-(32<<8);
+	updatesector(*x,*y,dasector);
+	dax = ((wall[i].x+wall[wall[i].point2].x)>>1);
+	day = ((wall[i].y+wall[wall[i].point2].y)>>1);
+	*daang = getangle(dax-*x,day-*y);
+
+	wsayfollow("warp.wav",3072L+(krand()&127)-64,192L,&ox,&oy,0);
+	wsayfollow("warp.wav",4096L+(krand()&127)-64,256L,x,y,0);
+}
+
+
+void warpsprite(short spritenum)
+{
+	short dasectnum;
+
+	dasectnum = sprite[spritenum].sectnum;
+	warp(&sprite[spritenum].x,&sprite[spritenum].y,&sprite[spritenum].z,
+		  &sprite[spritenum].ang,&dasectnum);
+
+	copybuf(&sprite[spritenum].x,&osprite[spritenum].x,3);
+	changespritesect(spritenum,dasectnum);
+
+	show2dsprite[spritenum>>3] &= ~(1<<(spritenum&7));
+	if (show2dsector[dasectnum>>3]&(1<<(dasectnum&7)))
+		show2dsprite[spritenum>>3] |= (1<<(spritenum&7));
+}
+
+
+int testneighborsectors(short sect1, short sect2)
+{
+	short i, startwall, num1, num2;
+
+	num1 = sector[sect1].wallnum;
+	num2 = sector[sect2].wallnum;
+	if (num1 < num2) /* Traverse walls of sector with fewest walls (for speed) */
+	{
+		startwall = sector[sect1].wallptr;
+		for(i=num1-1;i>=0;i--)
+			if (wall[i+startwall].nextsector == sect2)
+				return(1);
+	}
+	else
+	{
+		startwall = sector[sect2].wallptr;
+		for(i=num2-1;i>=0;i--)
+			if (wall[i+startwall].nextsector == sect1)
+				return(1);
+	}
+	return(0);
+}
+
 
 void tagcode(void)
 {
-//	long i, nexti, j, k, l, s, dax, day, daz, dax2, day2, cnt, good;
 	long i, j, k, l, s, dax, day, cnt, good;
 	short startwall, endwall, dasector, p, oldang;
 
@@ -1951,7 +2880,7 @@ void tagcode(void)
 	}
 
 	for(p=connecthead;p>=0;p=connectpoint2[p])
-		if (sector[cursectnum[p]].lotag == 10)  //warp sector
+		if (sector[cursectnum[p]].lotag == 10)  /* warp sector */
 		{
 			if (cursectnum[p] != ocursectnum[p])
 			{
@@ -1964,14 +2893,16 @@ void tagcode(void)
 
 				sprite[playersprite[p]].z += EYEHEIGHT;
 
-				//warp(&posx[p],&posy[p],&posz[p],&ang[p],&cursectnum[p]);
-					//Update sprite representation of player
-				//setsprite(playersprite[p],posx[p],posy[p],posz[p]+EYEHEIGHT);
-				//sprite[playersprite[p]].ang = ang[p];
+                #if 0
+				warp(&posx[p],&posy[p],&posz[p],&ang[p],&cursectnum[p]);
+					/* Update sprite representation of player */
+				setsprite(playersprite[p],posx[p],posy[p],posz[p]+EYEHEIGHT);
+				sprite[playersprite[p]].ang = ang[p];
+                #endif
 			}
 		}
 
-	for(i=0;i<xpanningsectorcnt;i++)   //animate wall x-panning sectors
+	for(i=0;i<xpanningsectorcnt;i++)   /* animate wall x-panning sectors */
 	{
 		dasector = xpanningsectorlist[i];
 
@@ -1990,7 +2921,7 @@ void tagcode(void)
 		sprite[turnspritelist[i]].ang &= 2047;
 	}
 
-	for(i=0;i<floorpanningcnt;i++)   //animate floor of slime sectors
+	for(i=0;i<floorpanningcnt;i++)   /* animate floor of slime sectors */
 	{
 		sector[floorpanninglist[i]].floorxpanning = ((lockclock>>2)&255);
 		sector[floorpanninglist[i]].floorypanning = ((lockclock>>2)&255);
@@ -2020,9 +2951,9 @@ void tagcode(void)
 				posy[p] += dragydir[i];
 				if (p == myconnectindex)
 					{ myx += dragxdir[i]; myy += dragydir[i]; }
-				//posz[p] += (sector[dasector].floorz-j);
+				/*posz[p] += (sector[dasector].floorz-j);*/
 
-					//Update sprite representation of player
+					/* Update sprite representation of player */
 				setsprite(playersprite[p],posx[p],posy[p],posz[p]+EYEHEIGHT);
 				sprite[playersprite[p]].ang = ang[p];
 			}
@@ -2056,7 +2987,7 @@ void tagcode(void)
 						{
 							good = 1;
 
-								//swingangopendir is -1 if forwards, 1 is backwards
+								/* swingangopendir is -1 if forwards, 1 is backwards */
 							l = (swingangopendir[i] > 0);
 							for(k=l+3;k>=l;k--)
 								if (clipinsidebox(posx[p],posy[p],swingwall[i][k],128L) != 0)
@@ -2154,7 +3085,7 @@ void tagcode(void)
 										if (p == myconnectindex)
 											{ myx += subwayvel[i]; }
 
-											//Update sprite representation of player
+											/* Update sprite representation of player */
 										setsprite(playersprite[p],posx[p],posy[p],posz[p]+EYEHEIGHT);
 										sprite[playersprite[p]].ang = ang[p];
 									}
@@ -2187,7 +3118,7 @@ void tagcode(void)
 
 		if ((subwayvel[i] <= 2) && (subwayvel[i] >= -2) && (klabs(k) < 2048))
 		{
-			  //Open / close doors
+			  /* Open / close doors */
 			if ((subwaypausetime[i] == 720) || ((subwaypausetime[i] >= 120) && (subwaypausetime[i]-TICSPERFRAME < 120)))
 				activatehitag(sector[subwaytracksector[i][0]].hitag);
 
@@ -2218,20 +3149,106 @@ void tagcode(void)
 	}
 }
 
+
+void bombexplode(long i)
+{
+	long j, nextj, k, daang, dax, day, dist;
+
+	spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z,0,-4,0,
+		32,64,64,0,0,EXPLOSION,sprite[i].ang,
+		0,0,0,sprite[i].owner,sprite[i].sectnum,5,31,0,0);
+		  /* 31=Time left for explosion to stay */
+
+	for(k=0;k<12;k++)
+	{
+		spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z+(8<<8),2,-4,0,
+			32,24,24,0,0,EXPLOSION,sprite[i].ang,
+			(krand()>>7)-256,(krand()>>7)-256,(krand()>>2)-8192,
+			sprite[i].owner,sprite[i].sectnum,7,96,0,0);
+				/* 96=Time left for smoke to be alive */
+	}
+
+	for(j=connecthead;j>=0;j=connectpoint2[j])
+	{
+		dist = (posx[j]-sprite[i].x)*(posx[j]-sprite[i].x);
+		dist += (posy[j]-sprite[i].y)*(posy[j]-sprite[i].y);
+		dist += ((posz[j]-sprite[i].z)>>4)*((posz[j]-sprite[i].z)>>4);
+		if (dist < 4194304)
+			if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,posx[j],posy[j],posz[j],cursectnum[j]) == 1)
+			{
+				k = ((32768/((dist>>16)+4))>>5);
+				if (j == myconnectindex)
+				{
+					daang = getangle(posx[j]-sprite[i].x,posy[j]-sprite[i].y);
+					dax = ((k*sintable[(daang+512)&2047])>>14);
+					day = ((k*sintable[daang&2047])>>14);
+					fvel += ((dax*sintable[(ang[j]+512)&2047]+day*sintable[ang[j]&2047])>>14);
+					svel += ((day*sintable[(ang[j]+512)&2047]-dax*sintable[ang[j]&2047])>>14);
+				}
+				changehealth(j,-k);    /* if changehealth returns 1, you're dead */
+			}
+	}
+
+	for(k=1;k<=2;k++)         /* Check for hurting monsters */
+	{
+		for(j=headspritestat[k];j>=0;j=nextj)
+		{
+			nextj = nextspritestat[j];
+
+			dist = (sprite[j].x-sprite[i].x)*(sprite[j].x-sprite[i].x);
+			dist += (sprite[j].y-sprite[i].y)*(sprite[j].y-sprite[i].y);
+			dist += ((sprite[j].z-sprite[i].z)>>4)*((sprite[j].z-sprite[i].z)>>4);
+			if (dist >= 4194304) continue;
+			if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,sprite[j].x,sprite[j].y,sprite[j].z-(tilesizy[sprite[j].picnum]<<7),sprite[j].sectnum) == 0)
+				continue;
+			if (sprite[j].picnum == BROWNMONSTER)
+			{
+				sprite[j].z += ((tilesizy[sprite[j].picnum]*sprite[j].yrepeat)<<1);
+				sprite[j].picnum = GIFTBOX;
+				sprite[j].cstat &= ~0x83;    /* Should not clip, foot-z */
+				changespritestat(j,12);
+			}
+		}
+	}
+
+	for(j=headspritestat[10];j>=0;j=nextj)   /* Check for EVILAL's */
+	{
+		nextj = nextspritestat[j];
+
+		dist = (sprite[j].x-sprite[i].x)*(sprite[j].x-sprite[i].x);
+		dist += (sprite[j].y-sprite[i].y)*(sprite[j].y-sprite[i].y);
+		dist += ((sprite[j].z-sprite[i].z)>>4)*((sprite[j].z-sprite[i].z)>>4);
+		if (dist >= 4194304) continue;
+		if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,sprite[j].x,sprite[j].y,sprite[j].z-(tilesizy[sprite[j].picnum]<<7),sprite[j].sectnum) == 0)
+			continue;
+
+		sprite[j].picnum = EVILALGRAVE;
+		sprite[j].cstat = 0;
+		sprite[j].xvel = (krand()&255)-128;
+		sprite[j].yvel = (krand()&255)-128;
+		sprite[j].zvel = (krand()&4095)-3072;
+		changespritestat(j,9);
+	}
+
+	wsayfollow("blowup.wav",3840L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
+	deletesprite((short)i);
+}
+
+
 void statuslistcode(void)
 {
 	short p, target, hitobject, daang, osectnum, movestat;
 	long i, nexti, j, nextj, k, l, dax, day, daz, dist=0, ox, oy, mindist;
 	long doubvel, xvect, yvect;
 
-		//Go through active BROWNMONSTER list
+		/* Go through active BROWNMONSTER list */
 	for(i=headspritestat[1];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
 
 		k = krand();
 
-			//Choose a target player
+			/* Choose a target player */
 		mindist = 0x7fffffff; target = connecthead;
 		for(p=connecthead;p>=0;p=connectpoint2[p])
 		{
@@ -2239,7 +3256,7 @@ void statuslistcode(void)
 			if (dist < mindist) mindist = dist, target = p;
 		}
 
-			//brown monster decides to shoot bullet
+			/* brown monster decides to shoot bullet */
 		if ((k&63) == 23)
 		{
 			if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,posx[target],posy[target],posz[target],cursectnum[target]) == 0)
@@ -2265,7 +3282,7 @@ void statuslistcode(void)
 
 				ox = posx[target]; oy = posy[target];
 
-					//distance is j
+					/* distance is j */
 				j = ksqrt((ox-sprite[i].x)*(ox-sprite[i].x)+(oy-sprite[i].y)*(oy-sprite[i].y));
 
 				switch((sprite[i].extra>>11)&3)
@@ -2276,7 +3293,7 @@ void statuslistcode(void)
 				}
 				sprite[i].extra += 2048;
 
-					//rate is (TICSPERFRAME<<19)
+					/* rate is (TICSPERFRAME<<19) */
 				xvect = scale(xvect,j,TICSPERFRAME<<19);
 				yvect = scale(yvect,j,TICSPERFRAME<<19);
 				clipmove(&ox,&oy,&posz[target],&cursectnum[target],xvect<<14,yvect<<14,128L,4<<8,4<<8,CLIPMASK0);
@@ -2300,8 +3317,8 @@ void statuslistcode(void)
 			}
 		}
 
-			//Move brown monster
-		dax = sprite[i].x;   //Back up old x&y if stepping off cliff
+			/* Move brown monster */
+		dax = sprite[i].x;   /* Back up old x&y if stepping off cliff */
 		day = sprite[i].y;
 
 		doubvel = max(mulscale7(sprite[i].xrepeat,sprite[i].yrepeat),4);
@@ -2337,7 +3354,7 @@ void statuslistcode(void)
 		}
 	}
 
-	for(i=headspritestat[10];i>=0;i=nexti)  //EVILAL list
+	for(i=headspritestat[10];i>=0;i=nexti)  /* EVILAL list */
 	{
 		nexti = nextspritestat[i];
 
@@ -2351,7 +3368,7 @@ void statuslistcode(void)
 
 		if ((nummoves-i)&statrate[10]) continue;
 
-			//Choose a target player
+			/* Choose a target player */
 		mindist = 0x7fffffff; target = connecthead;
 		for(p=connecthead;p>=0;p=connectpoint2[p])
 		{
@@ -2361,10 +3378,10 @@ void statuslistcode(void)
 
 		k = (krand()&255);
 
-		if ((sprite[i].lotag&32) && (k < 48))  //Al decides to reproduce
+		if ((sprite[i].lotag&32) && (k < 48))  /* Al decides to reproduce */
 		{
 			l = 0;
-			if ((sprite[i].lotag&64) && (k < 2))  //Give him a chance to reproduce without seeing you
+			if ((sprite[i].lotag&64) && (k < 2))  /* Give him a chance to reproduce without seeing you */
 				l = 1;
 			else if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,posx[target],posy[target],posz[target],cursectnum[target]) == 1)
 				l = 1;
@@ -2373,7 +3390,7 @@ void statuslistcode(void)
 				spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z,sprite[i].cstat,sprite[i].shade,sprite[i].pal,
 					sprite[i].clipdist,38,38,sprite[i].xoffset,sprite[i].yoffset,sprite[i].picnum,krand()&2047,0,0,0,i,
 					sprite[i].sectnum,10,sprite[i].lotag,sprite[i].hitag,sprite[i].extra);
-				switch(krand()&31)  //Mutations!
+				switch(krand()&31)  /* Mutations! */
 				{
 					case 0: sprite[i].cstat ^= 2; break;
 					case 1: sprite[i].cstat ^= 512; break;
@@ -2385,7 +3402,7 @@ void statuslistcode(void)
 				}
 			}
 		}
-		if (k >= 208+((sprite[i].lotag&128)>>2))    //Al decides to shoot bullet
+		if (k >= 208+((sprite[i].lotag&128)>>2))    /* Al decides to shoot bullet */
 		{
 			if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,posx[target],posy[target],posz[target],cursectnum[target]) == 1)
 			{
@@ -2407,7 +3424,7 @@ void statuslistcode(void)
 			}
 		}
 
-			//Move Al
+			/* Move Al */
 		l = (((sprite[i].lotag&3)+2)<<8);
 		if (sprite[i].lotag&4) l = -l;
 		dax = sintable[(sprite[i].ang+512)&2047]*l;
@@ -2475,14 +3492,14 @@ void statuslistcode(void)
 		}
 	}
 
-		//Go through travelling bullet sprites
+		/* Go through travelling bullet sprites */
 	for(i=headspritestat[6];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
 
 		if ((nummoves-i)&statrate[6]) continue;
 
-			 //If the sprite is a bullet then...
+			 /* If the sprite is a bullet then... */
 		if ((sprite[i].picnum == BULLET) || (sprite[i].picnum == GRABBER) || (sprite[i].picnum == MISSILE) || (sprite[i].picnum == BOMB))
 		{
 			dax = ((((long)sprite[i].xvel)*TICSPERFRAME)<<12);
@@ -2498,10 +3515,10 @@ void statuslistcode(void)
 				hitobject = 0;
 			}
 
-			if (sprite[i].picnum == GRABBER) {   // Andy did this (& Ken) !Homing!
+			if (sprite[i].picnum == GRABBER) {   /* Andy did this (& Ken) !Homing! */
 				checkgrabbertouchsprite(i,sprite[i].sectnum);
 				l = 0x7fffffff;
-				for (j = connecthead; j >= 0; j = connectpoint2[j])   // Players
+				for (j = connecthead; j >= 0; j = connectpoint2[j])   /* Players */
 					if (j != (sprite[i].owner & (MAXSPRITES - 1)))
 						if (cansee(sprite[i].x,sprite[i].y,sprite[i].z,sprite[i].sectnum,posx[j],posy[j],posz[j],cursectnum[j])) {
 							k = ksqrt(sqr(posx[j] - sprite[i].x) + sqr(posy[j] - sprite[i].y) + (sqr(posz[j] - sprite[i].z) >> 8));
@@ -2512,7 +3529,7 @@ void statuslistcode(void)
 								daz = (posz[j] - sprite[i].z);
 							}
 						}
-				for(j = headspritestat[1]; j >= 0; j = nextj) {   // Active monsters
+				for(j = headspritestat[1]; j >= 0; j = nextj) {   /* Active monsters */
 					nextj = nextspritestat[j];
 					if (cansee(sprite[i].x,sprite[i].y,sprite[i].z,sprite[i].sectnum,sprite[j].x,sprite[j].y,sprite[j].z,sprite[j].sectnum)) {
 						k = ksqrt(sqr(sprite[j].x - sprite[i].x) + sqr(sprite[j].y - sprite[i].y) + (sqr(sprite[j].z - sprite[i].z) >> 8));
@@ -2524,7 +3541,7 @@ void statuslistcode(void)
 						}
 					}
 				}
-				for(j = headspritestat[2]; j >= 0; j = nextj) {   // Inactive monsters
+				for(j = headspritestat[2]; j >= 0; j = nextj) {   /* Inactive monsters */
 					nextj = nextspritestat[j];
 					if (cansee(sprite[i].x,sprite[i].y,sprite[i].z,sprite[i].sectnum,sprite[j].x,sprite[j].y,sprite[j].z,sprite[j].sectnum)) {
 						k = ksqrt(sqr(sprite[j].x - sprite[i].x) + sqr(sprite[j].y - sprite[i].y) + (sqr(sprite[j].z - sprite[i].z) >> 8));
@@ -2537,9 +3554,9 @@ void statuslistcode(void)
 					}
 				}
 				if (l != 0x7fffffff) {
-					sprite[i].xvel = (divscale7(dax,l) + sprite[i].xvel);   // 1/5 of velocity is homing, 4/5 is momentum
-					sprite[i].yvel = (divscale7(day,l) + sprite[i].yvel);   // 1/5 of velocity is homing, 4/5 is momentum
-					sprite[i].zvel = (divscale7(daz,l) + sprite[i].zvel);   // 1/5 of velocity is homing, 4/5 is momentum
+					sprite[i].xvel = (divscale7(dax,l) + sprite[i].xvel);   /* 1/5 of velocity is homing, 4/5 is momentum */
+					sprite[i].yvel = (divscale7(day,l) + sprite[i].yvel);   /* 1/5 of velocity is homing, 4/5 is momentum */
+					sprite[i].zvel = (divscale7(daz,l) + sprite[i].zvel);   /* 1/5 of velocity is homing, 4/5 is momentum */
 					l = ksqrt((sprite[i].xvel * sprite[i].xvel) + (sprite[i].yvel * sprite[i].yvel) + ((sprite[i].zvel * sprite[i].zvel) >> 8));
 					sprite[i].xvel = divscale9(sprite[i].xvel,l);
 					sprite[i].yvel = divscale9(sprite[i].yvel,l);
@@ -2596,8 +3613,8 @@ void statuslistcode(void)
 				}
 			}
 
-				//Check for bouncy objects before killing bullet
-			if ((hitobject&0xc000) == 16384)  //Bullet hit a ceiling/floor
+				/* Check for bouncy objects before killing bullet */
+			if ((hitobject&0xc000) == 16384)  /* Bullet hit a ceiling/floor */
 			{
 				k = sector[hitobject&(MAXSECTORS-1)].wallptr; l = wall[k].point2;
 				daang = getangle(wall[l].x-wall[k].x,wall[l].y-wall[k].y);
@@ -2621,9 +3638,9 @@ void statuslistcode(void)
 				}
 				wsayfollow("bouncy.wav",4096L+(krand()&127)-64,255,&sprite[i].x,&sprite[i].y,1);
 				hitobject = 0;
-				sprite[i].owner = -1;   //Bullet turns evil!
+				sprite[i].owner = -1;   /* Bullet turns evil! */
 			}
-			else if ((hitobject&0xc000) == 32768)  //Bullet hit a wall
+			else if ((hitobject&0xc000) == 32768)  /* Bullet hit a wall */
 			{
 				if (wall[hitobject&4095].lotag == 8)
 				{
@@ -2633,9 +3650,9 @@ void statuslistcode(void)
 						k = (hitobject&4095); l = wall[k].point2;
 						j = getangle(wall[l].x-wall[k].x,wall[l].y-wall[k].y)+512;
 
-							//k = cos(ang) * sin(ang) * 2
+							/* k = cos(ang) * sin(ang) * 2 */
 						k = mulscale13(sintable[(j+512)&2047],sintable[j&2047]);
-							//l = cos(ang * 2)
+							/* l = cos(ang * 2) */
 						l = sintable[((j<<1)+512)&2047];
 
 						ox = sprite[i].xvel; oy = sprite[i].yvel;
@@ -2653,11 +3670,11 @@ void statuslistcode(void)
 						dist = ((ox*ox+oy*oy)>>8);
 						wsayfollow("bouncy.wav",4096L+(krand()&127)-64,min(dist,256),&sprite[i].x,&sprite[i].y,1);
 						hitobject = 0;
-						sprite[i].owner = -1;   //Bullet turns evil!
+						sprite[i].owner = -1;   /* Bullet turns evil! */
 					}
 				}
 			}
-			else if ((hitobject&0xc000) == 49152)  //Bullet hit a sprite
+			else if ((hitobject&0xc000) == 49152)  /* Bullet hit a sprite */
 			{
 				if (sprite[hitobject&4095].picnum == BOUNCYMAT)
 				{
@@ -2672,9 +3689,9 @@ void statuslistcode(void)
 					{
 						j = sprite[hitobject&4095].ang;
 
-							//k = cos(ang) * sin(ang) * 2
+							/* k = cos(ang) * sin(ang) * 2 */
 						k = mulscale13(sintable[(j+512)&2047],sintable[j&2047]);
-							//l = cos(ang * 2)
+							/* l = cos(ang * 2) */
 						l = sintable[((j<<1)+512)&2047];
 
 						ox = sprite[i].xvel; oy = sprite[i].yvel;
@@ -2685,7 +3702,7 @@ void statuslistcode(void)
 						ox -= sprite[i].xvel; oy -= sprite[i].yvel;
 						dist = ((ox*ox+oy*oy)>>8);
 					}
-					sprite[i].owner = -1;   //Bullet turns evil!
+					sprite[i].owner = -1;   /* Bullet turns evil! */
 					wsayfollow("bouncy.wav",4096L+(krand()&127)-64,min(dist,256),&sprite[i].x,&sprite[i].y,1);
 					hitobject = 0;
 				}
@@ -2696,7 +3713,7 @@ void statuslistcode(void)
 				if ((sprite[i].picnum == MISSILE) || (sprite[i].picnum == BOMB))
 				{
 					if ((hitobject&0xc000) == 49152)
-						if (sprite[hitobject&4095].lotag == 5)  //Basketball hoop
+						if (sprite[hitobject&4095].lotag == 5)  /* Basketball hoop */
 						{
 							wsayfollow("niceshot.wav",3840L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
 							deletesprite((short)i);
@@ -2707,19 +3724,19 @@ void statuslistcode(void)
 					goto bulletisdeletedskip;
 				}
 
-				if ((hitobject&0xc000) == 16384)  //Hits a ceiling / floor
+				if ((hitobject&0xc000) == 16384)  /* Hits a ceiling / floor */
 				{
 					wsayfollow("bullseye.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
 					deletesprite((short)i);
 					goto bulletisdeletedskip;
 				}
-				else if ((hitobject&0xc000) == 32768)  //Bullet hit a wall
+				else if ((hitobject&0xc000) == 32768)  /* Bullet hit a wall */
 				{
 					if (wall[hitobject&4095].picnum == KENPICTURE)
 					{
 						if (waloff[MAXTILES-1] != 0)
 							wall[hitobject&4095].picnum = MAXTILES-1;
-						wsayfollow("hello.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);   //Ken says, "Hello... how are you today!"
+						wsayfollow("hello.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);   /* Ken says, "Hello... how are you today!" */
 					}
 					else
 						wsayfollow("bullseye.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
@@ -2727,9 +3744,9 @@ void statuslistcode(void)
 					deletesprite((short)i);
 					goto bulletisdeletedskip;
 				}
-				else if ((hitobject&0xc000) == 49152)  //Bullet hit a sprite
+				else if ((hitobject&0xc000) == 49152)  /* Bullet hit a sprite */
 				{
-					if ((sprite[hitobject&4095].lotag == 5) && (sprite[i].picnum == GRABBER)) {  // Basketball hoop (Andy's addition)
+					if ((sprite[hitobject&4095].lotag == 5) && (sprite[i].picnum == GRABBER)) {  /* Basketball hoop (Andy's addition) */
 						wsayfollow("niceshot.wav",3840L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
 						switch (krand() & 63) {
 							case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9:
@@ -2753,19 +3770,19 @@ void statuslistcode(void)
 								goto bulletisdeletedskip;
 						}
 						sprite[i].xvel = sprite[i].yvel = sprite[i].zvel = 0;
-						sprite[i].cstat &= ~0x83;    //Should not clip, foot-z
+						sprite[i].cstat &= ~0x83;    /* Should not clip, foot-z */
 						changespritestat(i,12);
 						goto bulletisdeletedskip;
 					}
 
-						//Check if bullet hit a player & find which player it was...
+						/* Check if bullet hit a player & find which player it was... */
 					if (sprite[hitobject&4095].picnum == PLAYER)
 						for(j=connecthead;j>=0;j=connectpoint2[j])
 							if (sprite[i].owner != j+4096)
 								if (playersprite[j] == (hitobject&4095))
 								{
 									wsayfollow("ouch.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
-									if (sprite[i].picnum == GRABBER) {   // Andy did this
+									if (sprite[i].picnum == GRABBER) {   /* Andy did this */
 										k = ((sprite[i].xrepeat * sprite[i].yrepeat) * 3) >> 9;
 										changehealth((sprite[i].owner - 4096),k);
 										changehealth(j,-k);
@@ -2775,15 +3792,15 @@ void statuslistcode(void)
 									goto bulletisdeletedskip;
 								}
 
-						//Check if bullet hit any monsters...
-					j = (hitobject&4095);     //j is the spritenum that the bullet (spritenum i) hit
+						/* Check if bullet hit any monsters... */
+					j = (hitobject&4095);     /* j is the spritenum that the bullet (spritenum i) hit */
 					if (sprite[i].owner != j)
 					{
 						switch(sprite[j].picnum)
 						{
 							case BROWNMONSTER:
 								if (sprite[j].lotag > 0) {
-									if (sprite[i].picnum == GRABBER) {   // Andy did this
+									if (sprite[i].picnum == GRABBER) {   /* Andy did this */
 										k = ((sprite[i].xrepeat * sprite[i].yrepeat) * 3) >> 9;
 										changehealth((sprite[i].owner - 4096),k);
 										sprite[j].lotag -= k;
@@ -2800,12 +3817,12 @@ void statuslistcode(void)
 									wsayfollow("mondie.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
 									sprite[j].z += ((tilesizy[sprite[j].picnum]*sprite[j].yrepeat)<<1);
 									sprite[j].picnum = GIFTBOX;
-									sprite[j].cstat &= ~0x83;    //Should not clip, foot-z
+									sprite[j].cstat &= ~0x83;    /* Should not clip, foot-z */
 
 									spawnsprite(k,sprite[j].x,sprite[j].y,sprite[j].z,
 										0,-4,0,32,64,64,0,0,EXPLOSION,sprite[j].ang,
 										0,0,0,j,sprite[j].sectnum,5,31,0,0);
-											//31=Time left for explosion to stay
+											/* 31=Time left for explosion to stay */
 
 									changespritestat(j,12);
 								}
@@ -2829,7 +3846,9 @@ void statuslistcode(void)
 								if (sprite[j].yrepeat >= 38)
 								{
 									sprite[j].picnum = EVILAL;
-									//sprite[j].cstat |= 2;      //Make him transluscent
+                                    #if 0
+									sprite[j].cstat |= 2;      /* Make him transluscent */
+                                    #endif
 									changespritestat(j,10);
 								}
 								deletesprite((short)i);
@@ -2846,28 +3865,32 @@ void statuslistcode(void)
 bulletisdeletedskip: continue;
 	}
 
-		//Go through monster waiting for you list
+		/* Go through monster waiting for you list */
 	for(i=headspritestat[2];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
 
 		if ((nummoves-i)&15) continue;
 
-			//Use dot product to see if monster's angle is towards a player
+			/* Use dot product to see if monster's angle is towards a player */
 		for(p=connecthead;p>=0;p=connectpoint2[p])
 			if (sintable[(sprite[i].ang+512)&2047]*(posx[p]-sprite[i].x) + sintable[sprite[i].ang&2047]*(posy[p]-sprite[i].y) >= 0)
 				if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,posx[p],posy[p],posz[p],cursectnum[p]) == 1)
 				{
 					changespritestat(i,1);
-					//if (sprite[i].lotag == 100)
-					//{
-						wsayfollow("iseeyou.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,1);
-					//   sprite[i].lotag = 99;
-					//}
+                    #if 0
+    					if (sprite[i].lotag == 100)
+    					{
+           					wsayfollow("iseeyou.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,1);
+    	 				    sprite[i].lotag = 99;
+    					}
+                    #else
+       					wsayfollow("iseeyou.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,1);
+                    #endif
 				}
 	}
 
-		//Go through smoke sprites
+		/* Go through smoke sprites */
 	for(i=headspritestat[3];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
@@ -2877,7 +3900,7 @@ bulletisdeletedskip: continue;
 		if (sprite[i].lotag < 0) deletesprite(i);
 	}
 
-		//Go through splash sprites
+		/* Go through splash sprites */
 	for(i=headspritestat[4];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
@@ -2887,7 +3910,7 @@ bulletisdeletedskip: continue;
 		if (sprite[i].lotag < 0) deletesprite(i);
 	}
 
-		//Go through explosion sprites
+		/* Go through explosion sprites */
 	for(i=headspritestat[5];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
@@ -2896,7 +3919,7 @@ bulletisdeletedskip: continue;
 		if (sprite[i].lotag < 0) deletesprite(i);
 	}
 
-		//Go through bomb spriral-explosion sprites
+		/* Go through bomb spriral-explosion sprites */
 	for(i=headspritestat[7];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
@@ -2925,7 +3948,7 @@ bulletisdeletedskip: continue;
 		}
 	}
 
-		//EVILALGRAVE shrinking list
+		/* EVILALGRAVE shrinking list */
 	for(i=headspritestat[9];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
@@ -2958,7 +3981,7 @@ bulletisdeletedskip: continue;
 		}
 	}
 
-		//Re-spawning sprite list
+		/* Re-spawning sprite list */
 	for(i=headspritestat[11];i>=0;i=nexti)
 	{
 		nexti = nextspritestat[i];
@@ -2974,2130 +3997,6 @@ bulletisdeletedskip: continue;
 	}
 }
 
-void activatehitag(short dahitag)
-{
-	long i, nexti;
-
-	for(i=0;i<numsectors;i++)
-		if (sector[i].hitag == dahitag) operatesector(i);
-
-	for(i=headspritestat[0];i>=0;i=nexti)
-	{
-		nexti = nextspritestat[i];
-		if (sprite[i].hitag == dahitag) operatesprite(i);
-	}
-}
-
-void bombexplode(long i)
-{
-	long j, nextj, k, daang, dax, day, dist;
-
-	spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z,0,-4,0,
-		32,64,64,0,0,EXPLOSION,sprite[i].ang,
-		0,0,0,sprite[i].owner,sprite[i].sectnum,5,31,0,0);
-		  //31=Time left for explosion to stay
-
-	for(k=0;k<12;k++)
-	{
-		spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z+(8<<8),2,-4,0,
-			32,24,24,0,0,EXPLOSION,sprite[i].ang,
-			(krand()>>7)-256,(krand()>>7)-256,(krand()>>2)-8192,
-			sprite[i].owner,sprite[i].sectnum,7,96,0,0);
-				//96=Time left for smoke to be alive
-	}
-
-	for(j=connecthead;j>=0;j=connectpoint2[j])
-	{
-		dist = (posx[j]-sprite[i].x)*(posx[j]-sprite[i].x);
-		dist += (posy[j]-sprite[i].y)*(posy[j]-sprite[i].y);
-		dist += ((posz[j]-sprite[i].z)>>4)*((posz[j]-sprite[i].z)>>4);
-		if (dist < 4194304)
-			if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,posx[j],posy[j],posz[j],cursectnum[j]) == 1)
-			{
-				k = ((32768/((dist>>16)+4))>>5);
-				if (j == myconnectindex)
-				{
-					daang = getangle(posx[j]-sprite[i].x,posy[j]-sprite[i].y);
-					dax = ((k*sintable[(daang+512)&2047])>>14);
-					day = ((k*sintable[daang&2047])>>14);
-					fvel += ((dax*sintable[(ang[j]+512)&2047]+day*sintable[ang[j]&2047])>>14);
-					svel += ((day*sintable[(ang[j]+512)&2047]-dax*sintable[ang[j]&2047])>>14);
-				}
-				changehealth(j,-k);    //if changehealth returns 1, you're dead
-			}
-	}
-
-	for(k=1;k<=2;k++)         //Check for hurting monsters
-	{
-		for(j=headspritestat[k];j>=0;j=nextj)
-		{
-			nextj = nextspritestat[j];
-
-			dist = (sprite[j].x-sprite[i].x)*(sprite[j].x-sprite[i].x);
-			dist += (sprite[j].y-sprite[i].y)*(sprite[j].y-sprite[i].y);
-			dist += ((sprite[j].z-sprite[i].z)>>4)*((sprite[j].z-sprite[i].z)>>4);
-			if (dist >= 4194304) continue;
-			if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,sprite[j].x,sprite[j].y,sprite[j].z-(tilesizy[sprite[j].picnum]<<7),sprite[j].sectnum) == 0)
-				continue;
-			if (sprite[j].picnum == BROWNMONSTER)
-			{
-				sprite[j].z += ((tilesizy[sprite[j].picnum]*sprite[j].yrepeat)<<1);
-				sprite[j].picnum = GIFTBOX;
-				sprite[j].cstat &= ~0x83;    //Should not clip, foot-z
-				changespritestat(j,12);
-			}
-		}
-	}
-
-	for(j=headspritestat[10];j>=0;j=nextj)   //Check for EVILAL's
-	{
-		nextj = nextspritestat[j];
-
-		dist = (sprite[j].x-sprite[i].x)*(sprite[j].x-sprite[i].x);
-		dist += (sprite[j].y-sprite[i].y)*(sprite[j].y-sprite[i].y);
-		dist += ((sprite[j].z-sprite[i].z)>>4)*((sprite[j].z-sprite[i].z)>>4);
-		if (dist >= 4194304) continue;
-		if (cansee(sprite[i].x,sprite[i].y,sprite[i].z-(tilesizy[sprite[i].picnum]<<7),sprite[i].sectnum,sprite[j].x,sprite[j].y,sprite[j].z-(tilesizy[sprite[j].picnum]<<7),sprite[j].sectnum) == 0)
-			continue;
-
-		sprite[j].picnum = EVILALGRAVE;
-		sprite[j].cstat = 0;
-		sprite[j].xvel = (krand()&255)-128;
-		sprite[j].yvel = (krand()&255)-128;
-		sprite[j].zvel = (krand()&4095)-3072;
-		changespritestat(j,9);
-	}
-
-	wsayfollow("blowup.wav",3840L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
-	deletesprite((short)i);
-}
-
-void processinput(short snum)
-{
-//	long oldposx, oldposy, nexti;
-	long i, j, k, doubvel, xvect, yvect, goalz;
-//	long dax, day, dax2, day2, odax, oday, odax2, oday2;
-	long dax, day;
-//	short startwall, endwall;
-//	char *ptr;
-
-		//SHARED KEYS:
-		//Movement code
-	if ((_sync[snum].fvel|_sync[snum].svel) != 0)
-	{
-		doubvel = (TICSPERFRAME<<((_sync[snum].bits&256)>0));
-
-		xvect = 0, yvect = 0;
-		if (_sync[snum].fvel != 0)
-		{
-			xvect += ((((long)_sync[snum].fvel)*doubvel*(long)sintable[(ang[snum]+512)&2047])>>3);
-			yvect += ((((long)_sync[snum].fvel)*doubvel*(long)sintable[ang[snum]&2047])>>3);
-		}
-		if (_sync[snum].svel != 0)
-		{
-			xvect += ((((long)_sync[snum].svel)*doubvel*(long)sintable[ang[snum]&2047])>>3);
-			yvect += ((((long)_sync[snum].svel)*doubvel*(long)sintable[(ang[snum]+1536)&2047])>>3);
-		}
-		if (flytime[snum] > lockclock) { xvect += xvect; yvect += yvect; }   // DOuble flying speed
-		clipmove(&posx[snum],&posy[snum],&posz[snum],&cursectnum[snum],xvect,yvect,128L,4<<8,4<<8,CLIPMASK0);
-		revolvedoorstat[snum] = 1;
-	}
-	else
-	{
-		revolvedoorstat[snum] = 0;
-	}
-
-	sprite[playersprite[snum]].cstat &= ~1;
-		//Push player away from walls if clipmove doesn't work
-	if (pushmove(&posx[snum],&posy[snum],&posz[snum],&cursectnum[snum],128L,4<<8,4<<8,CLIPMASK0) < 0)
-		changehealth(snum,-1000);  //If this screws up, then instant death!!!
-
-			// Getzrange returns the highest and lowest z's for an entire box,
-			// NOT just a point.  This prevents you from falling off cliffs
-			// when you step only slightly over the cliff.
-	getzrange(posx[snum],posy[snum],posz[snum],cursectnum[snum],&globhiz,&globhihit,&globloz,&globlohit,128L,CLIPMASK0);
-	sprite[playersprite[snum]].cstat |= 1;
-
-	if (_sync[snum].avel != 0)          //ang += avel * constant
-	{                         //ENGINE calculates avel for you
-		doubvel = TICSPERFRAME;
-		if ((_sync[snum].bits&256) > 0)  //Lt. shift makes turn velocity 50% faster
-			doubvel += (TICSPERFRAME>>1);
-		ang[snum] += ((((long)_sync[snum].avel)*doubvel)>>4);
-		ang[snum] &= 2047;
-	}
-
-	if (health[snum] < 0)
-	{
-		health[snum] -= TICSPERFRAME;
-		if (health[snum] <= -160)
-		{
-			hvel[snum] = 0;
-			if (snum == myconnectindex)
-				fvel = 0, svel = 0, avel = 0, keystatus[3] = 1;
-
-			deaths[snum]++;
-			health[snum] = 100;
-			numbombs[snum] = 0;
-			numgrabbers[snum] = 0;
-			nummissiles[snum] = 0;
-			flytime[snum] = 0;
-
-			findrandomspot(&posx[snum],&posy[snum],&cursectnum[snum]);
-			posz[snum] = getflorzofslope(cursectnum[snum],posx[snum],posy[snum])-(1<<8);
-			horiz[snum] = 100;
-			ang[snum] = (krand()&2047);
-
-			sprite[playersprite[snum]].x = posx[snum];
-			sprite[playersprite[snum]].y = posy[snum];
-			sprite[playersprite[snum]].z = posz[snum]+EYEHEIGHT;
-			sprite[playersprite[snum]].picnum = PLAYER;
-			sprite[playersprite[snum]].ang = ang[snum];
-			sprite[playersprite[snum]].xrepeat = 64;
-			sprite[playersprite[snum]].yrepeat = 64;
-			changespritesect(playersprite[snum],cursectnum[snum]);
-
-			drawstatusbar(snum);   // Andy did this
-
-			i = playersprite[snum];
-			wsayfollow("zipguns.wav",4096L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,1);
-			for(k=0;k<16;k++)
-			{
-				spawnsprite(j,sprite[i].x,sprite[i].y,sprite[i].z+(8<<8),2,-4,0,
-					32,24,24,0,0,EXPLOSION,sprite[i].ang,
-					(krand()&511)-256,(krand()&511)-256,(krand()&16384)-8192,
-					sprite[i].owner,sprite[i].sectnum,7,96,0,0);
-						//96=Time left for smoke to be alive
-			}
-		}
-		else
-		{
-			sprite[playersprite[snum]].xrepeat = max(((128+health[snum])>>1),0);
-			sprite[playersprite[snum]].yrepeat = max(((128+health[snum])>>1),0);
-
-			hvel[snum] += (TICSPERFRAME<<2);
-			horiz[snum] = max(horiz[snum]-4,0);
-			posz[snum] += hvel[snum];
-			if (posz[snum] > globloz-(4<<8))
-			{
-				posz[snum] = globloz-(4<<8);
-				horiz[snum] = min(horiz[snum]+5,200);
-				hvel[snum] = 0;
-			}
-		}
-	}
-
-	if (((_sync[snum].bits&8) > 0) && (horiz[snum] > 100-(200>>1))) horiz[snum] -= 4;     //-
-	if (((_sync[snum].bits&4) > 0) && (horiz[snum] < 100+(200>>1))) horiz[snum] += 4;   //+
-
-	goalz = globloz-EYEHEIGHT;
-	if (sector[cursectnum[snum]].lotag == 4)   //slime sector
-		if ((globlohit&0xc000) != 49152)            //You're not on a sprite
-		{
-			goalz = globloz-(8<<8);
-			if (posz[snum] >= goalz-(2<<8))
-			{
-				clipmove(&posx[snum],&posy[snum],&posz[snum],&cursectnum[snum],-TICSPERFRAME<<14,-TICSPERFRAME<<14,128L,4<<8,4<<8,CLIPMASK0);
-
-				if (slimesoundcnt[snum] >= 0)
-				{
-					slimesoundcnt[snum] -= TICSPERFRAME;
-					while (slimesoundcnt[snum] < 0)
-					{
-						slimesoundcnt[snum] += 120;
-						wsayfollow("slime.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-					}
-				}
-			}
-		}
-	if (goalz < globhiz+(16<<8))   //ceiling&floor too close
-		goalz = ((globloz+globhiz)>>1);
-	//goalz += mousz;
-	if (health[snum] >= 0)
-	{
-		if ((_sync[snum].bits&1) > 0)                         //A (stand high)
-		{
-			if (flytime[snum] <= lockclock)
-			{
-				if (posz[snum] >= globloz-(32<<8))
-				{
-					goalz -= (16<<8);
-					if (_sync[snum].bits&256) goalz -= (24<<8);
-				}
-			}
-			else
-			{
-				hvel[snum] -= 192;
-				if (_sync[snum].bits&256) hvel[snum] -= 192;
-			}
-		}
-		if ((_sync[snum].bits&2) > 0)                         //Z (stand low)
-		{
-			if (flytime[snum] <= lockclock)
-			{
-				goalz += (12<<8);
-				if (_sync[snum].bits&256) goalz += (12<<8);
-			}
-			else
-			{
-				hvel[snum] += 192;
-				if (_sync[snum].bits&256) hvel[snum] += 192;
-			}
-		}
-	}
-
-	if (flytime[snum] <= lockclock)
-	{
-		if (posz[snum] < goalz)
-			hvel[snum] += (TICSPERFRAME<<4);
-		else
-			hvel[snum] = (((goalz-posz[snum])*TICSPERFRAME)>>5);
-	}
-	else
-	{
-		hvel[snum] -= (hvel[snum]>>2);
-		hvel[snum] -= ksgn(hvel[snum]);
-	}
-
-	posz[snum] += hvel[snum];
-	if (posz[snum] > globloz-(4<<8)) posz[snum] = globloz-(4<<8), hvel[snum] = 0;
-	if (posz[snum] < globhiz+(4<<8)) posz[snum] = globhiz+(4<<8), hvel[snum] = 0;
-
-	if (dimensionmode[snum] != 3)
-	{
-		if (((_sync[snum].bits&32) > 0) && (zoom[snum] > 48)) zoom[snum] -= (zoom[snum]>>4);
-		if (((_sync[snum].bits&16) > 0) && (zoom[snum] < 4096)) zoom[snum] += (zoom[snum]>>4);
-	}
-
-		//Update sprite representation of player
-		//   -should be after movement, but before shooting code
-	setsprite(playersprite[snum],posx[snum],posy[snum],posz[snum]+EYEHEIGHT);
-	sprite[playersprite[snum]].ang = ang[snum];
-
-	if (health[snum] >= 0)
-	{
-		if ((cursectnum[snum] < 0) || (cursectnum[snum] >= numsectors))
-		{       //How did you get in the wrong sector?
-			wsayfollow("ouch.wav",4096L+(krand()&127)-64,64L,&posx[snum],&posy[snum],1);
-			changehealth(snum,-TICSPERFRAME);
-		}
-		else if (globhiz+(8<<8) > globloz)
-		{       //Ceiling and floor are smooshing you!
-			wsayfollow("ouch.wav",4096L+(krand()&127)-64,64L,&posx[snum],&posy[snum],1);
-			changehealth(snum,-TICSPERFRAME);
-		}
-	}
-
-	if ((waterfountainwall[snum] >= 0) && (health[snum] >= 0))
-		if ((wall[neartagwall].lotag != 7) || ((_sync[snum].bits&1024) == 0))
-		{
-			i = waterfountainwall[snum];
-			if (wall[i].overpicnum == USEWATERFOUNTAIN)
-				wall[i].overpicnum = WATERFOUNTAIN;
-			else if (wall[i].picnum == USEWATERFOUNTAIN)
-				wall[i].picnum = WATERFOUNTAIN;
-
-			waterfountainwall[snum] = -1;
-		}
-
-	if ((_sync[snum].bits&1024) > 0)  //Space bar
-	{
-			//Continuous triggers...
-
-		neartag(posx[snum],posy[snum],posz[snum],cursectnum[snum],ang[snum],&neartagsector,&neartagwall,&neartagsprite,&neartaghitdist,1024L,3);
-		if (neartagsector == -1)
-		{
-			i = cursectnum[snum];
-			if ((sector[i].lotag|sector[i].hitag) != 0)
-				neartagsector = i;
-		}
-
-		if (wall[neartagwall].lotag == 7)  //Water fountain
-		{
-			if (wall[neartagwall].overpicnum == WATERFOUNTAIN)
-			{
-				wsayfollow("water.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-				wall[neartagwall].overpicnum = USEWATERFOUNTAIN;
-				waterfountainwall[snum] = neartagwall;
-			}
-			else if (wall[neartagwall].picnum == WATERFOUNTAIN)
-			{
-				wsayfollow("water.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-				wall[neartagwall].picnum = USEWATERFOUNTAIN;
-				waterfountainwall[snum] = neartagwall;
-			}
-
-			if (waterfountainwall[snum] >= 0)
-			{
-				waterfountaincnt[snum] -= TICSPERFRAME;
-				while (waterfountaincnt[snum] < 0)
-				{
-					waterfountaincnt[snum] += 120;
-					wsayfollow("water.wav",4096L+(krand()&127)-64,256L,&posx[snum],&posy[snum],1);
-					changehealth(snum,2);
-				}
-			}
-		}
-
-			//1-time triggers...
-		if ((oflags[snum]&1024) == 0)
-		{
-			if (neartagsector >= 0)
-				if (sector[neartagsector].hitag == 0)
-					operatesector(neartagsector);
-
-			if (neartagwall >= 0)
-				if (wall[neartagwall].lotag == 2)  //Switch
-				{
-					activatehitag(wall[neartagwall].hitag);
-
-					j = wall[neartagwall].overpicnum;
-					if (j == SWITCH1ON)                     //1-time switch
-					{
-						wall[neartagwall].overpicnum = GIFTBOX;
-						wall[neartagwall].lotag = 0;
-						wall[neartagwall].hitag = 0;
-					}
-					if (j == GIFTBOX)                       //1-time switch
-					{
-						wall[neartagwall].overpicnum = SWITCH1ON;
-						wall[neartagwall].lotag = 0;
-						wall[neartagwall].hitag = 0;
-					}
-					if (j == SWITCH2ON) wall[neartagwall].overpicnum = SWITCH2OFF;
-					if (j == SWITCH2OFF) wall[neartagwall].overpicnum = SWITCH2ON;
-					if (j == SWITCH3ON) wall[neartagwall].overpicnum = SWITCH3OFF;
-					if (j == SWITCH3OFF) wall[neartagwall].overpicnum = SWITCH3ON;
-
-					i = wall[neartagwall].point2;
-					dax = ((wall[neartagwall].x+wall[i].x)>>1);
-					day = ((wall[neartagwall].y+wall[i].y)>>1);
-					wsayfollow("switch.wav",4096L+(krand()&255)-128,256L,&dax,&day,0);
-				}
-
-			if (neartagsprite >= 0)
-			{
-				if (sprite[neartagsprite].lotag == 1)
-				{  //if you're shoving innocent little AL around, he gets mad!
-					if (sprite[neartagsprite].picnum == AL)
-					{
-						sprite[neartagsprite].picnum = EVILAL;
-						sprite[neartagsprite].cstat |= 2;   //Make him transluscent
-						sprite[neartagsprite].xrepeat = 38;
-						sprite[neartagsprite].yrepeat = 38;
-						changespritestat(neartagsprite,10);
-					}
-				}
-				if (sprite[neartagsprite].lotag == 4)
-				{
-					activatehitag(sprite[neartagsprite].hitag);
-
-					j = sprite[neartagsprite].picnum;
-					if (j == SWITCH1ON)                     //1-time switch
-					{
-						sprite[neartagsprite].picnum = GIFTBOX;
-						sprite[neartagsprite].lotag = 0;
-						sprite[neartagsprite].hitag = 0;
-					}
-					if (j == GIFTBOX)                       //1-time switch
-					{
-						sprite[neartagsprite].picnum = SWITCH1ON;
-						sprite[neartagsprite].lotag = 0;
-						sprite[neartagsprite].hitag = 0;
-					}
-					if (j == SWITCH2ON) sprite[neartagsprite].picnum = SWITCH2OFF;
-					if (j == SWITCH2OFF) sprite[neartagsprite].picnum = SWITCH2ON;
-					if (j == SWITCH3ON) sprite[neartagsprite].picnum = SWITCH3OFF;
-					if (j == SWITCH3OFF) sprite[neartagsprite].picnum = SWITCH3ON;
-
-					dax = sprite[neartagsprite].x;
-					day = sprite[neartagsprite].y;
-					wsayfollow("switch.wav",4096L+(krand()&255)-128,256L,&dax,&day,0);
-				}
-			}
-		}
-	}
-
-	if ((_sync[snum].bits & 2048) > 0) {   // Shoot a bullet
-		if ((numbombs[snum] == 0) && (((_sync[snum].bits >> 13) & 7) == 2) && (myconnectindex == snum))
-			locselectedgun = 0;
-		if ((nummissiles[snum] == 0) && (((_sync[snum].bits >> 13) & 7) == 3) && (myconnectindex == snum))
-			locselectedgun = 1;
-		if ((numgrabbers[snum] == 0) && (((_sync[snum].bits >> 13) & 7) == 4) && (myconnectindex == snum))
-			locselectedgun = 1;
-
-		if ((health[snum] >= 0) || ((krand() & 127) > -health[snum]))
-			switch((_sync[snum].bits >> 13) & 7) {
-				case 0:
-					if (lockclock > lastchaingun[snum]+8) {
-						lastchaingun[snum] = lockclock;
-						shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],0);
-					}
-					break;
-				case 1:
-					if ((oflags[snum] & 2048) == 0)
-						shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],1);
-					break;
-				case 2:
-					if ((oflags[snum] & 2048) == 0)
-						if (numbombs[snum] > 0) {
-							shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],2);
-							changenumbombs(snum,-1);
-						}
-					break;
-				case 3:
-					if ((oflags[snum] & 2048) == 0)
-						if (nummissiles[snum] > 0) {
-							shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],3);
-							changenummissiles(snum,-1);
-						}
-					break;
-				case 4:
-					if ((oflags[snum] & 2048) == 0)
-						if (numgrabbers[snum] > 0) {
-							shootgun(snum,posx[snum],posy[snum],posz[snum],ang[snum],horiz[snum],cursectnum[snum],4);
-							changenumgrabbers(snum,-1);
-						}
-					break;
-			}
-	}
-
-	if ((_sync[snum].bits&4096) > (oflags[snum]&4096))  //Keypad enter
-	{
-		dimensionmode[snum]++;
-		if (dimensionmode[snum] > 3) dimensionmode[snum] = 1;
-	}
-
-	oflags[snum] = _sync[snum].bits;
-}
-
-void view (short snum, long *vx, long *vy, long *vz,
-		short *vsectnum, short ang, long horiz)
-{
-	spritetype *sp;
-//	long i, nx, ny, nz, hx, hy, hz, hitx, hity, hitz;
-	long i, nx, ny, nz, hx, hy, hitx, hity, hitz;
-	short bakcstat, hitsect, hitwall, hitsprite, daang;
-
-	nx = (sintable[(ang+1536)&2047]>>4);
-	ny = (sintable[(ang+1024)&2047]>>4);
-	nz = (horiz-100)*128;
-
-	sp = &sprite[snum];
-
-	bakcstat = sp->cstat;
-	sp->cstat &= (short)~0x101;
-
-	updatesectorz(*vx,*vy,*vz,vsectnum);
-	hitscan(*vx,*vy,*vz,*vsectnum,nx,ny,nz,&hitsect,&hitwall,&hitsprite,&hitx,&hity,&hitz,CLIPMASK1);
-	hx = hitx-(*vx); hy = hity-(*vy);
-	if (klabs(nx)+klabs(ny) > klabs(hx)+klabs(hy))
-	{
-		*vsectnum = hitsect;
-		if (hitwall >= 0)
-		{
-			daang = getangle(wall[wall[hitwall].point2].x-wall[hitwall].x,
-								  wall[wall[hitwall].point2].y-wall[hitwall].y);
-
-			i = nx*sintable[daang]+ny*sintable[(daang+1536)&2047];
-			if (klabs(nx) > klabs(ny)) hx -= mulscale28(nx,i);
-										 else hy -= mulscale28(ny,i);
-		}
-		else if (hitsprite < 0)
-		{
-			if (klabs(nx) > klabs(ny)) hx -= (nx>>5);
-										 else hy -= (ny>>5);
-		}
-		if (klabs(nx) > klabs(ny)) i = divscale16(hx,nx);
-									 else i = divscale16(hy,ny);
-		if (i < cameradist) cameradist = i;
-	}
-	*vx = (*vx)+mulscale16(nx,cameradist);
-	*vy = (*vy)+mulscale16(ny,cameradist);
-	*vz = (*vz)+mulscale16(nz,cameradist);
-
-	updatesectorz(*vx,*vy,*vz,vsectnum);
-
-	sp->cstat = bakcstat;
-}
-
-void updatesectorz(long x, long y, long z, short *sectnum)
-{
-	walltype *wal;
-	long i, j, cz, fz;
-
-	getzsofslope(*sectnum,x,y,&cz,&fz);
-	if ((z >= cz) && (z <= fz))
-		if (inside(x,y,*sectnum) != 0) return;
-
-	if ((*sectnum >= 0) && (*sectnum < numsectors))
-	{
-		wal = &wall[sector[*sectnum].wallptr];
-		j = sector[*sectnum].wallnum;
-		do
-		{
-			i = wal->nextsector;
-			if (i >= 0)
-			{
-				getzsofslope(i,x,y,&cz,&fz);
-				if ((z >= cz) && (z <= fz))
-					if (inside(x,y,(short)i) == 1)
-						{ *sectnum = i; return; }
-			}
-			wal++; j--;
-		} while (j != 0);
-	}
-
-	for(i=numsectors-1;i>=0;i--)
-	{
-		getzsofslope(i,x,y,&cz,&fz);
-		if ((z >= cz) && (z <= fz))
-			if (inside(x,y,(short)i) == 1)
-				{ *sectnum = i; return; }
-	}
-
-	*sectnum = -1;
-}
-
-void drawscreen(short snum, long dasmoothratio)
-{
-	long i, j, k=0, l, charsperline, templong;
-	long x1, y1, x2, y2, ox1, oy1, ox2, oy2, dist, maxdist;
-	long cposx, cposy, cposz, choriz, czoom, tposx, tposy;
-	long tiltlock, *longptr, ovisibility, oparallaxvisibility;
-	short cang, tang, csect;
-	char ch, *ptr, *ptr2, *ptr3, *ptr4;
-	spritetype *tspr;
-
-	smoothratio = max(min(dasmoothratio,65536),0);
-
-	dointerpolations();
-
-	if ((snum == myconnectindex) && ((networkmode == 1) || (myconnectindex != connecthead)))
-	{
-		cposx = omyx+mulscale16(myx-omyx,smoothratio);
-		cposy = omyy+mulscale16(myy-omyy,smoothratio);
-		cposz = omyz+mulscale16(myz-omyz,smoothratio);
-		choriz = omyhoriz+mulscale16(myhoriz-omyhoriz,smoothratio);
-		cang = omyang+mulscale16((long)(((myang+1024-omyang)&2047)-1024),smoothratio);
-	}
-	else
-	{
-		cposx = oposx[snum]+mulscale16(posx[snum]-oposx[snum],smoothratio);
-		cposy = oposy[snum]+mulscale16(posy[snum]-oposy[snum],smoothratio);
-		cposz = oposz[snum]+mulscale16(posz[snum]-oposz[snum],smoothratio);
-		choriz = ohoriz[snum]+mulscale16(horiz[snum]-ohoriz[snum],smoothratio);
-		cang = oang[snum]+mulscale16(((ang[snum]+1024-oang[snum])&2047)-1024,smoothratio);
-	}
-	czoom = ozoom[snum]+mulscale16(zoom[snum]-ozoom[snum],smoothratio);
-
-	setears(cposx,cposy,(long)sintable[(cang+512)&2047]<<14,(long)sintable[cang&2047]<<14);
-
-	if (typemode != 0)
-	{
-		charsperline = 40;
-		//if (dimensionmode[snum] == 2) charsperline = 80;
-
-		for(i=0;i<=typemessageleng;i+=charsperline)
-		{
-			for(j=0;j<charsperline;j++)
-				tempbuf[j] = typemessage[i+j];
-			if (typemessageleng < i+charsperline)
-			{
-				tempbuf[(typemessageleng-i)] = '_';
-				tempbuf[(typemessageleng-i)+1] = 0;
-			}
-			else
-				tempbuf[charsperline] = 0;
-			//if (dimensionmode[snum] == 3)
-				printext256(0L,(i/charsperline)<<3,183,-1,tempbuf,0);
-			//else
-			//   printext16(0L,((i/charsperline)<<3)+(pageoffset/640),10,-1,tempbuf,0);
-		}
-	}
-	else
-	{
-		if (dimensionmode[myconnectindex] == 3)
-		{
-			templong = screensize;
-
-			if (((loc.bits&32) > (screensizeflag&32)) && (screensize > 64))
-			{
-				ox1 = ((xdim-screensize)>>1);
-				ox2 = ox1+screensize-1;
-				oy1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
-				oy2 = oy1 + scale(screensize,ydim-32,xdim)-1;
-				screensize -= (screensize>>3);
-
-				if (templong > xdim)
-				{
-					screensize = xdim;
-
-					flushperms();
-
-					rotatesprite((xdim-320)<<15,(ydim-32)<<16,65536L,0,STATUSBAR,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
-					i = ((xdim-320)>>1);
-					while (i >= 8) i -= 8, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
-					if (i >= 4) i -= 4, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
-					i = ((xdim-320)>>1)+320;
-					while (i <= xdim-8) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 8;
-					if (i <= xdim-4) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 4;
-
-					drawstatusbar(screenpeek);   // Andy did this
-				}
-
-				x1 = ((xdim-screensize)>>1);
-				x2 = x1+screensize-1;
-				y1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
-				y2 = y1 + scale(screensize,ydim-32,xdim)-1;
-				setview(x1,y1,x2,y2);
-
-				// (ox1,oy1)ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-				//          ³  (x1,y1)        ³
-				//          ³     ÚÄÄÄÄÄ¿     ³
-				//          ³     ³     ³     ³
-				//          ³     ÀÄÄÄÄÄÙ     ³
-				//          ³        (x2,y2)  ³
-				//          ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ(ox2,oy2)
-
-				drawtilebackground(0L,0L,BACKGROUND,8,ox1,oy1,x1-1,oy2,0);
-				drawtilebackground(0L,0L,BACKGROUND,8,x2+1,oy1,ox2,oy2,0);
-				drawtilebackground(0L,0L,BACKGROUND,8,x1,oy1,x2,y1-1,0);
-				drawtilebackground(0L,0L,BACKGROUND,8,x1,y2+1,x2,oy2,0);
-			}
-			if (((loc.bits&16) > (screensizeflag&16)) && (screensize <= xdim))
-			{
-				screensize += (screensize>>3);
-				if ((screensize > xdim) && (templong == xdim))
-				{
-					screensize = xdim+1;
-					x1 = 0; y1 = 0;
-					x2 = xdim-1; y2 = ydim-1;
-				}
-				else
-				{
-					if (screensize > xdim) screensize = xdim;
-					x1 = ((xdim-screensize)>>1);
-					x2 = x1+screensize-1;
-					y1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
-					y2 = y1 + scale(screensize,ydim-32,xdim)-1;
-				}
-				setview(x1,y1,x2,y2);
-			}
-			screensizeflag = loc.bits;
-		}
-	}
-
-	if (dimensionmode[snum] != 2)
-	{
-		if ((numplayers > 1) && (option[4] == 0))
-		{
-				//Do not draw other views constantly if they're staying still
-				//It's a shame this trick will only work in screen-buffer mode
-				//At least screen-buffer mode covers all the HI hi-res modes
-			if (vidoption == 2)
-			{
-				for(i=connecthead;i>=0;i=connectpoint2[i]) frame2draw[i] = 0;
-				frame2draw[snum] = 1;
-
-					//2-1,3-1,4-2
-					//5-2,6-2,7-2,8-3,9-3,10-3,11-3,12-4,13-4,14-4,15-4,16-5
-				x1 = posx[snum]; y1 = posy[snum];
-				for(j=(numplayers>>2)+1;j>0;j--)
-				{
-					maxdist = 0x80000000;
-					for(i=connecthead;i>=0;i=connectpoint2[i])
-						if (frame2draw[i] == 0)
-						{
-							x2 = posx[i]-x1; y2 = posy[i]-y1;
-							dist = dmulscale12(x2,x2,y2,y2);
-
-							if (dist < 64) dist = 16384;
-							else if (dist > 16384) dist = 64;
-							else dist = 1048576 / dist;
-
-							dist *= frameskipcnt[i];
-
-								//Increase frame rate if screen is moving
-							if ((posx[i] != oposx[i]) || (posy[i] != oposy[i]) ||
-								 (posz[i] != oposz[i]) || (ang[i] != oang[i]) ||
-								 (horiz[i] != ohoriz[i])) dist += dist;
-
-							if (dist > maxdist) maxdist = dist, k = i;
-						}
-
-					for(i=connecthead;i>=0;i=connectpoint2[i])
-						frameskipcnt[i] += (frameskipcnt[i]>>3)+1;
-					frameskipcnt[k] = 0;
-
-					frame2draw[k] = 1;
-				}
-			}
-			else
-			{
-				for(i=connecthead;i>=0;i=connectpoint2[i]) frame2draw[i] = 1;
-			}
-
-			for(i=connecthead,j=0;i>=0;i=connectpoint2[i],j++)
-				if (frame2draw[i] != 0)
-				{
-					if (numplayers <= 4)
-					{
-						switch(j)
-						{
-							case 0: setview(0,0,(xdim>>1)-1,(ydim>>1)-1); break;
-							case 1: setview((xdim>>1),0,xdim-1,(ydim>>1)-1); break;
-							case 2: setview(0,(ydim>>1),(xdim>>1)-1,ydim-1); break;
-							case 3: setview((xdim>>1),(ydim>>1),xdim-1,ydim-1); break;
-						}
-					}
-					else
-					{
-						switch(j)
-						{
-							case 0: setview(0,0,(xdim>>2)-1,(ydim>>2)-1); break;
-							case 1: setview(xdim>>2,0,(xdim>>1)-1,(ydim>>2)-1); break;
-							case 2: setview(xdim>>1,0,xdim-(xdim>>2)-1,(ydim>>2)-1); break;
-							case 3: setview(xdim-(xdim>>2),0,xdim-1,(ydim>>2)-1); break;
-							case 4: setview(0,ydim>>2,(xdim>>2)-1,(ydim>>1)-1); break;
-							case 5: setview(xdim>>2,ydim>>2,(xdim>>1)-1,(ydim>>1)-1); break;
-							case 6: setview(xdim>>1,ydim>>2,xdim-(xdim>>2)-1,(ydim>>1)-1); break;
-							case 7: setview(xdim-(xdim>>2),ydim>>2,xdim-1,(ydim>>1)-1); break;
-							case 8: setview(0,ydim>>1,(xdim>>2)-1,ydim-(ydim>>2)-1); break;
-							case 9: setview(xdim>>2,ydim>>1,(xdim>>1)-1,ydim-(ydim>>2)-1); break;
-							case 10: setview(xdim>>1,ydim>>1,xdim-(xdim>>2)-1,ydim-(ydim>>2)-1); break;
-							case 11: setview(xdim-(xdim>>2),ydim>>1,xdim-1,ydim-(ydim>>2)-1); break;
-							case 12: setview(0,ydim-(ydim>>2),(xdim>>2)-1,ydim-1); break;
-							case 13: setview(xdim>>2,ydim-(ydim>>2),(xdim>>1)-1,ydim-1); break;
-							case 14: setview(xdim>>1,ydim-(ydim>>2),xdim-(xdim>>2)-1,ydim-1); break;
-							case 15: setview(xdim-(xdim>>2),ydim-(ydim>>2),xdim-1,ydim-1); break;
-						}
-					}
-
-					if (i == snum)
-					{
-						sprite[playersprite[snum]].cstat |= 0x8000;
-						drawrooms(cposx,cposy,cposz,cang,choriz,cursectnum[i]);
-						sprite[playersprite[snum]].cstat &= ~0x8000;
-						analyzesprites(cposx,cposy);
-					}
-					else
-					{
-						sprite[playersprite[i]].cstat |= 0x8000;
-						drawrooms(posx[i],posy[i],posz[i],ang[i],horiz[i],cursectnum[i]);
-						sprite[playersprite[i]].cstat &= ~0x8000;
-						analyzesprites(posx[i],posy[i]);
-					}
-					drawmasks();
-					if ((numgrabbers[i] > 0) || (nummissiles[i] > 0) || (numbombs[i] > 0))
-						rotatesprite(160<<16,184L<<16,65536,0,GUNONBOTTOM,sector[cursectnum[i]].floorshade,0,2,windowx1,windowy1,windowx2,windowy2);
-
-					if (lockclock < 384)
-					{
-						if (lockclock < 128)
-							rotatesprite(320<<15,200<<15,lockclock<<9,lockclock<<4,DEMOSIGN,(128-lockclock)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
-						else if (lockclock < 256)
-							rotatesprite(320<<15,200<<15,65536,0,DEMOSIGN,0,0,2,windowx1,windowy1,windowx2,windowy2);
-						else
-							rotatesprite(320<<15,200<<15,(384-lockclock)<<9,lockclock<<4,DEMOSIGN,(lockclock-256)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
-					}
-
-					if (health[i] <= 0)
-						rotatesprite(320<<15,200<<15,(-health[i])<<11,(-health[i])<<5,NO,0,0,2,windowx1,windowy1,windowx2,windowy2);
-				}
-		}
-		else
-		{
-				//Init for screen rotation
-			tiltlock = screentilt;
-			if ((tiltlock) || (detailmode))
-			{
-				walock[MAXTILES-2] = 255;
-				if (waloff[MAXTILES-2] == 0)
-					allocache(&waloff[MAXTILES-2],320L*320L,&walock[MAXTILES-2]);
-				if ((tiltlock&1023) == 0)
-					setviewtotile(MAXTILES-2,200L>>detailmode,320L>>detailmode);
-				else
-					setviewtotile(MAXTILES-2,320L>>detailmode,320L>>detailmode);
-				if ((tiltlock&1023) == 512)
-				{     //Block off unscreen section of 90ø tilted screen
-					j = ((320-60)>>detailmode);
-					for(i=(60>>detailmode)-1;i>=0;i--)
-					{
-						startumost[i] = 1; startumost[i+j] = 1;
-						startdmost[i] = 0; startdmost[i+j] = 0;
-					}
-				}
-
-				i = (tiltlock&511); if (i > 256) i = 512-i;
-				i = sintable[i+512]*8 + sintable[i]*5L;
-				setaspect(i>>1,yxaspect);
-			}
-
-			if ((gotpic[FLOORMIRROR>>3]&(1<<(FLOORMIRROR&7))) > 0)
-			{
-				dist = 0x7fffffff; i = 0;
-				for(k=floormirrorcnt-1;k>=0;k--)
-				{
-					j = klabs(wall[sector[floormirrorsector[k]].wallptr].x-cposx);
-					j += klabs(wall[sector[floormirrorsector[k]].wallptr].y-cposy);
-					if (j < dist) dist = j, i = k;
-				}
-
-				j = floormirrorsector[i];
-
-				if (cameradist < 0) sprite[playersprite[snum]].cstat |= 0x8000;
-				drawrooms(cposx,cposy,(sector[j].floorz<<1)-cposz,cang,201-choriz,j);
-				sprite[playersprite[snum]].cstat &= ~0x8000;
-				analyzesprites(cposx,cposy);
-				drawmasks();
-
-					//Temp horizon
-				l = scale(choriz-100,windowx2-windowx1,320)+((windowy1+windowy2)>>1);
-				for(y1=windowy1,y2=windowy2;y1<y2;y1++,y2--)
-				{
-					ptr = (char *)(frameplace+ylookup[y1]);
-					ptr2 = (char *)(frameplace+ylookup[y2]);
-					ptr3 = palookup[18];
-					ptr3 += (min(klabs(y1-l)>>2,31)<<8);
-					ptr4 = palookup[18];
-					ptr4 += (min(klabs(y2-l)>>2,31)<<8);
-
-					j = sintable[((y2+totalclock)<<6)&2047];
-					j += sintable[((y2-totalclock)<<7)&2047];
-					j >>= 14;
-
-					ptr2 += j;
-
-					for(x1=windowx1;x1<=windowx2;x1++)
-						{ ch = ptr[x1]; ptr[x1] = ptr3[(unsigned int)ptr2[x1]]; ptr2[x1] = ptr4[(unsigned int)ch]; }
-				}
-				gotpic[FLOORMIRROR>>3] &= ~(1<<(FLOORMIRROR&7));
-			}
-
-			if (gotpic[DAYSKY>>3]&(1<<(DAYSKY&7)))
-			{
-				gotpic[DAYSKY>>3] &= ~(1<<(DAYSKY&7));
-				pskyoff[0] = 0; pskyoff[1] = 0; pskybits = 1;
-			}
-			else if (gotpic[NIGHTSKY>>3]&(1<<(NIGHTSKY&7)))
-			{
-				gotpic[NIGHTSKY>>3] &= ~(1<<(NIGHTSKY&7));
-				pskyoff[0] = 0; pskyoff[1] = 0; pskyoff[2] = 0; pskyoff[3] = 0;
-				pskyoff[4] = 0; pskyoff[5] = 0; pskyoff[6] = 0; pskyoff[7] = 0;
-				pskybits = 3;
-			}
-
-				//Over the shoulder mode
-			csect = cursectnum[snum];
-			if (cameradist >= 0)
-			{
-				cang += cameraang;
-				view(playersprite[snum],&cposx,&cposy,&cposz,&csect,cang,choriz);
-			}
-
-				//WARNING!  Assuming (MIRRORLABEL&31) = 0 and MAXMIRRORS = 64
-			longptr = (long *)FP_OFF(gotpic[MIRRORLABEL>>3]);
-			//if ((longptr != NULL) && (longptr[0]|longptr[1]))
-				for(i=MAXMIRRORS-1;i>=0;i--)
-					if (gotpic[(i+MIRRORLABEL)>>3]&(1<<(i&7)))
-					{
-						gotpic[(i+MIRRORLABEL)>>3] &= ~(1<<(i&7));
-
-							//Prepare drawrooms for drawing mirror and calculate reflected
-							//position into tposx, tposy, and tang (tposz == cposz)
-							//Must call preparemirror before drawrooms and
-							//          completemirror after drawrooms
-						preparemirror(cposx,cposy,cposz,cang,choriz,
-									  mirrorwall[i],mirrorsector[i],&tposx,&tposy,&tang);
-
-						ovisibility = visibility;
-						oparallaxvisibility = parallaxvisibility;
-						visibility <<= 1;
-						parallaxvisibility <<= 1;
-						ptr = palookup[0]; palookup[0] = palookup[17]; palookup[17] = ptr;
-
-						drawrooms(tposx,tposy,cposz,tang,choriz,mirrorsector[i]|MAXSECTORS);
-						for(j=0,tspr=&tsprite[0];j<spritesortcnt;j++,tspr++)
-							if ((tspr->cstat&48) == 0) tspr->cstat |= 4;
-						analyzesprites(tposx,tposy);
-						drawmasks();
-
-						ptr = palookup[0]; palookup[0] = palookup[17]; palookup[17] = ptr;
-						visibility = ovisibility;
-						parallaxvisibility = oparallaxvisibility;
-
-						completemirror();   //Reverse screen x-wise in this function
-
-						break;
-					}
-
-			if (cameradist < 0) sprite[playersprite[snum]].cstat |= 0x8000;
-			drawrooms(cposx,cposy,cposz,cang,choriz,csect);
-			sprite[playersprite[snum]].cstat &= ~0x8000;
-			analyzesprites(cposx,cposy);
-			drawmasks();
-
-			if ((gotpic[FLOORMIRROR>>3]&(1<<(FLOORMIRROR&7))) > 0)
-				transarea += (windowx2-windowx1)*(windowy2-windowy1);
-
-				//Finish for screen rotation
-			if ((tiltlock) || (detailmode))
-			{
-				setviewback();
-				i = (tiltlock&511); if (i > 256) i = 512-i;
-				i = sintable[i+512]*8 + sintable[i]*5L;
-				if (detailmode == 0) i >>= 1;
-				rotatesprite(320<<15,200<<15,i,tiltlock+512,MAXTILES-2,0,0,2+4+64,windowx1,windowy1,windowx2,windowy2);
-				walock[MAXTILES-2] = 1;
-			}
-
-			if (((numgrabbers[screenpeek] > 0) || (nummissiles[screenpeek] > 0) || (numbombs[screenpeek] > 0)) && (cameradist < 0))
-			{
-					//Reset startdmost to bottom of screen
-				if ((windowx1 == 0) && (windowx2 == 319) && (yxaspect == 65536) && (tiltlock == 0))
-				{
-					x1 = 160L-(tilesizx[GUNONBOTTOM]>>1); y1 = windowy2+1;
-					for(i=0;i<tilesizx[GUNONBOTTOM];i++)
-						startdmost[i+x1] = y1;
-				}
-				rotatesprite(160<<16,184L<<16,65536,0,GUNONBOTTOM,sector[cursectnum[screenpeek]].floorshade,0,2,windowx1,windowy1,windowx2,windowy2);
-			}
-
-			if (cachecount != 0)
-			{
-				rotatesprite((320-16)<<16,16<<16,32768,0,BUILDDISK,0,0,2+64,windowx1,windowy1,windowx2,windowy2);
-				cachecount = 0;
-			}
-
-			if (lockclock < 384)
-			{
-				if (lockclock < 128)
-					rotatesprite(320<<15,200<<15,lockclock<<9,lockclock<<4,DEMOSIGN,(128-lockclock)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
-				else if (lockclock < 256)
-					rotatesprite(320<<15,200<<15,65536,0,DEMOSIGN,0,0,2,windowx1,windowy1,windowx2,windowy2);
-				else
-					rotatesprite(320<<15,200<<15,(384-lockclock)<<9,lockclock<<4,DEMOSIGN,(lockclock-256)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
-			}
-
-			if (health[screenpeek] <= 0)
-				rotatesprite(320<<15,200<<15,(-health[screenpeek])<<11,(-health[screenpeek])<<5,NO,0,0,2,windowx1,windowy1,windowx2,windowy2);
-		}
-	}
-
-		//Only animate lava if its picnum is on screen
-		//gotpic is a bit array where the tile number's bit is set
-		//whenever it is drawn (ceilings, walls, sprites, etc.)
-	if ((gotpic[SLIME>>3]&(1<<(SLIME&7))) > 0)
-	{
-		gotpic[SLIME>>3] &= ~(1<<(SLIME&7));
-		if (waloff[SLIME] != 0) movelava((char *)waloff[SLIME]);
-	}
-
-	if ((show2dsector[cursectnum[snum]>>3]&(1<<(cursectnum[snum]&7))) == 0)
-		searchmap(cursectnum[snum]);
-
-	if (dimensionmode[snum] != 3)
-	{
-			//Move back pivot point
-		i = scale(czoom,screensize,320);
-		if (dimensionmode[snum] == 2)
-		{
-			clearview(0L);  //Clear screen to specified color
-			drawmapview(cposx,cposy,i,cang);
-		}
-		drawoverheadmap(cposx,cposy,i,cang);
-	}
-
-	if (getmessageleng > 0)
-	{
-		charsperline = 40;
-		//if (dimensionmode[snum] == 2) charsperline = 80;
-
-		for(i=0;i<=getmessageleng;i+=charsperline)
-		{
-			for(j=0;j<charsperline;j++)
-				tempbuf[j] = getmessage[i+j];
-			if (getmessageleng < i+charsperline)
-				tempbuf[(getmessageleng-i)] = 0;
-			else
-				tempbuf[charsperline] = 0;
-
-			printext256(0L,((i/charsperline)<<3)+(ydim-32-8)-(((getmessageleng-1)/charsperline)<<3),151,-1,tempbuf,0);
-		}
-		if (totalclock > getmessagetimeoff)
-			getmessageleng = 0;
-	}
-	if ((numplayers >= 2) && (screenpeek != myconnectindex))
-	{
-		j = 1;
-		for(i=connecthead;i>=0;i=connectpoint2[i])
-		{
-			if (i == screenpeek) break;
-			j++;
-		}
-		sprintf(tempbuf,"(Player %ld's view)",j);
-		printext256((xdim>>1)-(strlen(tempbuf)<<2),0,24,-1,tempbuf,0);
-	}
-
-	if (syncstat != 0) printext256(68L,84L,31,0,"OUT OF SYNC!",0);
-	if (syncstate != 0) printext256(68L,92L,31,0,"Missed Network packet!",0);
-
-//   //Uncomment this to test cache locks
-//extern long cacnum;
-//typedef struct { long *hand, leng; char *lock; } cactype;
-//extern cactype cac[];
-//
-//   j = 0;
-//   for(i=0;i<cacnum;i++)
-//      if ((*cac[i].lock) >= 200)
-//      {
-//         sprintf(tempbuf,"Locked- %ld: Leng:%ld, Lock:%ld",i,cac[i].leng,*cac[i].lock);
-//         printext256(0L,j,31,-1,tempbuf,1); j += 6;
-//      }
-
-	nextpage();
-
-	if (keystatus[0x3f])   //F5
-	{
-		keystatus[0x3f] = 0;
-		detailmode ^= 1;
-	}
-	if (keystatus[0x58])   //F12
-	{
-		keystatus[0x58] = 0;
-		screencapture("captxxxx.pcx",keystatus[0x2a]|keystatus[0x36]);
-	}
-	if (keystatus[0x3c])  //F2 (toggle stereo mode)
-	{
-		keystatus[0x3c] = 0;
-		stereomode++; if (stereomode >= 3) stereomode = 0;
-#ifdef PLATFORM_DOS		
-		setstereo(stereomode);
-#endif		
-	}
-	if (keystatus[0x3e])  //F4 - screen re-size
-	{
-		keystatus[0x3e] = 0;
-
-			//cycle through all vesa modes, then screen-buffer mode
-		getvalidvesamodes();
-		if (vidoption == 1)
-		{
-			for(i=0;i<validmodecnt;i++)
-				if ((validmodexdim[i] == xdim) && (validmodeydim[i] == ydim))
-				{
-					if (i == validmodecnt-1)
-						setgamemode(2,320L,200L);
-					else
-						setgamemode(1,validmodexdim[i+1],validmodeydim[i+1]);
-					screensize = xdim+1;
-					break;
-				}
-		}
-		else if (validmodecnt > 0)
-		{
-			setgamemode(1,validmodexdim[0],validmodeydim[0]);
-			screensize = xdim+1;
-		}
-
-		sprintf(getmessage,"Video mode: %ld x %ld",xdim,ydim);
-		if (vidoption == 2) strcat(getmessage," (Screen-buffer)");
-		getmessageleng = strlen(getmessage);
-		getmessagetimeoff = totalclock+120*5;
-	}
-	if (keystatus[0x57])  //F11 - brightness
-	{
-		keystatus[0x57] = 0;
-		brightness++;
-		if (brightness > 8) brightness = 0;
-		setbrightness(brightness,(char *)&palette[0]);
-	}
-	if (stereomode)  //Adjustments for red-blue / crystal eyes modes
-	{
-		if (keystatus[0x2a]|keystatus[0x36])
-		{
-			if (keystatus[0xa]) stereopixelwidth = max(stereopixelwidth-1,0);   //Shift (
-			if (keystatus[0xb]) stereopixelwidth++;   //Shift )
-		}
-		else
-		{
-			if (keystatus[0xa]) stereowidth = max(stereowidth-512,0);   //(
-			if (keystatus[0xb]) stereowidth += 512;   //)
-		}
-	}
-
-	if (option[4] == 0)           //Single player only keys
-	{
-		if (keystatus[0xd2])   //Insert - Insert player
-		{
-			keystatus[0xd2] = 0;
-			if (numplayers < MAXPLAYERS)
-			{
-				connectpoint2[numplayers-1] = numplayers;
-				connectpoint2[numplayers] = -1;
-
-				movefifoend[numplayers] = movefifoend[0];   //HACK 01/05/2000
-
-				initplayersprite(numplayers);
-
-				clearallviews(0L);  //Clear screen to specified color
-
-				numplayers++;
-			}
-		}
-		if (keystatus[0xd3])   //Delete - Delete player
-		{
-			keystatus[0xd3] = 0;
-			if (numplayers > 1)
-			{
-				numplayers--;
-				connectpoint2[numplayers-1] = -1;
-
-				deletesprite(playersprite[numplayers]);
-				playersprite[numplayers] = -1;
-
-				if (myconnectindex >= numplayers) myconnectindex = 0;
-				if (screenpeek >= numplayers) screenpeek = 0;
-
-				if (numplayers < 2)
-					setup3dscreen();
-				else
-					clearallviews(0L);  //Clear screen to specified color
-			}
-		}
-		if (keystatus[0x46])   //Scroll Lock
-		{
-			keystatus[0x46] = 0;
-
-			myconnectindex = connectpoint2[myconnectindex];
-			if (myconnectindex < 0) myconnectindex = connecthead;
-			screenpeek = myconnectindex;
-		}
-	}
-
-	restoreinterpolations();
-}
-
-void movethings(void)
-{
-	long i;
-
-	gotlastpacketclock = totalclock;
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-	{
-		copybufbyte(&ffsync[i],&baksync[movefifoend[i]][i],sizeof(input));
-		movefifoend[i] = ((movefifoend[i]+1)&(MOVEFIFOSIZ-1));
-	}
-}
-
-void fakedomovethings(void)
-{
-	input *syn;
-//	long i, j, k, doubvel, xvect, yvect, goalz;
-	long doubvel, xvect, yvect, goalz;
-	short bakcstat;
-
-	syn = (input *)&baksync[fakemovefifoplc][myconnectindex];
-
-	omyx = myx;
-	omyy = myy;
-	omyz = myz;
-	omyang = myang;
-	omyhoriz = myhoriz;
-
-	bakcstat = sprite[playersprite[myconnectindex]].cstat;
-	sprite[playersprite[myconnectindex]].cstat &= ~0x101;
-
-	if ((syn->fvel|syn->svel) != 0)
-	{
-		doubvel = (TICSPERFRAME<<((syn->bits&256)>0));
-
-		xvect = 0, yvect = 0;
-		if (syn->fvel != 0)
-		{
-			xvect += ((((long)syn->fvel)*doubvel*(long)sintable[(myang+512)&2047])>>3);
-			yvect += ((((long)syn->fvel)*doubvel*(long)sintable[myang&2047])>>3);
-		}
-		if (syn->svel != 0)
-		{
-			xvect += ((((long)syn->svel)*doubvel*(long)sintable[myang&2047])>>3);
-			yvect += ((((long)syn->svel)*doubvel*(long)sintable[(myang+1536)&2047])>>3);
-		}
-		if (flytime[myconnectindex] > lockclock) { xvect += xvect; yvect += yvect; }   // DOuble flying speed
-		clipmove(&myx,&myy,&myz,&mycursectnum,xvect,yvect,128L,4<<8,4<<8,CLIPMASK0);
-	}
-
-	pushmove(&myx,&myy,&myz,&mycursectnum,128L,4<<8,4<<8,CLIPMASK0);
-	getzrange(myx,myy,myz,mycursectnum,&globhiz,&globhihit,&globloz,&globlohit,128L,CLIPMASK0);
-
-	if (syn->avel != 0)          //ang += avel * constant
-	{                         //ENGINE calculates avel for you
-		doubvel = TICSPERFRAME;
-		if ((syn->bits&256) > 0)  //Lt. shift makes turn velocity 50% faster
-			doubvel += (TICSPERFRAME>>1);
-		myang += ((((long)syn->avel)*doubvel)>>4);
-		myang &= 2047;
-	}
-
-	if (((syn->bits&8) > 0) && (myhoriz > 100-(200>>1))) myhoriz -= 4;   //-
-	if (((syn->bits&4) > 0) && (myhoriz < 100+(200>>1))) myhoriz += 4;   //+
-
-	goalz = globloz-EYEHEIGHT;
-	if (sector[mycursectnum].lotag == 4)   //slime sector
-		if ((globlohit&0xc000) != 49152)            //You're not on a sprite
-		{
-			goalz = globloz-(8<<8);
-			if (myz >= goalz-(2<<8))
-				clipmove(&myx,&myy,&myz,&mycursectnum,-TICSPERFRAME<<14,-TICSPERFRAME<<14,128L,4<<8,4<<8,CLIPMASK0);
-		}
-	if (goalz < globhiz+(16<<8))   //ceiling&floor too close
-		goalz = ((globloz+globhiz)>>1);
-
-	if (health[myconnectindex] >= 0)
-	{
-		if ((syn->bits&1) > 0)                         //A (stand high)
-		{
-			if (flytime[myconnectindex] <= lockclock)
-			{
-				if (myz >= globloz-(32<<8))
-				{
-					goalz -= (16<<8);
-					if (syn->bits&256) goalz -= (24<<8);
-				}
-			}
-			else
-			{
-				myzvel -= 192;
-				if (syn->bits&256) myzvel -= 192;
-			}
-		}
-		if ((syn->bits&2) > 0)                         //Z (stand low)
-		{
-			if (flytime[myconnectindex] <= lockclock)
-			{
-				goalz += (12<<8);
-				if (syn->bits&256) goalz += (12<<8);
-			}
-			else
-			{
-				myzvel += 192;
-				if (syn->bits&256) myzvel += 192;
-			}
-		}
-	}
-
-	if (flytime[myconnectindex] <= lockclock)
-	{
-		if (myz < goalz)
-			myzvel += (TICSPERFRAME<<4);
-		else
-			myzvel = (((goalz-myz)*TICSPERFRAME)>>5);
-	}
-	else
-	{
-		myzvel -= (myzvel>>2);
-		myzvel -= ksgn(myzvel);
-	}
-
-	myz += myzvel;
-	if (myz > globloz-(4<<8)) myz = globloz-(4<<8), myzvel = 0;
-	if (myz < globhiz+(4<<8)) myz = globhiz+(4<<8), myzvel = 0;
-
-	sprite[playersprite[myconnectindex]].cstat = bakcstat;
-
-	myxbak[fakemovefifoplc] = myx;
-	myybak[fakemovefifoplc] = myy;
-	myzbak[fakemovefifoplc] = myz;
-	myangbak[fakemovefifoplc] = myang;
-	myhorizbak[fakemovefifoplc] = myhoriz;
-	fakemovefifoplc = (fakemovefifoplc+1)&(MOVEFIFOSIZ-1);
-}
-
-	//Prediction correction
-void fakedomovethingscorrect(void)
-{
-	long i;
-
-	if ((networkmode == 0) && (myconnectindex == connecthead)) return;
-
-	i = ((movefifoplc-1)&(MOVEFIFOSIZ-1));
-
-	if ((posx[myconnectindex] == myxbak[i]) &&
-		 (posy[myconnectindex] == myybak[i]) &&
-		 (posz[myconnectindex] == myzbak[i]) &&
-		 (horiz[myconnectindex] == myhorizbak[i]) &&
-		 (ang[myconnectindex] == myangbak[i]))
-		 return;
-
-		//Re-start fakedomovethings back to place of error
-	myx = omyx = posx[myconnectindex];
-	myy = omyy = posy[myconnectindex];
-	myz = omyz = posz[myconnectindex]; myzvel = hvel[myconnectindex];
-	myang = omyang = ang[myconnectindex];
-	mycursectnum = mycursectnum;
-	myhoriz = omyhoriz = horiz[myconnectindex];
-
-	fakemovefifoplc = movefifoplc;
-	while (fakemovefifoplc != movefifoend[myconnectindex]) fakedomovethings();
-}
-
-void domovethings(void)
-{
-	short i, j, startwall, endwall;
-//	spritetype *spr;
-	walltype *wal;
-//	point3d *ospr;
-
-	nummoves++;
-
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-		copybufbyte(&baksync[movefifoplc][i],&_sync[i],sizeof(input));
-	movefifoplc = ((movefifoplc+1)&(MOVEFIFOSIZ-1));
-
-	if (option[4] != 0)
-	{
-		syncval[syncvalhead] = (char)(randomseed&255);
-		syncvalhead = ((syncvalhead+1)&(MOVEFIFOSIZ-1));
-	}
-
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-	{
-		oposx[i] = posx[i];
-		oposy[i] = posy[i];
-		oposz[i] = posz[i];
-		ohoriz[i] = horiz[i];
-		ozoom[i] = zoom[i];
-		oang[i] = ang[i];
-	}
-
-	for(i=NUMSTATS-1;i>=0;i--)
-		if (statrate[i] >= 0)
-			for(j=headspritestat[i];j>=0;j=nextspritestat[j])
-				if (((nummoves-j)&statrate[i]) == 0)
-					copybuf(&sprite[j].x,&osprite[j].x,3);
-
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-		ocursectnum[i] = cursectnum[i];
-
-	updateinterpolations();
-
-	if ((numplayers <= 2) && (recstat == 1))
-	{
-		j = 0;
-		for(i=connecthead;i>=0;i=connectpoint2[i])
-		{
-			copybufbyte(&_sync[i],&recsync[reccnt][j],sizeof(input));
-			j++;
-		}
-		reccnt++; if (reccnt > 16383) reccnt = 16383;
-	}
-
-	lockclock += TICSPERFRAME;
-	drawstatusflytime(screenpeek);   // Andy did this
-
-	if (cameradist >= 0)
-	{
-		cameradist = min(cameradist+((totalclock-cameraclock)<<10),65536);
-		if (keystatus[0x52])       //0
-			cameraang -= ((totalclock-cameraclock)<<(2+(keystatus[0x2a]|keystatus[0x36])));
-		if (keystatus[0x53])       //.
-			cameraang += ((totalclock-cameraclock)<<(2+(keystatus[0x2a]|keystatus[0x36])));
-		cameraclock = totalclock;
-	}
-
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-	{
-		processinput(i);                        //Move player
-
-		checktouchsprite(i,cursectnum[i]);      //Pick up coins
-		startwall = sector[cursectnum[i]].wallptr;
-		endwall = startwall + sector[cursectnum[i]].wallnum;
-		for(j=startwall,wal=&wall[j];j<endwall;j++,wal++)
-			if (wal->nextsector >= 0) checktouchsprite(i,wal->nextsector);
-	}
-
-	doanimations();
-	tagcode();            //Door code, moving sector code, other stuff
-	statuslistcode();     //Monster / bullet code / explosions
-
-	fakedomovethingscorrect();
-
-	checkmasterslaveswitch();
-}
-
-void getinput(void)
-{
-//	char ch, keystate, *ptr;
-	char ch, keystate;
-//	long i, j, k;
-	long i, j;
-	short mousx, mousy, bstatus;
-
-	if (typemode == 0)           //if normal game keys active
-	{
-		if (keystatus[(unsigned int)keys[15]])
-		{
-			keystatus[(unsigned int)keys[15]] = 0;
-
-			screenpeek = connectpoint2[screenpeek];
-			if (screenpeek < 0) screenpeek = connecthead;
-			drawstatusbar(screenpeek);   // Andy did this
-		}
-
-		for(i=7;i>=0;i--)
-			if (keystatus[i+2])
-				{ keystatus[i+2] = 0; locselectedgun = i; break; }
-	}
-
-
-		//KEYTIMERSTUFF
-	if (!keystatus[(unsigned int)keys[5]])
-	{
-		if (keystatus[(unsigned int)keys[2]]) avel = max(avel-16*TICSPERFRAME,-128);
-		if (keystatus[(unsigned int)keys[3]]) avel = min(avel+16*TICSPERFRAME,127);
-	}
-	else
-	{
-		if (keystatus[(unsigned int)keys[2]]) svel = min(svel+8*TICSPERFRAME,127);
-		if (keystatus[(unsigned int)keys[3]]) svel = max(svel-8*TICSPERFRAME,-128);
-	}
-	if (keystatus[(unsigned int)keys[0]]) fvel = min(fvel+8*TICSPERFRAME,127);
-	if (keystatus[(unsigned int)keys[1]]) fvel = max(fvel-8*TICSPERFRAME,-128);
-	if (keystatus[(unsigned int)keys[12]]) svel = min(svel+8*TICSPERFRAME,127);
-	if (keystatus[(unsigned int)keys[13]]) svel = max(svel-8*TICSPERFRAME,-128);
-
-	if (avel < 0) avel = min(avel+12*TICSPERFRAME,0);
-	if (avel > 0) avel = max(avel-12*TICSPERFRAME,0);
-	if (svel < 0) svel = min(svel+2*TICSPERFRAME,0);
-	if (svel > 0) svel = max(svel-2*TICSPERFRAME,0);
-	if (fvel < 0) fvel = min(fvel+2*TICSPERFRAME,0);
-	if (fvel > 0) fvel = max(fvel-2*TICSPERFRAME,0);
-
-	if ((option[4] == 0) && (numplayers >= 2))
-	{
-		if (!keystatus[0x4f])
-		{
-			if (keystatus[0x4b]) avel2 = max(avel2-16*TICSPERFRAME,-128);
-			if (keystatus[0x4d]) avel2 = min(avel2+16*TICSPERFRAME,127);
-		}
-		else
-		{
-			if (keystatus[0x4b]) svel2 = min(svel2+8*TICSPERFRAME,127);
-			if (keystatus[0x4d]) svel2 = max(svel2-8*TICSPERFRAME,-128);
-		}
-		if (keystatus[0x48]) fvel2 = min(fvel2+8*TICSPERFRAME,127);
-		if (keystatus[0x4c]) fvel2 = max(fvel2-8*TICSPERFRAME,-128);
-
-		if (avel2 < 0) avel2 = min(avel2+12*TICSPERFRAME,0);
-		if (avel2 > 0) avel2 = max(avel2-12*TICSPERFRAME,0);
-		if (svel2 < 0) svel2 = min(svel2+2*TICSPERFRAME,0);
-		if (svel2 > 0) svel2 = max(svel2-2*TICSPERFRAME,0);
-		if (fvel2 < 0) fvel2 = min(fvel2+2*TICSPERFRAME,0);
-		if (fvel2 > 0) fvel2 = max(fvel2-2*TICSPERFRAME,0);
-	}
-
-	if (keystatus[0x1a]) screentilt += ((4*TICSPERFRAME)<<(keystatus[0x2a]|keystatus[0x36]));
-	if (keystatus[0x1b]) screentilt -= ((4*TICSPERFRAME)<<(keystatus[0x2a]|keystatus[0x36]));
-
-	i = (TICSPERFRAME<<1);
-	while ((screentilt != 0) && (i > 0))
-		{ screentilt = ((screentilt+ksgn(screentilt-1024))&2047); i--; }
-	if (keystatus[0x28]) screentilt = 1536;
-
-
-	loc.fvel = min(max(fvel,-128+8),127-8);
-	loc.svel = min(max(svel,-128+8),127-8);
-	loc.avel = min(max(avel,-128+16),127-16);
-
-	getmousevalues(&mousx,&mousy,&bstatus);
-	loc.avel = min(max(loc.avel+(mousx<<3),-128),127);
-	loc.fvel = min(max(loc.fvel-(mousy<<3),-128),127);
-
-	loc.bits = (locselectedgun<<13);
-	if (typemode == 0)           //if normal game keys active
-	{
-		loc.bits |= (keystatus[0x32]<<9);                 //M (be master)
-		loc.bits |= ((keystatus[(unsigned int)keys[14]]==1)<<12);       //Map mode
-	}
-	loc.bits |= keystatus[(unsigned int)keys[8]];                   //Stand high
-	loc.bits |= (keystatus[(unsigned int)keys[9]]<<1);              //Stand low
-	loc.bits |= (keystatus[(unsigned int)keys[16]]<<4);             //Zoom in
-	loc.bits |= (keystatus[(unsigned int)keys[17]]<<5);             //Zoom out
-	loc.bits |= (keystatus[(unsigned int)keys[4]]<<8);                 //Run
-	loc.bits |= (keystatus[(unsigned int)keys[10]]<<2);                //Look up
-	loc.bits |= (keystatus[(unsigned int)keys[11]]<<3);                //Look down
-	loc.bits |= ((keystatus[(unsigned int)keys[7]]==1)<<10);           //Space
-	loc.bits |= ((keystatus[(unsigned int)keys[6]]==1)<<11);           //Shoot
-	loc.bits |= (((bstatus&6)>(oldmousebstatus&6))<<10); //Space
-	loc.bits |= (((bstatus&1)>(oldmousebstatus&1))<<11); //Shoot
-
-	oldmousebstatus = bstatus;
-	if (((loc.bits&2048) > 0) && (locselectedgun == 1))
-		oldmousebstatus &= ~1;     //Allow continous fire with mouse for chain gun
-
-		//PRIVATE KEYS:
-	if (keystatus[0xb7])  //Printscreen
-	{
-		keystatus[0xb7] = 0;
-#ifdef PLATFORM_DOS		
-		printscreeninterrupt();
-#endif		
-	}
-
-	if (keystatus[0x2f])       //V
-	{
-		keystatus[0x2f] = 0;
-		if (cameradist < 0) cameradist = 0; else cameradist = -1;
-		cameraang = 0;
-	}
-
-	if (typemode == 0)           //if normal game keys active
-	{
-		if (keystatus[0x19])  //P
-		{
-			keystatus[0x19] = 0;
-			parallaxtype++;
-			if (parallaxtype > 2) parallaxtype = 0;
-		}
-		if (keystatus[0x38]|keystatus[0xb8])  //ALT
-		{
-			if (keystatus[0x4a])  // Keypad -
-				visibility = min(visibility+(visibility>>3),16384);
-			if (keystatus[0x4e])  // Keypad +
-				visibility = max(visibility-(visibility>>3),128);
-		}
-
-		if (keystatus[(unsigned int)keys[18]])   //Typing mode
-		{
-			keystatus[(unsigned int)keys[18]] = 0;
-			typemode = 1;
-			keyfifoplc = keyfifoend;      //Reset keyboard fifo
-		}
-	}
-	else
-	{
-		while (keyfifoplc != keyfifoend)
-		{
-			ch = keyfifo[(unsigned int)keyfifoplc];
-			keystate = keyfifo[(keyfifoplc+1)&(KEYFIFOSIZ-1)];
-			keyfifoplc = ((keyfifoplc+2)&(KEYFIFOSIZ-1));
-
-			if (keystate != 0)
-			{
-				if (ch == 0xe)   //Backspace
-				{
-					if (typemessageleng == 0) { typemode = 0; break; }
-					typemessageleng--;
-				}
-				if (ch == 0xf)
-				{
-					keystatus[0xf] = 0;
-					typemode = 0;
-					break;
-				}
-				if ((ch == 0x1c) || (ch == 0x9c))  //Either ENTER
-				{
-					keystatus[0x1c] = 0; keystatus[0x9c] = 0;
-					if (typemessageleng > 0)
-					{
-						packbuf[0] = 2;          //Sending text is message type 4
-						for(j=typemessageleng-1;j>=0;j--)
-							packbuf[j+1] = typemessage[j];
-
-						for(i=connecthead;i>=0;i=connectpoint2[i])
-							if (i != myconnectindex)
-								sendpacket(i,packbuf,typemessageleng+1);
-
-						typemessageleng = 0;
-					}
-					typemode = 0;
-					break;
-				}
-
-				if ((typemessageleng < 159) && (ch < 128))
-				{
-					if (keystatus[0x2a]|keystatus[0x36])
-						ch = scantoascwithshift[(unsigned int)ch];
-					else
-						ch = scantoasc[(unsigned int)ch];
-
-					if (ch != 0) typemessage[(unsigned int)typemessageleng++] = ch;
-				}
-			}
-		}
-			//Here's a trick of making key repeat after a 1/2 second
-		if (keystatus[0xe])
-		{
-			if (keystatus[0xe] < 30)
-				keystatus[0xe] += TICSPERFRAME;
-			else
-			{
-				if (typemessageleng == 0)
-					typemode = 0;
-				else
-					typemessageleng--;
-			}
-		}
-	}
-}
-
-void initplayersprite(short snum)
-{
-	long i;
-
-	if (playersprite[snum] >= 0) return;
-
-	spawnsprite(playersprite[snum],posx[snum],posy[snum],posz[snum]+EYEHEIGHT,
-		1+256,0,snum,32,64,64,0,0,PLAYER,ang[snum],0,0,0,snum+4096,
-		cursectnum[snum],8,0,0,0);
-
-	switch(snum)
-	{
-		case 1: for(i=0;i<32;i++) tempbuf[i+192] = i+128; break; //green->red
-		case 2: for(i=0;i<32;i++) tempbuf[i+192] = i+32; break;  //green->blue
-		case 3: for(i=0;i<32;i++) tempbuf[i+192] = i+224; break; //green->pink
-		case 4: for(i=0;i<32;i++) tempbuf[i+192] = i+64; break;  //green->brown
-		case 5: for(i=0;i<32;i++) tempbuf[i+192] = i+96; break;
-		case 6: for(i=0;i<32;i++) tempbuf[i+192] = i+160; break;
-		case 7: for(i=0;i<32;i++) tempbuf[i+192] = i+192; break;
-		default: for(i=0;i<256;i++) tempbuf[i] = i; break;
-	}
-	makepalookup(snum,tempbuf,0,0,0,1);
-}
-
-void playback(void)
-{
-	long i, j, k;
-
-	ready2send = 0;
-	recstat = 0; i = reccnt;
-	while (!keystatus[1])
-	{
-		while (totalclock >= lockclock+TICSPERFRAME)
-		{
-			if (i >= reccnt)
-			{
-				prepareboard(boardfilename);
-				for(i=connecthead;i>=0;i=connectpoint2[i])
-					initplayersprite((short)i);
-				totalclock = 0;
-				i = 0;
-			}
-
-			k = 0;
-			for(j=connecthead;j>=0;j=connectpoint2[j])
-			{
-				copybufbyte(&recsync[i][k],&ffsync[j],sizeof(input));
-				k++;
-			}
-			movethings(); domovethings();
-			i++;
-		}
-		drawscreen(screenpeek,(totalclock-gotlastpacketclock)*(65536/(TIMERINTSPERSECOND/MOVESPERSECOND)));
-
-		if (keystatus[(unsigned int)keys[15]])
-		{
-			keystatus[(unsigned int)keys[15]] = 0;
-			screenpeek = connectpoint2[screenpeek];
-			if (screenpeek < 0) screenpeek = connecthead;
-			drawstatusbar(screenpeek);   // Andy did this
-		}
-		if (keystatus[(unsigned int)keys[14]])
-		{
-			keystatus[(unsigned int)keys[14]] = 0;
-			dimensionmode[screenpeek]++;
-			if (dimensionmode[screenpeek] > 3) dimensionmode[screenpeek] = 1;
-		}
-	}
-
-	musicoff();
-	uninitmultiplayers();
-	uninittimer();
-	uninitkeys();
-	uninitengine();
-	uninitsb();
-	uninitgroupfile();
-	setvmode(0x3);        //Set back to text mode
-	exit(0);
-}
-
-void setup3dscreen(void)
-{
-	long i, dax, day, dax2, day2;
-
-	i = setgamemode(option[0],vesares[option[6]&15][0],vesares[option[6]&15][1]);
-	if (i < 0)
-	{
-		printf("VESA driver for (%ld * %ld) not found/supported.\n",xdim,ydim);
-		printf("   Press ENTER to play in NORMAL mode instead\n");
-		printf("   Press ESC to quit to DOS\n");
-		keystatus[1] = keystatus[0x1c] = keystatus[0x9c] = 0;
-		while (!keystatus[1])
-			if (keystatus[0x1c]|keystatus[0x9c])
-				{ option[0] = vidoption = 2; i = setgamemode(option[0],vesares[option[6]&15][0],vesares[option[6]&15][1]); break; }
-	}
-	if (i < 0)
-	{
-		sendlogoff();
-		musicoff();
-		uninitmultiplayers();
-		uninittimer();
-		uninitkeys();
-		uninitengine();
-		uninitsb();
-		uninitgroupfile();
-		exit(0);
-	}
-
-	  //Make that ugly pink into black in case it ever shows up!
-	i = 0L;
-	VBE_setPalette(255,1,(char *)&i);
-	//outp(0x3c8,255); outp(0x3c9,0); outp(0x3c9,0); outp(0x3c9,0);
-
-	screensize = xdim;
-	if (screensize > xdim)
-	{
-		dax = 0; day = 0;
-		dax2 = xdim-1; day2 = ydim-1;
-	}
-	else
-	{
-		dax = ((xdim-screensize)>>1);
-		dax2 = dax+screensize-1;
-		day = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
-		day2 = day + scale(screensize,ydim-32,xdim)-1;
-		setview(dax,day,dax2,day2);
-	}
-
-	flushperms();
-
-	if (screensize < xdim)
-		drawtilebackground(0L,0L,BACKGROUND,8,0L,0L,xdim-1L,ydim-1L,0);      //Draw background
-
-	if (screensize <= xdim)
-	{
-		rotatesprite((xdim-320)<<15,(ydim-32)<<16,65536L,0,STATUSBAR,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
-		i = ((xdim-320)>>1);
-		while (i >= 8) i -= 8, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
-		if (i >= 4) i -= 4, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
-		i = ((xdim-320)>>1)+320;
-		while (i <= xdim-8) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 8;
-		if (i <= xdim-4) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 4;
-
-		drawstatusbar(screenpeek);   // Andy did this
-	}
-}
-
-void findrandomspot(long *x, long *y, short *sectnum)
-{
-	short startwall, endwall, s, dasector;
-	long dax, day, daz, minx, maxx, miny, maxy, cnt;
-
-	for(cnt=256;cnt>=0;cnt--)
-	{
-		do
-		{
-			dasector = mulscale16(krand(),numsectors);
-		} while ((sector[dasector].ceilingz+(8<<8) >= sector[dasector].floorz) || ((sector[dasector].lotag|sector[dasector].hitag) != 0) || ((sector[dasector].floorstat&1) != 0));
-
-		startwall = sector[dasector].wallptr;
-		endwall = startwall+sector[dasector].wallnum;
-		if (endwall <= startwall) continue;
-
-		dax = 0L;
-		day = 0L;
-		minx = 0x7fffffff; maxx = 0x80000000;
-		miny = 0x7fffffff; maxy = 0x80000000;
-
-		for(s=startwall;s<endwall;s++)
-		{
-			dax += wall[s].x;
-			day += wall[s].y;
-			if (wall[s].x < minx) minx = wall[s].x;
-			if (wall[s].x > maxx) maxx = wall[s].x;
-			if (wall[s].y < miny) miny = wall[s].y;
-			if (wall[s].y > maxy) maxy = wall[s].y;
-		}
-
-		if ((maxx-minx <= 256) || (maxy-miny <= 256)) continue;
-
-		dax /= (endwall-startwall);
-		day /= (endwall-startwall);
-
-		if (inside(dax,day,dasector) == 0) continue;
-
-		daz = sector[dasector].floorz-(32<<8);
-		if (pushmove(&dax,&day,&daz,&dasector,128L,4<<8,4<<8,CLIPMASK0) < 0) continue;
-
-		*x = dax; *y = day; *sectnum = dasector;
-		return;
-	}
-}
-
-void warp(long *x, long *y, long *z, short *daang, short *dasector)
-{
-	short startwall, endwall, s;
-	long i, j, dax, day, ox, oy;
-
-	ox = *x; oy = *y;
-
-	for(i=0;i<warpsectorcnt;i++)
-		if (warpsectorlist[i] == *dasector)
-		{
-			j = sector[*dasector].hitag;
-			do
-			{
-				i++;
-				if (i >= warpsectorcnt) i = 0;
-			} while (sector[warpsectorlist[i]].hitag != j);
-			*dasector = warpsectorlist[i];
-			break;
-		}
-
-		//Find center of sector
-	startwall = sector[*dasector].wallptr;
-	endwall = startwall+sector[*dasector].wallnum;
-	dax = 0L, day = 0L;
-	for(s=startwall;s<endwall;s++)
-	{
-		dax += wall[s].x, day += wall[s].y;
-		if (wall[s].nextsector >= 0)
-			i = s;
-	}
-	*x = dax / (endwall-startwall);
-	*y = day / (endwall-startwall);
-	*z = sector[*dasector].floorz-(32<<8);
-	updatesector(*x,*y,dasector);
-	dax = ((wall[i].x+wall[wall[i].point2].x)>>1);
-	day = ((wall[i].y+wall[wall[i].point2].y)>>1);
-	*daang = getangle(dax-*x,day-*y);
-
-	wsayfollow("warp.wav",3072L+(krand()&127)-64,192L,&ox,&oy,0);
-	wsayfollow("warp.wav",4096L+(krand()&127)-64,256L,x,y,0);
-}
-
-void warpsprite(short spritenum)
-{
-	short dasectnum;
-
-	dasectnum = sprite[spritenum].sectnum;
-	warp(&sprite[spritenum].x,&sprite[spritenum].y,&sprite[spritenum].z,
-		  &sprite[spritenum].ang,&dasectnum);
-
-	copybuf(&sprite[spritenum].x,&osprite[spritenum].x,3);
-	changespritesect(spritenum,dasectnum);
-
-	show2dsprite[spritenum>>3] &= ~(1<<(spritenum&7));
-	if (show2dsector[dasectnum>>3]&(1<<(dasectnum&7)))
-		show2dsprite[spritenum>>3] |= (1<<(spritenum&7));
-}
-
-void initlava(void)
-{
-	long x, y, z, r;
-
-	for(z=0;z<32;z++) lavaradcnt[z] = 0;
-	for(x=-16;x<=16;x++)
-		for(y=-16;y<=16;y++)
-		{
-			r = ksqrt(x*x + y*y);
-			lavaradx[r][lavaradcnt[r]] = x;
-			lavarady[r][lavaradcnt[r]] = y;
-			lavaradcnt[r]++;
-		}
-
-	for(z=0;z<16;z++)
-		lavadropsizlookup[z] = 8 / (ksqrt(z)+1);
-
-	for(z=0;z<LAVASIZ;z++)
-		lavainc[z] = klabs((((z^17)>>4)&7)-4)+12;
-
-	lavanumdrops = 0;
-	lavanumframes = 0;
-}
-
-#if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
-
-        long addlava(int param);
-    #pragma aux addlava =\
-	"mov al, byte ptr [ebx-133]",\
-	"mov dl, byte ptr [ebx-1]",\
-	"add al, byte ptr [ebx-132]",\
-	"add dl, byte ptr [ebx+131]",\
-	"add al, byte ptr [ebx-131]",\
-	"add dl, byte ptr [ebx+132]",\
-	"add al, byte ptr [ebx+1]",\
-	"add al, dl",\
-	parm [ebx]\
-	modify exact [eax edx]
-
-  #elif (defined __GNUC__)
-	static long addlava (int i1)
-	{
-        long retval;
-        __asm__ __volatile__ (
-            "\n\t"
-            "movb -133(%%ebx), %%al\n\t"
-            "movb -1(%%ebx), %%dl\n\t"
-            "addb -132(%%ebx), %%al\n\t"
-            "addb 131(%%ebx), %%dl\n\t"
-            "addb -131(%%ebx), %%al\n\t"
-            "addb 132(%%ebx), %%dl\n\t"
-            "addb 1(%%ebx), %%al\n\t"
-            "addb %%dl, %%al\n\t"
-        : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
-        return (retval);
-	}	
-
-  #else
-      #error Please write Assembly code for your platform!
-    #endif
-
-#else   // USE_I386_ASM
-    #error Please implement this function in C.
-#endif
-
-
-void movelava(char *dapic)
-{
-	long i, j, x, y, z, zz, dalavadropsiz, dadropsizlookup;
-	long dalavax, dalavay, *ptr, *ptr2;
-
-	for(z=min(LAVAMAXDROPS-lavanumdrops-1,3);z>=0;z--)
-	{
-		lavadropx[lavanumdrops] = (rand()&(LAVASIZ-1));
-		lavadropy[lavanumdrops] = (rand()&(LAVASIZ-1));
-		lavadropsiz[lavanumdrops] = 1;
-		lavanumdrops++;
-	}
-
-	for(z=lavanumdrops-1;z>=0;z--)
-	{
-		dadropsizlookup = lavadropsizlookup[lavadropsiz[z]]*(((z&1)<<1)-1);
-		dalavadropsiz = lavadropsiz[z];
-		dalavax = lavadropx[z]; dalavay = lavadropy[z];
-		for(zz=lavaradcnt[lavadropsiz[z]]-1;zz>=0;zz--)
-		{
-			i = (((lavaradx[dalavadropsiz][zz]+dalavax)&(LAVASIZ-1))<<LAVALOGSIZ);
-			i += ((lavarady[dalavadropsiz][zz]+dalavay)&(LAVASIZ-1));
-			dapic[i] += dadropsizlookup;
-			if (dapic[i] < 192) dapic[i] = 192;
-		}
-
-		lavadropsiz[z]++;
-		if (lavadropsiz[z] > 10)
-		{
-			lavanumdrops--;
-			lavadropx[z] = lavadropx[lavanumdrops];
-			lavadropy[z] = lavadropy[lavanumdrops];
-			lavadropsiz[z] = lavadropsiz[lavanumdrops];
-		}
-	}
-
-		//Back up dapic with 1 pixel extra on each boundary
-		//(to prevent anding for wrap-around)
-	ptr = (long *)dapic;
-	ptr2 = (long *)((LAVASIZ+4)+1+((long)lavabakpic));
-	for(x=0;x<LAVASIZ;x++)
-	{
-		for(y=(LAVASIZ>>2);y>0;y--) *ptr2++ = ((*ptr++)&0x1f1f1f1f);
-		ptr2++;
-	}
-	for(y=0;y<LAVASIZ;y++)
-	{
-		lavabakpic[y+1] = (dapic[y+((LAVASIZ-1)<<LAVALOGSIZ)]&31);
-		lavabakpic[y+1+(LAVASIZ+1)*(LAVASIZ+4)] = (dapic[y]&31);
-	}
-	for(x=0;x<LAVASIZ;x++)
-	{
-		lavabakpic[(x+1)*(LAVASIZ+4)] = (dapic[(x<<LAVALOGSIZ)+(LAVASIZ-1)]&31);
-		lavabakpic[(x+1)*(LAVASIZ+4)+(LAVASIZ+1)] = (dapic[x<<LAVALOGSIZ]&31);
-	}
-	lavabakpic[0] = (dapic[LAVASIZ*LAVASIZ-1]&31);
-	lavabakpic[LAVASIZ+1] = (dapic[LAVASIZ*(LAVASIZ-1)]&31);
-	lavabakpic[(LAVASIZ+4)*(LAVASIZ+1)] = (dapic[LAVASIZ-1]&31);
-	lavabakpic[(LAVASIZ+4)*(LAVASIZ+2)-1] = (dapic[0]&31);
-
-	ptr = (long *)dapic;
-	for(x=0;x<LAVASIZ;x++)
-	{
-		i = (long)&lavabakpic[(x+1)*(LAVASIZ+4)+1];
-		j = i+LAVASIZ;
-		for(y=i;y<j;y+=4)
-		{
-			*ptr++ = ((addlava(y+0)&0xf8)>>3)+
-						((addlava(y+1)&0xf8)<<5)+
-						((addlava(y+2)&0xf8)<<13)+
-						((addlava(y+3)&0xf8)<<21)+
-						0xc2c2c2c2;
-		}
-	}
-
-	lavanumframes++;
-}
-
-void doanimations(void)
-{
-	long i, j;
-
-	for(i=animatecnt-1;i>=0;i--)
-	{
-		j = *animateptr[i];
-
-		if (j < animategoal[i])
-			j = min(j+animatevel[i]*TICSPERFRAME,animategoal[i]);
-		else
-			j = max(j-animatevel[i]*TICSPERFRAME,animategoal[i]);
-		animatevel[i] += animateacc[i];
-
-		*animateptr[i] = j;
-
-		if (j == animategoal[i])
-		{
-			animatecnt--;
-			if (i != animatecnt)
-			{
-				stopinterpolation(animateptr[i]);
-				animateptr[i] = animateptr[animatecnt];
-				animategoal[i] = animategoal[animatecnt];
-				animatevel[i] = animatevel[animatecnt];
-				animateacc[i] = animateacc[animatecnt];
-			}
-		}
-	}
-}
-
-long getanimationgoal(long animptr)
-{
-	long i;
-
-	for(i=animatecnt-1;i>=0;i--)
-		if ((long *)animptr == animateptr[i]) return(i);
-	return(-1);
-}
-
-long setanimation(long *animptr, long thegoal, long thevel, long theacc)
-{
-	long i, j;
-
-	if (animatecnt >= MAXANIMATES) return(-1);
-
-	j = animatecnt;
-	for(i=animatecnt-1;i>=0;i--)
-		if (animptr == animateptr[i])
-			{ j = i; break; }
-
-	setinterpolation(animptr);
-
-	animateptr[j] = animptr;
-	animategoal[j] = thegoal;
-	animatevel[j] = thevel;
-	animateacc[j] = theacc;
-	if (j == animatecnt) animatecnt++;
-	return(j);
-}
 
 void checkmasterslaveswitch(void)
 {
@@ -5153,572 +4052,88 @@ void checkmasterslaveswitch(void)
 	}
 }
 
-void __interrupt __far timerhandler()
+void domovethings(void)
 {
-	totalclock++;
-	//_chain_intr(oldtimerhandler);
+	short i, j, startwall, endwall;
+	walltype *wal;
 
-    #ifdef PLATFORM_DOS
-    	outp(0x20,0x20);
-    #endif
-}
+	nummoves++;
 
-void initkeys(void)
-{
-	long i;
+	for(i=connecthead;i>=0;i=connectpoint2[i])
+		copybufbyte(&baksync[movefifoplc][i],&_sync[i],sizeof(input));
+	movefifoplc = ((movefifoplc+1)&(MOVEFIFOSIZ-1));
 
-	keyfifoplc = 0; keyfifoend = 0;
-	for(i=0;i<256;i++) keystatus[i] = 0;
-    _initkeys();
-}
-
-void __interrupt __far keyhandler()
-{
-        // ryan sez: End Of Interrupt call on DOS. This seems like a
-        //  dangerous place to put it, if you ask me, but oh well.  --ryan.
-    #ifdef PLATFORM_DOS
-    	koutp(0x20,0x20);
-    #endif
-
-	oldreadch = readch; readch = _readlastkeyhit();
-
-    //printf("keyhandler() got a (0x%X) ... \n", readch);
-
-        // ryan sez: these inp/outp calls read the keyboard state,
-        //  reset the keyboard, and put the original state back in.
-        //  This is apparently needed on some XTs, but not newer boxes, and
-        //  obviously never on Linux.  --ryan.
-    #ifdef PLATFORM_DOS
-    	keytemp = kinp(0x61); koutp(0x61,keytemp|128); koutp(0x61,keytemp&127);
-    #else
-        keytemp = readch;
-    #endif
-
-	if ((readch|1) == 0xe1) { extended = 128; return; }
-	if (oldreadch != readch)
+	if (option[4] != 0)
 	{
-		if ((readch&128) == 0)
-		{
-			keytemp = readch+extended;
-			if (!keystatus[(int) keytemp])
-			{
-				keystatus[(int) keytemp] = 1;
-				keyfifo[(int) keyfifoend] = keytemp;
-				keyfifo[(int) (keyfifoend+1)&(KEYFIFOSIZ-1)] = 1;
-				keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
-			}
-		}
-		else
-		{
-			keytemp = (readch&127)+extended;
-			keystatus[(int) keytemp] = 0;
-			keyfifo[(int) keyfifoend] = keytemp;
-			keyfifo[(int) (keyfifoend+1)&(KEYFIFOSIZ-1)] = 0;
-			keyfifoend = ((keyfifoend+2)&(KEYFIFOSIZ-1));
-		}
+		syncval[syncvalhead] = (char)(randomseed&255);
+		syncvalhead = ((syncvalhead+1)&(MOVEFIFOSIZ-1));
 	}
-	extended = 0;
-}
 
-int testneighborsectors(short sect1, short sect2)
-{
-	short i, startwall, num1, num2;
-
-	num1 = sector[sect1].wallnum;
-	num2 = sector[sect2].wallnum;
-	if (num1 < num2) //Traverse walls of sector with fewest walls (for speed)
+	for(i=connecthead;i>=0;i=connectpoint2[i])
 	{
-		startwall = sector[sect1].wallptr;
-		for(i=num1-1;i>=0;i--)
-			if (wall[i+startwall].nextsector == sect2)
-				return(1);
+		oposx[i] = posx[i];
+		oposy[i] = posy[i];
+		oposz[i] = posz[i];
+		ohoriz[i] = horiz[i];
+		ozoom[i] = zoom[i];
+		oang[i] = ang[i];
 	}
-	else
+
+	for(i=NUMSTATS-1;i>=0;i--)
+		if (statrate[i] >= 0)
+			for(j=headspritestat[i];j>=0;j=nextspritestat[j])
+				if (((nummoves-j)&statrate[i]) == 0)
+					copybuf(&sprite[j].x,&osprite[j].x,3);
+
+	for(i=connecthead;i>=0;i=connectpoint2[i])
+		ocursectnum[i] = cursectnum[i];
+
+	updateinterpolations();
+
+	if ((numplayers <= 2) && (recstat == 1))
 	{
-		startwall = sector[sect2].wallptr;
-		for(i=num2-1;i>=0;i--)
-			if (wall[i+startwall].nextsector == sect1)
-				return(1);
-	}
-	return(0);
-}
-
-int loadgame(void)
-{
-	long i;
-	long fil;
-
-	if ((fil = kopen4load("save0000.gam",0)) == -1) return(-1);
-
-	kdfread(&numplayers,2,1,fil);
-	kdfread(&myconnectindex,2,1,fil);
-	kdfread(&connecthead,2,1,fil);
-	kdfread(connectpoint2,2,MAXPLAYERS,fil);
-
-		//Make sure palookups get set, sprites will get overwritten later
-	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
-
-	kdfread(posx,4,MAXPLAYERS,fil);
-	kdfread(posy,4,MAXPLAYERS,fil);
-	kdfread(posz,4,MAXPLAYERS,fil);
-	kdfread(horiz,4,MAXPLAYERS,fil);
-	kdfread(zoom,4,MAXPLAYERS,fil);
-	kdfread(hvel,4,MAXPLAYERS,fil);
-	kdfread(ang,2,MAXPLAYERS,fil);
-	kdfread(cursectnum,2,MAXPLAYERS,fil);
-	kdfread(ocursectnum,2,MAXPLAYERS,fil);
-	kdfread(playersprite,2,MAXPLAYERS,fil);
-	kdfread(deaths,2,MAXPLAYERS,fil);
-	kdfread(lastchaingun,4,MAXPLAYERS,fil);
-	kdfread(health,4,MAXPLAYERS,fil);
-	kdfread(numgrabbers,2,MAXPLAYERS,fil);
-	kdfread(nummissiles,2,MAXPLAYERS,fil);
-	kdfread(numbombs,2,MAXPLAYERS,fil);
-	kdfread(flytime,4,MAXPLAYERS,fil);
-	kdfread(oflags,2,MAXPLAYERS,fil);
-	kdfread(dimensionmode,1,MAXPLAYERS,fil);
-	kdfread(revolvedoorstat,1,MAXPLAYERS,fil);
-	kdfread(revolvedoorang,2,MAXPLAYERS,fil);
-	kdfread(revolvedoorrotang,2,MAXPLAYERS,fil);
-	kdfread(revolvedoorx,4,MAXPLAYERS,fil);
-	kdfread(revolvedoory,4,MAXPLAYERS,fil);
-
-	kdfread(&numsectors,2,1,fil);
-	kdfread(sector,sizeof(sectortype),numsectors,fil);
-	kdfread(&numwalls,2,1,fil);
-	kdfread(wall,sizeof(walltype),numwalls,fil);
-		//Store all sprites (even holes) to preserve indeces
-	kdfread(sprite,sizeof(spritetype),MAXSPRITES,fil);
-	kdfread(headspritesect,2,MAXSECTORS+1,fil);
-	kdfread(prevspritesect,2,MAXSPRITES,fil);
-	kdfread(nextspritesect,2,MAXSPRITES,fil);
-	kdfread(headspritestat,2,MAXSTATUS+1,fil);
-	kdfread(prevspritestat,2,MAXSPRITES,fil);
-	kdfread(nextspritestat,2,MAXSPRITES,fil);
-
-	kdfread(&fvel,4,1,fil);
-	kdfread(&svel,4,1,fil);
-	kdfread(&avel,4,1,fil);
-
-	kdfread(&locselectedgun,4,1,fil);
-	kdfread(&loc.fvel,1,1,fil);
-	kdfread(&oloc.fvel,1,1,fil);
-	kdfread(&loc.svel,1,1,fil);
-	kdfread(&oloc.svel,1,1,fil);
-	kdfread(&loc.avel,1,1,fil);
-	kdfread(&oloc.avel,1,1,fil);
-	kdfread(&loc.bits,2,1,fil);
-	kdfread(&oloc.bits,2,1,fil);
-
-	kdfread(&locselectedgun2,4,1,fil);
-	kdfread(&loc2.fvel,sizeof(input),1,fil);
-
-	kdfread(_sync,sizeof(input),MAXPLAYERS,fil);
-	kdfread(osync,sizeof(input),MAXPLAYERS,fil);
-
-	kdfread(boardfilename,1,80,fil);
-	kdfread(&screenpeek,2,1,fil);
-	kdfread(&oldmousebstatus,2,1,fil);
-	kdfread(&brightness,2,1,fil);
-	kdfread(&neartagsector,2,1,fil);
-	kdfread(&neartagwall,2,1,fil);
-	kdfread(&neartagsprite,2,1,fil);
-	kdfread(&lockclock,4,1,fil);
-	kdfread(&neartagdist,4,1,fil);
-	kdfread(&neartaghitdist,4,1,fil);
-
-	kdfread(turnspritelist,2,16,fil);
-	kdfread(&turnspritecnt,2,1,fil);
-	kdfread(warpsectorlist,2,16,fil);
-	kdfread(&warpsectorcnt,2,1,fil);
-	kdfread(xpanningsectorlist,2,16,fil);
-	kdfread(&xpanningsectorcnt,2,1,fil);
-	kdfread(ypanningwalllist,2,64,fil);
-	kdfread(&ypanningwallcnt,2,1,fil);
-	kdfread(floorpanninglist,2,64,fil);
-	kdfread(&floorpanningcnt,2,1,fil);
-	kdfread(dragsectorlist,2,16,fil);
-	kdfread(dragxdir,2,16,fil);
-	kdfread(dragydir,2,16,fil);
-	kdfread(&dragsectorcnt,2,1,fil);
-	kdfread(dragx1,4,16,fil);
-	kdfread(dragy1,4,16,fil);
-	kdfread(dragx2,4,16,fil);
-	kdfread(dragy2,4,16,fil);
-	kdfread(dragfloorz,4,16,fil);
-	kdfread(&swingcnt,2,1,fil);
-	kdfread(swingwall,2,32*5,fil);
-	kdfread(swingsector,2,32,fil);
-	kdfread(swingangopen,2,32,fil);
-	kdfread(swingangclosed,2,32,fil);
-	kdfread(swingangopendir,2,32,fil);
-	kdfread(swingang,2,32,fil);
-	kdfread(swinganginc,2,32,fil);
-	kdfread(swingx,4,32*8,fil);
-	kdfread(swingy,4,32*8,fil);
-	kdfread(revolvesector,2,4,fil);
-	kdfread(revolveang,2,4,fil);
-	kdfread(&revolvecnt,2,1,fil);
-	kdfread(revolvex,4,4*16,fil);
-	kdfread(revolvey,4,4*16,fil);
-	kdfread(revolvepivotx,4,4,fil);
-	kdfread(revolvepivoty,4,4,fil);
-	kdfread(subwaytracksector,2,4*128,fil);
-	kdfread(subwaynumsectors,2,4,fil);
-	kdfread(&subwaytrackcnt,2,1,fil);
-	kdfread(subwaystop,4,4*8,fil);
-	kdfread(subwaystopcnt,4,4,fil);
-	kdfread(subwaytrackx1,4,4,fil);
-	kdfread(subwaytracky1,4,4,fil);
-	kdfread(subwaytrackx2,4,4,fil);
-	kdfread(subwaytracky2,4,4,fil);
-	kdfread(subwayx,4,4,fil);
-	kdfread(subwaygoalstop,4,4,fil);
-	kdfread(subwayvel,4,4,fil);
-	kdfread(subwaypausetime,4,4,fil);
-	kdfread(waterfountainwall,2,MAXPLAYERS,fil);
-	kdfread(waterfountaincnt,2,MAXPLAYERS,fil);
-	kdfread(slimesoundcnt,2,MAXPLAYERS,fil);
-
-		//Warning: only works if all pointers are in sector structures!
-	kdfread(animateptr,4,MAXANIMATES,fil);
-	for(i=MAXANIMATES-1;i>=0;i--)
-		animateptr[i] = (long *)(animateptr[i]+((long)sector));
-
-	kdfread(animategoal,4,MAXANIMATES,fil);
-	kdfread(animatevel,4,MAXANIMATES,fil);
-	kdfread(animateacc,4,MAXANIMATES,fil);
-	kdfread(&animatecnt,4,1,fil);
-
-	kdfread((void*)&totalclock,4,1,fil);
-	kdfread(&numframes,4,1,fil);
-	kdfread(&randomseed,4,1,fil);
-	kdfread(&numpalookups,2,1,fil);
-
-	kdfread(&visibility,4,1,fil);
-	kdfread(&parallaxvisibility,4,1,fil);
-	kdfread(&parallaxtype,1,1,fil);
-	kdfread(&parallaxyoffs,4,1,fil);
-	kdfread(pskyoff,2,MAXPSKYTILES,fil);
-	kdfread(&pskybits,2,1,fil);
-
-	kdfread(&mirrorcnt,2,1,fil);
-	kdfread(mirrorwall,2,mirrorcnt,fil);
-	kdfread(mirrorsector,2,mirrorcnt,fil);
-
-		//I should save off interpolation list, but they're pointers :(
-	numinterpolations = 0;
-	startofdynamicinterpolations = 0;
-
-	kclose(fil);
-
-	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
-
-	totalclock = lockclock;
-	ototalclock = lockclock;
-
-	strcpy(getmessage,"Game loaded.");
-	getmessageleng = strlen(getmessage);
-	getmessagetimeoff = totalclock+360+(getmessageleng<<4);
-	return(0);
-}
-
-int savegame(void)
-{
-	long i;
-	FILE *fil;
-
-	if ((fil = fopen("save0000.gam","wb")) == 0) return(-1);
-
-	dfwrite(&numplayers,2,1,fil);
-	dfwrite(&myconnectindex,2,1,fil);
-	dfwrite(&connecthead,2,1,fil);
-	dfwrite(connectpoint2,2,MAXPLAYERS,fil);
-
-	dfwrite(posx,4,MAXPLAYERS,fil);
-	dfwrite(posy,4,MAXPLAYERS,fil);
-	dfwrite(posz,4,MAXPLAYERS,fil);
-	dfwrite(horiz,4,MAXPLAYERS,fil);
-	dfwrite(zoom,4,MAXPLAYERS,fil);
-	dfwrite(hvel,4,MAXPLAYERS,fil);
-	dfwrite(ang,2,MAXPLAYERS,fil);
-	dfwrite(cursectnum,2,MAXPLAYERS,fil);
-	dfwrite(ocursectnum,2,MAXPLAYERS,fil);
-	dfwrite(playersprite,2,MAXPLAYERS,fil);
-	dfwrite(deaths,2,MAXPLAYERS,fil);
-	dfwrite(lastchaingun,4,MAXPLAYERS,fil);
-	dfwrite(health,4,MAXPLAYERS,fil);
-	dfwrite(numgrabbers,2,MAXPLAYERS,fil);
-	dfwrite(nummissiles,2,MAXPLAYERS,fil);
-	dfwrite(numbombs,2,MAXPLAYERS,fil);
-	dfwrite(flytime,4,MAXPLAYERS,fil);
-	dfwrite(oflags,2,MAXPLAYERS,fil);
-	dfwrite(dimensionmode,1,MAXPLAYERS,fil);
-	dfwrite(revolvedoorstat,1,MAXPLAYERS,fil);
-	dfwrite(revolvedoorang,2,MAXPLAYERS,fil);
-	dfwrite(revolvedoorrotang,2,MAXPLAYERS,fil);
-	dfwrite(revolvedoorx,4,MAXPLAYERS,fil);
-	dfwrite(revolvedoory,4,MAXPLAYERS,fil);
-
-	dfwrite(&numsectors,2,1,fil);
-	dfwrite(sector,sizeof(sectortype),numsectors,fil);
-	dfwrite(&numwalls,2,1,fil);
-	dfwrite(wall,sizeof(walltype),numwalls,fil);
-		//Store all sprites (even holes) to preserve indeces
-	dfwrite(sprite,sizeof(spritetype),MAXSPRITES,fil);
-	dfwrite(headspritesect,2,MAXSECTORS+1,fil);
-	dfwrite(prevspritesect,2,MAXSPRITES,fil);
-	dfwrite(nextspritesect,2,MAXSPRITES,fil);
-	dfwrite(headspritestat,2,MAXSTATUS+1,fil);
-	dfwrite(prevspritestat,2,MAXSPRITES,fil);
-	dfwrite(nextspritestat,2,MAXSPRITES,fil);
-
-	dfwrite(&fvel,4,1,fil);
-	dfwrite(&svel,4,1,fil);
-	dfwrite(&avel,4,1,fil);
-
-	dfwrite(&locselectedgun,4,1,fil);
-	dfwrite(&loc.fvel,1,1,fil);
-	dfwrite(&oloc.fvel,1,1,fil);
-	dfwrite(&loc.svel,1,1,fil);
-	dfwrite(&oloc.svel,1,1,fil);
-	dfwrite(&loc.avel,1,1,fil);
-	dfwrite(&oloc.avel,1,1,fil);
-	dfwrite(&loc.bits,2,1,fil);
-	dfwrite(&oloc.bits,2,1,fil);
-
-	dfwrite(&locselectedgun2,4,1,fil);
-	dfwrite(&loc2.fvel,sizeof(input),1,fil);
-
-	dfwrite(_sync,sizeof(input),MAXPLAYERS,fil);
-	dfwrite(osync,sizeof(input),MAXPLAYERS,fil);
-
-	dfwrite(boardfilename,1,80,fil);
-	dfwrite(&screenpeek,2,1,fil);
-	dfwrite(&oldmousebstatus,2,1,fil);
-	dfwrite(&brightness,2,1,fil);
-	dfwrite(&neartagsector,2,1,fil);
-	dfwrite(&neartagwall,2,1,fil);
-	dfwrite(&neartagsprite,2,1,fil);
-	dfwrite(&lockclock,4,1,fil);
-	dfwrite(&neartagdist,4,1,fil);
-	dfwrite(&neartaghitdist,4,1,fil);
-
-	dfwrite(turnspritelist,2,16,fil);
-	dfwrite(&turnspritecnt,2,1,fil);
-	dfwrite(warpsectorlist,2,16,fil);
-	dfwrite(&warpsectorcnt,2,1,fil);
-	dfwrite(xpanningsectorlist,2,16,fil);
-	dfwrite(&xpanningsectorcnt,2,1,fil);
-	dfwrite(ypanningwalllist,2,64,fil);
-	dfwrite(&ypanningwallcnt,2,1,fil);
-	dfwrite(floorpanninglist,2,64,fil);
-	dfwrite(&floorpanningcnt,2,1,fil);
-	dfwrite(dragsectorlist,2,16,fil);
-	dfwrite(dragxdir,2,16,fil);
-	dfwrite(dragydir,2,16,fil);
-	dfwrite(&dragsectorcnt,2,1,fil);
-	dfwrite(dragx1,4,16,fil);
-	dfwrite(dragy1,4,16,fil);
-	dfwrite(dragx2,4,16,fil);
-	dfwrite(dragy2,4,16,fil);
-	dfwrite(dragfloorz,4,16,fil);
-	dfwrite(&swingcnt,2,1,fil);
-	dfwrite(swingwall,2,32*5,fil);
-	dfwrite(swingsector,2,32,fil);
-	dfwrite(swingangopen,2,32,fil);
-	dfwrite(swingangclosed,2,32,fil);
-	dfwrite(swingangopendir,2,32,fil);
-	dfwrite(swingang,2,32,fil);
-	dfwrite(swinganginc,2,32,fil);
-	dfwrite(swingx,4,32*8,fil);
-	dfwrite(swingy,4,32*8,fil);
-	dfwrite(revolvesector,2,4,fil);
-	dfwrite(revolveang,2,4,fil);
-	dfwrite(&revolvecnt,2,1,fil);
-	dfwrite(revolvex,4,4*16,fil);
-	dfwrite(revolvey,4,4*16,fil);
-	dfwrite(revolvepivotx,4,4,fil);
-	dfwrite(revolvepivoty,4,4,fil);
-	dfwrite(subwaytracksector,2,4*128,fil);
-	dfwrite(subwaynumsectors,2,4,fil);
-	dfwrite(&subwaytrackcnt,2,1,fil);
-	dfwrite(subwaystop,4,4*8,fil);
-	dfwrite(subwaystopcnt,4,4,fil);
-	dfwrite(subwaytrackx1,4,4,fil);
-	dfwrite(subwaytracky1,4,4,fil);
-	dfwrite(subwaytrackx2,4,4,fil);
-	dfwrite(subwaytracky2,4,4,fil);
-	dfwrite(subwayx,4,4,fil);
-	dfwrite(subwaygoalstop,4,4,fil);
-	dfwrite(subwayvel,4,4,fil);
-	dfwrite(subwaypausetime,4,4,fil);
-	dfwrite(waterfountainwall,2,MAXPLAYERS,fil);
-	dfwrite(waterfountaincnt,2,MAXPLAYERS,fil);
-	dfwrite(slimesoundcnt,2,MAXPLAYERS,fil);
-
-		//Warning: only works if all pointers are in sector structures!
-	for(i=MAXANIMATES-1;i>=0;i--)
-		animateptr[i] = (long *)(animateptr[i]-((long)sector));
-	dfwrite(animateptr,4,MAXANIMATES,fil);
-	for(i=MAXANIMATES-1;i>=0;i--)
-		animateptr[i] = (long *)(animateptr[i]+((long)sector));
-
-	dfwrite(animategoal,4,MAXANIMATES,fil);
-	dfwrite(animatevel,4,MAXANIMATES,fil);
-	dfwrite(animateacc,4,MAXANIMATES,fil);
-	dfwrite(&animatecnt,4,1,fil);
-
-	dfwrite((void*)&totalclock,4,1,fil);
-	dfwrite(&numframes,4,1,fil);
-	dfwrite(&randomseed,4,1,fil);
-	dfwrite(&numpalookups,2,1,fil);
-
-	dfwrite(&visibility,4,1,fil);
-	dfwrite(&parallaxvisibility,4,1,fil);
-	dfwrite(&parallaxtype,1,1,fil);
-	dfwrite(&parallaxyoffs,4,1,fil);
-	dfwrite(pskyoff,2,MAXPSKYTILES,fil);
-	dfwrite(&pskybits,2,1,fil);
-
-	dfwrite(&mirrorcnt,2,1,fil);
-	dfwrite(mirrorwall,2,mirrorcnt,fil);
-	dfwrite(mirrorsector,2,mirrorcnt,fil);
-
-	fclose(fil);
-
-	strcpy(getmessage,"Game saved.");
-	getmessageleng = strlen(getmessage);
-	getmessagetimeoff = totalclock+360+(getmessageleng<<4);
-	return(0);
-}
-
-void faketimerhandler(void)
-{
-//	short other, packbufleng;
-	short other;
-	long i, j, k, l;
-
-	if ((totalclock < ototalclock+(TIMERINTSPERSECOND/MOVESPERSECOND)) || (ready2send == 0)) return;
-	ototalclock += (TIMERINTSPERSECOND/MOVESPERSECOND);
-
-	getpackets(); if (getoutputcirclesize() >= 16) return;
-	getinput();
-
-	if (networkmode == 1)
-	{
-		packbuf[2] = 0; j = 3;
-		if (loc.fvel != oloc.fvel) packbuf[j++] = loc.fvel, packbuf[2] |= 1;
-		if (loc.svel != oloc.svel) packbuf[j++] = loc.svel, packbuf[2] |= 2;
-		if (loc.avel != oloc.avel) packbuf[j++] = loc.avel, packbuf[2] |= 4;
-		if ((loc.bits^oloc.bits)&0x00ff) packbuf[j++] = (loc.bits&255), packbuf[2] |= 8;
-		if ((loc.bits^oloc.bits)&0xff00) packbuf[j++] = ((loc.bits>>8)&255), packbuf[2] |= 16;
-		copybufbyte(&loc,&oloc,sizeof(input));
-
-		copybufbyte(&loc,&baksync[movefifoend[myconnectindex]][myconnectindex],sizeof(input));
-		movefifoend[myconnectindex] = ((movefifoend[myconnectindex]+1)&(MOVEFIFOSIZ-1));
-
+		j = 0;
 		for(i=connecthead;i>=0;i=connectpoint2[i])
-			if (i != myconnectindex)
-			{
-				packbuf[0] = 17;
-				packbuf[1] = (char)((movefifoend[myconnectindex]-movefifoend[i])&(MOVEFIFOSIZ-1));
-
-				k = j;
-				if ((myconnectindex == connecthead) || ((i == connecthead) && (myconnectindex == connectpoint2[connecthead])))
-				{
-					while (syncvalhead != syncvaltail)
-					{
-						packbuf[j++] = syncval[syncvaltail];
-						syncvaltail = ((syncvaltail+1)&(MOVEFIFOSIZ-1));
-					}
-				}
-				sendpacket(i,packbuf,j);
-				j = k;
-			}
-
-		gotlastpacketclock = totalclock;
-		return;
-	}
-
-		//MASTER (or 1 player game)
-	if ((myconnectindex == connecthead) || (option[4] == 0))
-	{
-		copybufbyte(&loc,&ffsync[myconnectindex],sizeof(input));
-
-		if (option[4] != 0)
 		{
-			packbuf[0] = 0;
-			j = ((numplayers+1)>>1)+1;
-			for(k=1;k<j;k++) packbuf[k] = 0;
-			k = (1<<3);
-			for(i=connecthead;i>=0;i=connectpoint2[i])
-			{
-				l = 0;
-				if (ffsync[i].fvel != osync[i].fvel) packbuf[j++] = ffsync[i].fvel, l |= 1;
-				if (ffsync[i].svel != osync[i].svel) packbuf[j++] = ffsync[i].svel, l |= 2;
-				if (ffsync[i].avel != osync[i].avel) packbuf[j++] = ffsync[i].avel, l |= 4;
-				if (ffsync[i].bits != osync[i].bits)
-				{
-					packbuf[j++] = (ffsync[i].bits&255);
-					packbuf[j++] = ((ffsync[i].bits>>8)&255);
-					l |= 8;
-				}
-				packbuf[k>>3] |= (l<<(k&7));
-				k += 4;
-
-				copybufbyte(&ffsync[i],&osync[i],sizeof(input));
-			}
-
-			while (syncvalhead != syncvaltail)
-			{
-				packbuf[j++] = syncval[syncvaltail];
-				syncvaltail = ((syncvaltail+1)&(MOVEFIFOSIZ-1));
-			}
-
-			for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
-				sendpacket(i,packbuf,j);
+			copybufbyte(&_sync[i],&recsync[reccnt][j],sizeof(input));
+			j++;
 		}
-		else if (numplayers >= 2)
-		{
-			if (keystatus[0xb5])
-			{
-				keystatus[0xb5] = 0;
-				locselectedgun2++; if (locselectedgun2 >= 3) locselectedgun2 = 0;
-			}
-
-				//Second player on 1 computer mode
-			loc2.fvel = min(max(fvel2,-128+8),127-8);
-			loc2.svel = min(max(svel2,-128+8),127-8);
-			loc2.avel = min(max(avel2,-128+16),127-16);
-			loc2.bits = (locselectedgun2<<13);
-			loc2.bits |= keystatus[0x45];                  //Stand high
-			loc2.bits |= (keystatus[0x47]<<1);             //Stand low
-			loc2.bits |= (1<<8);                           //Run
-			loc2.bits |= (keystatus[0x49]<<2);             //Look up
-			loc2.bits |= (keystatus[0x37]<<3);             //Look down
-			loc2.bits |= (keystatus[0x50]<<10);            //Space
-			loc2.bits |= (keystatus[0x52]<<11);            //Shoot
-
-			other = connectpoint2[myconnectindex];
-			if (other < 0) other = connecthead;
-
-			copybufbyte(&loc2,&ffsync[other],sizeof(input));
-		}
-		movethings();  //Move EVERYTHING (you too!)
+		reccnt++; if (reccnt > 16383) reccnt = 16383;
 	}
-	else                        //I am a SLAVE
+
+	lockclock += TICSPERFRAME;
+	drawstatusflytime(screenpeek);   /* Andy did this */
+
+	if (cameradist >= 0)
 	{
-		packbuf[0] = 1; packbuf[1] = 0; j = 2;
-		if (loc.fvel != oloc.fvel) packbuf[j++] = loc.fvel, packbuf[1] |= 1;
-		if (loc.svel != oloc.svel) packbuf[j++] = loc.svel, packbuf[1] |= 2;
-		if (loc.avel != oloc.avel) packbuf[j++] = loc.avel, packbuf[1] |= 4;
-		if ((loc.bits^oloc.bits)&0x00ff) packbuf[j++] = (loc.bits&255), packbuf[1] |= 8;
-		if ((loc.bits^oloc.bits)&0xff00) packbuf[j++] = ((loc.bits>>8)&255), packbuf[1] |= 16;
-		copybufbyte(&loc,&oloc,sizeof(input));
-		sendpacket(connecthead,packbuf,j);
+		cameradist = min(cameradist+((totalclock-cameraclock)<<10),65536);
+		if (keystatus[0x52])       /* 0 */
+			cameraang -= ((totalclock-cameraclock)<<(2+(keystatus[0x2a]|keystatus[0x36])));
+		if (keystatus[0x53])       /* . */
+			cameraang += ((totalclock-cameraclock)<<(2+(keystatus[0x2a]|keystatus[0x36])));
+		cameraclock = totalclock;
 	}
+
+	for(i=connecthead;i>=0;i=connectpoint2[i])
+	{
+		processinput(i);                        /* Move player */
+
+		checktouchsprite(i,cursectnum[i]);      /* Pick up coins */
+		startwall = sector[cursectnum[i]].wallptr;
+		endwall = startwall + sector[cursectnum[i]].wallnum;
+		for(j=startwall,wal=&wall[j];j<endwall;j++,wal++)
+			if (wal->nextsector >= 0) checktouchsprite(i,wal->nextsector);
+	}
+
+	doanimations();
+	tagcode();            /* Door code, moving sector code, other stuff */
+	statuslistcode();     /* Monster / bullet code / explosions */
+
+	fakedomovethingscorrect();
+
+	checkmasterslaveswitch();
 }
+
 
 void getpackets(void)
 {
@@ -5732,7 +4147,7 @@ void getpackets(void)
 	{
 		switch(packbuf[0])
 		{
-			case 0:  //[0] (receive master sync buffer)
+			case 0:  /* [0] (receive master sync buffer) */
 				j = ((numplayers+1)>>1)+1; k = (1<<3);
 				for(i=connecthead;i>=0;i=connectpoint2[i])
 				{
@@ -5763,10 +4178,10 @@ void getpackets(void)
 					} while ((syncvalhead != syncvaltottail) && (othersyncvalhead != syncvaltottail));
 				}
 
-				movethings();        //Move all players and sprites
+				movethings();        /* Move all players and sprites */
 				movecnt++;
 				break;
-			case 1:  //[1] (receive slave sync buffer)
+			case 1:  /* [1] (receive slave sync buffer) */
 				j = 2; k = packbuf[1];
 				if (k&1) ffsync[other].fvel = packbuf[j++];
 				if (k&2) ffsync[other].svel = packbuf[j++];
@@ -5785,7 +4200,7 @@ void getpackets(void)
 			case 5:
 				playerreadyflag[other] = packbuf[1];
 				if ((other == connecthead) && (packbuf[1] == 2))
-					sendpacket(connecthead,packbuf,2);
+					sendpacket(connecthead,(unsigned char *) packbuf,2);
 				break;
 			case 17:
 				j = 3; k = packbuf[2];
@@ -5815,7 +4230,7 @@ void getpackets(void)
 				}
 
 				break;
-			case 255:  //[255] (logout)
+			case 255:  /* [255] (logout) */
 				keystatus[1] = 1;
 				break;
 		}
@@ -5826,6 +4241,209 @@ void getpackets(void)
 					else ototalclock -= (TICSPERFRAME>>1);
 	}
 }
+
+
+void initplayersprite(short snum)
+{
+	long i;
+
+	if (playersprite[snum] >= 0) return;
+
+	spawnsprite(playersprite[snum],posx[snum],posy[snum],posz[snum]+EYEHEIGHT,
+		1+256,0,snum,32,64,64,0,0,PLAYER,ang[snum],0,0,0,snum+4096,
+		cursectnum[snum],8,0,0,0);
+
+	switch(snum)
+	{
+		case 1: for(i=0;i<32;i++) tempbuf[i+192] = i+128; break; /* green->red */
+		case 2: for(i=0;i<32;i++) tempbuf[i+192] = i+32; break;  /* green->blue */
+		case 3: for(i=0;i<32;i++) tempbuf[i+192] = i+224; break; /* green->pink */
+		case 4: for(i=0;i<32;i++) tempbuf[i+192] = i+64; break;  /* green->brown */
+		case 5: for(i=0;i<32;i++) tempbuf[i+192] = i+96; break;
+		case 6: for(i=0;i<32;i++) tempbuf[i+192] = i+160; break;
+		case 7: for(i=0;i<32;i++) tempbuf[i+192] = i+192; break;
+		default: for(i=0;i<256;i++) tempbuf[i] = i; break;
+	}
+	makepalookup(snum,tempbuf,0,0,0,1);
+}
+
+
+#define MAXVOXMIPS 5
+extern char *voxoff[][MAXVOXMIPS];
+void analyzesprites(long dax, long day)
+{
+	long i, j=0, k, *longptr;
+	point3d *ospr;
+	spritetype *tspr;
+
+		/*
+         * This function is called between drawrooms() and drawmasks()
+		 * It has a list of possible sprites that may be drawn on this frame
+         */
+	for(i=0,tspr=&tsprite[0];i<spritesortcnt;i++,tspr++)
+	{
+		switch(tspr->picnum)
+		{
+			case PLAYER:
+				   /* Get which of the 8 angles of the sprite to draw (0-7) */
+				   /* k ranges from 0-7 */
+                #if 0
+				k = getangle(tspr->x-dax,tspr->y-day);
+				k = (((tspr->ang+3072+128-k)&2047)>>8)&7;
+
+				   /* This guy has only 5 pictures for 8 angles (3 are x-flipped) */
+				if (k <= 4)
+				{
+				   tspr->picnum += (k<<2);
+				   tspr->cstat &= ~4;   /* clear x-flipping bit */
+				}
+				else
+				{
+				   tspr->picnum += ((8-k)<<2);
+				   tspr->cstat |= 4;    /* set x-flipping bit */
+				}
+                #endif
+
+				if ((tspr->cstat&2) == 0)
+				{
+					tspr->cstat |= 48;
+					longptr = (long *)voxoff[0][0];
+					tspr->xrepeat = scale(tspr->xrepeat,56,longptr[2]);
+					tspr->yrepeat = scale(tspr->yrepeat,56,longptr[2]);
+					tspr->picnum = 0;
+					tspr->shade -= 6;
+				}
+				break;
+			case BROWNMONSTER:
+				tspr->cstat |= 48;
+				tspr->picnum = 1;
+				break;
+		}
+
+		k = statrate[tspr->statnum];
+		if (k >= 0)  /* Interpolate moving sprite */
+		{
+			ospr = &osprite[tspr->owner];
+			switch(k)
+			{
+				case 0: j = smoothratio; break;
+				case 1: j = (smoothratio>>1)+(((nummoves-tspr->owner)&1)<<15); break;
+				case 3: j = (smoothratio>>2)+(((nummoves-tspr->owner)&3)<<14); break;
+				case 7: j = (smoothratio>>3)+(((nummoves-tspr->owner)&7)<<13); break;
+				case 15: j = (smoothratio>>4)+(((nummoves-tspr->owner)&15)<<12); break;
+			}
+			k = tspr->x-ospr->x; tspr->x = ospr->x;
+			if (k != 0) tspr->x += mulscale16(k,j);
+			k = tspr->y-ospr->y; tspr->y = ospr->y;
+			if (k != 0) tspr->y += mulscale16(k,j);
+			k = tspr->z-ospr->z; tspr->z = ospr->z;
+			if (k != 0) tspr->z += mulscale16(k,j);
+		}
+
+			/* Don't allow close explosion sprites to be transluscent */
+		k = tspr->statnum;
+		if ((k == 3) || (k == 4) || (k == 5) || (k == 7))
+			if (klabs(dax-tspr->x) < 256)
+				if (klabs(day-tspr->y) < 256)
+					tspr->cstat &= ~2;
+
+		tspr->shade += 6;
+		if (sector[tspr->sectnum].ceilingstat&1)
+			tspr->shade += sector[tspr->sectnum].ceilingshade;
+		else
+			tspr->shade += sector[tspr->sectnum].floorshade;
+	}
+}
+
+
+void updatesectorz(long x, long y, long z, short *sectnum)
+{
+	walltype *wal;
+	long i, j, cz, fz;
+
+	getzsofslope(*sectnum,x,y,&cz,&fz);
+	if ((z >= cz) && (z <= fz))
+		if (inside(x,y,*sectnum) != 0) return;
+
+	if ((*sectnum >= 0) && (*sectnum < numsectors))
+	{
+		wal = &wall[sector[*sectnum].wallptr];
+		j = sector[*sectnum].wallnum;
+		do
+		{
+			i = wal->nextsector;
+			if (i >= 0)
+			{
+				getzsofslope(i,x,y,&cz,&fz);
+				if ((z >= cz) && (z <= fz))
+					if (inside(x,y,(short)i) == 1)
+						{ *sectnum = i; return; }
+			}
+			wal++; j--;
+		} while (j != 0);
+	}
+
+	for(i=numsectors-1;i>=0;i--)
+	{
+		getzsofslope(i,x,y,&cz,&fz);
+		if ((z >= cz) && (z <= fz))
+			if (inside(x,y,(short)i) == 1)
+				{ *sectnum = i; return; }
+	}
+
+	*sectnum = -1;
+}
+
+
+void view(short snum, long *vx, long *vy, long *vz,
+		  short *vsectnum, short ang, long horiz)
+{
+	spritetype *sp;
+	long i, nx, ny, nz, hx, hy, hitx, hity, hitz;
+	short bakcstat, hitsect, hitwall, hitsprite, daang;
+
+	nx = (sintable[(ang+1536)&2047]>>4);
+	ny = (sintable[(ang+1024)&2047]>>4);
+	nz = (horiz-100)*128;
+
+	sp = &sprite[snum];
+
+	bakcstat = sp->cstat;
+	sp->cstat &= (short)~0x101;
+
+	updatesectorz(*vx,*vy,*vz,vsectnum);
+	hitscan(*vx,*vy,*vz,*vsectnum,nx,ny,nz,&hitsect,&hitwall,&hitsprite,&hitx,&hity,&hitz,CLIPMASK1);
+	hx = hitx-(*vx); hy = hity-(*vy);
+	if (klabs(nx)+klabs(ny) > klabs(hx)+klabs(hy))
+	{
+		*vsectnum = hitsect;
+		if (hitwall >= 0)
+		{
+			daang = getangle(wall[wall[hitwall].point2].x-wall[hitwall].x,
+								  wall[wall[hitwall].point2].y-wall[hitwall].y);
+
+			i = nx*sintable[daang]+ny*sintable[(daang+1536)&2047];
+			if (klabs(nx) > klabs(ny)) hx -= mulscale28(nx,i);
+										 else hy -= mulscale28(ny,i);
+		}
+		else if (hitsprite < 0)
+		{
+			if (klabs(nx) > klabs(ny)) hx -= (nx>>5);
+										 else hy -= (ny>>5);
+		}
+		if (klabs(nx) > klabs(ny)) i = divscale16(hx,nx);
+									 else i = divscale16(hy,ny);
+		if (i < cameradist) cameradist = i;
+	}
+	*vx = (*vx)+mulscale16(nx,cameradist);
+	*vy = (*vy)+mulscale16(ny,cameradist);
+	*vz = (*vz)+mulscale16(nz,cameradist);
+
+	updatesectorz(*vx,*vy,*vz,vsectnum);
+
+	sp->cstat = bakcstat;
+}
+
 
 void drawoverheadmap(long cposx, long cposy, long czoom, short cang)
 {
@@ -5842,7 +4460,7 @@ void drawoverheadmap(long cposx, long cposy, long czoom, short cang)
 	xvect2 = mulscale16(xvect,yxaspect);
 	yvect2 = mulscale16(yvect,yxaspect);
 
-		//Draw red lines
+		/* Draw red lines */
 	for(i=0;i<numsectors;i++)
 	{
 		startwall = sector[i].wallptr;
@@ -5887,7 +4505,7 @@ void drawoverheadmap(long cposx, long cposy, long czoom, short cang)
 		}
 	}
 
-		//Draw sprites
+		/* Draw sprites */
 	k = playersprite[screenpeek];
 	for(i=0;i<numsectors;i++)
 		for(j=headspritesect[i];j>=0;j=nextspritesect[j])
@@ -6035,7 +4653,7 @@ void drawoverheadmap(long cposx, long cposy, long czoom, short cang)
 				}
 			}
 
-		//Draw white lines
+		/* Draw white lines */
 	for(i=0;i<numsectors;i++)
 	{
 		startwall = sector[i].wallptr;
@@ -6070,51 +4688,1633 @@ void drawoverheadmap(long cposx, long cposy, long czoom, short cang)
 	}
 }
 
-	//New movesprite using getzrange.  Note that I made the getzrange
-	//parameters global (&globhiz,&globhihit,&globloz,&globlohit) so they
-	//don't need to be passed everywhere.  Also this should make this
-	//movesprite function compatible with the older movesprite functions.
-short movesprite(short spritenum, long dx, long dy, long dz, long ceildist, long flordist, long clipmask)
+
+void drawscreen(short snum, long dasmoothratio)
 {
-//	long daz, zoffs, templong;
-	long daz, zoffs;
-	short retval, dasectnum, datempshort;
-	spritetype *spr;
+	long i, j, k=0, l, charsperline, templong;
+	long x1, y1, x2, y2, ox1, oy1, ox2, oy2, dist, maxdist;
+	long cposx, cposy, cposz, choriz, czoom, tposx, tposy;
+	long tiltlock, *longptr, ovisibility, oparallaxvisibility;
+	short cang, tang, csect;
+	char ch, *ptr, *ptr2, *ptr3, *ptr4;
+	spritetype *tspr;
 
-	spr = &sprite[spritenum];
+	smoothratio = max(min(dasmoothratio,65536),0);
 
-	if ((spr->cstat&128) == 0)
-		zoffs = -((tilesizy[spr->picnum]*spr->yrepeat)<<1);
-	else
-		zoffs = 0;
+	dointerpolations();
 
-	dasectnum = spr->sectnum;  //Can't modify sprite sectors directly becuase of linked lists
-	daz = spr->z+zoffs;  //Must do this if not using the new centered centering (of course)
-	retval = clipmove(&spr->x,&spr->y,&daz,&dasectnum,dx,dy,
-							((long)spr->clipdist)<<2,ceildist,flordist,clipmask);
-
-	if (dasectnum < 0) retval = -1;
-
-	if ((dasectnum != spr->sectnum) && (dasectnum >= 0))
-		changespritesect(spritenum,dasectnum);
-
-		//Set the blocking bit to 0 temporarly so getzrange doesn't pick up
-		//its own sprite
-	datempshort = spr->cstat; spr->cstat &= ~1;
-	getzrange(spr->x,spr->y,spr->z-1,spr->sectnum,
-				 &globhiz,&globhihit,&globloz,&globlohit,
-				 ((long)spr->clipdist)<<2,clipmask);
-	spr->cstat = datempshort;
-
-	daz = spr->z+zoffs + dz;
-	if ((daz <= globhiz) || (daz > globloz))
+	if ((snum == myconnectindex) && ((networkmode == 1) || (myconnectindex != connecthead)))
 	{
-		if (retval != 0) return(retval);
-		return(16384+dasectnum);
+		cposx = omyx+mulscale16(myx-omyx,smoothratio);
+		cposy = omyy+mulscale16(myy-omyy,smoothratio);
+		cposz = omyz+mulscale16(myz-omyz,smoothratio);
+		choriz = omyhoriz+mulscale16(myhoriz-omyhoriz,smoothratio);
+		cang = omyang+mulscale16((long)(((myang+1024-omyang)&2047)-1024),smoothratio);
 	}
-	spr->z = daz-zoffs;
-	return(retval);
+	else
+	{
+		cposx = oposx[snum]+mulscale16(posx[snum]-oposx[snum],smoothratio);
+		cposy = oposy[snum]+mulscale16(posy[snum]-oposy[snum],smoothratio);
+		cposz = oposz[snum]+mulscale16(posz[snum]-oposz[snum],smoothratio);
+		choriz = ohoriz[snum]+mulscale16(horiz[snum]-ohoriz[snum],smoothratio);
+		cang = oang[snum]+mulscale16(((ang[snum]+1024-oang[snum])&2047)-1024,smoothratio);
+	}
+	czoom = ozoom[snum]+mulscale16(zoom[snum]-ozoom[snum],smoothratio);
+
+	setears(cposx,cposy,(long)sintable[(cang+512)&2047]<<14,(long)sintable[cang&2047]<<14);
+
+	if (typemode != 0)
+	{
+		charsperline = 40;
+		/*if (dimensionmode[snum] == 2) charsperline = 80;*/
+
+		for(i=0;i<=typemessageleng;i+=charsperline)
+		{
+			for(j=0;j<charsperline;j++)
+				tempbuf[j] = typemessage[i+j];
+			if (typemessageleng < i+charsperline)
+			{
+				tempbuf[(typemessageleng-i)] = '_';
+				tempbuf[(typemessageleng-i)+1] = 0;
+			}
+			else
+				tempbuf[charsperline] = 0;
+
+            #if 0
+			    if (dimensionmode[snum] == 3)
+    				printext256(0L,(i/charsperline)<<3,183,-1,tempbuf,0);
+    			else
+    			    printext16(0L,((i/charsperline)<<3)+(pageoffset/640),10,-1,tempbuf,0);
+            #else
+    				printext256(0L,(i/charsperline)<<3,183,-1,tempbuf,0);
+            #endif
+		}
+	}
+	else
+	{
+		if (dimensionmode[myconnectindex] == 3)
+		{
+			templong = screensize;
+
+			if (((loc.bits&32) > (screensizeflag&32)) && (screensize > 64))
+			{
+				ox1 = ((xdim-screensize)>>1);
+				ox2 = ox1+screensize-1;
+				oy1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
+				oy2 = oy1 + scale(screensize,ydim-32,xdim)-1;
+				screensize -= (screensize>>3);
+
+				if (templong > xdim)
+				{
+					screensize = xdim;
+
+					flushperms();
+
+					rotatesprite((xdim-320)<<15,(ydim-32)<<16,65536L,0,STATUSBAR,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
+					i = ((xdim-320)>>1);
+					while (i >= 8) i -= 8, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
+					if (i >= 4) i -= 4, rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L);
+					i = ((xdim-320)>>1)+320;
+					while (i <= xdim-8) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL8,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 8;
+					if (i <= xdim-4) rotatesprite(i<<16,(ydim-32)<<16,65536L,0,STATUSBARFILL4,0,0,8+16+64+128,0L,0L,xdim-1L,ydim-1L), i += 4;
+
+					drawstatusbar(screenpeek);   /* Andy did this */
+				}
+
+				x1 = ((xdim-screensize)>>1);
+				x2 = x1+screensize-1;
+				y1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
+				y2 = y1 + scale(screensize,ydim-32,xdim)-1;
+				setview(x1,y1,x2,y2);
+
+                /*
+				 * (ox1,oy1)ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+				 *          ³  (x1,y1)        ³
+				 *          ³     ÚÄÄÄÄÄ¿     ³
+				 *          ³     ³     ³     ³
+				 *          ³     ÀÄÄÄÄÄÙ     ³
+				 *          ³        (x2,y2)  ³
+				 *          ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ(ox2,oy2)
+                 */
+
+				drawtilebackground(0L,0L,BACKGROUND,8,ox1,oy1,x1-1,oy2,0);
+				drawtilebackground(0L,0L,BACKGROUND,8,x2+1,oy1,ox2,oy2,0);
+				drawtilebackground(0L,0L,BACKGROUND,8,x1,oy1,x2,y1-1,0);
+				drawtilebackground(0L,0L,BACKGROUND,8,x1,y2+1,x2,oy2,0);
+			}
+			if (((loc.bits&16) > (screensizeflag&16)) && (screensize <= xdim))
+			{
+				screensize += (screensize>>3);
+				if ((screensize > xdim) && (templong == xdim))
+				{
+					screensize = xdim+1;
+					x1 = 0; y1 = 0;
+					x2 = xdim-1; y2 = ydim-1;
+				}
+				else
+				{
+					if (screensize > xdim) screensize = xdim;
+					x1 = ((xdim-screensize)>>1);
+					x2 = x1+screensize-1;
+					y1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
+					y2 = y1 + scale(screensize,ydim-32,xdim)-1;
+				}
+				setview(x1,y1,x2,y2);
+			}
+			screensizeflag = loc.bits;
+		}
+	}
+
+	if (dimensionmode[snum] != 2)
+	{
+		if ((numplayers > 1) && (option[4] == 0))
+		{
+				/*
+                 * Do not draw other views constantly if they're staying still
+				 * It's a shame this trick will only work in screen-buffer mode
+				 * At least screen-buffer mode covers all the HI hi-res modes
+                 */
+			if (vidoption == 2)
+			{
+				for(i=connecthead;i>=0;i=connectpoint2[i]) frame2draw[i] = 0;
+				frame2draw[snum] = 1;
+
+					/* 2-1,3-1,4-2 */
+					/* 5-2,6-2,7-2,8-3,9-3,10-3,11-3,12-4,13-4,14-4,15-4,16-5 */
+				x1 = posx[snum]; y1 = posy[snum];
+				for(j=(numplayers>>2)+1;j>0;j--)
+				{
+					maxdist = 0x80000000;
+					for(i=connecthead;i>=0;i=connectpoint2[i])
+						if (frame2draw[i] == 0)
+						{
+							x2 = posx[i]-x1; y2 = posy[i]-y1;
+							dist = dmulscale12(x2,x2,y2,y2);
+
+							if (dist < 64) dist = 16384;
+							else if (dist > 16384) dist = 64;
+							else dist = 1048576 / dist;
+
+							dist *= frameskipcnt[i];
+
+								/* Increase frame rate if screen is moving */
+							if ((posx[i] != oposx[i]) || (posy[i] != oposy[i]) ||
+								 (posz[i] != oposz[i]) || (ang[i] != oang[i]) ||
+								 (horiz[i] != ohoriz[i])) dist += dist;
+
+							if (dist > maxdist) maxdist = dist, k = i;
+						}
+
+					for(i=connecthead;i>=0;i=connectpoint2[i])
+						frameskipcnt[i] += (frameskipcnt[i]>>3)+1;
+					frameskipcnt[k] = 0;
+
+					frame2draw[k] = 1;
+				}
+			}
+			else
+			{
+				for(i=connecthead;i>=0;i=connectpoint2[i]) frame2draw[i] = 1;
+			}
+
+			for(i=connecthead,j=0;i>=0;i=connectpoint2[i],j++)
+				if (frame2draw[i] != 0)
+				{
+					if (numplayers <= 4)
+					{
+						switch(j)
+						{
+							case 0: setview(0,0,(xdim>>1)-1,(ydim>>1)-1); break;
+							case 1: setview((xdim>>1),0,xdim-1,(ydim>>1)-1); break;
+							case 2: setview(0,(ydim>>1),(xdim>>1)-1,ydim-1); break;
+							case 3: setview((xdim>>1),(ydim>>1),xdim-1,ydim-1); break;
+						}
+					}
+					else
+					{
+						switch(j)
+						{
+							case 0: setview(0,0,(xdim>>2)-1,(ydim>>2)-1); break;
+							case 1: setview(xdim>>2,0,(xdim>>1)-1,(ydim>>2)-1); break;
+							case 2: setview(xdim>>1,0,xdim-(xdim>>2)-1,(ydim>>2)-1); break;
+							case 3: setview(xdim-(xdim>>2),0,xdim-1,(ydim>>2)-1); break;
+							case 4: setview(0,ydim>>2,(xdim>>2)-1,(ydim>>1)-1); break;
+							case 5: setview(xdim>>2,ydim>>2,(xdim>>1)-1,(ydim>>1)-1); break;
+							case 6: setview(xdim>>1,ydim>>2,xdim-(xdim>>2)-1,(ydim>>1)-1); break;
+							case 7: setview(xdim-(xdim>>2),ydim>>2,xdim-1,(ydim>>1)-1); break;
+							case 8: setview(0,ydim>>1,(xdim>>2)-1,ydim-(ydim>>2)-1); break;
+							case 9: setview(xdim>>2,ydim>>1,(xdim>>1)-1,ydim-(ydim>>2)-1); break;
+							case 10: setview(xdim>>1,ydim>>1,xdim-(xdim>>2)-1,ydim-(ydim>>2)-1); break;
+							case 11: setview(xdim-(xdim>>2),ydim>>1,xdim-1,ydim-(ydim>>2)-1); break;
+							case 12: setview(0,ydim-(ydim>>2),(xdim>>2)-1,ydim-1); break;
+							case 13: setview(xdim>>2,ydim-(ydim>>2),(xdim>>1)-1,ydim-1); break;
+							case 14: setview(xdim>>1,ydim-(ydim>>2),xdim-(xdim>>2)-1,ydim-1); break;
+							case 15: setview(xdim-(xdim>>2),ydim-(ydim>>2),xdim-1,ydim-1); break;
+						}
+					}
+
+					if (i == snum)
+					{
+						sprite[playersprite[snum]].cstat |= 0x8000;
+						drawrooms(cposx,cposy,cposz,cang,choriz,cursectnum[i]);
+						sprite[playersprite[snum]].cstat &= ~0x8000;
+						analyzesprites(cposx,cposy);
+					}
+					else
+					{
+						sprite[playersprite[i]].cstat |= 0x8000;
+						drawrooms(posx[i],posy[i],posz[i],ang[i],horiz[i],cursectnum[i]);
+						sprite[playersprite[i]].cstat &= ~0x8000;
+						analyzesprites(posx[i],posy[i]);
+					}
+					drawmasks();
+					if ((numgrabbers[i] > 0) || (nummissiles[i] > 0) || (numbombs[i] > 0))
+						rotatesprite(160<<16,184L<<16,65536,0,GUNONBOTTOM,sector[cursectnum[i]].floorshade,0,2,windowx1,windowy1,windowx2,windowy2);
+
+					if (lockclock < 384)
+					{
+						if (lockclock < 128)
+							rotatesprite(320<<15,200<<15,lockclock<<9,lockclock<<4,DEMOSIGN,(128-lockclock)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
+						else if (lockclock < 256)
+							rotatesprite(320<<15,200<<15,65536,0,DEMOSIGN,0,0,2,windowx1,windowy1,windowx2,windowy2);
+						else
+							rotatesprite(320<<15,200<<15,(384-lockclock)<<9,lockclock<<4,DEMOSIGN,(lockclock-256)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
+					}
+
+					if (health[i] <= 0)
+						rotatesprite(320<<15,200<<15,(-health[i])<<11,(-health[i])<<5,NO,0,0,2,windowx1,windowy1,windowx2,windowy2);
+				}
+		}
+		else
+		{
+				/* Init for screen rotation */
+			tiltlock = screentilt;
+			if ((tiltlock) || (detailmode))
+			{
+				walock[MAXTILES-2] = 255;
+				if (waloff[MAXTILES-2] == 0)
+					allocache(&waloff[MAXTILES-2],320L*320L,(unsigned char *)&walock[MAXTILES-2]);
+				if ((tiltlock&1023) == 0)
+					setviewtotile(MAXTILES-2,200L>>detailmode,320L>>detailmode);
+				else
+					setviewtotile(MAXTILES-2,320L>>detailmode,320L>>detailmode);
+				if ((tiltlock&1023) == 512)
+				{     /* Block off unscreen section of 90ø tilted screen */
+					j = ((320-60)>>detailmode);
+					for(i=(60>>detailmode)-1;i>=0;i--)
+					{
+						startumost[i] = 1; startumost[i+j] = 1;
+						startdmost[i] = 0; startdmost[i+j] = 0;
+					}
+				}
+
+				i = (tiltlock&511); if (i > 256) i = 512-i;
+				i = sintable[i+512]*8 + sintable[i]*5L;
+				setaspect(i>>1,yxaspect);
+			}
+
+			if ((gotpic[FLOORMIRROR>>3]&(1<<(FLOORMIRROR&7))) > 0)
+			{
+				dist = 0x7fffffff; i = 0;
+				for(k=floormirrorcnt-1;k>=0;k--)
+				{
+					j = klabs(wall[sector[floormirrorsector[k]].wallptr].x-cposx);
+					j += klabs(wall[sector[floormirrorsector[k]].wallptr].y-cposy);
+					if (j < dist) dist = j, i = k;
+				}
+
+				j = floormirrorsector[i];
+
+				if (cameradist < 0) sprite[playersprite[snum]].cstat |= 0x8000;
+				drawrooms(cposx,cposy,(sector[j].floorz<<1)-cposz,cang,201-choriz,j);
+				sprite[playersprite[snum]].cstat &= ~0x8000;
+				analyzesprites(cposx,cposy);
+				drawmasks();
+
+					/* Temp horizon */
+				l = scale(choriz-100,windowx2-windowx1,320)+((windowy1+windowy2)>>1);
+				for(y1=windowy1,y2=windowy2;y1<y2;y1++,y2--)
+				{
+					ptr = (char *)(frameplace+ylookup[y1]);
+					ptr2 = (char *)(frameplace+ylookup[y2]);
+					ptr3 = palookup[18];
+					ptr3 += (min(klabs(y1-l)>>2,31)<<8);
+					ptr4 = palookup[18];
+					ptr4 += (min(klabs(y2-l)>>2,31)<<8);
+
+					j = sintable[((y2+totalclock)<<6)&2047];
+					j += sintable[((y2-totalclock)<<7)&2047];
+					j >>= 14;
+
+					ptr2 += j;
+
+					for(x1=windowx1;x1<=windowx2;x1++)
+						{ ch = ptr[x1]; ptr[x1] = ptr3[(unsigned int)ptr2[x1]]; ptr2[x1] = ptr4[(unsigned int)ch]; }
+				}
+				gotpic[FLOORMIRROR>>3] &= ~(1<<(FLOORMIRROR&7));
+			}
+
+			if (gotpic[DAYSKY>>3]&(1<<(DAYSKY&7)))
+			{
+				gotpic[DAYSKY>>3] &= ~(1<<(DAYSKY&7));
+				pskyoff[0] = 0; pskyoff[1] = 0; pskybits = 1;
+			}
+			else if (gotpic[NIGHTSKY>>3]&(1<<(NIGHTSKY&7)))
+			{
+				gotpic[NIGHTSKY>>3] &= ~(1<<(NIGHTSKY&7));
+				pskyoff[0] = 0; pskyoff[1] = 0; pskyoff[2] = 0; pskyoff[3] = 0;
+				pskyoff[4] = 0; pskyoff[5] = 0; pskyoff[6] = 0; pskyoff[7] = 0;
+				pskybits = 3;
+			}
+
+				/* Over the shoulder mode */
+			csect = cursectnum[snum];
+			if (cameradist >= 0)
+			{
+				cang += cameraang;
+				view(playersprite[snum],&cposx,&cposy,&cposz,&csect,cang,choriz);
+			}
+
+				/* WARNING!  Assuming (MIRRORLABEL&31) = 0 and MAXMIRRORS = 64 */
+			longptr = (long *)FP_OFF(gotpic[MIRRORLABEL>>3]);
+			/* if ((longptr != NULL) && (longptr[0]|longptr[1])) */
+				for(i=MAXMIRRORS-1;i>=0;i--)
+					if (gotpic[(i+MIRRORLABEL)>>3]&(1<<(i&7)))
+					{
+						gotpic[(i+MIRRORLABEL)>>3] &= ~(1<<(i&7));
+
+							/*
+                             * Prepare drawrooms for drawing mirror and calculate reflected
+							 * position into tposx, tposy, and tang (tposz == cposz)
+							 * Must call preparemirror before drawrooms and
+							 *          completemirror after drawrooms
+                             */
+						preparemirror(cposx,cposy,cposz,cang,choriz,
+									  mirrorwall[i],mirrorsector[i],&tposx,&tposy,&tang);
+
+						ovisibility = visibility;
+						oparallaxvisibility = parallaxvisibility;
+						visibility <<= 1;
+						parallaxvisibility <<= 1;
+						ptr = palookup[0]; palookup[0] = palookup[17]; palookup[17] = ptr;
+
+						drawrooms(tposx,tposy,cposz,tang,choriz,mirrorsector[i]|MAXSECTORS);
+						for(j=0,tspr=&tsprite[0];j<spritesortcnt;j++,tspr++)
+							if ((tspr->cstat&48) == 0) tspr->cstat |= 4;
+						analyzesprites(tposx,tposy);
+						drawmasks();
+
+						ptr = palookup[0]; palookup[0] = palookup[17]; palookup[17] = ptr;
+						visibility = ovisibility;
+						parallaxvisibility = oparallaxvisibility;
+
+						completemirror();   /* Reverse screen x-wise in this function */
+
+						break;
+					}
+
+			if (cameradist < 0) sprite[playersprite[snum]].cstat |= 0x8000;
+			drawrooms(cposx,cposy,cposz,cang,choriz,csect);
+			sprite[playersprite[snum]].cstat &= ~0x8000;
+			analyzesprites(cposx,cposy);
+			drawmasks();
+
+			if ((gotpic[FLOORMIRROR>>3]&(1<<(FLOORMIRROR&7))) > 0)
+				transarea += (windowx2-windowx1)*(windowy2-windowy1);
+
+				/* Finish for screen rotation */
+			if ((tiltlock) || (detailmode))
+			{
+				setviewback();
+				i = (tiltlock&511); if (i > 256) i = 512-i;
+				i = sintable[i+512]*8 + sintable[i]*5L;
+				if (detailmode == 0) i >>= 1;
+				rotatesprite(320<<15,200<<15,i,tiltlock+512,MAXTILES-2,0,0,2+4+64,windowx1,windowy1,windowx2,windowy2);
+				walock[MAXTILES-2] = 1;
+			}
+
+			if (((numgrabbers[screenpeek] > 0) || (nummissiles[screenpeek] > 0) || (numbombs[screenpeek] > 0)) && (cameradist < 0))
+			{
+					/* Reset startdmost to bottom of screen */
+				if ((windowx1 == 0) && (windowx2 == 319) && (yxaspect == 65536) && (tiltlock == 0))
+				{
+					x1 = 160L-(tilesizx[GUNONBOTTOM]>>1); y1 = windowy2+1;
+					for(i=0;i<tilesizx[GUNONBOTTOM];i++)
+						startdmost[i+x1] = y1;
+				}
+				rotatesprite(160<<16,184L<<16,65536,0,GUNONBOTTOM,sector[cursectnum[screenpeek]].floorshade,0,2,windowx1,windowy1,windowx2,windowy2);
+			}
+
+			if (cachecount != 0)
+			{
+				rotatesprite((320-16)<<16,16<<16,32768,0,BUILDDISK,0,0,2+64,windowx1,windowy1,windowx2,windowy2);
+				cachecount = 0;
+			}
+
+			if (lockclock < 384)
+			{
+				if (lockclock < 128)
+					rotatesprite(320<<15,200<<15,lockclock<<9,lockclock<<4,DEMOSIGN,(128-lockclock)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
+				else if (lockclock < 256)
+					rotatesprite(320<<15,200<<15,65536,0,DEMOSIGN,0,0,2,windowx1,windowy1,windowx2,windowy2);
+				else
+					rotatesprite(320<<15,200<<15,(384-lockclock)<<9,lockclock<<4,DEMOSIGN,(lockclock-256)>>2,0,1+2,windowx1,windowy1,windowx2,windowy2);
+			}
+
+			if (health[screenpeek] <= 0)
+				rotatesprite(320<<15,200<<15,(-health[screenpeek])<<11,(-health[screenpeek])<<5,NO,0,0,2,windowx1,windowy1,windowx2,windowy2);
+		}
+	}
+
+		/*
+         * Only animate lava if its picnum is on screen
+		 *  gotpic is a bit array where the tile number's bit is set
+		 *  whenever it is drawn (ceilings, walls, sprites, etc.)
+         */
+	if ((gotpic[SLIME>>3]&(1<<(SLIME&7))) > 0)
+	{
+		gotpic[SLIME>>3] &= ~(1<<(SLIME&7));
+		if (waloff[SLIME] != 0) movelava((char *)waloff[SLIME]);
+	}
+
+	if ((show2dsector[cursectnum[snum]>>3]&(1<<(cursectnum[snum]&7))) == 0)
+		searchmap(cursectnum[snum]);
+
+	if (dimensionmode[snum] != 3)
+	{
+			/* Move back pivot point */
+		i = scale(czoom,screensize,320);
+		if (dimensionmode[snum] == 2)
+		{
+			clearview(0L);  /* Clear screen to specified color */
+			drawmapview(cposx,cposy,i,cang);
+		}
+		drawoverheadmap(cposx,cposy,i,cang);
+	}
+
+	if (getmessageleng > 0)
+	{
+		charsperline = 40;
+		/*if (dimensionmode[snum] == 2) charsperline = 80;*/
+
+		for(i=0;i<=getmessageleng;i+=charsperline)
+		{
+			for(j=0;j<charsperline;j++)
+				tempbuf[j] = getmessage[i+j];
+			if (getmessageleng < i+charsperline)
+				tempbuf[(getmessageleng-i)] = 0;
+			else
+				tempbuf[charsperline] = 0;
+
+			printext256(0L,((i/charsperline)<<3)+(ydim-32-8)-(((getmessageleng-1)/charsperline)<<3),151,-1,tempbuf,0);
+		}
+		if (totalclock > getmessagetimeoff)
+			getmessageleng = 0;
+	}
+	if ((numplayers >= 2) && (screenpeek != myconnectindex))
+	{
+		j = 1;
+		for(i=connecthead;i>=0;i=connectpoint2[i])
+		{
+			if (i == screenpeek) break;
+			j++;
+		}
+		sprintf(tempbuf,"(Player %ld's view)",j);
+		printext256((xdim>>1)-(strlen(tempbuf)<<2),0,24,-1,tempbuf,0);
+	}
+
+	if (syncstat != 0) printext256(68L,84L,31,0,"OUT OF SYNC!",0);
+	if (syncstate != 0) printext256(68L,92L,31,0,"Missed Network packet!",0);
+
+#if 0   /* Uncomment this to test cache locks */
+   extern long cacnum;
+   typedef struct { long *hand, leng; char *lock; } cactype;
+   extern cactype cac[];
+
+   j = 0;
+   for(i=0;i<cacnum;i++)
+      if ((*cac[i].lock) >= 200)
+      {
+         sprintf(tempbuf,"Locked- %ld: Leng:%ld, Lock:%ld",i,cac[i].leng,*cac[i].lock);
+         printext256(0L,j,31,-1,tempbuf,1); j += 6;
+      }
+#endif
+
+	nextpage();
+
+	if (keystatus[0x3f])   /* F5 */
+	{
+		keystatus[0x3f] = 0;
+		detailmode ^= 1;
+	}
+	if (keystatus[0x58])   /* F12 */
+	{
+		keystatus[0x58] = 0;
+		screencapture("captxxxx.pcx",keystatus[0x2a]|keystatus[0x36]);
+	}
+	if (keystatus[0x3c])  /* F2 (toggle stereo mode) */
+	{
+		keystatus[0x3c] = 0;
+		stereomode++; if (stereomode >= 3) stereomode = 0;
+#ifdef PLATFORM_DOS		
+		setstereo(stereomode);
+#endif		
+	}
+	if (keystatus[0x3e])  /* F4 - screen re-size */
+	{
+		keystatus[0x3e] = 0;
+
+			/* cycle through all vesa modes, then screen-buffer mode */
+		getvalidvesamodes();
+		if (vidoption == 1)
+		{
+			for(i=0;i<validmodecnt;i++)
+				if ((validmodexdim[i] == xdim) && (validmodeydim[i] == ydim))
+				{
+					if (i == validmodecnt-1)
+						setgamemode(2,320L,200L);
+					else
+						setgamemode(1,validmodexdim[i+1],validmodeydim[i+1]);
+					screensize = xdim+1;
+					break;
+				}
+		}
+		else if (validmodecnt > 0)
+		{
+			setgamemode(1,validmodexdim[0],validmodeydim[0]);
+			screensize = xdim+1;
+		}
+
+		sprintf(getmessage,"Video mode: %ld x %ld",xdim,ydim);
+		if (vidoption == 2) strcat(getmessage," (Screen-buffer)");
+		getmessageleng = strlen(getmessage);
+		getmessagetimeoff = totalclock+120*5;
+	}
+	if (keystatus[0x57])  /* F11 - brightness */
+	{
+		keystatus[0x57] = 0;
+		brightness++;
+		if (brightness > 8) brightness = 0;
+		setbrightness(brightness, &palette[0]);
+	}
+	if (stereomode)  /* Adjustments for red-blue / crystal eyes modes */
+	{
+		if (keystatus[0x2a]|keystatus[0x36])
+		{
+			if (keystatus[0xa]) stereopixelwidth = max(stereopixelwidth-1,0);   /* Shift ( */
+			if (keystatus[0xb]) stereopixelwidth++;   /* Shift ) */
+		}
+		else
+		{
+			if (keystatus[0xa]) stereowidth = max(stereowidth-512,0);   /* ( */
+			if (keystatus[0xb]) stereowidth += 512;   /* ) */
+		}
+	}
+
+	if (option[4] == 0)           /* Single player only keys */
+	{
+		if (keystatus[0xd2])   /* Insert - Insert player */
+		{
+			keystatus[0xd2] = 0;
+			if (numplayers < MAXPLAYERS)
+			{
+				connectpoint2[numplayers-1] = numplayers;
+				connectpoint2[numplayers] = -1;
+
+				movefifoend[numplayers] = movefifoend[0];   /* HACK 01/05/2000 */
+
+				initplayersprite(numplayers);
+
+				clearallviews(0L);  /* Clear screen to specified color */
+
+				numplayers++;
+			}
+		}
+		if (keystatus[0xd3])   /* Delete - Delete player */
+		{
+			keystatus[0xd3] = 0;
+			if (numplayers > 1)
+			{
+				numplayers--;
+				connectpoint2[numplayers-1] = -1;
+
+				deletesprite(playersprite[numplayers]);
+				playersprite[numplayers] = -1;
+
+				if (myconnectindex >= numplayers) myconnectindex = 0;
+				if (screenpeek >= numplayers) screenpeek = 0;
+
+				if (numplayers < 2)
+					setup3dscreen();
+				else
+					clearallviews(0L);  /* Clear screen to specified color */
+			}
+		}
+		if (keystatus[0x46])   /* Scroll Lock */
+		{
+			keystatus[0x46] = 0;
+
+			myconnectindex = connectpoint2[myconnectindex];
+			if (myconnectindex < 0) myconnectindex = connecthead;
+			screenpeek = myconnectindex;
+		}
+	}
+
+	restoreinterpolations();
 }
+
+
+void playback(void)
+{
+	long i, j, k;
+
+	ready2send = 0;
+	recstat = 0; i = reccnt;
+	while (!keystatus[1])
+	{
+		while (totalclock >= lockclock+TICSPERFRAME)
+		{
+			if (i >= reccnt)
+			{
+				prepareboard(boardfilename);
+				for(i=connecthead;i>=0;i=connectpoint2[i])
+					initplayersprite((short)i);
+				totalclock = 0;
+				i = 0;
+			}
+
+			k = 0;
+			for(j=connecthead;j>=0;j=connectpoint2[j])
+			{
+				copybufbyte(&recsync[i][k],&ffsync[j],sizeof(input));
+				k++;
+			}
+			movethings(); domovethings();
+			i++;
+		}
+		drawscreen(screenpeek,(totalclock-gotlastpacketclock)*(65536/(TIMERINTSPERSECOND/MOVESPERSECOND)));
+
+		if (keystatus[(unsigned int)keys[15]])
+		{
+			keystatus[(unsigned int)keys[15]] = 0;
+			screenpeek = connectpoint2[screenpeek];
+			if (screenpeek < 0) screenpeek = connecthead;
+			drawstatusbar(screenpeek);   /* Andy did this */
+		}
+		if (keystatus[(unsigned int)keys[14]])
+		{
+			keystatus[(unsigned int)keys[14]] = 0;
+			dimensionmode[screenpeek]++;
+			if (dimensionmode[screenpeek] > 3) dimensionmode[screenpeek] = 1;
+		}
+	}
+
+	musicoff();
+	uninitmultiplayers();
+	uninittimer();
+	uninitkeys();
+	uninitengine();
+	uninitsb();
+	uninitgroupfile();
+	setvmode(0x3);        /* Set back to text mode */
+	exit(0);
+}
+
+
+int loadgame(void)
+{
+	long i;
+	long fil;
+
+	if ((fil = kopen4load("save0000.gam",0)) == -1) return(-1);
+
+	kdfread(&numplayers,2,1,fil);
+	kdfread(&myconnectindex,2,1,fil);
+	kdfread(&connecthead,2,1,fil);
+	kdfread(connectpoint2,2,MAXPLAYERS,fil);
+
+		/* Make sure palookups get set, sprites will get overwritten later */
+	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
+
+	kdfread(posx,4,MAXPLAYERS,fil);
+	kdfread(posy,4,MAXPLAYERS,fil);
+	kdfread(posz,4,MAXPLAYERS,fil);
+	kdfread(horiz,4,MAXPLAYERS,fil);
+	kdfread(zoom,4,MAXPLAYERS,fil);
+	kdfread(hvel,4,MAXPLAYERS,fil);
+	kdfread(ang,2,MAXPLAYERS,fil);
+	kdfread(cursectnum,2,MAXPLAYERS,fil);
+	kdfread(ocursectnum,2,MAXPLAYERS,fil);
+	kdfread(playersprite,2,MAXPLAYERS,fil);
+	kdfread(deaths,2,MAXPLAYERS,fil);
+	kdfread(lastchaingun,4,MAXPLAYERS,fil);
+	kdfread(health,4,MAXPLAYERS,fil);
+	kdfread(numgrabbers,2,MAXPLAYERS,fil);
+	kdfread(nummissiles,2,MAXPLAYERS,fil);
+	kdfread(numbombs,2,MAXPLAYERS,fil);
+	kdfread(flytime,4,MAXPLAYERS,fil);
+	kdfread(oflags,2,MAXPLAYERS,fil);
+	kdfread(dimensionmode,1,MAXPLAYERS,fil);
+	kdfread(revolvedoorstat,1,MAXPLAYERS,fil);
+	kdfread(revolvedoorang,2,MAXPLAYERS,fil);
+	kdfread(revolvedoorrotang,2,MAXPLAYERS,fil);
+	kdfread(revolvedoorx,4,MAXPLAYERS,fil);
+	kdfread(revolvedoory,4,MAXPLAYERS,fil);
+
+	kdfread(&numsectors,2,1,fil);
+	kdfread(sector,sizeof(sectortype),numsectors,fil);
+	kdfread(&numwalls,2,1,fil);
+	kdfread(wall,sizeof(walltype),numwalls,fil);
+		/* Store all sprites (even holes) to preserve indeces */
+	kdfread(sprite,sizeof(spritetype),MAXSPRITES,fil);
+	kdfread(headspritesect,2,MAXSECTORS+1,fil);
+	kdfread(prevspritesect,2,MAXSPRITES,fil);
+	kdfread(nextspritesect,2,MAXSPRITES,fil);
+	kdfread(headspritestat,2,MAXSTATUS+1,fil);
+	kdfread(prevspritestat,2,MAXSPRITES,fil);
+	kdfread(nextspritestat,2,MAXSPRITES,fil);
+
+	kdfread(&fvel,4,1,fil);
+	kdfread(&svel,4,1,fil);
+	kdfread(&avel,4,1,fil);
+
+	kdfread(&locselectedgun,4,1,fil);
+	kdfread(&loc.fvel,1,1,fil);
+	kdfread(&oloc.fvel,1,1,fil);
+	kdfread(&loc.svel,1,1,fil);
+	kdfread(&oloc.svel,1,1,fil);
+	kdfread(&loc.avel,1,1,fil);
+	kdfread(&oloc.avel,1,1,fil);
+	kdfread(&loc.bits,2,1,fil);
+	kdfread(&oloc.bits,2,1,fil);
+
+	kdfread(&locselectedgun2,4,1,fil);
+	kdfread(&loc2.fvel,sizeof(input),1,fil);
+
+	kdfread(_sync,sizeof(input),MAXPLAYERS,fil);
+	kdfread(osync,sizeof(input),MAXPLAYERS,fil);
+
+	kdfread(boardfilename,1,80,fil);
+	kdfread(&screenpeek,2,1,fil);
+	kdfread(&oldmousebstatus,2,1,fil);
+	kdfread(&brightness,2,1,fil);
+	kdfread(&neartagsector,2,1,fil);
+	kdfread(&neartagwall,2,1,fil);
+	kdfread(&neartagsprite,2,1,fil);
+	kdfread(&lockclock,4,1,fil);
+	kdfread(&neartagdist,4,1,fil);
+	kdfread(&neartaghitdist,4,1,fil);
+
+	kdfread(turnspritelist,2,16,fil);
+	kdfread(&turnspritecnt,2,1,fil);
+	kdfread(warpsectorlist,2,16,fil);
+	kdfread(&warpsectorcnt,2,1,fil);
+	kdfread(xpanningsectorlist,2,16,fil);
+	kdfread(&xpanningsectorcnt,2,1,fil);
+	kdfread(ypanningwalllist,2,64,fil);
+	kdfread(&ypanningwallcnt,2,1,fil);
+	kdfread(floorpanninglist,2,64,fil);
+	kdfread(&floorpanningcnt,2,1,fil);
+	kdfread(dragsectorlist,2,16,fil);
+	kdfread(dragxdir,2,16,fil);
+	kdfread(dragydir,2,16,fil);
+	kdfread(&dragsectorcnt,2,1,fil);
+	kdfread(dragx1,4,16,fil);
+	kdfread(dragy1,4,16,fil);
+	kdfread(dragx2,4,16,fil);
+	kdfread(dragy2,4,16,fil);
+	kdfread(dragfloorz,4,16,fil);
+	kdfread(&swingcnt,2,1,fil);
+	kdfread(swingwall,2,32*5,fil);
+	kdfread(swingsector,2,32,fil);
+	kdfread(swingangopen,2,32,fil);
+	kdfread(swingangclosed,2,32,fil);
+	kdfread(swingangopendir,2,32,fil);
+	kdfread(swingang,2,32,fil);
+	kdfread(swinganginc,2,32,fil);
+	kdfread(swingx,4,32*8,fil);
+	kdfread(swingy,4,32*8,fil);
+	kdfread(revolvesector,2,4,fil);
+	kdfread(revolveang,2,4,fil);
+	kdfread(&revolvecnt,2,1,fil);
+	kdfread(revolvex,4,4*16,fil);
+	kdfread(revolvey,4,4*16,fil);
+	kdfread(revolvepivotx,4,4,fil);
+	kdfread(revolvepivoty,4,4,fil);
+	kdfread(subwaytracksector,2,4*128,fil);
+	kdfread(subwaynumsectors,2,4,fil);
+	kdfread(&subwaytrackcnt,2,1,fil);
+	kdfread(subwaystop,4,4*8,fil);
+	kdfread(subwaystopcnt,4,4,fil);
+	kdfread(subwaytrackx1,4,4,fil);
+	kdfread(subwaytracky1,4,4,fil);
+	kdfread(subwaytrackx2,4,4,fil);
+	kdfread(subwaytracky2,4,4,fil);
+	kdfread(subwayx,4,4,fil);
+	kdfread(subwaygoalstop,4,4,fil);
+	kdfread(subwayvel,4,4,fil);
+	kdfread(subwaypausetime,4,4,fil);
+	kdfread(waterfountainwall,2,MAXPLAYERS,fil);
+	kdfread(waterfountaincnt,2,MAXPLAYERS,fil);
+	kdfread(slimesoundcnt,2,MAXPLAYERS,fil);
+
+		/* Warning: only works if all pointers are in sector structures! */
+	kdfread(animateptr,4,MAXANIMATES,fil);
+	for(i=MAXANIMATES-1;i>=0;i--)
+		animateptr[i] = (long *)(animateptr[i]+((long)sector));
+
+	kdfread(animategoal,4,MAXANIMATES,fil);
+	kdfread(animatevel,4,MAXANIMATES,fil);
+	kdfread(animateacc,4,MAXANIMATES,fil);
+	kdfread(&animatecnt,4,1,fil);
+
+	kdfread((void*)&totalclock,4,1,fil);
+	kdfread(&numframes,4,1,fil);
+	kdfread(&randomseed,4,1,fil);
+	kdfread(&numpalookups,2,1,fil);
+
+	kdfread(&visibility,4,1,fil);
+	kdfread(&parallaxvisibility,4,1,fil);
+	kdfread(&parallaxtype,1,1,fil);
+	kdfread(&parallaxyoffs,4,1,fil);
+	kdfread(pskyoff,2,MAXPSKYTILES,fil);
+	kdfread(&pskybits,2,1,fil);
+
+	kdfread(&mirrorcnt,2,1,fil);
+	kdfread(mirrorwall,2,mirrorcnt,fil);
+	kdfread(mirrorsector,2,mirrorcnt,fil);
+
+		/* I should save off interpolation list, but they're pointers :( */
+	numinterpolations = 0;
+	startofdynamicinterpolations = 0;
+
+	kclose(fil);
+
+	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
+
+	totalclock = lockclock;
+	ototalclock = lockclock;
+
+	strcpy(getmessage,"Game loaded.");
+	getmessageleng = strlen(getmessage);
+	getmessagetimeoff = totalclock+360+(getmessageleng<<4);
+	return(0);
+}
+
+
+int savegame(void)
+{
+	long i;
+	FILE *fil;
+
+	if ((fil = fopen("save0000.gam","wb")) == 0) return(-1);
+
+	dfwrite(&numplayers,2,1,fil);
+	dfwrite(&myconnectindex,2,1,fil);
+	dfwrite(&connecthead,2,1,fil);
+	dfwrite(connectpoint2,2,MAXPLAYERS,fil);
+
+	dfwrite(posx,4,MAXPLAYERS,fil);
+	dfwrite(posy,4,MAXPLAYERS,fil);
+	dfwrite(posz,4,MAXPLAYERS,fil);
+	dfwrite(horiz,4,MAXPLAYERS,fil);
+	dfwrite(zoom,4,MAXPLAYERS,fil);
+	dfwrite(hvel,4,MAXPLAYERS,fil);
+	dfwrite(ang,2,MAXPLAYERS,fil);
+	dfwrite(cursectnum,2,MAXPLAYERS,fil);
+	dfwrite(ocursectnum,2,MAXPLAYERS,fil);
+	dfwrite(playersprite,2,MAXPLAYERS,fil);
+	dfwrite(deaths,2,MAXPLAYERS,fil);
+	dfwrite(lastchaingun,4,MAXPLAYERS,fil);
+	dfwrite(health,4,MAXPLAYERS,fil);
+	dfwrite(numgrabbers,2,MAXPLAYERS,fil);
+	dfwrite(nummissiles,2,MAXPLAYERS,fil);
+	dfwrite(numbombs,2,MAXPLAYERS,fil);
+	dfwrite(flytime,4,MAXPLAYERS,fil);
+	dfwrite(oflags,2,MAXPLAYERS,fil);
+	dfwrite(dimensionmode,1,MAXPLAYERS,fil);
+	dfwrite(revolvedoorstat,1,MAXPLAYERS,fil);
+	dfwrite(revolvedoorang,2,MAXPLAYERS,fil);
+	dfwrite(revolvedoorrotang,2,MAXPLAYERS,fil);
+	dfwrite(revolvedoorx,4,MAXPLAYERS,fil);
+	dfwrite(revolvedoory,4,MAXPLAYERS,fil);
+
+	dfwrite(&numsectors,2,1,fil);
+	dfwrite(sector,sizeof(sectortype),numsectors,fil);
+	dfwrite(&numwalls,2,1,fil);
+	dfwrite(wall,sizeof(walltype),numwalls,fil);
+		/* Store all sprites (even holes) to preserve indeces */
+	dfwrite(sprite,sizeof(spritetype),MAXSPRITES,fil);
+	dfwrite(headspritesect,2,MAXSECTORS+1,fil);
+	dfwrite(prevspritesect,2,MAXSPRITES,fil);
+	dfwrite(nextspritesect,2,MAXSPRITES,fil);
+	dfwrite(headspritestat,2,MAXSTATUS+1,fil);
+	dfwrite(prevspritestat,2,MAXSPRITES,fil);
+	dfwrite(nextspritestat,2,MAXSPRITES,fil);
+
+	dfwrite(&fvel,4,1,fil);
+	dfwrite(&svel,4,1,fil);
+	dfwrite(&avel,4,1,fil);
+
+	dfwrite(&locselectedgun,4,1,fil);
+	dfwrite(&loc.fvel,1,1,fil);
+	dfwrite(&oloc.fvel,1,1,fil);
+	dfwrite(&loc.svel,1,1,fil);
+	dfwrite(&oloc.svel,1,1,fil);
+	dfwrite(&loc.avel,1,1,fil);
+	dfwrite(&oloc.avel,1,1,fil);
+	dfwrite(&loc.bits,2,1,fil);
+	dfwrite(&oloc.bits,2,1,fil);
+
+	dfwrite(&locselectedgun2,4,1,fil);
+	dfwrite(&loc2.fvel,sizeof(input),1,fil);
+
+	dfwrite(_sync,sizeof(input),MAXPLAYERS,fil);
+	dfwrite(osync,sizeof(input),MAXPLAYERS,fil);
+
+	dfwrite(boardfilename,1,80,fil);
+	dfwrite(&screenpeek,2,1,fil);
+	dfwrite(&oldmousebstatus,2,1,fil);
+	dfwrite(&brightness,2,1,fil);
+	dfwrite(&neartagsector,2,1,fil);
+	dfwrite(&neartagwall,2,1,fil);
+	dfwrite(&neartagsprite,2,1,fil);
+	dfwrite(&lockclock,4,1,fil);
+	dfwrite(&neartagdist,4,1,fil);
+	dfwrite(&neartaghitdist,4,1,fil);
+
+	dfwrite(turnspritelist,2,16,fil);
+	dfwrite(&turnspritecnt,2,1,fil);
+	dfwrite(warpsectorlist,2,16,fil);
+	dfwrite(&warpsectorcnt,2,1,fil);
+	dfwrite(xpanningsectorlist,2,16,fil);
+	dfwrite(&xpanningsectorcnt,2,1,fil);
+	dfwrite(ypanningwalllist,2,64,fil);
+	dfwrite(&ypanningwallcnt,2,1,fil);
+	dfwrite(floorpanninglist,2,64,fil);
+	dfwrite(&floorpanningcnt,2,1,fil);
+	dfwrite(dragsectorlist,2,16,fil);
+	dfwrite(dragxdir,2,16,fil);
+	dfwrite(dragydir,2,16,fil);
+	dfwrite(&dragsectorcnt,2,1,fil);
+	dfwrite(dragx1,4,16,fil);
+	dfwrite(dragy1,4,16,fil);
+	dfwrite(dragx2,4,16,fil);
+	dfwrite(dragy2,4,16,fil);
+	dfwrite(dragfloorz,4,16,fil);
+	dfwrite(&swingcnt,2,1,fil);
+	dfwrite(swingwall,2,32*5,fil);
+	dfwrite(swingsector,2,32,fil);
+	dfwrite(swingangopen,2,32,fil);
+	dfwrite(swingangclosed,2,32,fil);
+	dfwrite(swingangopendir,2,32,fil);
+	dfwrite(swingang,2,32,fil);
+	dfwrite(swinganginc,2,32,fil);
+	dfwrite(swingx,4,32*8,fil);
+	dfwrite(swingy,4,32*8,fil);
+	dfwrite(revolvesector,2,4,fil);
+	dfwrite(revolveang,2,4,fil);
+	dfwrite(&revolvecnt,2,1,fil);
+	dfwrite(revolvex,4,4*16,fil);
+	dfwrite(revolvey,4,4*16,fil);
+	dfwrite(revolvepivotx,4,4,fil);
+	dfwrite(revolvepivoty,4,4,fil);
+	dfwrite(subwaytracksector,2,4*128,fil);
+	dfwrite(subwaynumsectors,2,4,fil);
+	dfwrite(&subwaytrackcnt,2,1,fil);
+	dfwrite(subwaystop,4,4*8,fil);
+	dfwrite(subwaystopcnt,4,4,fil);
+	dfwrite(subwaytrackx1,4,4,fil);
+	dfwrite(subwaytracky1,4,4,fil);
+	dfwrite(subwaytrackx2,4,4,fil);
+	dfwrite(subwaytracky2,4,4,fil);
+	dfwrite(subwayx,4,4,fil);
+	dfwrite(subwaygoalstop,4,4,fil);
+	dfwrite(subwayvel,4,4,fil);
+	dfwrite(subwaypausetime,4,4,fil);
+	dfwrite(waterfountainwall,2,MAXPLAYERS,fil);
+	dfwrite(waterfountaincnt,2,MAXPLAYERS,fil);
+	dfwrite(slimesoundcnt,2,MAXPLAYERS,fil);
+
+		/* Warning: only works if all pointers are in sector structures! */
+	for(i=MAXANIMATES-1;i>=0;i--)
+		animateptr[i] = (long *)(animateptr[i]-((long)sector));
+	dfwrite(animateptr,4,MAXANIMATES,fil);
+	for(i=MAXANIMATES-1;i>=0;i--)
+		animateptr[i] = (long *)(animateptr[i]+((long)sector));
+
+	dfwrite(animategoal,4,MAXANIMATES,fil);
+	dfwrite(animatevel,4,MAXANIMATES,fil);
+	dfwrite(animateacc,4,MAXANIMATES,fil);
+	dfwrite(&animatecnt,4,1,fil);
+
+	dfwrite((void*)&totalclock,4,1,fil);
+	dfwrite(&numframes,4,1,fil);
+	dfwrite(&randomseed,4,1,fil);
+	dfwrite(&numpalookups,2,1,fil);
+
+	dfwrite(&visibility,4,1,fil);
+	dfwrite(&parallaxvisibility,4,1,fil);
+	dfwrite(&parallaxtype,1,1,fil);
+	dfwrite(&parallaxyoffs,4,1,fil);
+	dfwrite(pskyoff,2,MAXPSKYTILES,fil);
+	dfwrite(&pskybits,2,1,fil);
+
+	dfwrite(&mirrorcnt,2,1,fil);
+	dfwrite(mirrorwall,2,mirrorcnt,fil);
+	dfwrite(mirrorsector,2,mirrorcnt,fil);
+
+	fclose(fil);
+
+	strcpy(getmessage,"Game saved.");
+	getmessageleng = strlen(getmessage);
+	getmessagetimeoff = totalclock+360+(getmessageleng<<4);
+	return(0);
+}
+
+
+int main(int argc, char **argv)
+{
+	long i, j, k, fil, waitplayers, x1, y1, x2, y2;
+	short other;
+
+#ifdef USE_PERL
+    int perl_works = 0;
+    if (buildperl_init() == 0)
+        perl_works = 1;
+#endif
+
+    _platform_init(argc, argv, "KenBuild by Ken Silverman", "KenBuild");
+
+	initgroupfile("stuff.dat");
+
+	if ((argc >= 2) && (stricmp("-net",argv[1]) != 0) && (stricmp("/net",argv[1]) != 0))
+	{
+		strcpy((char*)&boardfilename,argv[1]);
+		if(strchr(boardfilename,'.') == 0)
+			strcat(boardfilename,".map");
+	}
+	else
+		strcpy((char*)&boardfilename,"nukeland.map");
+
+	if ((fil = open("setup.dat",O_BINARY|O_RDWR,S_IREAD)) != -1)
+	{
+		read(fil,&option[0],NUMOPTIONS);
+		read(fil,&keys[0],NUMKEYS);
+		close(fil);
+	}
+	if (option[3] != 0) initmouse();
+
+	initengine();
+	_initkeys();
+	inittimer();
+	initmultiplayers(option[4],option[5],0);
+
+	pskyoff[0] = 0; pskyoff[1] = 0; pskybits = 1;
+
+	initsb(option[1],option[2],digihz[option[7]>>4],((option[7]&4)>0)+1,((option[7]&2)>0)+1,60,option[7]&1);
+	if (strcmp(boardfilename,"klab.map") == 0)
+		loadsong("klabsong.kdm");
+	else
+		loadsong("neatsong.kdm");
+	musicon();
+
+	loadpics("tiles000.art");                      /* Load artwork */
+	qloadkvx(0L,"voxel000.kvx");
+	qloadkvx(1L,"voxel001.kvx");
+
+		/*
+         * Here's an example of TRUE ornamented walls
+		 * The allocatepermanenttile should be called right after loadpics
+		 * Since it resets the tile cache for each call.
+         */
+	if (allocatepermanenttile(SLIME,128,128) == 0)    /* If enough memory */
+	{
+		printf("Not enough memory for slime!\n");
+		exit(0);
+	}
+	if (allocatepermanenttile(MAXTILES-1,64,64) != 0)    /* If enough memory */
+	{
+			/* My face with an explosion written over it */
+		copytilepiece(KENPICTURE,0,0,64,64,MAXTILES-1,0,0);
+		copytilepiece(EXPLOSION,0,0,64,64,MAXTILES-1,0,0);
+	}
+
+	initlava();
+
+	for(j=0;j<256;j++)
+		tempbuf[j] = ((j+32)&255);  /* remap colors for screwy palette sectors */
+	makepalookup(16,tempbuf,0,0,0,1);
+
+	for(j=0;j<256;j++) tempbuf[j] = j;
+	makepalookup(17,tempbuf,24,24,24,1);
+
+	for(j=0;j<256;j++) tempbuf[j] = j; /* (j&31)+32; */
+	makepalookup(18,tempbuf,8,8,48,1);
+
+	prepareboard(boardfilename);                   /* Load board */
+
+	if (option[4] > 0)
+	{
+		x1 = ((xdim-screensize)>>1);
+		x2 = x1+screensize-1;
+		y1 = (((ydim-32)-scale(screensize,ydim-32,xdim))>>1);
+		y2 = y1 + scale(screensize,ydim-32,xdim)-1;
+		drawtilebackground(0L,0L,BACKGROUND,8,x1,y1,x2,y2,0);
+
+		sendlogon();
+		if (option[4] < 5) waitplayers = 2; else waitplayers = option[4]-3;
+		while (numplayers < waitplayers)
+		{
+			sprintf(tempbuf,"%d of %ld players in...",numplayers,waitplayers);
+			printext256(68L,84L,31,0,tempbuf,0);
+			nextpage();
+
+			if (getpacket(&other,packbuf) > 0)
+				if (packbuf[0] == 255)
+					keystatus[1] = 1;
+
+			if (keystatus[1])
+			{
+				sendlogoff();         /* Signing off */
+				musicoff();
+				uninitmultiplayers();
+				uninittimer();
+				uninitkeys();
+				uninitengine();
+				uninitsb();
+				uninitgroupfile();
+				setvmode(0x3);        /* Set back to text mode */
+				exit(0);
+			}
+		}
+		screenpeek = myconnectindex;
+
+		if (numplayers <= 3)
+			networkmode = 1;
+		else
+			networkmode = 0;
+
+		j = 1;
+		for(i=connecthead;i>=0;i=connectpoint2[i])
+		{
+			if (myconnectindex == i) break;
+			j++;
+		}
+		sprintf(getmessage,"Player %ld",j);
+		if (networkmode == 0)
+		{
+			if (j == 1) strcat(getmessage," (Master)");
+					 else strcat(getmessage," (Slave)");
+		}
+		else
+			strcat(getmessage," (Even)");
+		getmessageleng = strlen(getmessage);
+		getmessagetimeoff = totalclock+120;
+	}
+
+	reccnt = 0;
+	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
+
+	/* waitforeverybody(); */
+	totalclock = ototalclock = 0; gotlastpacketclock = 0; nummoves = 0;
+
+	drawscreen(screenpeek,65536L);
+
+	ready2send = 1;
+	while (!keystatus[1])       /* Main loop starts here */
+	{
+        #ifdef USE_PERL
+            if (perl_works)
+                buildperl_frame();
+        #endif
+
+			/* backslash (useful only with KDM) */
+		if (keystatus[0x2b]) { keystatus[0x2b] = 0; preparesndbuf(); }
+
+		if ((networkmode == 1) || (myconnectindex != connecthead))
+			while (fakemovefifoplc != movefifoend[myconnectindex]) fakedomovethings();
+
+		getpackets();
+
+		if (typemode == 0)           /* if normal game keys active */
+		{
+			if ((keystatus[0x2a]&keystatus[0x36]&keystatus[0x13]) > 0)   /* Sh.Sh.R (replay) */
+			{
+				keystatus[0x13] = 0;
+				playback();
+			}
+
+			if (keystatus[0x26]&(keystatus[0x1d]|keystatus[0x9d])) /* Load game */
+			{
+				keystatus[0x26] = 0;
+				loadgame();
+				drawstatusbar(screenpeek);   /* Andy did this */
+			}
+
+			if (keystatus[0x1f]&(keystatus[0x1d]|keystatus[0x9d])) /* Save game */
+			{
+				keystatus[0x1f] = 0;
+				savegame();
+			}
+		}
+
+		if ((networkmode == 0) || (option[4] == 0))
+		{
+			while (movefifoplc != movefifoend[0]) domovethings();
+		}
+		else
+		{
+			j = connecthead;
+			if (j == myconnectindex) j = connectpoint2[j];
+			averagelag[j] = ((averagelag[j]*7+(((movefifoend[myconnectindex]-movefifoend[j]+otherlag[j]+2)&255)<<8))>>3);
+			j = max(averagelag[j]>>9,1);
+			while (((movefifoend[myconnectindex]-movefifoplc)&(MOVEFIFOSIZ-1)) > j)
+			{
+				for(i=connecthead;i>=0;i=connectpoint2[i])
+					if (movefifoplc == movefifoend[i]) break;
+				if (i >= 0) break;
+				if (myconnectindex != connecthead)
+				{
+					k = ((movefifoend[myconnectindex]-movefifoend[connecthead]-otherlag[connecthead]+128)&255);
+					if (k > 128+1) ototalclock++;
+					if (k < 128-1) ototalclock--;
+				}
+				domovethings();
+			}
+		}
+		i = (totalclock-gotlastpacketclock)*(65536/(TIMERINTSPERSECOND/MOVESPERSECOND));
+		drawscreen(screenpeek,i);
+		if (((stereomode) || (option[0] == 6)) && ((activepage&1)))
+			drawscreen(screenpeek,i);
+	}
+
+	sendlogoff();         /* Signing off */
+	musicoff();
+	uninitmultiplayers();
+	uninittimer();
+	uninitkeys();
+	uninitengine();
+	uninitsb();
+	uninitgroupfile();
+	setvmode(0x3);        /* Set back to text mode */
+
+	if (stereomode)
+	{
+		printf("stereowidth was: %ld\n",stereowidth);
+		printf("stereopixelwidth was: %ld\n",stereopixelwidth);
+	}
+
+    #ifdef USE_PERL
+        if (perl_works)
+            buildperl_deinit();
+    #endif
+
+	return(0);
+}
+
+
+void getinput(void)
+{
+	char ch, keystate;
+	long i, j;
+	short mousx, mousy, bstatus;
+
+	if (typemode == 0)           /* if normal game keys active */
+	{
+		if (keystatus[(unsigned int)keys[15]])
+		{
+			keystatus[(unsigned int)keys[15]] = 0;
+
+			screenpeek = connectpoint2[screenpeek];
+			if (screenpeek < 0) screenpeek = connecthead;
+			drawstatusbar(screenpeek);   /* Andy did this */
+		}
+
+		for(i=7;i>=0;i--)
+			if (keystatus[i+2])
+				{ keystatus[i+2] = 0; locselectedgun = i; break; }
+	}
+
+
+		/* KEYTIMERSTUFF */
+	if (!keystatus[(unsigned int)keys[5]])
+	{
+		if (keystatus[(unsigned int)keys[2]]) avel = max(avel-16*TICSPERFRAME,-128);
+		if (keystatus[(unsigned int)keys[3]]) avel = min(avel+16*TICSPERFRAME,127);
+	}
+	else
+	{
+		if (keystatus[(unsigned int)keys[2]]) svel = min(svel+8*TICSPERFRAME,127);
+		if (keystatus[(unsigned int)keys[3]]) svel = max(svel-8*TICSPERFRAME,-128);
+	}
+	if (keystatus[(unsigned int)keys[0]]) fvel = min(fvel+8*TICSPERFRAME,127);
+	if (keystatus[(unsigned int)keys[1]]) fvel = max(fvel-8*TICSPERFRAME,-128);
+	if (keystatus[(unsigned int)keys[12]]) svel = min(svel+8*TICSPERFRAME,127);
+	if (keystatus[(unsigned int)keys[13]]) svel = max(svel-8*TICSPERFRAME,-128);
+
+	if (avel < 0) avel = min(avel+12*TICSPERFRAME,0);
+	if (avel > 0) avel = max(avel-12*TICSPERFRAME,0);
+	if (svel < 0) svel = min(svel+2*TICSPERFRAME,0);
+	if (svel > 0) svel = max(svel-2*TICSPERFRAME,0);
+	if (fvel < 0) fvel = min(fvel+2*TICSPERFRAME,0);
+	if (fvel > 0) fvel = max(fvel-2*TICSPERFRAME,0);
+
+	if ((option[4] == 0) && (numplayers >= 2))
+	{
+		if (!keystatus[0x4f])
+		{
+			if (keystatus[0x4b]) avel2 = max(avel2-16*TICSPERFRAME,-128);
+			if (keystatus[0x4d]) avel2 = min(avel2+16*TICSPERFRAME,127);
+		}
+		else
+		{
+			if (keystatus[0x4b]) svel2 = min(svel2+8*TICSPERFRAME,127);
+			if (keystatus[0x4d]) svel2 = max(svel2-8*TICSPERFRAME,-128);
+		}
+		if (keystatus[0x48]) fvel2 = min(fvel2+8*TICSPERFRAME,127);
+		if (keystatus[0x4c]) fvel2 = max(fvel2-8*TICSPERFRAME,-128);
+
+		if (avel2 < 0) avel2 = min(avel2+12*TICSPERFRAME,0);
+		if (avel2 > 0) avel2 = max(avel2-12*TICSPERFRAME,0);
+		if (svel2 < 0) svel2 = min(svel2+2*TICSPERFRAME,0);
+		if (svel2 > 0) svel2 = max(svel2-2*TICSPERFRAME,0);
+		if (fvel2 < 0) fvel2 = min(fvel2+2*TICSPERFRAME,0);
+		if (fvel2 > 0) fvel2 = max(fvel2-2*TICSPERFRAME,0);
+	}
+
+	if (keystatus[0x1a]) screentilt += ((4*TICSPERFRAME)<<(keystatus[0x2a]|keystatus[0x36]));
+	if (keystatus[0x1b]) screentilt -= ((4*TICSPERFRAME)<<(keystatus[0x2a]|keystatus[0x36]));
+
+	i = (TICSPERFRAME<<1);
+	while ((screentilt != 0) && (i > 0))
+		{ screentilt = ((screentilt+ksgn(screentilt-1024))&2047); i--; }
+	if (keystatus[0x28]) screentilt = 1536;
+
+
+	loc.fvel = min(max(fvel,-128+8),127-8);
+	loc.svel = min(max(svel,-128+8),127-8);
+	loc.avel = min(max(avel,-128+16),127-16);
+
+	getmousevalues(&mousx,&mousy,&bstatus);
+	loc.avel = min(max(loc.avel+(mousx<<3),-128),127);
+	loc.fvel = min(max(loc.fvel-(mousy<<3),-128),127);
+
+	loc.bits = (locselectedgun<<13);
+	if (typemode == 0)           /* if normal game keys active */
+	{
+		loc.bits |= (keystatus[0x32]<<9);                 /* M (be master) */
+		loc.bits |= ((keystatus[(unsigned int)keys[14]]==1)<<12);       /* Map mode */
+	}
+	loc.bits |= keystatus[(unsigned int)keys[8]];                   /* Stand high */
+	loc.bits |= (keystatus[(unsigned int)keys[9]]<<1);              /* Stand low */
+	loc.bits |= (keystatus[(unsigned int)keys[16]]<<4);             /* Zoom in */
+	loc.bits |= (keystatus[(unsigned int)keys[17]]<<5);             /* Zoom out */
+	loc.bits |= (keystatus[(unsigned int)keys[4]]<<8);                 /* Run */
+	loc.bits |= (keystatus[(unsigned int)keys[10]]<<2);                /* Look up */
+	loc.bits |= (keystatus[(unsigned int)keys[11]]<<3);                /* Look down */
+	loc.bits |= ((keystatus[(unsigned int)keys[7]]==1)<<10);           /* Space */
+	loc.bits |= ((keystatus[(unsigned int)keys[6]]==1)<<11);           /* Shoot */
+	loc.bits |= (((bstatus&6)>(oldmousebstatus&6))<<10); /* Space */
+	loc.bits |= (((bstatus&1)>(oldmousebstatus&1))<<11); /* Shoot */
+
+	oldmousebstatus = bstatus;
+	if (((loc.bits&2048) > 0) && (locselectedgun == 1))
+		oldmousebstatus &= ~1;     /* Allow continous fire with mouse for chain gun */
+
+		/* PRIVATE KEYS: */
+	if (keystatus[0xb7])  /* Printscreen */
+	{
+		keystatus[0xb7] = 0;
+#ifdef PLATFORM_DOS		
+		printscreeninterrupt();
+#endif		
+	}
+
+	if (keystatus[0x2f])       /* V */
+	{
+		keystatus[0x2f] = 0;
+		if (cameradist < 0) cameradist = 0; else cameradist = -1;
+		cameraang = 0;
+	}
+
+	if (typemode == 0)           /* if normal game keys active */
+	{
+		if (keystatus[0x19])  /* P */
+		{
+			keystatus[0x19] = 0;
+			parallaxtype++;
+			if (parallaxtype > 2) parallaxtype = 0;
+		}
+		if (keystatus[0x38]|keystatus[0xb8])  /* ALT */
+		{
+			if (keystatus[0x4a])  /* Keypad - */
+				visibility = min(visibility+(visibility>>3),16384);
+			if (keystatus[0x4e])  /* Keypad + */
+				visibility = max(visibility-(visibility>>3),128);
+		}
+
+		if (keystatus[(unsigned int)keys[18]])   /* Typing mode */
+		{
+			keystatus[(unsigned int)keys[18]] = 0;
+			typemode = 1;
+			keyfifoplc = keyfifoend;      /* Reset keyboard fifo */
+		}
+	}
+	else
+	{
+		while (keyfifoplc != keyfifoend)
+		{
+			ch = keyfifo[(unsigned int)keyfifoplc];
+			keystate = keyfifo[(keyfifoplc+1)&(KEYFIFOSIZ-1)];
+			keyfifoplc = ((keyfifoplc+2)&(KEYFIFOSIZ-1));
+
+			if (keystate != 0)
+			{
+				if (ch == 0xe)   /* Backspace */
+				{
+					if (typemessageleng == 0) { typemode = 0; break; }
+					typemessageleng--;
+				}
+				if (ch == 0xf)
+				{
+					keystatus[0xf] = 0;
+					typemode = 0;
+					break;
+				}
+				if ((ch == 0x1c) || (ch == 0x9c))  /* Either ENTER */
+				{
+					keystatus[0x1c] = 0; keystatus[0x9c] = 0;
+					if (typemessageleng > 0)
+					{
+						packbuf[0] = 2;          /* Sending text is message type 4 */
+						for(j=typemessageleng-1;j>=0;j--)
+							packbuf[j+1] = typemessage[j];
+
+						for(i=connecthead;i>=0;i=connectpoint2[i])
+							if (i != myconnectindex)
+								sendpacket(i,(unsigned char *) packbuf,typemessageleng+1);
+
+						typemessageleng = 0;
+					}
+					typemode = 0;
+					break;
+				}
+
+				if ((typemessageleng < 159) && (ch < 128))
+				{
+					if (keystatus[0x2a]|keystatus[0x36])
+						ch = scantoascwithshift[(unsigned int)ch];
+					else
+						ch = scantoasc[(unsigned int)ch];
+
+					if (ch != 0) typemessage[(unsigned int)typemessageleng++] = ch;
+				}
+			}
+		}
+			/* Here's a trick of making key repeat after a 1/2 second */
+		if (keystatus[0xe])
+		{
+			if (keystatus[0xe] < 30)
+				keystatus[0xe] += TICSPERFRAME;
+			else
+			{
+				if (typemessageleng == 0)
+					typemode = 0;
+				else
+					typemessageleng--;
+			}
+		}
+	}
+}
+
+
+void faketimerhandler(void)
+{
+	short other;
+	long i, j, k, l;
+
+	if ((totalclock < ototalclock+(TIMERINTSPERSECOND/MOVESPERSECOND)) || (ready2send == 0)) return;
+	ototalclock += (TIMERINTSPERSECOND/MOVESPERSECOND);
+
+	getpackets(); if (getoutputcirclesize() >= 16) return;
+	getinput();
+
+	if (networkmode == 1)
+	{
+		packbuf[2] = 0; j = 3;
+		if (loc.fvel != oloc.fvel) packbuf[j++] = loc.fvel, packbuf[2] |= 1;
+		if (loc.svel != oloc.svel) packbuf[j++] = loc.svel, packbuf[2] |= 2;
+		if (loc.avel != oloc.avel) packbuf[j++] = loc.avel, packbuf[2] |= 4;
+		if ((loc.bits^oloc.bits)&0x00ff) packbuf[j++] = (loc.bits&255), packbuf[2] |= 8;
+		if ((loc.bits^oloc.bits)&0xff00) packbuf[j++] = ((loc.bits>>8)&255), packbuf[2] |= 16;
+		copybufbyte(&loc,&oloc,sizeof(input));
+
+		copybufbyte(&loc,&baksync[movefifoend[myconnectindex]][myconnectindex],sizeof(input));
+		movefifoend[myconnectindex] = ((movefifoend[myconnectindex]+1)&(MOVEFIFOSIZ-1));
+
+		for(i=connecthead;i>=0;i=connectpoint2[i])
+			if (i != myconnectindex)
+			{
+				packbuf[0] = 17;
+				packbuf[1] = (char)((movefifoend[myconnectindex]-movefifoend[i])&(MOVEFIFOSIZ-1));
+
+				k = j;
+				if ((myconnectindex == connecthead) || ((i == connecthead) && (myconnectindex == connectpoint2[connecthead])))
+				{
+					while (syncvalhead != syncvaltail)
+					{
+						packbuf[j++] = syncval[syncvaltail];
+						syncvaltail = ((syncvaltail+1)&(MOVEFIFOSIZ-1));
+					}
+				}
+				sendpacket(i,(unsigned char *) packbuf,j);
+				j = k;
+			}
+
+		gotlastpacketclock = totalclock;
+		return;
+	}
+
+		/* MASTER (or 1 player game) */
+	if ((myconnectindex == connecthead) || (option[4] == 0))
+	{
+		copybufbyte(&loc,&ffsync[myconnectindex],sizeof(input));
+
+		if (option[4] != 0)
+		{
+			packbuf[0] = 0;
+			j = ((numplayers+1)>>1)+1;
+			for(k=1;k<j;k++) packbuf[k] = 0;
+			k = (1<<3);
+			for(i=connecthead;i>=0;i=connectpoint2[i])
+			{
+				l = 0;
+				if (ffsync[i].fvel != osync[i].fvel) packbuf[j++] = ffsync[i].fvel, l |= 1;
+				if (ffsync[i].svel != osync[i].svel) packbuf[j++] = ffsync[i].svel, l |= 2;
+				if (ffsync[i].avel != osync[i].avel) packbuf[j++] = ffsync[i].avel, l |= 4;
+				if (ffsync[i].bits != osync[i].bits)
+				{
+					packbuf[j++] = (ffsync[i].bits&255);
+					packbuf[j++] = ((ffsync[i].bits>>8)&255);
+					l |= 8;
+				}
+				packbuf[k>>3] |= (l<<(k&7));
+				k += 4;
+
+				copybufbyte(&ffsync[i],&osync[i],sizeof(input));
+			}
+
+			while (syncvalhead != syncvaltail)
+			{
+				packbuf[j++] = syncval[syncvaltail];
+				syncvaltail = ((syncvaltail+1)&(MOVEFIFOSIZ-1));
+			}
+
+			for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+				sendpacket(i,(unsigned char *) packbuf,j);
+		}
+		else if (numplayers >= 2)
+		{
+			if (keystatus[0xb5])
+			{
+				keystatus[0xb5] = 0;
+				locselectedgun2++; if (locselectedgun2 >= 3) locselectedgun2 = 0;
+			}
+
+				/* Second player on 1 computer mode */
+			loc2.fvel = min(max(fvel2,-128+8),127-8);
+			loc2.svel = min(max(svel2,-128+8),127-8);
+			loc2.avel = min(max(avel2,-128+16),127-16);
+			loc2.bits = (locselectedgun2<<13);
+			loc2.bits |= keystatus[0x45];                  /* Stand high */
+			loc2.bits |= (keystatus[0x47]<<1);             /* Stand low */
+			loc2.bits |= (1<<8);                           /* Run */
+			loc2.bits |= (keystatus[0x49]<<2);             /* Look up */
+			loc2.bits |= (keystatus[0x37]<<3);             /* Look down */
+			loc2.bits |= (keystatus[0x50]<<10);            /* Space */
+			loc2.bits |= (keystatus[0x52]<<11);            /* Shoot */
+
+			other = connectpoint2[myconnectindex];
+			if (other < 0) other = connecthead;
+
+			copybufbyte(&loc2,&ffsync[other],sizeof(input));
+		}
+		movethings();  /* Move EVERYTHING (you too!) */
+	}
+	else                        /* I am a SLAVE */
+	{
+		packbuf[0] = 1; packbuf[1] = 0; j = 2;
+		if (loc.fvel != oloc.fvel) packbuf[j++] = loc.fvel, packbuf[1] |= 1;
+		if (loc.svel != oloc.svel) packbuf[j++] = loc.svel, packbuf[1] |= 2;
+		if (loc.avel != oloc.avel) packbuf[j++] = loc.avel, packbuf[1] |= 4;
+		if ((loc.bits^oloc.bits)&0x00ff) packbuf[j++] = (loc.bits&255), packbuf[1] |= 8;
+		if ((loc.bits^oloc.bits)&0xff00) packbuf[j++] = ((loc.bits>>8)&255), packbuf[1] |= 16;
+		copybufbyte(&loc,&oloc,sizeof(input));
+		sendpacket(connecthead,(unsigned char *) packbuf,j);
+	}
+}
+
 
 void waitforeverybody(void)
 {
@@ -6138,7 +6338,8 @@ void waitforeverybody(void)
 					packbuf[0] = 5;
 					packbuf[1] = j;
 					for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
-						if (playerreadyflag[i] != j) sendpacket(i,packbuf,2);
+						if (playerreadyflag[i] != j)
+                            sendpacket(i,(unsigned char *) packbuf,2);
 				}
 				for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
 					if (playerreadyflag[i] != j) break;
@@ -6154,149 +6355,11 @@ void waitforeverybody(void)
 			if (playerreadyflag[connecthead] == 1)
 			{
 				playerreadyflag[connecthead] = 0;
-				sendpacket(connecthead,packbuf,2);
+				sendpacket(connecthead,(unsigned char *) packbuf,2);
 			}
 		}
 	}
 }
 
-void searchmap(short startsector)
-{
-	long i, j, dasect, splc, send, startwall, endwall;
-	short dapic;
-	walltype *wal;
-
-	if ((startsector < 0) || (startsector >= numsectors)) return;
-	for(i=0;i<(MAXSECTORS>>3);i++) show2dsector[i] = 0;
-	for(i=0;i<(MAXWALLS>>3);i++) show2dwall[i] = 0;
-	for(i=0;i<(MAXSPRITES>>3);i++) show2dsprite[i] = 0;
-
-	automapping = 0;
-
-		//Search your area recursively & set all show2dsector/show2dwalls
-	tempshort[0] = startsector;
-	show2dsector[startsector>>3] |= (1<<(startsector&7));
-	dapic = sector[startsector].ceilingpicnum;
-	if (waloff[dapic] == 0) loadtile(dapic);
-	dapic = sector[startsector].floorpicnum;
-	if (waloff[dapic] == 0) loadtile(dapic);
-	for(splc=0,send=1;splc<send;splc++)
-	{
-		dasect = tempshort[splc];
-		startwall = sector[dasect].wallptr;
-		endwall = startwall + sector[dasect].wallnum;
-		for(i=startwall,wal=&wall[startwall];i<endwall;i++,wal++)
-		{
-			show2dwall[i>>3] |= (1<<(i&7));
-			dapic = wall[i].picnum;
-			if (waloff[dapic] == 0) loadtile(dapic);
-			dapic = wall[i].overpicnum;
-			if (((dapic&0xfffff000) == 0) && (waloff[dapic] == 0)) loadtile(dapic);
-
-			j = wal->nextsector;
-			if ((j >= 0) && ((show2dsector[j>>3]&(1<<(j&7))) == 0))
-			{
-				show2dsector[j>>3] |= (1<<(j&7));
-
-				dapic = sector[j].ceilingpicnum;
-				if (waloff[dapic] == 0) loadtile(dapic);
-				dapic = sector[j].floorpicnum;
-				if (waloff[dapic] == 0) loadtile(dapic);
-
-				tempshort[send++] = (short)j;
-			}
-		}
-
-		for(i=headspritesect[dasect];i>=0;i=nextspritesect[i])
-		{
-			show2dsprite[i>>3] |= (1<<(i&7));
-			dapic = sprite[i].picnum;
-			if (waloff[dapic] == 0) loadtile(dapic);
-		}
-	}
-}
-
-void setinterpolation(long *posptr)
-{
-	long i;
-
-	if (numinterpolations >= MAXINTERPOLATIONS) return;
-	for(i=numinterpolations-1;i>=0;i--)
-		if (curipos[i] == posptr) return;
-	curipos[numinterpolations] = posptr;
-	oldipos[numinterpolations] = *posptr;
-	numinterpolations++;
-}
-
-void stopinterpolation(long *posptr)
-{
-	long i;
-
-	for(i=numinterpolations-1;i>=startofdynamicinterpolations;i--)
-		if (curipos[i] == posptr)
-		{
-			numinterpolations--;
-			oldipos[i] = oldipos[numinterpolations];
-			bakipos[i] = bakipos[numinterpolations];
-			curipos[i] = curipos[numinterpolations];
-		}
-}
-
-void updateinterpolations()  //Stick at beginning of domovethings
-{
-	long i;
-
-	for(i=numinterpolations-1;i>=0;i--) oldipos[i] = *curipos[i];
-}
-
-void dointerpolations()       //Stick at beginning of drawscreen
-{
-	long i, j, odelta, ndelta;
-
-	ndelta = 0; j = 0;
-	for(i=numinterpolations-1;i>=0;i--)
-	{
-		bakipos[i] = *curipos[i];
-		odelta = ndelta; ndelta = (*curipos[i])-oldipos[i];
-		if (odelta != ndelta) j = mulscale16(ndelta,smoothratio);
-		*curipos[i] = oldipos[i]+j;
-	}
-}
-
-void restoreinterpolations()  //Stick at end of drawscreen
-{
-	long i;
-
-	for(i=numinterpolations-1;i>=0;i--) *curipos[i] = bakipos[i];
-}
-
-void printext(long x, long y, char *buffer, short tilenum, char invisiblecol)
-{
-	long i;
-	char ch;
-
-	for(i=0;buffer[i]!=0;i++)
-	{
-		ch = buffer[i];
-		rotatesprite((x-((8&15)<<3))<<16,(y-((8>>4)<<3))<<16,65536L,0,tilenum,0,0,8+16+64+128,x,y,x+7,y+7);
-		rotatesprite((x-((ch&15)<<3))<<16,(y-((ch>>4)<<3))<<16,65536L,0,tilenum,0,0,8+16+128,x,y,x+7,y+7);
-		x += 8;
-	}
-}
-
-void drawtilebackground (long thex, long they, short tilenum,
-								  signed char shade, long cx1, long cy1,
-								  long cx2, long cy2, char dapalnum)
-{
-	long x, y, xsiz, ysiz, tx1, ty1, tx2, ty2;
-
-	xsiz = tilesizx[tilenum]; tx1 = cx1/xsiz; tx2 = cx2/xsiz;
-	ysiz = tilesizy[tilenum]; ty1 = cy1/ysiz; ty2 = cy2/ysiz;
-
-	for(x=tx1;x<=tx2;x++)
-		for(y=ty1;y<=ty2;y++)
-			rotatesprite(x*xsiz<<16,y*ysiz<<16,65536L,0,tilenum,shade,dapalnum,8+16+64+128,cx1,cy1,cx2,cy2);
-}
-
-// end of game.c ...
+/* end of game.c ... */
 

@@ -7,9 +7,12 @@
  *  (including this file) to BUILD.
  */
 
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file IS NOT A PART OF Ken Silverman's original release
+ */
 
 #ifndef PLATFORM_UNIX
 #error Please define PLATFORM_UNIX to use this code.
@@ -19,6 +22,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "unix_compat.h"
 
 /*
@@ -47,6 +51,27 @@ const int hbits[64] =
     0xFFFFFFF8,0xFFFFFFFC,0xFFFFFFFE,0xFFFFFFFF
 };
 
+
+int stricmp(const char *x, const char *y)
+{
+    int ux, uy;
+
+    do
+    {
+        ux = toupper((int) *x);
+        uy = toupper((int) *y);
+        if (ux > uy)
+            return(1);
+        else if (ux < uy)
+            return(-1);
+        x++;
+        y++;
+    } while ((ux) && (uy));
+
+    return(0);
+} /* stricmp */
+
+
 long filelength(int fhandle)
 {
     long retval = -1;
@@ -57,20 +82,20 @@ long filelength(int fhandle)
 } /* filelength */
 
 
-// !!! remove me later!
+/* !!! remove me later! */
 int _inp_handler(int port, char *source_file, int source_line)
 {
     fprintf(stderr, "inp(0x%X) call in %s, line %d.\n", port, source_file, source_line);
     return(0);
-} // _inp_handler
+} /* _inp_handler */
 
 
-// !!! remove me later!
+/* !!! remove me later! */
 int _kinp_handler(int port, char *source_file, int source_line)
 {
     fprintf(stderr, "kinp(0x%X) call in %s, line %d.\n", port, source_file, source_line);
     return(0);
-} // _kinp_handler
+} /* _kinp_handler */
 
 /* end of unix_compat.c ... */
 

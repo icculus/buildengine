@@ -486,16 +486,26 @@
             against, and the version we are linked (dynamically) against.
 06082001 - It's Neurotic Cleanup Day! Started putting support for compiling
             with Visual C in place, and found how anal their anal settings
-            can be (does this beat -ansi -pendantic on Linux? Maybe.). Started
-            converting all the "//" comments to "/*" (ugh), and explicitly
+            can be (does this beat -ansi -pendantic on Linux? Probably not.).
+            Converted all the "//" comments to "/*" (ugh), and added explicit
             casting where needed. Replaced references to "long long" with
             "__int64", which is #defined appropriately in the compat headers.
-            Ways to go on this work, but it's for a higher good. Will start
-            compiling the Linux codebase with -ansi and -pendantic soon.
+            Now compiling the codebase with -ansi and -pendantic on Linux and
+            Cygwin. Changed PORTSIG in build.h. Moved the sound stubs out of
+            sdl_driver.c and into a #ifndef PLATFORM_DOS block in game.c; it's
+            KenBuild-specific, and I'm not interested in implementing it
+            cleanly, or at all, for non-DOS platforms. Cleaned up rest of
+            the forward references in game.c and build.c. Cleaned up the
+            OpenGL debugging output (it's now unified with the sdldebug()
+            code). Renamed a_linux.asm to a_nasm.asm, since it's used on Linux
+            and Windows (and probably everywhere else that there's an x86
+            system that isn't using Watcom). Implemented stricmp() on unix
+            (damned -ansi flag). Updated TODO and README. Changed the display
+            driver function _initkeys into initkeys. This will force a link
+            error in Build games, so they can be updated to call the driver's
+            init function; updated this in build.txt, too.
 
 --ryan. (icculus@linuxgames.com)
 
 /* end of CHANGELOG ... */
-
-
 
