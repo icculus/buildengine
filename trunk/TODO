@@ -47,6 +47,8 @@ NEXT ON TAP:
 - Can we move those SDL __cdecl pragmas out of display.h?
 - Add info to README on porting to new compilers.
 - Long filenames confuse the editor's file "dialog".
+- Might be worth moving all that resolution management code from sdl_driver.c
+   to engine.c ...
 
 // end of TODO ...
 
