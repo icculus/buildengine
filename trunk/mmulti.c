@@ -1,7 +1,9 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file has been modified from Ken Silverman's original release
+ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,7 +36,7 @@ long crctable[256];
 static char lastpacket[576], inlastpacket = 0;
 static short lastpacketfrom, lastpacketleng;
 
-extern long totalclock;  //MUST EXTERN 1 ANNOYING VARIABLE FROM GAME
+extern long totalclock;  /* MUST EXTERN 1 ANNOYING VARIABLE FROM GAME */
 static long timeoutcount = 60, resendagaincount = 4, lastsendtime[MAXPLAYERS];
 
 static short bakpacketptr[MAXPLAYERS][256], bakpacketlen[MAXPLAYERS][256];
@@ -51,13 +53,13 @@ extern char **_argv;
 #define MAXPACKETSIZE 2048
 typedef struct
 {
-	short intnum;                //communication between Game and the driver
-	short command;               //1-send, 2-get
-	short other;                 //dest for send, set by get (-1 = no packet)
+	short intnum;                /* communication between Game and the driver */
+	short command;               /* 1-send, 2-get */
+	short other;                 /* dest for send, set by get (-1 = no packet) */
 	short numbytes;
 	short myconnectindex;
 	short numplayers;
-	short gametype;              //gametype: 1-serial,2-modem,3-net
+	short gametype;              /* gametype: 1-serial,2-modem,3-net */
 	short filler;
 	char buffer[MAXPACKETSIZE];
 	long longcalladdress;
@@ -82,6 +84,36 @@ void callcommit(void)
 #else
 	fprintf (stderr, "%s, line %d; callcommit() called\n", __FILE__, __LINE__);
 #endif	
+}
+
+
+void initcrc(void)
+{
+	long i, j, k, a;
+
+	for(j=0;j<256;j++)      /* Calculate CRC table */
+	{
+		k = (j<<8); a = 0;
+		for(i=7;i>=0;i--)
+		{
+			if (((k^a)&0x8000) > 0)
+				a = ((a<<1)&65535) ^ 0x1021;   /* 0x1021 = genpoly */
+			else
+				a = ((a<<1)&65535);
+			k = ((k<<1)&65535);
+		}
+		crctable[j] = (a&65535);
+	}
+}
+
+
+long getcrc(char *buffer, short bufleng)
+{
+	long i, j;
+
+	j = 0;
+	for(i=bufleng-1;i>=0;i--) updatecrc16(j,buffer[i]);
+	return(j&65535);
 }
 
 void initmultiplayers(char damultioption, char dacomrateoption, char dapriority)
@@ -121,103 +153,8 @@ void initmultiplayers(char damultioption, char dacomrateoption, char dapriority)
 	for(i=0;i<numplayers;i++) lastsendtime[i] = totalclock;
 }
 
-void initcrc(void)
-{
-	long i, j, k, a;
 
-	for(j=0;j<256;j++)      //Calculate CRC table
-	{
-		k = (j<<8); a = 0;
-		for(i=7;i>=0;i--)
-		{
-			if (((k^a)&0x8000) > 0)
-				a = ((a<<1)&65535) ^ 0x1021;   //0x1021 = genpoly
-			else
-				a = ((a<<1)&65535);
-			k = ((k<<1)&65535);
-		}
-		crctable[j] = (a&65535);
-	}
-}
-
-void setpackettimeout(long datimeoutcount, long daresendagaincount)
-{
-	long i;
-
-	timeoutcount = datimeoutcount;
-	resendagaincount = daresendagaincount;
-	for(i=0;i<numplayers;i++) lastsendtime[i] = totalclock;
-}
-
-long getcrc(char *buffer, short bufleng)
-{
-	long i, j;
-
-	j = 0;
-	for(i=bufleng-1;i>=0;i--) updatecrc16(j,buffer[i]);
-	return(j&65535);
-}
-
-void uninitmultiplayers(void)
-{
-}
-
-void sendlogon(void)
-{
-}
-
-void sendlogoff(void)
-{
-	long i;
-	char tempbuf[2];
-
-	tempbuf[0] = 255;
-	tempbuf[1] = myconnectindex;
-	for(i=connecthead;i>=0;i=connectpoint2[i])
-		if (i != myconnectindex)
-			sendpacket(i,tempbuf,2L);
-}
-int getoutputcirclesize(void)
-{
-	return(0);
-}
-
-void setsocket(short newsocket)
-{
-}
-
-void sendpacket(long other, char *bufptr, long messleng)
-{
-	long i, j, k, l,cnt;
-	unsigned short dacrc;
-
-	if (numplayers < 2) return;
-
-	i = 0;
-	if (bakpacketlen[other][(outcntend[other]-1)&255] == messleng)
-	{
-		j = bakpacketptr[other][(outcntend[other]-1)&255];
-		for(i=messleng-1;i>=0;i--)
-			if (bakpacketbuf[(i+j)&(BAKSIZ-1)] != bufptr[i]) break;
-	}
-	bakpacketlen[other][outcntend[other]&255] = messleng;
-
-	if (i < 0)   //Point to last packet to save space on bakpacketbuf
-		bakpacketptr[other][outcntend[other]&255] = j;
-	else
-	{
-		bakpacketptr[other][outcntend[other]&255] = bakpacketplc;
-		for(i=0;i<messleng;i++)
-			bakpacketbuf[(bakpacketplc+i)&(BAKSIZ-1)] = bufptr[i];
-		bakpacketplc = ((bakpacketplc+messleng)&(BAKSIZ-1));
-	}
-	outcntend[other]++;
-
-	lastsendtime[other] = totalclock;
-	dosendpackets(other);
-}
-
-void dosendpackets(long other)
+static void dosendpackets(long other)
 {
 	long i, j, k, messleng;
 	unsigned short dacrc;
@@ -233,7 +170,7 @@ void dosendpackets(long other)
 #endif
 
 	if (outcntplc[other]+1 == outcntend[other])
-	{     //Send 1 sub-packet
+	{     /* Send 1 sub-packet */
 		k = 0;
 		gcom->buffer[k++] = (outcntplc[other]&255);
 		gcom->buffer[k++] = (errorgotnum[other]&7)+((errorresendnum[other]&7)<<3);
@@ -246,13 +183,13 @@ void dosendpackets(long other)
 		outcntplc[other]++;
 	}
 	else
-	{     //Send 2 sub-packets
+	{     /* Send 2 sub-packets */
 		k = 0;
 		gcom->buffer[k++] = (outcntplc[other]&255);
 		gcom->buffer[k++] = (errorgotnum[other]&7)+((errorresendnum[other]&7)<<3)+128;
 		gcom->buffer[k++] = (incnt[other]&255);
 
-			//First half-packet
+			/* First half-packet */
 		j = bakpacketptr[other][outcntplc[other]&255];
 		messleng = bakpacketlen[other][outcntplc[other]&255];
 		gcom->buffer[k++] = (char)(messleng&255);
@@ -261,7 +198,7 @@ void dosendpackets(long other)
 			gcom->buffer[k++] = bakpacketbuf[(i+j)&(BAKSIZ-1)];
 		outcntplc[other]++;
 
-			//Second half-packet
+			/* Second half-packet */
 		j = bakpacketptr[other][outcntplc[other]&255];
 		messleng = bakpacketlen[other][outcntplc[other]&255];
 		for(i=0;i<messleng;i++)
@@ -290,9 +227,82 @@ void dosendpackets(long other)
 		{ gcom->command = 1; callcommit(); }
 }
 
+
+void sendpacket(long other, char *bufptr, long messleng)
+{
+	long i = 0;
+    long j = 0;
+
+	if (numplayers < 2) return;
+
+	i = 0;
+	if (bakpacketlen[other][(outcntend[other]-1)&255] == messleng)
+	{
+		j = bakpacketptr[other][(outcntend[other]-1)&255];
+		for(i=messleng-1;i>=0;i--)
+			if (bakpacketbuf[(i+j)&(BAKSIZ-1)] != bufptr[i]) break;
+	}
+	bakpacketlen[other][outcntend[other]&255] = messleng;
+
+	if (i < 0)   /* Point to last packet to save space on bakpacketbuf */
+		bakpacketptr[other][outcntend[other]&255] = j;
+	else
+	{
+		bakpacketptr[other][outcntend[other]&255] = bakpacketplc;
+		for(i=0;i<messleng;i++)
+			bakpacketbuf[(bakpacketplc+i)&(BAKSIZ-1)] = bufptr[i];
+		bakpacketplc = ((bakpacketplc+messleng)&(BAKSIZ-1));
+	}
+	outcntend[other]++;
+
+	lastsendtime[other] = totalclock;
+	dosendpackets(other);
+}
+
+
+void setpackettimeout(long datimeoutcount, long daresendagaincount)
+{
+	long i;
+
+	timeoutcount = datimeoutcount;
+	resendagaincount = daresendagaincount;
+	for(i=0;i<numplayers;i++) lastsendtime[i] = totalclock;
+}
+
+
+void uninitmultiplayers(void)
+{
+}
+
+void sendlogon(void)
+{
+}
+
+void sendlogoff(void)
+{
+	long i;
+	char tempbuf[2];
+
+	tempbuf[0] = 255;
+	tempbuf[1] = myconnectindex;
+	for(i=connecthead;i>=0;i=connectpoint2[i])
+		if (i != myconnectindex)
+			sendpacket(i,tempbuf,2L);
+}
+
+int getoutputcirclesize(void)
+{
+	return(0);
+}
+
+void setsocket(short newsocket)
+{
+}
+
+
 short getpacket (short *other, char *bufptr)
 {
-	long i, j, messleng;
+	long i, messleng;
 	unsigned short dacrc;
 
 	if (numplayers < 2) return(0);
@@ -313,13 +323,13 @@ short getpacket (short *other, char *bufptr)
 					else
 						lastsendtime[i] += resendagaincount;
 					dosendpackets(i);
-				//}
+				/* } */
 			}
 		}
 
 	if (inlastpacket != 0)
 	{
-			//2ND half of good double-packet
+			/* 2ND half of good double-packet */
 		inlastpacket = 0;
 		*other = lastpacketfrom;
 		memcpy(bufptr,lastpacket,lastpacketleng);
@@ -345,7 +355,7 @@ short getpacket (short *other, char *bufptr)
 
 	dacrc = ((unsigned short)gcom->buffer[messleng-2]);
 	dacrc += (((unsigned short)gcom->buffer[messleng-1])<<8);
-	if (dacrc != getcrc(gcom->buffer,messleng-2))        //CRC check
+	if (dacrc != getcrc(gcom->buffer,messleng-2))        /* CRC check */
 	{
 #if (PRINTERRORS)
 		printf("\n%ld CRC",gcom->buffer[0]);
@@ -364,7 +374,7 @@ short getpacket (short *other, char *bufptr)
 		if (outcntplc[*other] > outcntend[*other]) outcntplc[*other] -= 256;
 	}
 
-	if (gcom->buffer[0] != (incnt[*other]&255))   //CNT check
+	if (gcom->buffer[0] != (incnt[*other]&255))   /* CNT check */
 	{
 		if (((incnt[*other]-gcom->buffer[0])&255) > 32)
 		{
@@ -376,13 +386,13 @@ short getpacket (short *other, char *bufptr)
 #if (PRINTERRORS)
 		else
 		{
-			if (!(gcom->buffer[1]&128))           //single else double packet
+			if (!(gcom->buffer[1]&128))           /* single else double packet */
 				printf("\n%ld cnt",gcom->buffer[0]);
 			else
 			{
 				if (((gcom->buffer[0]+1)&255) == (incnt[*other]&255))
 				{
-								 //GOOD! Take second half of double packet
+								 /* GOOD! Take second half of double packet */
 #if (PRINTERRORS)
 					printf("\n%ld-%ld .û ",gcom->buffer[0],(gcom->buffer[0]+1)&255);
 #endif
@@ -400,8 +410,8 @@ short getpacket (short *other, char *bufptr)
 		return(0);
 	}
 
-		//PACKET WAS GOOD!
-	if ((gcom->buffer[1]&128) == 0)           //Single packet
+		/* PACKET WAS GOOD! */
+	if ((gcom->buffer[1]&128) == 0)           /* Single packet */
 	{
 #if (PRINTERRORS)
 		printf("\n%ld û  ",gcom->buffer[0]);
@@ -415,7 +425,7 @@ short getpacket (short *other, char *bufptr)
 		return(messleng);
 	}
 
-														 //Double packet
+														 /* Double packet */
 #if (PRINTERRORS)
 	printf("\n%ld-%ld ûû ",gcom->buffer[0],(gcom->buffer[0]+1)&255);
 #endif
@@ -433,7 +443,8 @@ short getpacket (short *other, char *bufptr)
 
 void flushpackets()
 {
-	/*long i;
+#if 0
+	long i;
 
 	if (numplayers < 2) return;
 
@@ -452,7 +463,8 @@ void flushpackets()
 		errorfixnum[i] = 0;
 		errorresendnum[i] = 0;
 		lastsendtime[i] = totalclock;
-	}*/
+	}
+#endif
 }
 
 void genericmultifunction(long other, char *bufptr, long messleng, long command)
@@ -465,3 +477,6 @@ void genericmultifunction(long other, char *bufptr, long messleng, long command)
 	gcom->other = other+1;
 	callcommit();
 }
+
+/* end of mmulti.c ... */
+
