@@ -64,13 +64,13 @@ long msqrtasm(int i1)
           "msqrasm_begit: cmpl %%eax, %%ecx   \n\t"
           "jl msqrasm_skip   \n\t"
           "subl %%eax, %%ecx   \n\t"
-      "leal (%%eax, %%ebx, 4), %%eax   \n\t"
+          "leal (%%eax, %%ebx, 4), %%eax   \n\t"
           "msqrasm_skip: subl %%ebx, %%eax   \n\t"
           "shrl $1, %%eax   \n\t"
-      "shrl $2, %%ebx   \n\t"
+          "shrl $2, %%ebx   \n\t"
           "jnz msqrasm_begit   \n\t"
           "cmpl %%eax, %%ecx   \n\t"
-      "sbbl $-1, %%eax   \n\t"
+          "sbbl $-1, %%eax   \n\t"
           "shrl $1, %%eax   \n\t"
      : "=a" (retval) : "c" (i1) : "cc", "ebx");
     return(retval);
