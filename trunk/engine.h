@@ -17,6 +17,10 @@
 #ifndef _INCLUDE_ENGINE_H_
 #define _INCLUDE_ENGINE_H_
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SUPERBUILD  /* don't touch this. */
 
 /*
@@ -141,6 +145,10 @@ int clipinsidebox(long x, long y, short wallnum, long walldist);
 
 #ifdef SUPERBUILD
 void qloadkvx(long voxindex, char *filename);
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* !defined _INCLUDE_ENGINE_H_ */
