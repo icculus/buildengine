@@ -449,6 +449,22 @@
             by setting the environment variable BUILD_SCREENRES, you can add
             one window of any dimension to the list. For example,
             "export BUILD_SCREENRES=666x666".
+05282001 - Added a maximum screen resolution of 1600x1200. This can be raised
+            or lowered with an environment variable: export
+            BUILD_MAXSCREENRES=1024x768, if you like. Renamed
+            BUILD_NO_MOUSE_GRAB to BUILD_NOMOUSEGRAB for consistency. Renamed
+            BUILD_SCREENRES to BUILD_USERSCREENRES. Rewrote the spaghetti that
+            all this resolution management code had quickly become. The fight
+            with attempt_fullscreen_toggle() continues: gave up, and just
+            called setbrightness() to fix the palettes. Now tries to use
+            SDL_WM_ToggleFullscreen() first before doing it The Hard Way, and
+            just returns if there's no window manager reported by
+            SDL_GetVideoInfo->wm_available. All the debugging output (of which
+            there is still more added today) has been cleaned up and is
+            passed through a function called sdldebug() that is used like
+            fprintf(stderr), but adds the "BUILDSDL: " string to the front,
+            a newline to the end, and prints nothing if debugging is disabled.
+            TODO is, as usual, expanding.
 
 --ryan. (icculus@linuxgames.com)
 
