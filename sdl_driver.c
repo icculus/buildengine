@@ -1095,7 +1095,7 @@ void getvalidvesamodes(void)
     int pos = 0;
     int stdres[][2] = {   // !!! is this legal C?!
                        {320, 200}, {640, 350}, {640, 480},
-                       {800, 600}, {1024, 768}, {999, 999}
+                       {800, 600}, {1024, 768}
                      };
 
     if (already_checked)
