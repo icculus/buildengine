@@ -54,11 +54,20 @@ INFO:
 - See us in #loki at irc.openprojects.net with questions.
 - This is NOT a Loki-sponsored project. We're Loki employees that get off on
   this stuff. Don't harrass info@lokigames.com about it.
-- Yes, you CAN edit Duke3D maps with this, but I haven't tried extensively.
-  Get your DUKE3D.GRP file, kextract *.map from it, and then rename it to
-  stuff.dat. Open one of the extracted maps in BUILD, and it should work.
-  I haven't tried Blood, Shadow Warrior, or anything else, and I only walked
-  around E1L1.MAP for a few minutes, but that much looked copacetic.
+- Yes, you CAN edit Duke3D maps with this. Sort of.
+  Get your DUKE3D.GRP file, and then rename it to stuff.dat. Go get a Duke3D
+  map off the net and open it in build. This segfaults a lot, still.
+  I haven't tried Blood, Shadow Warrior, or anything else. Anything with
+  voxels is going to need a more robust bstub.c than the one that KenBuild
+  uses. I'm not sure what the ramifications for Duke3D are, either; you might
+  need their editor to do certain things or do certain things correctly.
+
+Either way, there's lots of screenshots up at:
+http://www.lokigames.com/~icculus/BUILD/screenshots/duke3d_data_files/
+http://www.lokigames.com/~icculus/BUILD/screenshots/shadow_warrior_data_files/
+
+ Is this enough to play Duke/Shadow/Blood? No. But it's a good start.
+
 
 GOOD REFERENCES:
 - VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
