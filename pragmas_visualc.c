@@ -2761,7 +2761,7 @@ void qinterpolatedown16short(long *i1, long i2, long i3, long i4)
     {
         mov eax, i1
         mov ecx, i2
-        mov esx, i3
+        mov edx, i3
         mov esi, i4
         test ecx, ecx
         jz endit
@@ -2844,7 +2844,6 @@ long mul3(long i1)
     {
         mov eax, i1
         lea eax, [eax+eax*2]
-        parm nomemory [eax]\
         mov i1, eax
     } /* asm */
     return(i1);
@@ -3005,7 +3004,6 @@ void swapchar(char *i1, char *i2)
         mov [eax], ch
         mov i1, eax
     } /* asm */
-    return(i1);
 }
 
 void swapshort(short *i1, short *i2)
@@ -3020,7 +3018,6 @@ void swapshort(short *i1, short *i2)
         mov [eax], dx
         mov i1, eax
     } /* asm */
-    return(i1);
 }
 
 void swaplong(long *i1, long *i2)
@@ -3035,7 +3032,6 @@ void swaplong(long *i1, long *i2)
         mov [eax], edx
         mov i1, eax
     } /* asm */
-    return(i1);
 }
 
 

@@ -366,26 +366,26 @@ extern long drawslab(long,long,long,long,long,long);
 
 
 #if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
+    #if (defined __WATCOMC__)
 
         long nsqrtasm(int param);
-    #pragma aux nsqrtasm =\
-	"test eax, 0xff000000",\
-	"mov ebx, eax",\
-	"jnz short over24",\
-	"shr ebx, 12",\
-   "mov cx, word ptr shlookup[ebx*2]",\
-	"jmp short under24",\
-	"over24: shr ebx, 24",\
-   "mov cx, word ptr shlookup[ebx*2+8192]",\
-	"under24: shr eax, cl",\
-	"mov cl, ch",\
-	"mov ax, word ptr sqrtable[eax*2]",\
-	"shr eax, cl",\
-	parm nomemory [eax]\
-	modify exact [eax ebx ecx]\
+        #pragma aux nsqrtasm =\
+        "test eax, 0xff000000",\
+        "mov ebx, eax",\
+        "jnz short over24",\
+        "shr ebx, 12",\
+        "mov cx, word ptr shlookup[ebx*2]",\
+        "jmp short under24",\
+        "over24: shr ebx, 24",\
+        "mov cx, word ptr shlookup[ebx*2+8192]",\
+        "under24: shr eax, cl",\
+        "mov cl, ch",\
+        "mov ax, word ptr sqrtable[eax*2]",\
+        "shr eax, cl",\
+	    parm nomemory [eax]\
+	    modify exact [eax ebx ecx]\
 
-  #elif (defined __GNUC__)
+    #elif (defined __GNUC__)
         static long nsqrtasm(int i1)
         {
             long retval;
@@ -407,9 +407,31 @@ extern long drawslab(long,long,long,long,long,long);
             return(retval);
         } /* nsqrtasm */
 
+    #elif (defined _MSC_VER)
+        long nsqrtasm(int param)
+		{
+            __asm
+            {
+                mov eax, param
+                test eax, 0xff000000
+                mov ebx, eax
+                jnz short over24
+                shr ebx, 12
+                mov cx, word ptr shlookup[ebx*2]
+                jmp short under24
+                over24: shr ebx, 24
+                mov cx, word ptr shlookup[ebx*2+8192]
+                under24: shr eax, cl
+                mov cl, ch
+                mov ax, word ptr sqrtable[eax*2]
+                shr eax, cl
+                mov param, eax
+            } /* asm */
+            return(param);
+        }
     #else
         #error Please write Assembly code for your platform!
-  #endif
+    #endif
 
 #else /* !defined USE_I386_ASM */
 
@@ -422,29 +444,28 @@ extern long drawslab(long,long,long,long,long,long);
 
 
 #if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
+    #if (defined __WATCOMC__)
+        /* 0x007ff000 is (11<<13), 0x3f800000 is (127<<23) */
+        long krecipasm(long param);
+        #pragma aux krecipasm =\
+	    "mov fpuasm, eax",\
+	    "fild dword ptr fpuasm",\
+	    "add eax, eax",\
+	    "fstp dword ptr fpuasm",\
+	    "sbb ebx, ebx",\
+	    "mov eax, fpuasm",\
+	    "mov ecx, eax",\
+	    "and eax, 0x007ff000",\
+	    "shr eax, 10",\
+	    "sub ecx, 0x3f800000",\
+	    "shr ecx, 23",\
+	    "mov eax, dword ptr reciptable[eax]",\
+	    "sar eax, cl",\
+	    "xor eax, ebx",\
+	    parm [eax]\
+	    modify exact [eax ebx ecx]\
 
-	/* 0x007ff000 is (11<<13), 0x3f800000 is (127<<23) */
-    long krecipasm(long param);
-    #pragma aux krecipasm =\
-	"mov fpuasm, eax",\
-	"fild dword ptr fpuasm",\
-	"add eax, eax",\
-	"fstp dword ptr fpuasm",\
-	"sbb ebx, ebx",\
-	"mov eax, fpuasm",\
-	"mov ecx, eax",\
-	"and eax, 0x007ff000",\
-	"shr eax, 10",\
-	"sub ecx, 0x3f800000",\
-	"shr ecx, 23",\
-	"mov eax, dword ptr reciptable[eax]",\
-	"sar eax, cl",\
-	"xor eax, ebx",\
-	parm [eax]\
-	modify exact [eax ebx ecx]\
-
-  #elif (defined __GNUC__)
+    #elif (defined __GNUC__)
         static long krecipasm(long i1)
         {
             long retval;
@@ -455,71 +476,94 @@ extern long drawslab(long,long,long,long,long,long);
         	: "cc", "ebx", "ecx", "memory");
             return(retval);
         } /* krecipasm */
-    
+
+    #elif (defined _MSC_VER)
+        /* 0x007ff000 is (11<<13), 0x3f800000 is (127<<23) */
+        long krecipasm(long param)
+        {
+            __asm
+            {
+                mov eax, param
+	            mov fpuasm, eax
+	            fild dword ptr fpuasm
+	            add eax, eax
+	            fstp dword ptr fpuasm
+	            sbb ebx, ebx
+	            mov eax, fpuasm
+	            mov ecx, eax
+	            and eax, 0x007ff000
+	            shr eax, 10
+	            sub ecx, 0x3f800000
+	            shr ecx, 23
+	            mov eax, dword ptr reciptable[eax]
+	            sar eax, cl
+	            xor eax, ebx
+                mov param,eax
+            } /* asm */
+            return(param);
+        } /* krecipasm */
     #else
         #error Please write Assembly for your platform!
-  #endif
+    #endif
 
 #else  /* USE_I386_ASM */
 
-        static long krecipasm(long x)
-        {
-            float xf;
-            int z;
-            int not;
+    static long krecipasm(long x)
+    {
+        float xf;
+        int z;
+        int not;
     
-            if (x & 0x80000000) /* If the highest bit is set... */
-                not = 0x0FFFFFFFF;
-            else
-                not = 0;
+        if (x & 0x80000000) /* If the highest bit is set... */
+            not = 0x0FFFFFFFF;
+        else
+            not = 0;
   
-            xf = (float)x;/* convert the int to a float */
+        xf = (float)x;/* convert the int to a float */
     
-            /* Pretend the float is an int so we can extract bits */
-            x = *((int*)(&xf));
-            z = x;
+        /* Pretend the float is an int so we can extract bits */
+        x = *((int*)(&xf));
+        z = x;
       
-            x = x & 0x007FF000;/* Mask out: 11 << 13 */
-            x = x >> 10;       /* Divide x by 1024 */
+        x = x & 0x007FF000;/* Mask out: 11 << 13 */
+        x = x >> 10;       /* Divide x by 1024 */
     
-            /* X now contains: 13 high order bits of the mantissa,
-               followed by two 0 bits */
+        /* X now contains: 13 high order bits of the mantissa,
+           followed by two 0 bits */
     
-            /* Now we perform an elaborate extraction
-               of the exponent from the floating point
-               number? WTF is the subtraction for? */
-            z = z - 0x03F800000;/* Subtract (127<<23) */
-            z = z >> 23;
+        /* Now we perform an elaborate extraction
+           of the exponent from the floating point
+           number? WTF is the subtraction for? */
+        z = z - 0x03F800000;/* Subtract (127<<23) */
+        z = z >> 23;
     
-            /* z now contains the exponent divided by two?  */
-            x = shift_algebraic_right(reciptable[(x>>2)], z) ^ not;
-            return x;
-        }
-    
+        /* z now contains the exponent divided by two?  */
+        x = shift_algebraic_right(reciptable[(x>>2)], z) ^ not;
+        return x;
+    } /* krecipasm */
 #endif /* defined USE_I386_ASM */
 
 
 
 #if (defined USE_I386_ASM)
 
-  #if (defined __WATCOMC__)
-
+    #if (defined __WATCOMC__)
         int setgotpic(long param);
-    #pragma aux setgotpic =\
-	"mov ebx, eax",\
-	"cmp byte ptr walock[eax], 200",\
-	"jae skipit",\
-	"mov byte ptr walock[eax], 199",\
-	"skipit: shr eax, 3",\
-	"and ebx, 7",\
-	"mov dl, byte ptr gotpic[eax]",\
-	"mov bl, byte ptr pow2char[ebx]",\
-	"or dl, bl",\
-	"mov byte ptr gotpic[eax], dl",\
-	parm [eax]\
-	modify exact [eax ebx ecx edx]\
+        #pragma aux setgotpic =\
+        "mov ebx, eax",\
+        "cmp byte ptr walock[eax], 200",\
+        "jae skipit",\
+        "mov byte ptr walock[eax], 199",\
+        "skipit: shr eax, 3",\
+        "and ebx, 7",\
+        "mov dl, byte ptr gotpic[eax]",\
+        "mov bl, byte ptr pow2char[ebx]",\
+        "or dl, bl",\
+        "mov byte ptr gotpic[eax], dl",\
+        parm [eax]\
+        modify exact [eax ebx ecx edx]\
 
-  #elif (defined __GNUC__)
+    #elif (defined __GNUC__)
 
         int setgotpic(long i1)
         {
@@ -540,6 +584,27 @@ extern long drawslab(long,long,long,long,long,long);
             return(retval);
         } /* setgotpic */
 
+    #elif (defined _MSC_VER)
+        int setgotpic(long param)
+        {
+            __asm
+            {
+                mov eax, param
+                mov ebx, eax
+                cmp byte ptr walock[eax], 200
+                jae skipit
+                mov byte ptr walock[eax], 199
+                skipit: shr eax, 3
+                and ebx, 7
+                mov dl, byte ptr gotpic[eax]
+                mov bl, byte ptr pow2char[ebx]
+                or dl, bl
+                mov byte ptr gotpic[eax], dl
+                mov param, eax
+            } /* asm */
+            return(param);
+        } /* setgotpic */
+
     #else
         #error Please write Assembly for your platform!
     #endif
@@ -550,23 +615,22 @@ extern long drawslab(long,long,long,long,long,long);
 
 
 #if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
-
+    #if (defined __WATCOMC__)
         long getclipmask(int i1, int i2, int i3, int i4);
-    #pragma aux getclipmask =\
-	"sar eax, 31",\
-	"add ebx, ebx",\
-	"adc eax, eax",\
-	"add ecx, ecx",\
-	"adc eax, eax",\
-	"add edx, edx",\
-	"adc eax, eax",\
-	"mov ebx, eax",\
-	"shl ebx, 4",\
-	"or al, 0xf0",\
-	"xor eax, ebx",\
-	parm [eax][ebx][ecx][edx]\
-	modify exact [eax ebx ecx edx]\
+        #pragma aux getclipmask =\
+        "sar eax, 31",\
+        "add ebx, ebx",\
+        "adc eax, eax",\
+        "add ecx, ecx",\
+        "adc eax, eax",\
+        "add edx, edx",\
+        "adc eax, eax",\
+        "mov ebx, eax",\
+        "shl ebx, 4",\
+        "or al, 0xf0",\
+        "xor eax, ebx",\
+        parm [eax][ebx][ecx][edx]\
+        modify exact [eax ebx ecx edx]\
 
   #elif (defined __GNUC__)
         long getclipmask(int i1, int i2, int i3, int i4)
@@ -588,6 +652,31 @@ extern long drawslab(long,long,long,long,long,long);
         	: "=a" (retval) : "a" (i1), "b" (i2), "c" (i3), "d" (i4)
         	: "cc", "memory");
             return(retval);
+        } /* getclipmask */
+
+    #elif (defined _MSC_VER)
+        long getclipmask(int i1, int i2, int i3, int i4)
+        {
+            __asm
+            {
+                mov eax, i1
+                mov ebx, i2
+                mov ecx, i3
+                mov edx, i4
+                sar eax, 31
+                add ebx, ebx
+                adc eax, eax
+                add ecx, ecx
+                adc eax, eax
+                add edx, edx
+                adc eax, eax
+                mov ebx, eax
+                shl ebx, 4
+                or al, 0xf0
+                xor eax, ebx
+                mov i1, eax
+            } /* asm */
+            return(i1);
         } /* getclipmask */
 
     #else
@@ -1652,7 +1741,7 @@ static void grouscan (long dax1, long dax2, long sectnum, char dastat)
 
 	if (dastat == 0)
 	{
-		if (globalposz <= getceilzofslope(sectnum,globalposx,globalposy))
+		if (globalposz <= getceilzofslope((short) sectnum,globalposx,globalposy))
 			return;  /* Back-face culling */
 		globalorientation = sec->ceilingstat;
 		globalpicnum = sec->ceilingpicnum;
@@ -1663,7 +1752,7 @@ static void grouscan (long dax1, long dax2, long sectnum, char dastat)
 	}
 	else
 	{
-		if (globalposz >= getflorzofslope(sectnum,globalposx,globalposy))
+		if (globalposz >= getflorzofslope((short) sectnum,globalposx,globalposy))
 			return;  /* Back-face culling */
 		globalorientation = sec->floorstat;
 		globalpicnum = sec->floorpicnum;
@@ -1673,7 +1762,7 @@ static void grouscan (long dax1, long dax2, long sectnum, char dastat)
 		daz = sec->floorz;
 	}
 
-	if ((picanm[globalpicnum]&192) != 0) globalpicnum += animateoffs(globalpicnum,sectnum);
+	if ((picanm[globalpicnum]&192) != 0) globalpicnum += animateoffs(globalpicnum,(short) sectnum);
 	setgotpic(globalpicnum);
 	if ((tilesizx[globalpicnum] <= 0) || (tilesizy[globalpicnum] <= 0)) return;
 	if (waloff[globalpicnum] == 0) loadtile(globalpicnum);
@@ -2146,7 +2235,7 @@ static void drawalls(long bunch)
 					globalshiftval = (picsiz[globalpicnum]>>4);
 					if (pow2long[globalshiftval] != tilesizy[globalpicnum]) globalshiftval++;
 					globalshiftval = 32-globalshiftval;
-					if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)wallnum+16384);
+					if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)(wallnum+16384));
 					globalshade = (long)wal->shade;
 					globvis = globalvisibility;
 					if (sec->visibility != 0) globvis = mulscale4(globvis,(long)((unsigned char)(sec->visibility+16)));
@@ -2235,7 +2324,7 @@ static void drawalls(long bunch)
 						if ((unsigned)globalpicnum >= (unsigned)MAXTILES) globalpicnum = 0;
 						globalxpanning = (long)wal->xpanning;
 						globalypanning = (long)wal->ypanning;
-						if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)wallnum+16384);
+						if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)(wallnum+16384));
 						globalshade = (long)wal->shade;
 						globalpal = (long)wal->pal;
 						wallnum = thewall[z]; wal = &wall[wallnum];
@@ -2247,7 +2336,7 @@ static void drawalls(long bunch)
 						if ((unsigned)globalpicnum >= (unsigned)MAXTILES) globalpicnum = 0;
 						globalxpanning = (long)wal->xpanning;
 						globalypanning = (long)wal->ypanning;
-						if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)wallnum+16384);
+						if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)(wallnum+16384));
 						globalshade = (long)wal->shade;
 						globalpal = (long)wal->pal;
 					}
@@ -2309,12 +2398,12 @@ static void drawalls(long bunch)
 			if ((!(wal->cstat&32)) && ((gotsector[nextsectnum>>3]&pow2char[nextsectnum&7]) == 0))
 			{
 				if (umost[x2] < dmost[x2])
-					scansector(nextsectnum);
+					scansector((short) nextsectnum);
 				else
 				{
 					for(x=x1;x<x2;x++)
 						if (umost[x] < dmost[x])
-							{ scansector(nextsectnum); break; }
+							{ scansector((short) nextsectnum); break; }
 
 						/*
 						 * If can't see sector beyond, then cancel smost array and just
@@ -2339,7 +2428,7 @@ static void drawalls(long bunch)
 			if ((unsigned)globalpicnum >= (unsigned)MAXTILES) globalpicnum = 0;
 			globalxpanning = (long)wal->xpanning;
 			globalypanning = (long)wal->ypanning;
-			if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)wallnum+16384);
+			if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)(wallnum+16384));
 			globalshade = (long)wal->shade;
 			globvis = globalvisibility;
 			if (sec->visibility != 0) globvis = mulscale4(globvis,(long)((unsigned char)(sec->visibility+16)));
@@ -2788,7 +2877,7 @@ int loadboard(char *filename, long *daposx, long *daposy,
 
 	i = strlen(filename)-1;
 	if (filename[i] == 255) { filename[i] = 0; i = 1; } else i = 0;
-	if ((fil = kopen4load(filename,i)) == -1)
+	if ((fil = kopen4load(filename,(char) i)) == -1)
 		{ mapversion = 7L; return(-1); }
 
 	kread(fil,&mapversion,4);
@@ -3977,8 +4066,8 @@ void copytilepiece(long tilenume1, long sx1, long sy1, long xsiz, long ysiz,
 	xsiz2 = tilesizx[tilenume2]; ysiz2 = tilesizy[tilenume2];
 	if ((xsiz1 > 0) && (ysiz1 > 0) && (xsiz2 > 0) && (ysiz2 > 0))
 	{
-		if (waloff[tilenume1] == 0) loadtile(tilenume1);
-		if (waloff[tilenume2] == 0) loadtile(tilenume2);
+		if (waloff[tilenume1] == 0) loadtile((short) tilenume1);
+		if (waloff[tilenume2] == 0) loadtile((short) tilenume2);
 
 		x1 = sx1;
 		for(i=0;i<xsiz;i++)
@@ -4031,7 +4120,7 @@ static void drawmaskwall(short damaskwallcnt)
 	if ((unsigned)globalpicnum >= (unsigned)MAXTILES) globalpicnum = 0;
 	globalxpanning = (long)wal->xpanning;
 	globalypanning = (long)wal->ypanning;
-	if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)thewall[z]+16384);
+	if (picanm[globalpicnum]&192) globalpicnum += animateoffs(globalpicnum,(short)(thewall[z]+16384));
 	globalshade = (long)wal->shade;
 	globvis = globalvisibility;
 	if (sec->visibility != 0) globvis = mulscale4(globvis,(long)((unsigned char)(sec->visibility+16)));
@@ -4403,7 +4492,7 @@ static void drawsprite (long snum)
 
 	if ((cstat&48) != 48)
 	{
-		if (picanm[tilenum]&192) tilenum += animateoffs(tilenum,spritenum+32768);
+		if (picanm[tilenum]&192) tilenum += animateoffs(tilenum,(short) (spritenum+32768));
 		if ((tilesizx[tilenum] <= 0) || (tilesizy[tilenum] <= 0) || (spritenum < 0))
 			return;
 	}

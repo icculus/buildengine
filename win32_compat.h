@@ -1,8 +1,6 @@
 /*
- * win32 compatibility header. Takes care of some legacy code issues.
- *
- * Note that this is used with Watcom C's win32 target. Your mileage
- *  with another compiler WILL vary.
+ * win32 compatibility header. Takes care of some legacy code issues
+ *  and incompatibilities at the source level.
  *
  *  Written by Ryan C. Gordon (icculus@clutteredmind.org)
  *
@@ -28,7 +26,7 @@
 
 #include <stdio.h>
 
-#if (!defined __MSVC__)
+#if (!defined _MSC_VER)
 #include <unistd.h>
 #endif
 
@@ -114,11 +112,22 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #define __int64 long long
 #endif
 
-#if (defined __MSVC__)
+#if (defined _MSC_VER)
 #if ((!defined _INTEGRAL_MAX_BITS) || (_INTEGRAL_MAX_BITS < 64))
 #error __int64 type not supported
 #endif
-#endif
+
+#define open _open
+#define O_BINARY _O_BINARY
+#define O_RDONLY _O_RDONLY
+#define O_WRONLY _O_WRONLY
+#define O_RDWR _O_RDWR
+#define O_TRUNC _O_TRUNC
+#define O_CREAT _O_CREAT
+#define S_IREAD _S_IREAD
+#define S_IWRITE _S_IWRITE
+#define S_IRDWR _S_IRDWR
+#endif /* defined _MSC_VER */
  
 
 
