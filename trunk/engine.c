@@ -7094,14 +7094,8 @@ static void __printext256(long xpos, long ypos, short col, short backcol, char n
 		stx += charxsiz;
 	}
 
-    #if (!defined PLATFORM_DOS)
-
-        /* !!! ARGH! Abstract that SDL call out of there! */
-
-        if (should_update)
-            SDL_UpdateRect(SDL_GetVideoSurface(), xpos, ypos, charxsiz * i, 8); /* !!! temp!  --ryan. */
-    #endif
-
+    if (should_update)
+        _updateScreenRect(xpos, ypos, charxsiz * i, 8);
 }
 
 
