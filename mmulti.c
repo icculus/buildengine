@@ -846,7 +846,7 @@ static int set_socket_blockmode(int onOrOff)
     /* set socket to be (non-)blocking. */
 
 #if PLATFORM_WIN32
-    flags = (onOrOff) ? 1 : 0;
+    flags = (onOrOff) ? 0 : 1;
     rc = (ioctlsocket(udpsocket, FIONBIO, &flags) == 0);
 #else
     flags = fcntl(udpsocket, F_GETFL, 0);
