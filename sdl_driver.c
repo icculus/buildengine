@@ -26,7 +26,18 @@
 #include "build.h"
 #include "display.h"
 #include "pragmas.h"
+
+// !!! ugh. Clean this up.
+#if (defined USE_I386_ASM)
+#if (!defined __WATCOMC__)
 #include "a.h"
+#else
+extern long setvlinebpl(long);
+#pragma aux setvlinebpl parm [eax];
+#endif  // __WATCOMC__
+#endif  // USE_I386_ASM
+
+
 #include "cache1d.h"
 
 
