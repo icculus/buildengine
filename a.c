@@ -825,9 +825,9 @@ void thlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long
 	    if ((i1&0xff) != 0xff)
 	    {
 		    unsigned short val = (((unsigned char*)tmach_asm3)[i1]);
-		    val |=  (*((unsigned char *)i6)<<8);
+		    val |= (*((unsigned char *)i6)<<8);
 		    if (transrev) val = ((val>>8)|(val<<8));
-		    *((unsigned char *)i6) = (((unsigned char*)tmach_eax)[val]);
+		    *((unsigned char *)i6) = (((unsigned char*)tmach)[val]);
 	    }
 
 	    i2 += tmach_asm1;
