@@ -511,8 +511,7 @@ extern long drawslab(long,long,long,long,long,long);
 
 #else
 
-    // This isn't working right now?  --ryan.
-    #if 0  // def USE_I386_ASM
+    #ifdef USE_I386_ASM
 
         static long nsqrtasm(int i1)
         {
@@ -578,7 +577,7 @@ extern long drawslab(long,long,long,long,long,long);
 	          msqrasm_begit: cmpl %%eax, %%ecx
         	  jl msqrasm_skip
 	          subl %%eax, %%ecx
-    	      leal (%%eax, %%ebx, $4), %%eax
+    	      leal (%%eax, %%ebx, 4), %%eax
         	  msqrasm_skip: subl %%ebx, %%eax
 	          shrl $1, %%eax
     	      shrl $2, %%ebx
