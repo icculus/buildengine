@@ -46,7 +46,23 @@ int getoutputcirclesize(void);
  * Not interested in implementing these sound functions in a
  *  platform-independent manner for KenBuild. Anyone?  --ryan.
  */
-#if (!defined PLATFORM_DOS)
+#if (defined PLATFORM_DOS)
+
+void initsb(char dadigistat, char damusistat, long dasamplerate,
+            char danumspeakers, char dabytespersample,
+            char daintspersec, char daquality);
+
+void uninitsb(void);
+int loadsong(char *filename);
+void musicon(void);
+void musicoff(void);
+void wsayfollow(char *dafilename, long dafreq, long davol,
+                long *daxplc, long *dayplc, char followstat);
+void wsay(char *dafilename, long dafreq, long volume1, long volume2);
+void preparesndbuf(void);
+void setears(long daposx, long daposy, long daxvect, long dayvect);
+
+#else /* stubs for non-DOS platforms... */
 
 #ifndef __FILE__
 #define __FILE__ "game.c"
@@ -58,7 +74,9 @@ int getoutputcirclesize(void);
 
 static int audio_disabled = 0;
 
-void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeakers, char dabytespersample, char daintspersec, char daquality)
+void initsb(char dadigistat, char damusistat, long dasamplerate,
+            char danumspeakers, char dabytespersample,
+            char daintspersec, char daquality)
 {
 #if 0
     audio_disabled = (SDL_Init(SDL_INIT_AUDIO) == -1);
@@ -77,6 +95,7 @@ void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeak
 #endif
 } /* initsb */
 
+
 void uninitsb(void)
 {
     fprintf(stderr, "%s, line %d; uninitsb(): STUB.\n", __FILE__, __LINE__);
@@ -89,30 +108,37 @@ int loadsong(char *filename)
     return 0;
 } /* loadsong */
 
+
 void musicon(void)
 {
     fprintf(stderr, "%s, line %d; musicon(): STUB.\n", __FILE__, __LINE__);
 } /* musicon */
+
 
 void musicoff(void)
 {
     fprintf(stderr, "%s, line %d; musicoff(): STUB.\n", __FILE__, __LINE__);
 } /* musicoff */
 
-void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat)
+
+void wsayfollow(char *dafilename, long dafreq, long davol,
+                long *daxplc, long *dayplc, char followstat)
 {
     fprintf(stderr, "%s, line %d; wsayfollow(): STUB.\n", __FILE__, __LINE__);
 } /* wsayfollow */
+
 
 void wsay(char *dafilename, long dafreq, long volume1, long volume2)
 {
     fprintf(stderr, "%s, line %d; wsay(): STUB.\n", __FILE__, __LINE__);
 } /* wsay */
 
+
 void preparesndbuf(void)
 {
     fprintf(stderr,"%s, line %d; preparesndbuf(): STUB.\n", __FILE__, __LINE__);
 } /* preparesndbuf */
+
 
 void setears(long daposx, long daposy, long daxvect, long dayvect)
 {
