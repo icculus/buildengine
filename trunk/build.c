@@ -3604,7 +3604,12 @@ void overheadeditor(void)
 			}
 		}
 
-		if (((bstatus&1) < (oldmousebstatus&1)) && (highlightsectorcnt < 0))  //after dragging
+            //rcg02192001 added pointhighlight check to stop segfault that
+            //  was (miraculously) not exposed before the port to Watcom/win32.
+            //  Not sure of total ramifications of this patch; if left mouse
+            //  button behaviour in the overhead editor suddenly goes screwey,
+            //  this is why.
+		if (((bstatus&1) < (oldmousebstatus&1)) && (highlightsectorcnt < 0) && (pointhighlight >= 0))  //after dragging
 		{
 			j = 1;
 			if (highlightcnt > 0)
