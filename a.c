@@ -31,14 +31,11 @@ long mmxoverlay(void)
 static unsigned char machxbits_al;
 static unsigned char machxbits_bl;
 static long machxbits_ecx;
-static unsigned long machxbits_edx;
 void sethlinesizes(long i1, long i2, long i3)
 {
     machxbits_al = i1;
     machxbits_bl = i2;
     machxbits_ecx = i3;
-    machxbits_edx = -1;
-    machxbits_edx >>= (256-machxbits_al-machxbits_bl);
 } /* sethlinesizes */
 
 static unsigned char* pal_eax;
