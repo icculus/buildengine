@@ -33,28 +33,12 @@
 
 #if (defined USE_OPENGL)
 #include "buildgl.h"
-
-/* !!! move this to buildgl.c ... */
-int _do_3d_acceleration = 0;
-
-/*
- * !!! move this to buildgl.c, and add a function to that to abstract
- * !!!  SDL_GL_GetProcAddress().
- */
-glGetString_t dglGetString = NULL;
-glBegin_t dglBegin = NULL;
-glEnd_t dglEnd = NULL;
-glClear_t dglClear = NULL;
-glClearColor_t dglClearColor = NULL;
-glDrawPixels_t dglDrawPixels = NULL;
-glPixelMapfv_t dglPixelMapfv = NULL;
-glPixelStorei_t dglPixelStorei = NULL;
 #endif
+
 
 typedef enum
 {
     RENDERER_SOFTWARE,
-    RENDERER_OPENGL2D,
     RENDERER_OPENGL3D,
     RENDERER_TOTAL
 } sdl_renderer_type;
@@ -62,7 +46,6 @@ typedef enum
 const char *renderer_name[RENDERER_TOTAL];
 
 #define ENVRSTR_RENDERER_SOFTWARE  "software"
-#define ENVRSTR_RENDERER_OPENGL2D  "opengl2d"
 #define ENVRSTR_RENDERER_OPENGL3D  "opengl3d"
 
 static sdl_renderer_type renderer = RENDERER_SOFTWARE;
@@ -106,15 +89,6 @@ extern long setvlinebpl(long);
 #define DEFAULT_MAXRESWIDTH  1600
 #define DEFAULT_MAXRESHEIGHT 1200
 
-/* environment variables names... */
-#define BUILD_NOMOUSEGRAB    "BUILD_NOMOUSEGRAB"
-#define BUILD_WINDOWED       "BUILD_WINDOWED"
-#define BUILD_SDLDEBUG       "BUILD_SDLDEBUG"
-#define BUILD_RENDERER       "BUILD_RENDERER"
-#define BUILD_GLLIBRARY      "BUILD_GLLIBRARY"
-#define BUILD_USERSCREENRES  "BUILD_USERSCREENRES"
-#define BUILD_MAXSCREENRES   "BUILD_MAXSCREENRES"
-#define BUILD_HALLOFMIRRORS  "BUILD_HALLOFMIRRORS"
 
 #define UNLOCK_SURFACE_AND_RETURN  if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface); return;
 
@@ -176,18 +150,15 @@ void restore256_palette (void);
 void set16color_palette (void);
 
 
-#define using_opengl() ((renderer == RENDERER_OPENGL2D) || (renderer == RENDERER_OPENGL3D))
-
-
-static FILE *debug_file = NULL;
+static FILE *_sdl_debug_file = NULL;
 
 static inline void __out_sdldebug(const char *subsystem,
                                   const char *fmt, va_list ap)
 {
-    fprintf(debug_file, "%s: ", subsystem);
-    vfprintf(debug_file, fmt, ap);
-    fprintf(debug_file, "\n");
-    fflush(debug_file);
+    fprintf(_sdl_debug_file, "%s: ", subsystem);
+    vfprintf(_sdl_debug_file, fmt, ap);
+    fprintf(_sdl_debug_file, "\n");
+    fflush(_sdl_debug_file);
 } /* __out_sdldebug */
 
 
@@ -195,7 +166,7 @@ static void sdldebug(const char *fmt, ...)
 {
     va_list ap;
 
-    if (debug_file)
+    if (_sdl_debug_file)
     {
         va_start(ap, fmt);
         __out_sdldebug("BUILDSDL", fmt, ap);
@@ -205,11 +176,11 @@ static void sdldebug(const char *fmt, ...)
 
 
 #if (defined USE_OPENGL)
-static void sgldebug(const char *fmt, ...)
+void sgldebug(const char *fmt, ...)
 {
     va_list ap;
 
-    if (debug_file)
+    if (_sdl_debug_file)
     {
         va_start(ap, fmt);
         __out_sdldebug("BUILDSDL/GL", fmt, ap);
@@ -241,7 +212,7 @@ static void output_surface_info(SDL_Surface *_surface)
     const SDL_VideoInfo *info;
     char f[256];
 
-    if (!debug_file)
+    if (!_sdl_debug_file)
         return;
 
     if (_surface == NULL)
@@ -299,7 +270,7 @@ static void output_driver_info(void)
 {
     char buffer[256];
 
-    if (!debug_file)
+    if (!_sdl_debug_file)
         return;
 
     sdldebug("Using BUILD renderer \"%s\".", renderer_name[renderer]);
@@ -321,11 +292,17 @@ static Uint8 *get_framebuffer(void)
 
     if (renderer == RENDERER_SOFTWARE)
         return((Uint8 *) surface->pixels);
-    else if (renderer == RENDERER_OPENGL2D)
+    else if (renderer == RENDERER_OPENGL3D)
         return((Uint8 *) frameplace);
 
     return(NULL);
 } /* get_framebuffer */
+
+
+int using_opengl(void)
+{
+    return(renderer == RENDERER_OPENGL3D);
+} /* using_opengl */
 
 
 /*
@@ -339,7 +316,6 @@ static Uint8 *get_framebuffer(void)
 static char screenalloctype = 255;
 static void init_new_res_vars(int davidoption)
 {
-    static void *offscreen = NULL;
     int i = 0;
     int j = 0;
 
@@ -358,31 +334,10 @@ static void init_new_res_vars(int davidoption)
 	activepage = visualpage = 0;
     horizlookup = horizlookup2 = NULL;
 
-    if (renderer == RENDERER_OPENGL2D)
-    {
-        if (davidoption == -1)
-        {
-            offscreen = realloc(offscreen, surface->w * surface->h);
-            frameplace = (long) offscreen;
-            assert(frameplace);
-        } /* if */
-        else if (offscreen != NULL)
-        {
-            free(offscreen);
-            offscreen = NULL;
-        } /* else if */
-    } /* if */
-
-    else if (renderer == RENDERER_OPENGL3D)
-    {
+    if (renderer == RENDERER_OPENGL3D)
         frameplace = (long) NULL;
-    } /* else if */
-
     else
-    {
         frameplace = (long) ( ((Uint8 *) surface->pixels) );
-    } /* else */
-
 
   	if (screen != NULL)
    	{
@@ -899,108 +854,29 @@ void unprotect_ASM_pages(void)
 #endif
 
 
-#ifdef USE_OPENGL
-static int opengl_lib_is_loaded = 0;
-
-static void *try_glsym_load(void **ptr, const char *sym)
-{
-    void *retval = NULL;
-
-    SDL_ClearError();
-    retval = SDL_GL_GetProcAddress(sym);
-    if (retval == NULL)
-        sgldebug("Symbol \"%s\" NOT located; [%s].", sym, SDL_GetError());
-    else
-        sgldebug("Symbol \"%s\" located.", sym);
-
-    if (ptr != NULL)
-        *ptr = retval;
-
-    return(retval);
-} /* try_glsym_load */
-
-
-static int load_opengl_symbols(void)
-{
-    if (!try_glsym_load((void **) &dglGetString, "glGetString")) return(-1);
-    if (!try_glsym_load((void **) &dglBegin, "glBegin")) return(-1);
-    if (!try_glsym_load((void **) &dglEnd, "glEnd")) return(-1);
-    if (!try_glsym_load((void **) &dglClear, "glClear")) return(-1);
-    if (!try_glsym_load((void **) &dglClearColor, "glClearColor")) return(-1);
-    if (!try_glsym_load((void **) &dglDrawPixels, "glDrawPixels")) return(-1);
-    if (!try_glsym_load((void **) &dglPixelStorei, "glPixelStorei")) return(-1);
-    if (!try_glsym_load((void **) &dglPixelMapfv, "glPixelMapfv")) return(-1);
-    return(0);
-} /* load_opengl_symbols */
-
-
-static int try_opengl_libname(const char *libname)
-{
-    int rc = -1;
-
-    sgldebug("Trying to open library \"%s\"...",
-                libname ? libname : "[default]");
-    SDL_ClearError();
-    rc = SDL_GL_LoadLibrary(libname);
-
-    if (rc == -1)
-        sgldebug("Library opening failed; [%s].", SDL_GetError());
-    else
-    {
-        sgldebug("Library opened successfully!");
-        rc = load_opengl_symbols();
-        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    } /* else */
-
-    return(rc);
-} /* try_gl_libname */
-
-
-static int load_opengl_library(void)
-{
-    char *envlib = getenv(BUILD_GLLIBRARY);
-    int rc = 0;
-
-    if (!opengl_lib_is_loaded)  /* it's cool. Go on. */
-    {
-        rc = try_opengl_libname(envlib);
-        if (rc == -1)
-        {
-            sgldebug("Out of ideas. Giving up.");
-            return(-1);
-        } /* if */
-
-        opengl_lib_is_loaded = 1;
-    } /* if */
-    return(0);
-} /* load_opengl_library */
-
-#endif  /* defined USE_OPENGL */
-
-
 static inline void init_debugging(void)
 {
     const char *envr = getenv(BUILD_SDLDEBUG); 
 
     debug_hall_of_mirrors = (getenv(BUILD_HALLOFMIRRORS) != NULL);
 
-    if (debug_file != NULL)
+    if (_sdl_debug_file != NULL)
     {
-        fclose(debug_file);
-        debug_file = NULL;
+        fclose(_sdl_debug_file);
+        _sdl_debug_file = NULL;
     } /* if */
 
     if (envr != NULL)
     {
         if (strcmp(envr, "-") == 0)
-	    debug_file = stdout;
+	    _sdl_debug_file = stdout;
         else
-            debug_file = fopen(envr, "w");
+            _sdl_debug_file = fopen(envr, "w");
 
-        if (debug_file == NULL)
+        if (_sdl_debug_file == NULL)
             printf("BUILDSDL: -WARNING- Could not open debug file!\n");
         else
-            setbuf(debug_file, NULL);
+            setbuf(_sdl_debug_file, NULL);
     } /* if */
 } /* init_debugging */
 
@@ -1058,18 +934,11 @@ static void set_sdl_renderer(void)
         renderer = RENDERER_SOFTWARE;
 
 #ifdef USE_OPENGL
-    else if (strcmp(envr, ENVRSTR_RENDERER_OPENGL2D) == 0)
-    {
-        renderer = RENDERER_OPENGL2D;
-        need_opengl_lib = 1;
-    } /* else if */
-
 #if 0
     else if (strcmp(envr, ENVRSTR_RENDERER_OPENGL3D) == 0)
     {
         renderer = RENDERER_OPENGL3D;
         need_opengl_lib = 1;
-        _do_3d_acceleration = 1;
     } /* else if */
 #endif
 
@@ -1093,9 +962,15 @@ static void set_sdl_renderer(void)
 #ifdef USE_OPENGL
     if (need_opengl_lib)
     {
-        if (load_opengl_library() == -1)
+        if (opengl_load_library() == -1)
         {
             SDL_Quit();
+            fprintf(stderr, "BUILDSDL/GL: Failed to load OpenGL library!\n");
+            if (getenv(BUILD_SDLDEBUG) == NULL)
+            {
+                fprintf(stderr, "BUILDSDL/GL: Try setting environment variable"
+                                " %s for more info.\n", BUILD_SDLDEBUG);
+            } /* if */
             _exit(42);
         } /* if */
     } /* if */
@@ -1108,7 +983,6 @@ static void init_renderer_names(void)
 {
     memset(renderer_name, '\0', sizeof (renderer_name));
     renderer_name[RENDERER_SOFTWARE] = "RENDERER_SOFTWARE";
-    renderer_name[RENDERER_OPENGL2D] = "RENDERER_OPENGL2D";
     renderer_name[RENDERER_OPENGL3D] = "RENDERER_OPENGL3D";
 } /* init_renderer_names */
 
@@ -1314,26 +1188,30 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
     go_to_new_vid_mode((int) davidoption, daxdim, daydim);
 
     #ifdef USE_OPENGL
-        if ((gl) && (!shown_gl_strings))
+        if (gl)
         {
-            sgldebug("GL_VENDOR [%s]", (char *) dglGetString(GL_VENDOR));
-            sgldebug("GL_RENDERER [%s]", (char *) dglGetString(GL_RENDERER));
-            sgldebug("GL_VERSION [%s]", (char *) dglGetString(GL_VERSION));
-            sgldebug("GL_EXTENSIONS [%s]", (char *) dglGetString(GL_EXTENSIONS));
-            shown_gl_strings = 1;
-        } /* if */
+            if (!shown_gl_strings)
+            {
+                sgldebug("GL_VENDOR [%s]", (char *) dglGetString(GL_VENDOR));
+                sgldebug("GL_RENDERER [%s]", (char *) dglGetString(GL_RENDERER));
+                sgldebug("GL_VERSION [%s]", (char *) dglGetString(GL_VERSION));
+                sgldebug("GL_EXTENSIONS [%s]", (char *) dglGetString(GL_EXTENSIONS));
+                shown_gl_strings = 1;
+            } /* if */
 
-        #if 0
-        dglViewport(0, 0, daxdim, daydim);
-        dglEnable(GL_TEXTURE_2D);
-        dglClearDepth(1.0);
-        dglDepthFunc(GL_LESS);
-        dglEnable(GL_DEPTH_TEST);
-        dglShadeModel(GL_SMOOTH);
-        dglMatrixMode(GL_PROJECTION);
-        dglLoadIdentity();
-        dglMatrixMode(GL_MODELVIEW);
-        #endif
+            dglViewport(0, 0, daxdim, daydim);
+            dglEnable(GL_TEXTURE_2D);
+            dglPixelTransferi(GL_MAP_COLOR, GL_TRUE);
+            dglPixelTransferi(GL_INDEX_SHIFT, 0);
+            dglPixelTransferi(GL_INDEX_OFFSET, 0);
+            dglClearDepth(1.0);
+            dglDepthFunc(GL_LESS);
+            dglEnable(GL_DEPTH_TEST);
+            dglShadeModel(GL_SMOOTH);
+            dglMatrixMode(GL_PROJECTION);
+            dglLoadIdentity();
+            dglMatrixMode(GL_MODELVIEW);
+        } /* if */
     #endif
 
     qsetmode = 200;
@@ -1582,7 +1460,7 @@ static inline void output_vesa_modelist(void)
     char numbuf[20];
     int i;
 
-    if (!debug_file)
+    if (!_sdl_debug_file)
         return;
 
     buffer[0] = '\0';
@@ -1660,10 +1538,19 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
     int i;
 
 #if (defined USE_OPENGL)
+    int gl = using_opengl();
     GLfloat gl_reds[256];
     GLfloat gl_greens[256];
     GLfloat gl_blues[256];
     GLfloat gl_alphas[256];
+
+    if (gl)
+    {
+        dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_R, gl_reds);
+        dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_G, gl_greens);
+        dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_B, gl_blues);
+        dglGetPixelMapfv(GL_PIXEL_MAP_I_TO_A, gl_alphas);
+    } /* if */
 #endif
 
     assert( (start + num) <= (sizeof (fmt_swap) / sizeof (SDL_Color)) );
@@ -1676,22 +1563,25 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
         sdlp->unused = *p++;   /* This byte is unused in BUILD, too. */
 
 #if (defined USE_OPENGL)
-        gl_reds[i]   = ((GLfloat) sdlp->r) / 255.0f;
-        gl_greens[i] = ((GLfloat) sdlp->g) / 255.0f;
-        gl_blues[i]  = ((GLfloat) sdlp->b) / 255.0f;
-        gl_alphas[i] = 1.0f;
+        if (gl)
+        {
+            gl_reds[i+start]   = ((GLfloat) sdlp->r) / 255.0f;
+            gl_greens[i+start] = ((GLfloat) sdlp->g) / 255.0f;
+            gl_blues[i+start]  = ((GLfloat) sdlp->b) / 255.0f;
+            gl_alphas[i+start] = 1.0f;
+        } /* if */
 #endif
 
         sdlp++;
     } /* for */
 
 #if (defined USE_OPENGL)
-    if (using_opengl())
+    if (gl)
     {
-        dglPixelMapfv(GL_PIXEL_MAP_I_TO_R, num, &gl_reds[start]);
-        dglPixelMapfv(GL_PIXEL_MAP_I_TO_G, num, &gl_greens[start]);
-        dglPixelMapfv(GL_PIXEL_MAP_I_TO_B, num, &gl_blues[start]);
-        dglPixelMapfv(GL_PIXEL_MAP_I_TO_A, num, &gl_alphas[start]);
+        dglPixelMapfv(GL_PIXEL_MAP_I_TO_R, start + num, gl_reds);
+        dglPixelMapfv(GL_PIXEL_MAP_I_TO_G, start + num, gl_greens);
+        dglPixelMapfv(GL_PIXEL_MAP_I_TO_B, start + num, gl_blues);
+        dglPixelMapfv(GL_PIXEL_MAP_I_TO_A, start + num, gl_alphas);
     } /* if */
 #endif
 
@@ -1775,45 +1665,10 @@ void readmousebstatus(short *bstatus)
 
 static unsigned char mirrorcolor = 0;
 
-#if (defined USE_OPENGL)
-static void opengl_swapbuffers(void)
-{
-    if (using_opengl())
-    {
-        SDL_GL_SwapBuffers();
-        if (debug_hall_of_mirrors)
-        {
-            dglClearColor( ((GLfloat) mirrorcolor) / 255.0, 0.0f, 0.0f, 0.0f );
-            mirrorcolor++;
-        } /* if */
-        dglClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-    } /* if */
-} /* opengl_swapbuffers */
-
-
-static void opengl_build_2d_quads(int x, int y, int w, int h)
-{
-    /* !!! FIXME: write this. */
-}
-
-#endif
-
-
 void _updateScreenRect(long x, long y, long w, long h)
 {
     if (renderer == RENDERER_SOFTWARE)
         SDL_UpdateRect(surface, x, y, w, h);
-
-#if (defined USE_OPENGL)
-    else if (renderer == RENDERER_OPENGL2D)
-    {
-        opengl_build_2d_quads((int) x, (int) y, (int) w, (int) h);
-        opengl_swapbuffers();
-    } /* else if */
-
-    /* OPENGL3D doesn't do anything with this. */
-#endif
-
 } /* _updatescreenrect */
 
 
@@ -1832,11 +1687,6 @@ void _nextpage(void)
     } /* if */
 
 #ifdef USE_OPENGL
-    else if (renderer == RENDERER_OPENGL2D)
-    {
-        opengl_build_2d_quads(0, 0, surface->w, surface->h);
-        opengl_swapbuffers();
-    } /* else if */
     else if (renderer == RENDERER_OPENGL3D)
     {
         opengl_swapbuffers();
@@ -1916,7 +1766,7 @@ void drawpixelses(long offset, Uint32 pixelses)
 
 
 /* Fix this up The Right Way (TM) - DDOI */
-void setcolor16 (int col)
+void setcolor16(int col)
 {
 	drawpixel_color = col;
 }
@@ -1927,7 +1777,7 @@ void drawpixel16(long offset)
 } /* drawpixel16 */
 
 
-void fillscreen16 (long offset, long color, long blocksize)
+void fillscreen16(long offset, long color, long blocksize)
 {
     Uint8 *surface_end;
     Uint8 *wanted_end;
