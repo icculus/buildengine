@@ -1228,6 +1228,7 @@ void limitrate(void)
 
 Uint32 _timer_catcher(Uint32 interval, void *bleh)
 {
+#if 0
     // SDL (or rather, Linux) cannot fire timer events as fast as BUILD needs
     //  them, so we fire two in a row if we get behind.
 
@@ -1239,14 +1240,16 @@ Uint32 _timer_catcher(Uint32 interval, void *bleh)
         timerhandler();
         total_fires++;
     } while ( ( ((double) ticks) / ((double) total_fires) ) >= (1000.0 / 120.0) );
-
+#else
+    timerhandler();
+#endif
     return(1);
 } // _timer_catcher
 
 void inittimer(void)
 {
     SDL_ClearError();
-    primary_timer = SDL_AddTimer(1000 / 120, _timer_catcher, NULL);
+    primary_timer = SDL_AddTimer(1000 / PLATFORM_TIMER_HZ, _timer_catcher, NULL);
     if (primary_timer == NULL)
     {
         fprintf(stderr, "Error initializing primary timer!\n");
