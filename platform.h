@@ -11,6 +11,10 @@
 #error Define your platform!
 #endif
 
+#if (!defined __EXPORT__)
+#define __EXPORT__
+#endif
+
 #if ((defined PLATFORM_SUPPORTS_SDL) && (!defined PLATFORM_TIMER_HZ))
 #define PLATFORM_TIMER_HZ 100
 #endif
