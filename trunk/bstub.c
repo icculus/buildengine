@@ -1,7 +1,6 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
-
 // This file has been modified from Ken Silverman's original release
 
 #include <fcntl.h>
@@ -16,6 +15,8 @@
 #include "pragmas.h"
 #include "names.h"
 #include "bstub.h"
+#include "cache1d.h"  // rcg05232001 need groupfile support.
+#include "display.h"  // rcg05232001 need some "vesa" routines.
 
 // !!! temporary externs.
 extern long total_rendered_frames, total_render_time;
@@ -61,29 +62,6 @@ extern long stretchhline(long,long,long,long,long,long);
 #ifdef PLATFORM_DOS
 #pragma aux stretchhline parm [eax][ebx][ecx][edx][esi][edi];
 #endif
-
-// External function prototypes
-// !!! lose these! --ryan.
-extern long initgroupfile(char *filename);
-extern void uninitgroupfile(void);
-extern void initengine(void);
-extern void makepalookup(long palnum, char *remapbuf, signed char r,
-			signed char g, signed char b, char dastat);
-extern void getvalidvesamodes(void);
-extern int setgamemode(char davidoption, long daxdim, long daydim);
-extern void allocache (long *newhandle, long newbytes,
-			unsigned char *newlockptr);
-extern void setviewtotile(short tilenume, long xsiz, long ysiz);
-extern void setaspect(long daxrange, long daaspect);
-extern void qloadkvx(long voxindex, char *filename);
-extern void setviewback(void);
-extern void printext256(long xpos, long ypos, short col, short backcol,
-			char name[82], char fontsize);
-extern void editinput(void);
-extern void clearmidstatbar16(void);
-extern void drawline16(long x1, long y1, long x2, long y2, char col);
-extern short getnumber16(char namestart[80], short num, long maxnumber);
-extern void printmessage16(char name[82]);
 
 #ifdef PLATFORM_DOS
 extern void printext16(long xpos, long ypos, short col, short backcol,
@@ -155,11 +133,59 @@ long gettimer42(void);
   int gettimer42(void) { return(0); }
 #endif
 
+
+// rcg05232001 These are defined in build.c ...
+void editinput(void);
+void clearmidstatbar16(void);
+short getnumber16(char namestart[80], short num, long maxnumber);
+void printmessage16(char name[82]);
+
+
+// rcg05232001 much thanks to TerminX (Mapster) for the lookup.dat info!
+static int use_palette_lookup_file(const char *lookup_file)
+{
+    int retval = 0;
+    unsigned char *tempbuf = NULL;
+    unsigned char *ptr = NULL;
+    unsigned char num_palettes = 0;
+    int i = 0;
+    int bytes = 0;
+
+    long in = kopen4load(lookup_file, 1);
+    if (in != -1)
+    {
+        if (kread(in, &num_palettes, 1) == 1)
+        {
+            bytes = ( ((int) num_palettes) * 257 );
+            tempbuf = (unsigned char *) malloc((size_t) bytes);
+            if (tempbuf != NULL)
+            {
+                if (kread(in, tempbuf, bytes) == bytes)
+                {
+                    for (i = 0, ptr = tempbuf; i < num_palettes; i++)
+                    {
+                        makepalookup(*ptr, ptr + 1, 0, 0, 0, 1);
+                        ptr += 257;
+                    } // for
+                    retval = 1;  // success.
+                } // if
+                free(tempbuf);
+            } // if
+        } // if
+        kclose(in);
+    } // if
+
+    return(retval);
+} // use_lookup_dat
+
+
 void ExtInit(void)
 {
 	long i, fil;
+    const char *grpname = getenv("BUILD_GROUPFILE");
 
-	/*printf("------------------------------------------------------------------------------\n");
+	/*
+    printf("------------------------------------------------------------------------------\n");
 	printf("   BUILD.EXE copyright(c) 1996 by Ken Silverman.  You are granted the\n");
 	printf("   right to use this software for your personal use only.  This is a\n");
 	printf("   special version to be used with \"Happy Fun KenBuild\" and may not work\n");
@@ -169,7 +195,17 @@ void ExtInit(void)
 	getch();
 	*/
 
-	initgroupfile("stuff.dat");
+        // Now we check for an envr variable first, for Duke/SW/etc groups.
+    if (grpname == NULL)
+        grpname = "stuff.dat";
+
+        // rcg08122000 panic if groupfile is missing.
+	if (initgroupfile(grpname) < 0)
+    {
+        fprintf(stderr, "BUILDGRP: Cannot open \"%s\"! Aborting...\n", grpname);
+        exit(55);
+    } // if
+
 	if ((fil = open("setup.dat",O_BINARY|O_RDWR,S_IREAD)) != -1)
 	{
 		read(fil,&option[0],NUMOPTIONS);
@@ -184,9 +220,15 @@ void ExtInit(void)
 
 		//You can load your own palette lookup tables here if you just
 		//copy the right code!
-	for(i=0;i<256;i++)
-		tempbuf[i] = ((i+32)&255);  //remap colors for screwy palette sectors
-	makepalookup(16,tempbuf,0,0,0,1);
+
+        // We try to use a Duke3D lookup.dat first. If that fails, then
+        //  we revert to KenBuild's original method.  --ryan.
+    if (!use_palette_lookup_file("lookup.dat"))
+    {
+    	for(i=0;i<256;i++)
+    		tempbuf[i] = ((i+32)&255);  //remap colors for screwy palette sectors
+    	makepalookup(16,tempbuf,0,0,0,1);
+    } // if
 
 	kensplayerheight = 32;
 	zmode = 0;
