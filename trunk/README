@@ -156,11 +156,33 @@ GOOD REFERENCES:
 - The Art of Assembly Language, complete text:
     http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
 
+TO PORT TO NEW COMPILERS AND TOOLCHAINS:
+- Try to get nasm to generate object files that your linker. That is the
+  easiest for the asm modules. Use a_linux.asm (which is inaccurately named at
+  this point), which is the NASM version.
+- The alternative is to write portable C code to avoid all the self-modifying
+  ASM. Have fun.
+- There is inline assembly in engine.c, game.c, pragmas.c, and pragmas.h.
+  Every compiler has their own syntax for this. Have fun.
+- Try to find clean syntax fixes that work everywhere instead of #ifdef'ing,
+  if you can. Platform.h is a good starting point.
+
 TO PORT TO NEW OPERATING SYSTEMS:
 - If Simple Directmedia Layer supports your OS, you're in luck. Just get
-  everything building. If not, look at display.h for what you need to
-  implement, and sdl_driver.c and dos_drvr.c for examples. Consider getting
-  SDL working on your platform instead.
+  everything building (see above). If not, look at display.h for what you
+  need to implement, and sdl_driver.c and dos_drvr.c for examples. Consider
+  getting SDL working on your platform instead.
+- Your platform needs at least an 8-bit linear framebuffer for video.
+  Otherwise, you can pray the OpenGL code gets written and is useful to you.
+- The code doesn't necessarily NEED a keyboard, but the input device has GOT
+  to have a lot of buttons. The renderer itself doesn't deal with input, just
+  the apps (build, game, duke3d) that use it, so this may not be a problem,
+  depending on your needs. Some apps (the editor itself, for example) seem to
+  demand a mouse.
+- Your platform needs to be 32-bit clean, in all likelihood. You might be able
+  to make enough band-aids to get this working otherwise. No one's tried it on
+  a 64-bit platform yet, partially due to all the (32-bit) assembly code.
+  16-bits or less will likely be a nightmare.
 - Start in platform.h for an idea of where to add anything that's
   platform-specific. If you can't get by on PLATFORM_UNIX, then define
   PLATFORM_WHATEVER.
