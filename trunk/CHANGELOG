@@ -319,7 +319,10 @@
             Renamed dos_driver.c to dos_drvr.c, so you can build the DOS bits
             on a regular FAT filesystem. Added a Makefile.dos for use with
             Watcom C's wmake (based on Ken's original). Lots of other files
-            touched.
+            touched. Added a "make package" rule to the Makefile, to improve
+            the quality of my own life. Added (har) a FILEID.DIZ file, which
+            is really used for the package's zipfile comment, but I always
+            wanted to have one of those.  :)
 
 --ryan. (icculus@lokigames.com)
 
