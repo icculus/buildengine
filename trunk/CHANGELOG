@@ -234,6 +234,39 @@
             PLATFORM_DOS, now. Misassembled opcode in msqrtasm() is now fixed,
             so the function operates correctly. Removed the #if 0, so that
             ASM now gets used.
+09032000 - Dan fixed some printext16 calls in 2D mode. Added a BUILD_NOPENTIUM
+            environment variable: if set, it disables PentiumPro/PentiumII/MMX
+            optimizations. The code runs at more than 10fps less without
+            the Pentium overlays on my box (62fps to 50fps in the start of
+            nukeland.map at 640x480). I tried adding all the crazy compiler
+            optimizations I could think of. First, anything above -O2 causes
+            engine.c's compile to fail with a duplicate label from setgotpic.
+            This is an optimizer bug in inline asm. It cuts and pastes it
+            to inline it into each function, despite __volatile__ and the
+            lack of an inline keyword on the function where the ASM exists,
+            and you get a duplicate label. It's dumb. All the other
+            optimizations I threw at it worked, including pentiumpro
+            compilation, -fexpensive-optimizations, and -funroll-loops, but
+            there was absolutely NO increase in frame rate. I imagine most of
+            the time in 3D mode is being spent in a_linux.asm anyhow. If we
+            ever get this converted to C, those optimizations will be more
+            handy, I imagine, but for now, I've not committed the Makefile.
+            Cleaned up the README. After some tinkering, I managed to get
+            build to compile and RUN on Windows 98 with Cygwin. I can't
+            distribute binaries of this, as it would violate the GPL.
+            However, I will be merging the changes back into the main source
+            once I figure out the best way how. Mostly, the inline ASM needed
+            some hacks, but nothing I can cleanly #ifdef. Amazingly,
+            mprotect() worked identically on Linux and Cygwin. The mind
+            boggles. Changes that have made it into the CVS repository for the
+            Cygwin work follow: Removed dependency on the SDL event thread
+            (SDL_Init() fails on Win32 if you request an event thread), and
+            put SDL_PumpEvents() calls into _idle() and _nextpage(). This
+            seems to work fine, but there can be some breakage if there's a
+            keyboard polling loop somewhere that doesn't call either of these
+            functions. Added some %define macros to a_linux.asm to handle
+            C compilers that append an underscore to C identifiers. Updated the
+            Makefile for cygwin and other improvements.
 
 --ryan. (icculus@lokigames.com)
 
