@@ -6,7 +6,7 @@ The notable annoyances:
 1) No sound.
 2) No networking. Boohoo.   :)
 
-Bug reports to Ryan C. Gordon (icculus@linuxgames.com).
+Bug reports to Ryan C. Gordon (icculus@clutteredmind.org).
 
 I've only tested this briefly on a Windows 98 (second edition) box, and even
  more briefly on WinNT 4.0 (Service Pack 6) under vmWare. YMMV.
@@ -48,7 +48,7 @@ Feel free to send me comments, complaints, suggestions, and donations.
 
 Enjoy!
 
---ryan. (icculus@linuxgames.com)
+--ryan. (icculus@clutteredmind.org)
 
 
 CHANGELOG of win32 binary releases:

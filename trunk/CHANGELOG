@@ -549,9 +549,10 @@
 07162001 - Moved CVS repository to icculus.org. Updated README.
 08012001 - Committed some stuff, fixed a bug in the PhysicsFS code. Flipped
             the useopengl flag in the Makefile back to false for now. Added
-            PhysicsFS info to README.
+            PhysicsFS info to README. Changed all occurances of my email
+            address from linuxgames.com to clutteredmind.org.
 
---ryan. (icculus@linuxgames.com)
+--ryan. (icculus@clutteredmind.org)
 
 /* end of CHANGELOG ... */
 

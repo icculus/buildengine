@@ -2,7 +2,7 @@
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
 
-(questions to Ryan C. Gordon, icculus@linuxgames.com)
+(questions to Ryan C. Gordon, icculus@clutteredmind.org)
 
 NEXT ON TAP:
 - extern "C" in every header.

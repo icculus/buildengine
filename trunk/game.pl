@@ -2,7 +2,7 @@
 
 # This is an example of a perl module that is run from inside BUILD.
 #
-#  Written by Ryan C. Gordon. (icculus@linuxgames.com)
+#  Written by Ryan C. Gordon. (icculus@clutteredmind.org)
 #
 # Please do NOT harrass Ken Silverman about any code modifications
 #  (including this file) to BUILD.
