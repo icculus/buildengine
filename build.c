@@ -5,6 +5,13 @@
  * This file has been modified from Ken Silverman's original release
  */
 
+/**@file build.c
+ * @brief master build editor source file
+ *
+ * The main implementation file for the Build Editor.
+ *
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -34,11 +41,13 @@ static long crctable[256];
 static char kensig[24];
 
 #define KEYFIFOSIZ 64
-volatile unsigned char keystatus[256];
+volatile unsigned char keystatus[256]; /* Which keys on the keyboard are pressed? */
 static volatile unsigned char keyfifo[KEYFIFOSIZ], keyfifoplc, keyfifoend;
 static volatile unsigned char readch, oldreadch, extended, keytemp;
 
-long vel, svel, angvel;
+long vel;    /* Camera Velocity in Forward-Backward direction */
+long svel;   /* Camera Velocity in Left-Right direction       */
+long angvel; /* Camera Velocity in Angular Spin               */
 
 #define NUMKEYS 19
 unsigned char buildkeys[NUMKEYS] =
@@ -47,11 +56,45 @@ unsigned char buildkeys[NUMKEYS] =
 	0x1e,0x2c,0xd1,0xc9,0x33,0x34,
 	0x9c,0x1c,0xd,0xc,0xf,
 };
+/* Or, in plain english, for those of us who don't speak keyboard:
+unsigned char buildkeys[NUMKEYS] =
+{
+	[UP]-released,[DOWN]-released,[LEFT]-released,[RIGHT]-released,[L.SHIFT]-pushed,[R.CTRL]-pushed,[L.CTRL]-pushed,[SPACE]-pushed,
+	[A]-pressed,[Z]-pressed,[PgDn]-released,[PgUp]-released,[,|<]-pressed,[.|>]-pressed,
+	[KPEnter]-pressed,[ENTER]-pressed,[+|=]-pressed,[-|_]-pressed,[TAB]-pressed,
+};
+-------------------
+BUILD KEYS:
+00 = Up arrow
+01 = Down arrow
+02 = Left arrow
+03 = Right arrow
+04 = Left Shift key
+05 = Right Ctrl key
+06 = Left Ctrl key
+07 = Space
+08 = A
+09 = Z
+10 = PageDown
+11 = PageUp
+12 = <
+13 = >
+14 = Keypad Enter
+15 = Enter
+16 = +
+17 = -
+18 = Tab
+-------------------
+*/
 
-long posx, posy, posz, horiz = 100;
-short ang, cursectnum;
-long hvel;
-
+long posx; /* The camera's X position (east travel is positive, west travel negative.         */
+long posy; /* The camera's Y position (north travel is negative, south travel positive.       */
+long posz; /* The camera's Z position (upwards travel is negative, downwards travel positive. */
+long horiz = 100;
+short ang; /* The angle the camera is facing */
+short cursectnum; /* The sector the camera is in currently. */
+long hvel; /* The Z velocity of the camera, used for jumping in gravity mode. */
+           /* -512 is the starting value when you jump in gravity mode.       */
 static long synctics = 0, lockclock = 0;
 
 extern volatile long stereomode;
@@ -68,21 +111,27 @@ static short oldmousebstatus = 0, brightness = 0;
 long zlock = 0x7fffffff, zmode = 0, whitecol, kensplayerheight = 32;
 short defaultspritecstat = 0;
 
-static short localartfreq[MAXTILES];
+static short localartfreq[MAXTILES]; /* This is used to calculate the number of occurences of a tile
+                                        in the map, used mainly in the 3d tile picker (key V in 3D mode.) */
 static short localartlookup[MAXTILES], localartlookupnum;
 
 char tempbuf[4096];
 
-char names[MAXTILES][17];
+char names[MAXTILES][17]; /* Reserve 17 characters to name each tile. (Names come from names.h.) */
 
-short asksave = 0;
+short asksave = 0; /* Will be 1 if there are unsaved changes, 0 otherwise. */
 extern short editstatus, searchit;
 extern long searchx, searchy;                          /* search input */
 extern short searchsector, searchwall, searchstat;     /* search output */
 
 extern short pointhighlight, linehighlight, highlightcnt;
-short grid = 3, gridlock = 1, showtags = 1;
-long zoom = 768, gettilezoom = 1;
+
+/* Initial Status of Editor */
+short grid = 3;       /* Initial Grid Size is 3.          */
+short gridlock = 1;   /* Grid Locking is On.              */
+short showtags = 1;   /* Sector/Sprite/Wall labels is On. */
+long zoom = 768;      /* Initial Zoom factor is 768.      */
+long gettilezoom = 1;
 
 int numsprites;
 
@@ -128,23 +177,38 @@ static char scantoascwithshift[128] =
 };
 
 
+/**@brief Build Movement and Accelleration routine
+ *
+ * This code handles the default turning, walking, and strafing actions.
+ * This function acts on buildkeys[] 0, 1, 2, 3, 5, 12, and 13.
+ */
 void keytimerstuff(void)
 {
-	if (keystatus[buildkeys[5]] == 0)
+	/* Turn and strafe with the left and right arrow keys. */
+	if (keystatus[buildkeys[5]] == 0) /* Is [R.Ctrl] down? */
 	{
+		/* No, it isn't, we want to turn. */
 		if (keystatus[buildkeys[2]] > 0) angvel = max(angvel-16,-128);
 		if (keystatus[buildkeys[3]] > 0) angvel = min(angvel+16,127);
 	}
 	else
 	{
+		/* Yes, it is, we want to strafe. */
 		if (keystatus[buildkeys[2]] > 0) svel = min(svel+8,127);
 		if (keystatus[buildkeys[3]] > 0) svel = max(svel-8,-128);
 	}
+
+	/* Move Forward */
 	if (keystatus[buildkeys[0]] > 0) vel = min(vel+8,127);
+
+	/* Move Backward */
 	if (keystatus[buildkeys[1]] > 0) vel = max(vel-8,-128);
+
+	/* Use the [<] and [>] keys to strafe, too. */
 	if (keystatus[buildkeys[12]] > 0) svel = min(svel+8,127);
 	if (keystatus[buildkeys[13]] > 0) svel = max(svel-8,-128);
 
+	/* Accelleration Limiter for Movement */
 	if (angvel < 0) angvel = min(angvel+12,0);
 	if (angvel > 0) angvel = max(angvel-12,0);
 	if (svel < 0) svel = min(svel+2,0);
@@ -245,6 +309,12 @@ static void _initkeys(void)
 
 
 
+/**@brief Load Tile Names from names.h
+ *
+ * This function will load the names of special tiles into names[],
+ * provided the file names.h is in the current directory.
+ * @return -1 on failure, 0 on success.
+ */
 int loadnames(void)
 {
 	char buffer[80], firstch, ch;
@@ -319,6 +389,12 @@ void initmenupaths(char *filename)
 }
 
 
+/**@brief Draw the mouse in 3D mode.
+ *
+ * This function will draw the white 3D mode cursor at
+ * the location [searchx, searchy].
+ * (The mouse routine should set these automatically.)
+ */
 void showmouse(void)
 {
 	long i;
@@ -345,16 +421,33 @@ void fixrepeats(short i)
 }
 
 
+/**@brief Show the tile picker.
+ *
+ * This function will show the tile picker and let the user change a tile.
+ * @param tilenum The current tile (what to return if the user cancels.)
+ * @return The new user-selected tile.
+ * @remark Notes:
+ * Make sure you set searchstat for the right situation if you call this function yourself:
+ * 0: Wall tile
+ * 1 or 2: Ceiling or Floor tile.
+ * 3: Sprite
+ * 4: Wall Above tile (overpic) -- 
+ *
+ */
 long gettile(long tilenum)
 {
 	char snotbuf[80];
 	long i, j, k, otilenum, topleft, gap, temp, templong;
-	long xtiles, ytiles, tottiles;
+	long xtiles; /* Number of tiles that will fit horizontally on the screen. */
+	long ytiles; /* Number of tiles that will fit vertically on the screen.   */
+	long tottiles; /* Total tiles that fit on the screen at once. */
 
+	/* Calculate how the tiles fit, given the tile previews are 32 pixels wide and tall. */
 	xtiles = (xdim>>6); ytiles = (ydim>>6); tottiles = xtiles*ytiles;
-	otilenum = tilenum;
+	otilenum = tilenum; /* Back up the old value, in case the user cancels. */
 
-	keystatus[0x2f] = 0;
+	keystatus[0x2f] = 0; /* Clear [V] */
+	/* Recalculate the tile occurance stats for the "choose commonly used tile" screen. */
 	for(i=0;i<MAXTILES;i++)
 	{
 		localartfreq[i] = 0;
@@ -2095,17 +2188,17 @@ void overheadeditor(void)
 
 	pageoffset = 0; ydim16 = 144;
 
-	drawline16(0,0,639,0,7);
-	drawline16(0,143,639,143,7);
-	drawline16(0,0,0,143,7);
-	drawline16(639,0,639,143,7);
-	drawline16(0,24,639,24,7);
-	drawline16(192,0,192,24,7);
-	statusbar_printext16_noupdate(9L,9L,4,-1,kensig,0);
-	statusbar_printext16(8L,8L,12,-1,kensig,0);
-	printmessage16("Version: 9/23/95");
-	drawline16(0,143-24,639,143-24,7);
-	drawline16(256,143-24,256,143,7);
+	drawline16(0,0,639,0,7);        /* White border line at top of status area.                 */
+	drawline16(0,143,639,143,7);    /* White border line at bottom of status area.              */
+	drawline16(0,0,0,143,7);        /* White border line at left of status area.                */
+	drawline16(639,0,639,143,7);    /* White border line at right of status area.               */
+	drawline16(0,24,639,24,7);      /* White seperator line between top and middle status area. */
+	drawline16(192,0,192,24,7);     /* White seperator line between kensig and version.         */
+	statusbar_printext16_noupdate(9L,9L,4,-1,kensig,0);  /* Shadow for kensig.                        */
+	statusbar_printext16(8L,8L,12,-1,kensig,0);          /* Kensig in upper left status area.         */
+	printmessage16("Version: 9/23/95");                  /* Version info, upper right status area.    */
+	drawline16(0,143-24,639,143-24,7); /* White seperator line between middle and bottom status area. */
+	drawline16(256,143-24,256,143,7);  /* White seperator line for bottom status area.                */
 	pageoffset = 92160; ydim16 = 336;
 
     /* rcg08312000 whoops. Missed this one. */
@@ -2119,9 +2212,9 @@ void overheadeditor(void)
 	cursectorhighlight = -1;
 
 		/*
-         * White out all bordering lines of grab that are
-		 *  not highlighted on both sides
-         */
+		 * White out all bordering lines of grab that are
+		 * not highlighted on both side.
+		 */
 	for(i=highlightsectorcnt-1;i>=0;i--)
 	{
 		startwall = sector[highlightsector[i]].wallptr;
