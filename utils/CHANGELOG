@@ -1,3 +1,7 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
 CHANGELOG for BUILD Utils Package
 
 08122000 - Initial release. kextract is the only utility that compiles cleanly,
@@ -12,3 +16,7 @@ CHANGELOG for BUILD Utils Package
 	seems to have some too, but they are trivial, like files are sorted
 	backwards alphabetically in the group file and such.  As far as I can
 	tell, kgroup is stable.
+
+09042000 - Christian Zander contributed a new (GPL'd) kextract from scratch,
+    which I've named grpextract. It works under Linux, unlike kextract.
+    Added Ken's license text.
