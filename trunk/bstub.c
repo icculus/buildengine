@@ -379,12 +379,7 @@ void ExtCheckKeys(void)
 			walock[4094] = 1;
 
 			sprintf(tempbuf,"%ld",(hang*180)>>10);
-
-            #ifdef USE_OPENGL
-                /* !!! Fill me in! */
-            #else
-    			printext256(0L,8L,31,-1,tempbuf,1);
-            #endif
+    		printext256(0L,8L,31,-1,tempbuf,1);
 		}
 
 		if (keystatus[0xa]) setaspect(viewingrange+(viewingrange>>8),yxaspect+(yxaspect>>8));
@@ -413,11 +408,7 @@ void ExtCheckKeys(void)
     		sprintf(tempbuf,"%.2f", (double) (total_rendered_frames / ((double) total_render_time / 1000.0)));
         #endif
 
-        #ifdef USE_OPENGL
-            /* !!! Fill me in! */
-        #else
-    		printext256(0L,0L,31,-1,tempbuf,1);
-        #endif
+    	printext256(0L,0L,31,-1,tempbuf,1);
 
 		editinput();
 	}
