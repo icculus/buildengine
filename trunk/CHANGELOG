@@ -558,6 +558,7 @@
             *_[gnu|visualc]* files. Cleanups elsewhere. Added a "distclean"
             target which just calls "clean". The Visual C project doesn't work
             right now; I gave up on it.
+06232001 - Fixed a hang when lotagging a wall (closing bugzilla bug #25).
 
 --ryan. (icculus@clutteredmind.org)
 
