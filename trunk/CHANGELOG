@@ -267,6 +267,13 @@
             functions. Added some %define macros to a_linux.asm to handle
             C compilers that append an underscore to C identifiers. Updated the
             Makefile for cygwin and other improvements.
+09052000 - Checked if Duke3d maps can be edited. Apparently they can be,
+            but only sorta. Quitting from 2D mode only prompts you to save
+            if you've changed something, now. Fixed the CVS info in README.
+            Added Duke3D and Shadow Warrior data file info to README. Minor
+            cleanups in the Makefile. Moved VIDEOBASE defines to display.h.
+            _platform_init() now takes icon and titlebar titles, and has been
+            updated in all drivers.
 
 --ryan. (icculus@lokigames.com)
 
