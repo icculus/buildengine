@@ -128,8 +128,6 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #define S_IWRITE _S_IWRITE
 #define S_IRDWR _S_IRDWR
 #endif /* defined _MSC_VER */
- 
-
 
 #endif
 

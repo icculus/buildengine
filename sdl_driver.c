@@ -34,6 +34,11 @@
 #include "buildgl.h"
 #endif
 
+/* need VirtualProtect() from win32 API... */
+#if ((defined PLATFORM_WIN32) && (defined USE_I386_ASM))
+#define WIN32_LEAN_AND_MEAN 1
+#include <windows.h>
+#endif
 
 typedef enum
 {
@@ -770,9 +775,26 @@ unsigned char _readlastkeyhit(void)
 
 
 /* !!! I'd like this to be temporary. --ryan. */
-#if ((defined PLATFORM_UNIX) && (defined USE_I386_ASM))
+#if (defined USE_I386_ASM)
 
-#define PROT_R_W_X (PROT_READ | PROT_WRITE | PROT_EXEC)
+#  if (defined PLATFORM_UNIX)
+#    define PROT_R_W_X (PROT_READ | PROT_WRITE | PROT_EXEC)
+
+#  elif (defined PLATFORM_WIN32)
+#    ifndef PAGESIZE
+#      define PAGESIZE 4096
+#    endif
+#    define PROT_R_W_X PAGE_EXECUTE_READWRITE
+
+     static int mprotect(void *ptr, size_t len, int prot)
+     {
+         BOOL rc;
+         DWORD old = 0;
+         rc = VirtualProtect(ptr, len, prot, &old);
+         return(rc == 0);
+     }
+
+#endif
 
 int mprotect_align(const void *addr, size_t len, int prot)
 {
@@ -910,11 +932,13 @@ static __inline void output_sdl_versions(void)
 static int in_vmware = 0;
 static __inline void detect_vmware(void)
 {
+#if 0
     /* !!! need root access to touch i/o ports on Linux. */
     #if (!defined __linux__)
         in_vmware = (int) is_vmware_running();
     #endif
     sdldebug("vmWare %s running.", (in_vmware) ? "is" : "is not");
+#endif
 } /* detect_vmware */
 
 
@@ -1002,7 +1026,7 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
 
     init_debugging();
 
-    #if ((PLATFORM_UNIX) && (defined USE_I386_ASM))
+    #if (defined USE_I386_ASM)
         unprotect_ASM_pages();
     #endif
 
