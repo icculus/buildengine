@@ -915,26 +915,8 @@ int tmulscale32(int i1, int i2, int i3, int i4, int i5, int i6) {
 }
 
 int boundmulscale(int i1, int i2, int i3) {
-  int retval = 0;
   STUBBED ("Not implemented!");
-  __asm__ __volatile__ (
-	"imull %%ebx   \n\t"
-	"movl %%edx, %%ebx   \n\t"
-	"shrdl %%cl, %%edx, %%eax   \n\t"
-	"sarl %%cl, %%edx   \n\t"
-	"xorl %%eax, %%edx   \n\t"
-	"js checkit   \n\t"
-	"xorl %%eax, %%edx   \n\t"
-	"jz skipboundit   \n\t"
-	"cmpl $0xffffffff, %%edx   \n\t"
-	"je skipboundit   \n\t"
-	"checkit:   \n\t"
-	"movl %%ebx, %%eax   \n\t"
-	"sarl $31, %%eax   \n\t"
-	"xorl $0x7fffffff, %%eax   \n\t"
-	"skipboundit:   \n\t"
-   : "=a" (retval) : "a" (i1), "b" (i2), "c" (i3) : "edx", "cc");
-  return(retval);
+  return 0;
 }
 
 int divscale(int i1, int i2, int i3) {
@@ -1337,65 +1319,15 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 		*((unsigned short *)source) = ((linum>>16)&0xffff);
 }
 
-void vlin16first (long i1, long i2) {
-  STUBBED ("Not implemented!");
-  __asm__ __volatile__ (
-  	"movb 	(%%edi), %%al   \n\t"
-	"movl 	%%ecx, %%eax   \n\t"
-	"shrl 	$2, %%ecx   \n\t"
-	"   \n\t"
-	"begvlin16firsta:   \n\t"
-		"movb	%%al, (%%edi)   \n\t"
-		"movb 	%%al, 80(%%edi)   \n\t"
-		"movb 	%%al, 160(%%edi)   \n\t"
-		"movb 	%%al, 240(%%edi)   \n\t"
-		"addl 	$320, %%edi   \n\t"
-		"decl 	%%ecx   \n\t"
-	"jnz 	begvlin16firsta   \n\t"
-	"   \n\t"
-	"movl 	%%eax, %%ecx   \n\t"
-	"andl 	$3, %%ecx   \n\t"
-	"jz 	skipfirst   \n\t"
-	"begvlin16firstb:   \n\t"
-		"movb	%%al, (%%edi)   \n\t"
-		"addl 	$80, %%edi   \n\t"
-		"decl 	%%ecx   \n\t"
-	"jnz begvlin16firstb   \n\t"
-	"skipfirst:   \n\t"
-  
-  : : "D" (i1), "c" (i2) : "cc", "memory");
-}
-
-void vlin16 (long i1, long i2) {
-  STUBBED ("Not implemented!");
-  __asm__ __volatile__ (
-  	"movl 	%%edi, %%esi   \n\t"
-	"begvlin16:   \n\t"
-		"movsb   \n\t"
-		"addl 	$79, %%edi   \n\t"
-		"addl 	$79, %%esi   \n\t"
-		"decl 	%%ecx   \n\t"
-	"jnz 	begvlin16   \n\t"
-  
-  : : "D" (i1), "c" (i2) : "cc", "memory");
-
-}
-
 int klabs (int i1) {
   if (i1 < 0) i1 = -i1;
   return i1;
 }
 
 int ksgn(int i1) {
-  int retval = 0;
-  STUBBED ("Not implemented!");
-  __asm__ __volatile__ (
-	"addl %%ebx, %%ebx   \n\t"
-	"sbbl %%eax, %%eax   \n\t"
-	"cmpl %%ebx, %%eax   \n\t"
-	"adcb $0, %%al   \n\t"
-   : "=a" (retval) : "b" (i1) : "cc");
-  return(retval);
+  if (i1 < 0) return -1;
+  else if (i1 > 0) return 1;
+  else return 0;
 }
 
 void swapchar(unsigned char *p1, unsigned char *p2)

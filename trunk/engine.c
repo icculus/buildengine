@@ -6931,8 +6931,12 @@ void draw2dgrid(long posxe, long posye, short ange, long zoome, short gride)
 			if ((mask != 0) && ((xp2>>3) >= 0) && ((xp2>>3) < 80))
 			{
                 /* !!! Does this code ever get hit? Do something with this! */
+#ifdef PLATFORM_DOS
 				koutp(0x3cf,mask);
 				vlin16first(templong+(xp2>>3),tempy);
+#else
+				fprintf (stderr, "STUB: %s:%d\n",__FILE__,__LINE__);
+#endif
 			}
 		}
 
