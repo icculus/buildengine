@@ -25,7 +25,7 @@ WATCOMDIR = C:\WATCOM
 #  C:\SDL-1.1.8\lib" and "C:\SDL-1.1.8\include" directories on your drive.
 #  DON'T ADD THE TRAILING '\' CHARACTER!
 #-----------------------------------------------------------------------------#
-SDLDIR = C:\SDL-1.1.8
+SDLDIR = C:\SDL-1.2.0
 
 
 #-----------------------------------------------------------------------------#
