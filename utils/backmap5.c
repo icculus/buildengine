@@ -1,6 +1,7 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
+// This file has been modified from Ken Silverman's original release
 
 //These changes are from version 5 to version 6
 //Remember that this is backwards from what this program does!
