@@ -5,6 +5,7 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
+linux_ppc := false
 beos := false
 macosx := false
 solaris := false
@@ -131,6 +132,12 @@ ifeq ($(strip $(macosx)),true)
   CFLAGS += -DPLATFORM_MACOSX=1 -faltivec -falign-loops=32 -falign-functions=32
   LDFLAGS += -framework AppKit -lSDL -lSDLmain
 endif
+
+
+ifeq ($(strip $(linux_ppc)),true)
+  CFLAGS += -DPLATFORM_LINUXPPC=1
+endif
+
 
 ifeq ($(strip $(useopengl)),true)
   CFLAGS += -DUSE_OPENGL -I$(GL_INCLDIR)

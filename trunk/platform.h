@@ -33,7 +33,7 @@
 
 static __inline unsigned short _swap16(unsigned short D)
 {
-#if PLATFORM_MACOSX
+#if PLATFORM_MACOSX || PLATFORM_LINUXPPC
     register unsigned short returnValue;
     __asm__ volatile("lhbrx %0,0,%1"
         : "=r" (returnValue)
@@ -47,7 +47,7 @@ static __inline unsigned short _swap16(unsigned short D)
 
 static __inline unsigned int _swap32(unsigned int D)
 {
-#if PLATFORM_MACOSX
+#if PLATFORM_MACOSX || PLATFORM_LINUXPPC
     register unsigned int returnValue;
     __asm__ volatile("lwbrx %0,0,%1"
         : "=r" (returnValue)
@@ -59,7 +59,7 @@ static __inline unsigned int _swap32(unsigned int D)
 #endif
 }
 
-#if PLATFORM_MACOSX
+#if PLATFORM_MACOSX || PLATFORM_LINUXPPC
 #define PLATFORM_BIGENDIAN 1
 #define BUILDSWAP_INTEL16(x) _swap16(x)
 #define BUILDSWAP_INTEL32(x) _swap32(x)
