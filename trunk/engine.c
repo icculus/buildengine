@@ -126,6 +126,7 @@ void kkfree(void *buffer);
 
 void loadvoxel(long voxindex) { }
 #if ((defined __WATCOMC__) && (defined PLATFORM_DOS))
+void kloadvoxel(long voxindex);
 #pragma aux kloadvoxel =\
 	"call loadvoxel",\
 	parm [eax]\
@@ -213,53 +214,6 @@ char kensmessage[128];
 #define SYM_gotpic     "gotpic"
 #define SYM_dmval      "dmval"
 #endif
-
-
-#if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
-
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-        unsigned long getkensmessagecrc(long param);
-    #endif
-
-    #pragma aux getkensmessagecrc =\
-	"xor eax, eax",\
-	"mov ecx, 32",\
-	"beg: mov edx, dword ptr [ebx+ecx*4-4]",\
-	"ror edx, cl",\
-	"adc eax, edx",\
-	"bswap eax",\
-	"loop short beg",\
-	parm [ebx]\
-	modify exact [eax ebx ecx edx]\
-
-  #elif (defined __GNUC__)
-        static unsigned long getkensmessagecrc(long param) {
-            long retval;
-            __asm__ __volatile__ ("
-                xorl %%eax, %%eax
-    	        movl $32, %%ecx
-	        kensmsgbeg: movl -4(%%ebx,%%ecx,4), %%edx
-	        rorl %%cl, %%edx
-	        adcl %%edx, %%eax
-    	        bswapl %%eax
-    	        loop kensmsgbeg
-            " : "=a" (retval) : "b" (param) : "ecx", "edx", "cc");
-            return(retval);
-        } // getkensmessagecrc
-
-    #else
-        #error Please write Assembly for your platform.
-  #endif
-
-#else  // USE_I386_ASM
-
-        // out of respect to Ken, the above ASM needs to be converted to
-        //  portable C, so we can legitimately check this on all platforms.
-        #define getkensmessagecrc(x) (0x56c764d4)
-
-#endif
-
 
 char britable[16][64];
 char textfont[1024], smalltextfont[1024];
@@ -354,30 +308,7 @@ static permfifotype permfifo[MAXPERMS];
 static long permhead = 0, permtail = 0;
 
 short numscans, numhits, numbunches;
-#ifdef PLATFORM_DOS
-static short capturecount = 0;
 
-static char pcxheader[128] =
-{
-	0xa,0x5,0x1,0x8,0x0,0x0,0x0,0x0,0x3f,0x1,0xc7,0x0,
-	0x40,0x1,0xc8,0x0,0x0,0x0,0x0,0x8,0x8,0x8,0x10,0x10,
-	0x10,0x18,0x18,0x18,0x20,0x20,0x20,0x28,0x28,0x28,0x30,0x30,
-	0x30,0x38,0x38,0x38,0x40,0x40,0x40,0x48,0x48,0x48,0x50,0x50,
-	0x50,0x58,0x58,0x58,0x60,0x60,0x60,0x68,0x68,0x68,0x70,0x70,
-	0x70,0x78,0x78,0x78,0x0,0x1,0x40,0x1,0x0,0x0,0x0,0x0,
-	0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-	0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-	0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-	0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-	0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
-};
-
-static char vgapal16[48] =
-{
-	00,00,00,00,00,42,00,42,00,00,42,42,42,00,00,42,00,42,42,21,00,42,42,42,
-	21,21,21,21,21,63,21,63,21,21,63,63,63,21,21,63,21,63,63,63,21,63,63,63,
-};
-#endif
 short editstatus = 0;
 short searchit;
 long searchx = -1, searchy;                          //search input
@@ -486,10 +417,7 @@ extern long drawslab(long,long,long,long,long,long);
 #if (defined USE_I386_ASM)
   #if (defined __WATCOMC__)
 
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
         long nsqrtasm(int param);
-    #endif
-
     #pragma aux nsqrtasm =\
 	"test eax, 0xff000000",\
 	"mov ebx, eax",\
@@ -535,7 +463,7 @@ extern long drawslab(long,long,long,long,long,long);
 
         static long nsqrtasm(long eax)
         {
-            return((long) sqrt(eax));
+            return((long) sqrt(eax));   // !!! this might be wrong, due to precision issues.
         } // nsqrtasm
 
 #endif
@@ -544,71 +472,8 @@ extern long drawslab(long,long,long,long,long,long);
 #if (defined USE_I386_ASM)
   #if (defined __WATCOMC__)
 
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-        long msqrtasm(int param);
-    #endif
-
-    #pragma aux msqrtasm =\
-	"mov eax, 0x40000000",\
-	"mov ebx, 0x20000000",\
-	"begit: cmp ecx, eax",\
-	"jl skip",\
-	"sub ecx, eax",\
-	"lea eax, [eax+ebx*4]",\
-	"skip: sub eax, ebx",\
-	"shr eax, 1",\
-	"shr ebx, 2",\
-	"jnz begit",\
-	"cmp ecx, eax",\
-	"sbb eax, -1",\
-	"shr eax, 1",\
-	parm nomemory [ecx]\
-	modify exact [eax ebx ecx]\
-
-  #elif (defined __GNUC__)
-        static long msqrtasm(int i1)
-        {
-            int retval;
-            __asm__ __volatile__ ("
-              movl $0x40000000, %%eax
-        	  movl $0x20000000, %%ebx
-	          msqrasm_begit: cmpl %%eax, %%ecx
-        	  jl msqrasm_skip
-	          subl %%eax, %%ecx
-    	      leal (%%eax, %%ebx, 4), %%eax
-        	  msqrasm_skip: subl %%ebx, %%eax
-	          shrl $1, %%eax
-    	      shrl $2, %%ebx
-         	  jnz msqrasm_begit
-        	  cmpl %%eax, %%ecx
-    	      sbbl $-1, %%eax
-        	  shrl $1, %%eax
-            " : "=a" (retval) : "c" (i1) : "cc", "ebx");
-            return(retval);
-        } // msqrtasm
-
-    #else
-        #error Please write Assembly for your platform.
-  #endif
-
-#else   // USE_I386_ASM
-
-        static inline long msqrtasm (int input1)
-        {
-            // this isn't used in the C version, as it just sets up a table
-            //  for use by the ASM version of ksqrtasm. --ryan.
-        } // msqrtasm
-#endif
-
-
-#if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
-
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-        long krecipasm(long param);
-    #endif
-
 	//0x007ff000 is (11<<13), 0x3f800000 is (127<<23)
+    long krecipasm(long param);
     #pragma aux krecipasm =\
 	"mov fpuasm, eax",\
 	"fild dword ptr fpuasm",\
@@ -686,10 +551,7 @@ extern long drawslab(long,long,long,long,long,long);
 
   #if (defined __WATCOMC__)
 
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
         int setgotpic(long param);
-    #endif
-
     #pragma aux setgotpic =\
 	"mov ebx, eax",\
 	"cmp byte ptr walock[eax], 200",\
@@ -736,10 +598,7 @@ extern long drawslab(long,long,long,long,long,long);
 #if (defined USE_I386_ASM)
   #if (defined __WATCOMC__)
 
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
         long getclipmask(int i1, int i2, int i3, int i4);
-    #endif
-
     #pragma aux getclipmask =\
 	"sar eax, 31",\
 	"add ebx, ebx",\
@@ -2467,94 +2326,6 @@ int setgamemode(char davidoption, long daxdim, long daydim)
     return(_setgamemode(davidoption, daxdim, daydim));
 } // setgamemode
 
-
-/*  !!! use this instead, at some point.  --ryan.
-static char screenalloctype = 255;
-int _setgamemode(char davidoption, long daxdim, long daydim)
-{
-	long i, j, ostereomode;
-
-	if ((qsetmode == 200) && (vidoption == davidoption) && (xdim == daxdim) && (ydim == daydim))
-		return(0);
-	vidoption = davidoption; xdim = daxdim; ydim = daydim;
-
-	strcpy(kensmessage,"!!!! BUILD engine&tools programmed by Ken Silverman of E.G. RI.  (c) Copyright 1995 Ken Silverman.  Summary:  BUILD = Ken. !!!!");
-	if (getkensmessagecrc(FP_OFF(kensmessage)) != 0x56c764d4)
-		{ setvmode(0x3); printf("Nice try.\n"); exit(0); }
-
-    ostereomode = 0;
-
-    #ifdef PLATFORM_DOS
-      	ostereomode = stereomode; if (stereomode) setstereo(0L);
-    #endif
-
-	activepage = visualpage = 0;
-	switch(vidoption)
-	{
-		case 1: i = xdim*ydim; break;
-		case 2: xdim = 320; ydim = 200; i = xdim*ydim; break;
-		case 6: xdim = 320; ydim = 200; i = 131072; break;
-		default: return(-1);
-	}
-	j = ydim*4*sizeof(long);  //Leave room for horizlookup&horizlookup2
-
-	if (screen != NULL)
-	{
-		if (screenalloctype == 0) kkfree((void *)screen);
-		if (screenalloctype == 1) suckcache((long *)screen);
-		screen = NULL;
-	}
-	screenalloctype = 0;
-	if ((screen = (char *)kkmalloc(i+(j<<1))) == NULL)
-	{
-		 allocache((long *)&screen,i+(j<<1),&permanentlock);
-		 screenalloctype = 1;
-	}
-
-	frameplace = FP_OFF(screen);
-	horizlookup = (long *)(frameplace+i);
-	horizlookup2 = (long *)(frameplace+i+j);
-	horizycent = ((ydim*4)>>1);
-
-	switch(vidoption)
-	{
-		case 1:
-				//bytesperline is set in this function
-			if (setvesa(xdim,ydim) < 0) return(-1);
-			break;
-		case 2:
-			horizycent = ((ydim*4)>>1);  //HACK for switching to this mode
-		case 6:
-			bytesperline = xdim;
-			setvmode(0x13);
-			break;
-		default: return(-1);
-	}
-
-		//Force drawrooms to call dosetaspect & recalculate stuff
-	oxyaspect = oxdimen = oviewingrange = -1;
-
-	setvlinebpl(bytesperline);
-	j = 0;
-	for(i=0;i<=ydim;i++) ylookup[i] = j, j += bytesperline;
-
-	numpages = 1;
-	if (vidoption == 1) numpages = min(maxpages,8);
-
-	setview(0L,0L,xdim-1,ydim-1);
-	clearallviews(0L);
-	setbrightness((char)curbrightness,(char *)&palette[0]);
-
-	if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
-
-    #ifdef PLATFORM_DOS
-      	if (ostereomode) setstereo(ostereomode);
-    #endif
-
-	qsetmode = 200;
-	return(0);
-}
-*/
 
 void hline (long xr, long yp)
 {

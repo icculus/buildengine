@@ -219,11 +219,9 @@ typedef struct
 
 static long screentilt = 0;
 
-void (__interrupt __far *oldtimerhandler)();
 void __interrupt __far timerhandler(void);
 
 #define KEYFIFOSIZ 64
-void (__interrupt __far *oldkeyhandler)();
 void __interrupt __far keyhandler(void);
 volatile char keystatus[256], keyfifo[KEYFIFOSIZ], keyfifoplc, keyfifoend;
 volatile char readch, oldreadch, extended, keytemp;
@@ -4901,10 +4899,7 @@ void initlava(void)
 #if (defined USE_I386_ASM)
   #if (defined __WATCOMC__)
 
-    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
         long addlava(int param);
-    #endif
-  
     #pragma aux addlava =\
 	"mov al, byte ptr [ebx-133]",\
 	"mov dl, byte ptr [ebx-1]",\
@@ -5135,32 +5130,6 @@ void checkmasterslaveswitch(void)
 		i = j;
 	}
 }
-
-/*  handled in the platform drivers...  --ryan.
-void inittimer(void)
-{
-	outp(0x43,0x34);
-	outp(0x40,(1193181/TIMERINTSPERSECOND)&255);
-	outp(0x40,(1193181/TIMERINTSPERSECOND)>>8);
-	oldtimerhandler = _dos_getvect(0x8);
-	_disable(); _dos_setvect(0x8, timerhandler); _enable();
-}
-
-void uninittimer(void)
-{
-	outp(0x43,0x34); outp(0x40,0); outp(0x40,0);
-	_disable(); _dos_setvect(0x8, oldtimerhandler); _enable();
-}
-
-uninitkeys()
-{
-	short *ptr;
-
-	_dos_setvect(0x9, oldkeyhandler);
-		//Turn off shifts to prevent stucks with quitting
-	ptr = (short *)0x417; *ptr &= ~0x030f;
-}
-*/
 
 void __interrupt __far timerhandler()
 {

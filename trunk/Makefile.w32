@@ -34,10 +34,10 @@ DEBUGFLAGS = -d2
 #DEBUGFLAGS =
 
 #-----------------------------------------------------------------------------#
-# When debugging, use "d all", otherwise use the blank line.
+# When debugging, use "d all", otherwise use the "op el" line.
 #-----------------------------------------------------------------------------#
 LINKDEBUGFLAGS = d all
-#LINKDEBUGFLAGS =
+#LINKDEBUGFLAGS = op el
 
 #-----------------------------------------------------------------------------#
 # Choose one, or mix and match. Releases should use the full line,

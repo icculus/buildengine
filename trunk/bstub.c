@@ -79,16 +79,17 @@ extern void printext256(long xpos, long ypos, short col, short backcol,
 			char name[82], char fontsize);
 extern void editinput(void);
 extern void clearmidstatbar16(void);
-extern void printext16(long xpos, long ypos, short col, short backcol,
-			char name[82], char fontsize);
 extern void drawline16(long x1, long y1, long x2, long y2, char col);
 extern short getnumber16(char namestart[80], short num, long maxnumber);
 extern void printmessage16(char name[82]);
-extern void statusbar_printext16(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
 
 #ifdef PLATFORM_DOS
+extern void printext16(long xpos, long ypos, short col, short backcol,
+			char name[82], char fontsize);
 #define statusbar_printext16 printext16
 #define statusbar_printext16_noupdate printext16
+#else
+extern void statusbar_printext16(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
 #endif
 
 //Detecting 2D / 3D mode:
@@ -115,6 +116,8 @@ long ofinetotalclock, ototalclock, averagefps;
 static long frameval[AVERAGEFRAMES], framecnt = 0;
 
 #ifdef PLATFORM_DOS
+
+void inittimer42(void);
 #pragma aux inittimer42 =\
 	"in al, 0x61",\
 	"or al, 1",\
@@ -126,12 +129,16 @@ static long frameval[AVERAGEFRAMES], framecnt = 0;
 	"out 0x42, al",\
 	modify exact [eax]\
 
+
+void uninittimer42(void);
 #pragma aux uninittimer42 =\
 	"in al, 0x61",\
 	"and al, 252",\
 	"out 0x61, al",\
 	modify exact [eax]\
 
+
+long gettimer42(void);
 #pragma aux gettimer42 =\
 	"mov al, 0x84",\
 	"out 0x43, al",\

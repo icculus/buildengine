@@ -17,6 +17,7 @@
 #include <dos.h>
 
 #include "build.h"
+#include "pragmas.h"
 
 #pragma pack(push,1);
 
@@ -64,7 +65,7 @@ typedef struct
 
 long VESABuf_sel = 0, VESABuf_rseg;
 short modelist[256];
-static char *screen = NULL, vesachecked = 0;
+char *screen = NULL, vesachecked = 0;
 long xres, yres, bytesperline, frameplace, imageSize, maxpages;
 long buffermode, origbuffermode, linearmode;
 long setactiveentry = 0, setvisualentry = 0, setpaletteentry = 0;
@@ -77,6 +78,9 @@ static VBE_vgaInfo vgaInfo;
 long globlinplace;
 static long backlinaddress = 0;  //Save address for free operation (0x801)
 
+void faketimerhandler(void);
+
+void qlimitrate(void);
 #pragma aux qlimitrate =\
 	"mov dx, 0x3da",\
 	"wait1: in al, dx",\
@@ -84,6 +88,7 @@ static long backlinaddress = 0;  //Save address for free operation (0x801)
 	"jnz wait1",\
 	modify exact [eax edx]\
 
+void backupsegs(void);
 short ods, oes, oss;
 #pragma aux backupsegs =\
 	"mov ods, ds",\
@@ -91,45 +96,12 @@ short ods, oes, oss;
 	"mov oss, ss",\
 	modify [eax]\
 
+void restoresegs(void);
 #pragma aux restoresegs =\
 	"mov ds, ods",\
 	"mov es, oes",\
 	"mov ss, oss",\
 	modify [eax]\
-
-#pragma aux setvmode =\
-	"int 0x10",\
-	parm [eax]\
-
-#pragma aux copybufbyte =\
-	"cmp ecx, 4",\
-	"jae longcopy",\
-	"test cl, 1",\
-	"jz preskip",\
-	"movsb",\
-	"preskip: shr ecx, 1",\
-	"rep movsw",\
-	"jmp endit",\
-	"longcopy: test edi, 1",\
-	"jz skip1",\
-	"movsb",\
-	"dec ecx",\
-	"skip1: test edi, 2",\
-	"jz skip2",\
-	"movsw",\
-	"sub ecx, 2",\
-	"skip2: mov ebx, ecx",\
-	"shr ecx, 2",\
-	"rep movsd",\
-	"test bl, 2",\
-	"jz skip3",\
-	"movsw",\
-	"skip3: test bl, 1",\
-	"jz endit",\
-	"movsb",\
-	"endit:",\
-	parm [esi][edi][ecx]\
-	modify [ebx]\
 
 /*   //64-bit copybufbyte
 #pragma aux copybufbyte =\
@@ -178,14 +150,18 @@ short ods, oes, oss;
 	modify [ebx]\
 */
 
+
+void vesasetactive(long i1, long i2, long i3, long i4);
 #pragma aux vesasetactive =\
 	"call dword ptr [setactiveentry]",\
 	parm [eax][ebx][ecx][edx]\
 
+void vesasetvisual(long i1, long i2, long i3, long i4);
 #pragma aux vesasetvisual =\
 	"call dword ptr [setvisualentry]",\
 	parm [eax][ebx][ecx][edx]\
 
+long vesasetpalette(long i1, long i2, long i3, long i4, long i5, char *i6);
 #pragma aux vesasetpalette =\
 	"call dword ptr [setpaletteentry]",\
 	parm [eax][ebx][ecx][edx][esi][edi]\
@@ -376,7 +352,8 @@ int setvesa(long x, long y)
 {
 	div_t dived;
 	long i, j, k;
-	short *p, *p1, *p2;
+	//short *p, *p1, *p2;
+	short *p1;
 	VBE_modeInfo modeInfo;
 	RMREGS regs;
 	RMSREGS sregs;
@@ -520,7 +497,7 @@ static long curpag = 0;
 void setvisualpage(long dapagenum)
 {
 	RMREGS regs;
-	long i, j, p, dx, cx1, cy1, cx2, cy2, delta, x, y, y1, y2, ny1, ny2;
+	long i, /*j,*/ p, dx, cx1, cy1, cx2, cy2, delta, x, y, y1, y2, ny1, ny2;
 
 	if (buffermode != 0)
 	{

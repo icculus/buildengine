@@ -3,6 +3,7 @@
 // See the included license file "BUILDLIC.TXT" for license info.
 // This file has been modified from Ken Silverman's original release
 
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -38,11 +39,10 @@ extern void ExtPreCheckKeys(void);
 extern void ExtAnalyzeSprites(void);
 extern void ExtCheckKeys(void);
 
-void (__interrupt __far *oldtimerhandler)();
+void (__interrupt __far *oldtimerhandler)(void);
 void __interrupt __far timerhandler(void);
 
 #define KEYFIFOSIZ 64
-void (__interrupt __far *oldkeyhandler)();
 void __interrupt __far keyhandler(void);
 volatile unsigned char keystatus[256], keyfifo[KEYFIFOSIZ], keyfifoplc, keyfifoend;
 volatile unsigned char readch, oldreadch, extended, keytemp;
@@ -234,9 +234,6 @@ extern void clearview(long dacol);
 extern void loadtile (short tilenume);
 extern void qsetmode640480(void);
 extern void drawline16(long x1, long y1, long x2, long y2, char col);
-//extern void printext16(long xpos, long ypos, short col, short backcol,
-//			char name[82], char fontsize);
-extern void clear2dscreen(void);
 extern void draw2dgrid(long posxe, long posye, short ange, long zoome,
 			short gride);
 extern void draw2dscreen(long posxe, long posye, short ange, long zoome,
@@ -249,6 +246,7 @@ extern int ksqrt(long num);
 extern int lastwall(short point);
 extern int loopnumofsector(short sectnum, short wallnum);
 
+// !!! move this to ves2.h?  --ryan.
 #ifdef PLATFORM_DOS
 #pragma aux fillscreen16 =\
 	"mov dx, 0x3ce",\
@@ -6618,10 +6616,6 @@ void __interrupt __far timerhandler(void)
     	outp(0x20,0x20);
     #endif
 }
-
-#ifdef PLATFORM_DOS
-#define _readlastkeyhit() kinp(0x60)
-#endif
 
 void __interrupt __far keyhandler(void)
 {

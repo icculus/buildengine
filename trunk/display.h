@@ -100,9 +100,8 @@ void drawpixelses(long offset, Uint32 pixelses);
 void drawpixel16(long offset);
 void fillscreen16 (long input1, long input2, long input3);
 void limitrate(void);
-//void printext16(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
 void setactivepage(long dapagenum);
-//void clear2dscreen(void);
+void clear2dscreen(void);
 
 // mouse/keystuff stuff. Also implemented in sdl_driver.c ...
 int setupmouse(void);
@@ -123,7 +122,7 @@ void qsetmode640480(void);
 unsigned long getticks();
 
 #if (defined PLATFORM_DOS)
-#include "ves2.h"
+//#include "ves2.h"
 #endif
 
 #endif  // _INCLUDE_DISPLAY_H_

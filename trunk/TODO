@@ -27,6 +27,7 @@ NEXT ON TAP:
 - Port to Visual C?
 - Port to Mingwin32?  (the mprotect()s need to be #ifdef'd out. That should
   be the biggest change.)
+- Merge DOS makefile.
 
 // end of TODO ...
 
