@@ -83,7 +83,7 @@ PRAGMAS.H:
 
 VES2.H:
    VESA 2.0 routines used by the Build engine. This code unfortunately is
-   somewhat integrated with ENGINE.C
+   somewhat integrated with ENGINE.C  (only in the DOS version, now. --ryan.)
 
 MMULTI.C:
    Contains mid-level network routines.  This file arbitrated between
