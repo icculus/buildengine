@@ -348,6 +348,10 @@
             note to self added in engine.c, and an incorrect use of ASM in
             pragmas.h was repaired. Now the drawpixel16 function is working,
             closing the last bug specific to the Watcom/win32 port. Yay.
+02212001 - Fixed the timer bug! It was a one line change in game.c, pointed
+            out by Matt Saettler. Amen. This led to a better abstraction:
+            PLATFORM_TIMER_HZ, defined in platform.h ... Removed the wedged-in
+            call to SDL_PumpEvents() in game.c...not needed anymore.
 
 --ryan. (icculus@lokigames.com)
 
