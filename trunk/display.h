@@ -13,6 +13,18 @@
 #if (defined PLATFORM_SUPPORTS_SDL)
 #include "SDL.h"
 
+/* environment variables names... */
+/* These are only honored by the SDL driver. */
+#define BUILD_NOMOUSEGRAB    "BUILD_NOMOUSEGRAB"
+#define BUILD_WINDOWED       "BUILD_WINDOWED"
+#define BUILD_SDLDEBUG       "BUILD_SDLDEBUG"
+#define BUILD_RENDERER       "BUILD_RENDERER"
+#define BUILD_GLLIBRARY      "BUILD_GLLIBRARY"
+#define BUILD_USERSCREENRES  "BUILD_USERSCREENRES"
+#define BUILD_MAXSCREENRES   "BUILD_MAXSCREENRES"
+#define BUILD_HALLOFMIRRORS  "BUILD_HALLOFMIRRORS"
+#define BUILD_GLDUMP         "BUILD_GLDUMP"
+
 /* This part sucks. */
 #if (defined __WATCOMC__)
 #pragma aux (__cdecl) SDL_Init;
@@ -140,6 +152,8 @@ unsigned long getticks();
 
 void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color);
 void setcolor16(int i1);
+
+int using_opengl(void);
 
 #endif  /* _INCLUDE_DISPLAY_H_ */
 
