@@ -363,12 +363,86 @@ void uninitgroupfile(void)
 #endif
 }
 
+#if (defined USE_PHYSICSFS)
+static int locateOneElement(char *buf)
+{
+    char *ptr;
+    char **rc;
+    char **i;
+
+    if (PHYSFS_exists(buf))
+        return(1);  /* quick rejection: exists in current case. */
+
+    ptr = strrchr(buf, '/');  /* find entry at end of path. */
+    if (ptr == NULL)
+    {
+        rc = PHYSFS_enumerateFiles("/");
+        ptr = buf;
+    } /* if */
+    else
+    {
+        *ptr = '\0';
+        rc = PHYSFS_enumerateFiles(buf);
+        *ptr = '/';
+        ptr++;  /* point past dirsep to entry itself. */
+    } /* else */
+
+    for (i = rc; *i != NULL; i++)
+    {
+        if (stricmp(*i, ptr) == 0)
+        {
+            strcpy(ptr, *i); /* found a match. Overwrite with this case. */
+            PHYSFS_freeList(rc);
+            return(1);
+        } /* if */
+    } /* for */
+
+    /* no match at all... */
+    PHYSFS_freeList(rc);
+    return(0);
+} /* locateOneElement */
+
+
+int PHYSFSEXT_locateCorrectCase(char *buf)
+{
+    int rc;
+    char *ptr;
+    char *prevptr;
+
+    while (*buf == '/')  /* skip any '/' at start of string... */
+        buf++;
+
+    ptr = prevptr = buf;
+    if (*ptr == '\0')
+        return(0);  /* Uh...I guess that's success. */
+
+    while ((ptr = strchr(ptr + 1, '/')) != NULL)
+    {
+        *ptr = '\0';  /* block this path section off */
+        rc = locateOneElement(buf);
+        *ptr = '/'; /* restore path separator */
+        if (!rc)
+            return(-2);  /* missing element in path. */
+    } /* while */
+
+    /* check final element... */
+    return(locateOneElement(buf) ? 0 : -1);
+} /* PHYSFSEXT_locateCorrectCase */
+#endif
+
+
 long kopen4load(const char *filename, char searchfirst)
 {
 #if (defined USE_PHYSICSFS)
     int i;
-    PHYSFS_file *rc = PHYSFS_openRead(filename);
+    PHYSFS_file *rc;
+    char _filename[64];
 
+    assert(strlen(filename) < sizeof (_filename));
+    strcpy(_filename, filename);
+    PHYSFSEXT_locateCorrectCase(_filename);
+
+    rc = PHYSFS_openRead(_filename);
     if (rc == NULL)
         return(-1);
 
