@@ -282,15 +282,14 @@ long vlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
     unsigned char *dest = (unsigned char *)i6;
 
     i3++;
-    dest -= fixchain;
     while (i3)
     {
 	    unsigned long temp = i4;
 	    temp >>= mach3_al;
-	    dest += fixchain;
 	    temp = (temp&0xffffff00) | (source[temp]&0xff);
 	    *dest = ((unsigned char*)i2)[temp];
 	    i4 += i1;
+	    dest += fixchain;
 	    i3--;
     }
     return i4;
@@ -316,8 +315,8 @@ long tvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 	{
 		unsigned long temp = i4;
 		temp >>= transmach3_al;
-		temp = (temp&0xffffff00) | (source[temp]&0xff);
-		if ((temp&0xff) != 0xff)
+		temp = source[temp];
+		if (temp != 255)
 		{
 			unsigned short val;
 			val = ((unsigned char *)i2)[temp];
@@ -363,36 +362,35 @@ void tvlineasm2(unsigned long i1, unsigned long i2, unsigned long i3, unsigned l
 		ebp += tran2incb;
 		i3 = ((unsigned char *)tran2bufa)[i1];
 		i4 = ((unsigned char *)tran2bufb)[i2];
-		if (i3 == 0xff) { // skipdraw1
-			if (i4 != 0xff) { // skipdraw3
+		if (i3 == 255) { // skipdraw1
+			if (i4 != 255) { // skipdraw3
 				unsigned short val;
-				val = ((unsigned char *)tran2pal_ebx)[i3];
-				val |= (((unsigned char *)tran2edi1)[i6]<<8);
+				val = ((unsigned char *)tran2pal_ecx)[i4];
+				val |= (((unsigned char *)i6)[tran2edi1]<<8);
 				if (transrev) val = ((val>>8)|(val<<8));
 				((unsigned char *)i6)[tran2edi1] =
 					((unsigned char *)tmach)[val];
 			}
-		} else if (i4 == 0xff) { // skipdraw2
+		} else if (i4 == 255) { // skipdraw2
 			unsigned short val;
-			val = ((unsigned char *)tran2pal_ecx)[i4];
-			val |= (((unsigned char *)tran2edi)[i6]<<8);
+			val = ((unsigned char *)tran2pal_ebx)[i3];
+			val |= (((unsigned char *)i6)[tran2edi]<<8);
 			if (transrev) val = ((val>>8)|(val<<8));
 			((unsigned char *)i6)[tran2edi] =
 				((unsigned char *)tmach)[val];
 		} else {
-			// DDOI - doesn't look endian safe
-			unsigned short val = *((unsigned short *)(tran2edi+(signed)i6));
-			unsigned short val2 = (val << 8); // mov ah, bl
-			val |= (((unsigned char *)tran2pal_ecx)[i4]<<8);
-			val2 |= ((unsigned char *)tran2pal_ebx)[i3];
+			unsigned short l = ((unsigned char *)i6)[tran2edi]<<8;
+			unsigned short r = ((unsigned char *)i6)[tran2edi1]<<8;
+			l |= ((unsigned char *)tran2pal_ebx)[i3];
+			r |= ((unsigned char *)tran2pal_ecx)[i4];
 			if (transrev) {
-				val = ((val>>8)|(val<<8));
-				val2= ((val2>>8)|(val2<<8));
+				l = ((l>>8)|(l<<8));
+				r = ((r>>8)|(r<<8));
 			}
 			((unsigned char *)i6)[tran2edi] =
-				((unsigned char *)tmach)[val2];
+				((unsigned char *)tmach)[l];
 			((unsigned char *)i6)[tran2edi1] =
-				((unsigned char *)tmach)[val];
+				((unsigned char *)tmach)[r];
 		}
 		i6 += fixchain;
 	} while (i6 < i6 - fixchain);
