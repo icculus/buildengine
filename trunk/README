@@ -9,18 +9,16 @@
  *   (including this file) to BUILD.
  */
 
-Do not expect much from the code. We are making progress, but as of yet:
- - Some stuff doesn't work correctly.
- - Some stuff downright doesn't work at all.
-
-
 You NEED gcc 2.95.2 (or maybe later) to compile this code correctly.
 You'll also need Netwide Assembler (NASM). Get it at:
 
   http://nasm.sourceforge.net/
 
 
-This code relies on a fairly recent SDL. Get it like this:
+This code uses Simple Directmedia Layer (SDL) for graphics, sound, and other
+platform abstractions. Build relies on a fairly recent SDL code snapshot.
+
+Get SDL from CVS like this:
 
 cvs -d :pserver:guest@cvs.lokigames.com:/cvs login
 # password is "guest"
@@ -28,7 +26,7 @@ cvs -z3 -d :pserver:guest@cvs.lokigames.com:/cvs checkout -r devel_1_1_0 SDL
 cd SDL; ./autogen.sh; make; make install
 
 
-CVS is good if you want the up to the minutes changes of BUILD:
+CVS is also good if you want the up-to-the-minute changes of BUILD:
 
 cvs -d:pserver:anonymous@linux.ucla.edu:/var/cvs
 cvs -z3 co buildengine
@@ -66,7 +64,6 @@ GOOD REFERENCES:
 - BUILD keyboard reference: http://home.online.no/~flovstak/duke/bkeys.htm
 - mapFAQ: http://mapfaq.3dportal.com/
 - Ken Silverman's homepage: http://www.advsys.net/ken/
-- Ken Silverman's leg: http://www.advsys.net/ken/kenwebrv.htm
 - The Art of Assembly Language, complete text:
     http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
 
