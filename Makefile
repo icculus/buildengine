@@ -122,3 +122,8 @@ $(BUILDEXE) : $(BUILDOBJS)
 clean:
 	rm -f $(CLEANUP)
 
+package: clean
+	cd .. ; zip -9ryz ./BUILD-engine-$(shell date +%m%d%Y).zip buildengine -x "*CVS*" < buildengine/FILEID.DIZ
+
+# end of Makefile ...
+
