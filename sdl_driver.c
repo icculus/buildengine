@@ -422,22 +422,37 @@ static void go_to_new_vid_mode(int vidoption, int w, int h)
 } /* go_to_new_vid_mode */
 
 
-static int sdl_mouse_button_filter(SDL_Event const *event)
+static inline int sdl_mouse_button_filter(SDL_MouseButtonEvent const *event)
 {
         /*
-         * What BUILD expects:
+         * What bits BUILD expects:
          *  0	left button pressed if 1
          *  1	right button pressed if 1
          *  2	middle button pressed if 1
          *
          *   (That is, this is what Int 33h (AX=0x05) returns...)
+	 *
+	 *  additionally 3&4 are set for the mouse wheel
          */
+	Uint8 button = event->button;
+	if(button>=sizeof(mouse_buttons)*8) return;
 
+	if(button == SDL_BUTTON_RIGHT) button = SDL_BUTTON_MIDDLE;
+	else if(button == SDL_BUTTON_MIDDLE) button = SDL_BUTTON_RIGHT;
+
+	if(((const SDL_MouseButtonEvent*)event)->state)
+	    mouse_buttons |= 1<<(button-1);
+	else if(button != 4 && button != 5)
+	    mouse_buttons ^= 1<<(button-1);
+
+#if 0
     Uint8 bmask = SDL_GetMouseState(NULL, NULL);
     mouse_buttons = 0;
     if (bmask & SDL_BUTTON_LMASK) mouse_buttons |= 1;
     if (bmask & SDL_BUTTON_RMASK) mouse_buttons |= 2;
     if (bmask & SDL_BUTTON_MMASK) mouse_buttons |= 4;
+#endif
+
     return(0);
 } /* sdl_mouse_up_filter */
 
@@ -738,7 +753,7 @@ static int root_sdl_event_filter(const SDL_Event *event)
             return(sdl_mouse_motion_filter(event));
         case SDL_MOUSEBUTTONUP:
         case SDL_MOUSEBUTTONDOWN:
-            return(sdl_mouse_button_filter(event));
+	    return(sdl_mouse_button_filter((const SDL_MouseButtonEvent*)event));
         case SDL_QUIT:
             /* !!! rcg TEMP */
             SDL_Quit();
@@ -1696,6 +1711,11 @@ void readmousebstatus(short *bstatus)
 {
     if (bstatus)
         *bstatus = mouse_buttons;
+
+    // special wheel treatment
+    if(mouse_buttons&8) mouse_buttons ^= 8;
+    if(mouse_buttons&16) mouse_buttons ^= 16;
+
 } /* readmousebstatus */
 
 
