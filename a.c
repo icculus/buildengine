@@ -566,15 +566,15 @@ extern long vplce[4], vince[4], palookupoffse[4], bufplce[4];
 void vlineasm4(long i1, long i2)
 {
     unsigned long index = (i2 + ylookup[i1])/4;
-    long machvbuf1 = bufplce[2];
-    long machvbuf2 = bufplce[3];
-    long machvbuf3 = bufplce[0];
-    long machvbuf4 = bufplce[1];
-    long machvpal1 = palookupoffse[2];
-    long machvpal2 = palookupoffse[3];
-    long machvpal3 = palookupoffse[0];
-    long machvpal4 = palookupoffse[1];
-    long machvinc1, machvinc2, machvinc5;
+    unsigned long machvbuf1 = bufplce[2];
+    unsigned long machvbuf2 = bufplce[3];
+    unsigned long machvbuf3 = bufplce[0];
+    unsigned long machvbuf4 = bufplce[1];
+    unsigned long machvpal1 = palookupoffse[2];
+    unsigned long machvpal2 = palookupoffse[3];
+    unsigned long machvpal3 = palookupoffse[0];
+    unsigned long machvpal4 = palookupoffse[1];
+    unsigned long machvinc1, machvinc2, machvinc5;
     unsigned short machvinc34;
     unsigned long eax, ebx, edx, esi, ebp;
     unsigned long out = 0;
@@ -986,17 +986,18 @@ tendsvline:
 } /* tspritevline */
 
 /* #pragma aux mhline parm [eax][ebx][ecx][edx][esi][edi] */
-long mhline(long i1, long i2, long i3, long i4, long i5, long i6)
+static long mmach_eax;
+static long mmach_asm3;
+static long mmach_asm1;
+static long mmach_asm2;
+void mhlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long i5, long i6);
+void mhline(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_mhline   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-    return(retval);
+    mmach_eax = i1;
+    mmach_asm3 = asm3;
+    mmach_asm1 = asm1;
+    mmach_asm2 = asm2;
+    mhlineskipmodify(asm2,i2,i3,i4,i5,i6);
 /*
 _asm_mhline:
 	;asm1 = bxinc
@@ -1029,9 +1030,43 @@ _asm_mhline:
 } /* mhline */
 
 /* #pragma aux mhlineskipmodify parm [eax][ebx][ecx][edx][esi][edi] */
-long mhlineskipmodify(long i1, long i2, long i3, long i4, long i5, long i6)
+static unsigned char mshift_al;
+static unsigned char mshift_bl;
+void mhlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long i5, long i6)
 {
-    long retval = 0;
+    unsigned long ebx = i2;
+    i1 = 0;
+    //if (i3 & 0x10000)
+    while (1)
+    {
+	    ebx >>= mshift_al;
+	    ebx = shld (ebx, (unsigned)i5, mshift_bl);
+	    i2 += asm1;
+	    i1 = ((unsigned char *)mmach_eax)[ebx];
+	    i5 += asm2;
+	    if ((i1&0xff) != 255)
+	    {
+		    i3 = ((i3&0xffffff00)|(((unsigned char*)mmach_asm3)[i1]));
+		    *((unsigned char *)i6) = (i3&0xff);
+	    }
+	    i6++;
+	    i3 -= 65536;
+	    if (i3 > i3 + 65536) return;
+    }
+    
+    /*
+    ebx = i2 + mmach_asm1;
+    i2 >>= mshift_al;
+    shld (i2, (unsigned)i5, mshift_bl);
+    esi += mmach_asm2;
+    i3 = ((i3&0xffffff00)|(((unsigned char*)mmach_eax)[i2]));
+    i2 = ebx + mmach_asm1;
+    
+    ebx >>= mshift_al;
+    shld (ebx, (unsigned)i5, mshift_bl);
+    esi += mmach_asm2;
+    i3 = ((i3&0xffff00ff)|(((((unsigned char*)mmach_eax)[ebx])<<8);
+    */
     /*
     __asm__ __volatile__ (
         "call _asm_mhlineskipmodify   \n\t"
@@ -1039,7 +1074,6 @@ long mhlineskipmodify(long i1, long i2, long i3, long i4, long i5, long i6)
         : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
 	*/
-    return(retval);
 /*
 _asm_mhlineskipmodify:
 
@@ -1122,9 +1156,11 @@ mendhline:
 } /* mhlineskipmodify */
 
 /* #pragma aux msethlineshift parm [eax][ebx] */
-long msethlineshift(long i1, long i2)
+void msethlineshift(long i1, long i2)
 {
-    long retval = 0;
+    i1 = 256-i1;
+    mshift_al = (i1&0xff);
+    mshift_bl = (i2&0xff);
     /*
     __asm__ __volatile__ (
         "call _asm_msethlineshift   \n\t"
@@ -1132,7 +1168,6 @@ long msethlineshift(long i1, long i2)
         : "a" (i1), "b" (i2)
         : "cc", "memory");
 	*/
-    return(retval);
 /*
 _asm_msethlineshift:
 	neg al
