@@ -504,6 +504,16 @@
             driver function _initkeys into initkeys. This will force a link
             error in Build games, so they can be updated to call the driver's
             init function; updated this in build.txt, too.
+06122001 - Made mmulti.c compile with -ansi and -pedantic, as that might be
+            needed later. Testing the OpenGL waters again. Added string_dupe()
+            to replace strdup(), and changed a snprintf() call to sprintf() in
+            sdl_driver.c, so I could remove the _GNU_SOURCE define.
+06132001 - Changed Unix makefile, so that you can (by setting usedlls=true)
+            compile buildengine.so and buildnet.so, and the game and build
+            binaries only statically link what is absolutely necessary. Setting
+            usedlls=false statically links all the Build code together,
+            although currently external libraries like SDL are still
+            linked dynamically.
 
 --ryan. (icculus@linuxgames.com)
 
