@@ -228,6 +228,12 @@
             SHOULD be, but I had 320, 320 hardcoded in _setgamemode() for some
             strange reason. Oh, and CONTRIB was lowercased. That's where it
             went. URL for this project is now listed on Ken's homepage.
+09012000 - Happy September. Code tree is now available via CVS, thanks to
+            Matt and "witten". Dan fixed another keysym. port i/o macros were
+            being called when changing to 3D mode in the editor; #ifdef'd to
+            PLATFORM_DOS, now. Misassembled opcode in msqrtasm() is now fixed,
+            so the function operates correctly. Removed the #if 0, so that
+            ASM now gets used.
 
 --ryan. (icculus@lokigames.com)
 
