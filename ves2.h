@@ -6,7 +6,7 @@
 #ifndef _INCLUDE_VES2_H_
 #define _INCLUDE_VES2_H_
 
-#ifdef PLATFORM_UNIX
+#if (!defined PLATFORM_DOS)
 #error Do not include this file. It is for the DOS target only.
 #endif
 
@@ -15,6 +15,8 @@
 #include <string.h>
 #include <conio.h>
 #include <dos.h>
+
+#include "build.h"
 
 #pragma pack(push,1);
 
@@ -308,7 +310,7 @@ GetPtrToLFB(long physAddr)
 	if (r.x.cflag) { printf("DPMI_setSelectorLimit() failed!\n"); exit(0); }
 }
 
-getvalidvesamodes()
+void getvalidvesamodes(void)
 {
 	long i, j, k;
 	short *p, *p2;
@@ -370,7 +372,7 @@ getvalidvesamodes()
 			}
 }
 
-setvesa(long x, long y)
+int setvesa(long x, long y)
 {
 	div_t dived;
 	long i, j, k;
@@ -479,7 +481,7 @@ setvesa(long x, long y)
 	return(-1);
 }
 
-setdacbits(long newdacbits)
+long setdacbits(long newdacbits)
 {
 	RMREGS regs;
 
@@ -544,7 +546,7 @@ void setvisualpage(long dapagenum)
 								y1++; if ((y1&31) == 0) faketimerhandler();
 									//x,y1
 								i = p+ylookup[y1]+ves2lastx[y1];
-								copybufbyte(i,i+delta,x-ves2lastx[y1]);
+								copybufbyte((void *)i,(void *)(i+delta),x-ves2lastx[y1]);
 							}
 							y1 = ny1;
 						}
@@ -555,7 +557,7 @@ void setvisualpage(long dapagenum)
 								y1++; if ((y1&31) == 0) faketimerhandler();
 									//x-1,y1
 								i = p+ylookup[y1]+ves2lastx[y1];
-								copybufbyte(i,i+delta,x-ves2lastx[y1]);
+								copybufbyte((void *)i,(void *)(i+delta),x-ves2lastx[y1]);
 							}
 							while (y1 > ny1) ves2lastx[y1--] = x;
 						}
@@ -564,7 +566,7 @@ void setvisualpage(long dapagenum)
 							y2--; if ((y2&31) == 0) faketimerhandler();
 								//x-1,y2
 							i = p+ylookup[y2]+ves2lastx[y2];
-							copybufbyte(i,i+delta,x-ves2lastx[y2]);
+							copybufbyte((void *)i,(void *)(i+delta),x-ves2lastx[y2]);
 						}
 						while (y2 < ny2) ves2lastx[y2++] = x;
 					}
@@ -575,7 +577,7 @@ void setvisualpage(long dapagenum)
 							y1++; if ((y1&31) == 0) faketimerhandler();
 								//x-1,y1
 							i = p+ylookup[y1]+ves2lastx[y1];
-							copybufbyte(i,i+delta,x-ves2lastx[y1]);
+							copybufbyte((void *)i,(void *)(i+delta),x-ves2lastx[y1]);
 						}
 						if (x == cx2) break;
 						y1 = startumost[x+1]; y2 = y1;
@@ -586,7 +588,7 @@ void setvisualpage(long dapagenum)
 					y1++; if ((y1&31) == 0) faketimerhandler();
 						//cx2+1,y1
 					i = p+ylookup[y1]+ves2lastx[y1];
-					copybufbyte(i,i+delta,cx2+1-ves2lastx[y1]);
+					copybufbyte((void *)i,(void *)(i+delta),cx2+1-ves2lastx[y1]);
 				}
 			}
 			else
@@ -595,7 +597,7 @@ void setvisualpage(long dapagenum)
 				delta = activepagelookup[dapagenum&0x7fffffff]-FP_OFF(screen);
 				for(y=cy1;y<=cy2;y++)
 				{
-					copybufbyte(p,p+delta,dx);
+					copybufbyte((void *)p,(void *)(p+delta),dx);
 					p += ylookup[1];
 					if ((y&31) == 0) faketimerhandler();
 				}
@@ -616,16 +618,16 @@ void setvisualpage(long dapagenum)
 
 				i = (p&65535)+dx-65536;
 				if (i <= 0)
-					copybufbyte(p+FP_OFF(screen),(p&65535)+0xa0000,dx);
+					copybufbyte((void *)(p+FP_OFF(screen)),(void *)((p&65535)+0xa0000),dx);
 				else
 				{
-					copybufbyte(p+FP_OFF(screen),0xb0000-(dx-i),dx-i);
+					copybufbyte((void *)(p+FP_OFF(screen)),(void *)(0xb0000-(dx-i)),dx-i);
 
 					curpag = ((p+dx-1)>>16);
 					setvesapage(curpag<<davesapageshift);
 					faketimerhandler();
 
-					copybufbyte(p+(dx-i)+FP_OFF(screen),0xa0000,i);
+					copybufbyte((void *)(p+(dx-i)+FP_OFF(screen)),(void *)0xa0000,i);
 				}
 				p += ylookup[1];
 			}
@@ -664,7 +666,7 @@ void setvisualpage(long dapagenum)
 	}
 }
 
-uninitvesa()
+void uninitvesa(void)
 {
 	if (backlinaddress)
 	{
@@ -680,6 +682,7 @@ uninitvesa()
 	vesachecked = 0;
 }
 
+#if 0  // doesn't appear to be used anymore. --ryan.
 #pragma aux setpalettequick =\
 	"mov edx, 0x3c8",\
 	"out dx, al",\
@@ -688,9 +691,10 @@ uninitvesa()
 	"cld",\
 	"rep outsb",\
 	parm [eax][ecx][esi]\
-	modify exact [ecx edx esi]\
+	modify exact [ecx edx esi]
+#endif
 
-VBE_setPalette(long start, long num, char *dapal)
+int VBE_setPalette(long start, long num, char *dapal)
 {
 	RMREGS regs;
 	long i, j, k;
@@ -725,17 +729,17 @@ VBE_setPalette(long start, long num, char *dapal)
 		koutp(0x3c8,start);
 		for(i=(num>>1);i>0;i--)
 		{
-			koutp(0x3c9,dapal[2]);
+			koutp(0x3c9,(long) dapal[2]);
 			while (kinp(0x3da)&1); while (!(kinp(0x3da)&1));
-										  koutp(0x3c9,dapal[1]); koutp(0x3c9,dapal[0]);
-			koutp(0x3c9,dapal[6]); koutp(0x3c9,dapal[5]); koutp(0x3c9,dapal[4]);
+										  koutp(0x3c9,(long) dapal[1]); koutp(0x3c9,(long) dapal[0]);
+			koutp(0x3c9,(long) dapal[6]); koutp(0x3c9,(long) dapal[5]); koutp(0x3c9,(long) dapal[4]);
 			dapal += 8;
 		}
 		if (num&1)
 		{
-			koutp(0x3c9,dapal[2]);
+			koutp(0x3c9,(long) dapal[2]);
 			while (kinp(0x3da)&1); while (!(kinp(0x3da)&1));
-										  koutp(0x3c9,dapal[1]); koutp(0x3c9,dapal[0]);
+										  koutp(0x3c9,(long) dapal[1]); koutp(0x3c9,(long) dapal[0]);
 		}
 		return(1);
 	}
@@ -766,9 +770,9 @@ VBE_getPalette(long start, long num, char *dapal)
 		koutp(0x3c7,start);
 		for(i=num;i>0;i--)
 		{
-			dapal[2] = kinp(0x3c9);
-			dapal[1] = kinp(0x3c9);
-			dapal[0] = kinp(0x3c9);
+			dapal[2] = (char) kinp(0x3c9);
+			dapal[1] = (char) kinp(0x3c9);
+			dapal[0] = (char) kinp(0x3c9);
 			dapal += 4;
 		}
 		return(1);
@@ -782,5 +786,8 @@ VBE_getPalette(long start, long num, char *dapal)
 	return(1);
 }
 
-#endif
+#endif   // _INCLUDE_VES2_H_
+
+// end of ves2.h ...
+
 

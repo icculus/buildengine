@@ -12,10 +12,10 @@
 
 #include "platform.h"
 
+#include "pragmas.h"
 #include "display.h"
 #include "build.h"
 #include "names.h"
-#include "pragmas.h"
 
 #define TIMERINTSPERSECOND 280
 #define MOVESPERSECOND 40

@@ -123,14 +123,14 @@ void kkfree(void *buffer);
 #ifdef SUPERBUILD
 	//MUST CALL LOADVOXEL THIS WAY BECAUSE WATCOM STINKS!
 
-#ifndef PLATFORM_DOS
 void loadvoxel(long voxindex) { }
-#define kloadvoxel(a) (loadvoxel(a))
-#else
+#if ((defined __WATCOMC__) && (defined PLATFORM_DOS))
 #pragma aux kloadvoxel =\
 	"call loadvoxel",\
 	parm [eax]\
 
+#else
+#define kloadvoxel(a) (loadvoxel(a))
 #endif
 
 	//These variables need to be copied into BUILD
