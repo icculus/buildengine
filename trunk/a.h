@@ -5,6 +5,14 @@
 #ifndef __LINUX_A_H__
 #define __LINUX_A_H__
 
+#if (defined __WATCOMC__)
+#error Do not include this header with Watcom C.
+#endif
+
+#if (!defined USE_I386_ASM)
+#warning You do not have USE_I386_ASM defined. This might be a problem.
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
