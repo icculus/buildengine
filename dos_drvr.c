@@ -27,6 +27,7 @@
 #include "build.h"
 #include "cache1d.h"
 #include "ves2.h"
+#include "engine.h"
 
 static unsigned char tempbuf[MAXWALLS];
 extern long transarea;
