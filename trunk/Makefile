@@ -133,11 +133,9 @@ ifeq ($(strip $(macosx)),true)
   LDFLAGS += -framework AppKit -lSDL -lSDLmain
 endif
 
-
 ifeq ($(strip $(linux_ppc)),true)
   CFLAGS += -DPLATFORM_LINUXPPC=1
 endif
-
 
 ifeq ($(strip $(useopengl)),true)
   CFLAGS += -DUSE_OPENGL -I$(GL_INCLDIR)
@@ -210,6 +208,10 @@ ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 LINKER = gcc
 CFLAGS += $(USE_ASM) -funsigned-char -O3 -DPLATFORM_UNIX -g -Wall $(SDL_CFLAGS) -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
+
+# Always turn OFF strict aliasing, even when optimizing. Otherwise, this is
+#  just an accident waiting to happen...  --ryan.
+CFLAGS += -fno-strict-aliasing
 
 # Rules for turning source files into .o files
 %.o: %.c
