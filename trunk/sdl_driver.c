@@ -1195,7 +1195,8 @@ void *_getVideoBase(void)
 
 void setactivepage(long dapagenum)
 {
-    fprintf(stderr, "%s, line %d; setactivepage(): STUB.\n", __FILE__, __LINE__);
+	// Is this really still needed? - DDOI
+    //fprintf(stderr, "%s, line %d; setactivepage(): STUB.\n", __FILE__, __LINE__);
 } // setactivepage
 
 void limitrate(void)
