@@ -750,7 +750,7 @@ extern long drawslab(long,long,long,long,long,long);
         		adcl %%eax, %%eax
         		addl %%edx, %%edx
         		adcl %%eax, %%eax
-        		movl %%ebx, %%eax
+        		movl %%eax, %%ebx
         		shll $4, %%ebx
         		orb $0xf0, %%al
         		xorl %%ebx, %%eax
