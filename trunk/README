@@ -120,6 +120,12 @@ INFO:
   Foundation. Do the right thing; if you must distribute BUILD binaries,
   don't build them with Cygwin.
 
+- Does this code still work under DOS?  Yup. You use Watcom C the same as you
+  would for the Windows target, except you use Makefile.dos. Note that the
+  Windows and Linux versions are better maintained, more stable, and support
+  more hardware. Don't ask Ken about the DOS port either. He probably wouldn't
+  recognize his own code after all the mangling we did.  :)
+
 GOOD REFERENCES:
 - VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
 - http://www-cgi.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html
