@@ -1206,13 +1206,11 @@ _asm_setupmvlineasm:
 /* #pragma aux mvlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void mvlineasm4(long i1, long i2)
 {
-	/*
     __asm__ __volatile__ (
         "call _asm_mvlineasm4   \n\t"
         : : "c" (i1), "D" (i2)
         : "cc", "ebx", "edx", "esi", "memory");
     	return;
-	*/
     {
     unsigned long index = (i2 + ylookup[i1])/4;
     long machvbuf1 = bufplce[2];
@@ -2099,16 +2097,28 @@ _asm_tsethlineshift:
 
 /* #pragma aux setupslopevlin parm [eax][ebx][ecx] modify [edx] */
 static long slopemach_ebx;
-static float asm2_float;
-long setupslopevlin(long i1, long i2, long i3)
+static long slopemach_ecx;
+static long slopemach_edx;
+static unsigned char slopemach_ah1;
+static unsigned char slopemach_ah2;
+static float asm2_f;
+typedef union { unsigned int i; float f; } bitwisef2i;
+void setupslopevlin(long i1, long i2, long i3)
 {
-    long retval = 0;
+    bitwisef2i c;
+    slopemach_ebx = i2;
+    slopemach_ecx = i3;
+    slopemach_edx = (1<<(i1&0xff)) - 1;
+    slopemach_edx <<= ((i1&0xff00)>>8);
+    slopemach_ah1 = 256-((i1&0xff00)>>8);
+    slopemach_ah2 = slopemach_ah1 - (i1&0xff);
+    c.f = asm2_f = (float)asm1;
+    asm2 = c.i;
+
     __asm__ __volatile__ (
         "call _asm_setupslopevlin   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3)
+        : : "a" (i1), "b" (i2), "c" (i3)
         : "cc", "edx", "memory");
-    return(retval);
 /*
 _asm_setupslopevlin:
 	mov dword [slopmach3+3], ebx    ;ptr
@@ -2136,18 +2146,85 @@ _asm_setupslopevlin:
 */
 } /* setupslopevlin */
 
+extern long reciptable[2048];
+extern long globalx3, globaly3;
+extern long fpuasm;
+#define low32(a) ((a&0xffffffff))
+#define high32(a) ((int)(((__int64)a&(__int64)0xffffffff00000000)>>32))
+
 /* #pragma aux slopevlin parm [eax][ebx][ecx][edx][esi][edi] */
-long slopevlin(long i1, long i2, long i3, long i4, long i5, long i6)
+void slopevlin(long i1, unsigned long i2, long i3, long i4, long i5, long i6)
 {
-    long retval = 0;
-    /*
+	/*
     __asm__ __volatile__ (
         "call _asm_slopevlin   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
+        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
-	*/
-    return(retval);
+    return;
+    */
+    {
+    bitwisef2i c;
+    unsigned long ebp,ecx,eax,ebx,edx,esi,edi,esp;
+    float a = (float) asm3 + asm2_f;
+    esp = i3;
+    ebp = i1 - slopemach_ecx;
+    asm1 = i2;
+    eax = low32((__int64)globalx3 * (__int64)(i2<<3));	// imull!
+    ecx = low32((__int64)globaly3 * (__int64)(i2<<3));	// imull!
+    esi = i5 + eax;
+    edi = i6 + ecx;
+    ebx = i4;
+    do {
+	    c.f = a;
+	    fpuasm = eax = c.i;
+	    edx = 0;
+	    if ((eax - eax) > eax) edx--;	// edx = sign bit
+	    eax += eax;
+	    ecx = (eax>>24);	//  exponent
+	    eax = ((eax&0xffe000)>>11);
+	    ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
+	    eax = reciptable[eax/4];
+	    eax >>= (ecx&0xff);
+	    eax ^= edx;
+	    edx = asm1;
+	    ecx = globalx3;
+	    asm1 = eax;
+	    eax -= edx;
+	    edx = globaly3;
+	    ecx = low32((__int64)ecx * (__int64)eax);	// warning! imull
+	    eax = low32((__int64)eax * (__int64)edx);	// warning! imull
+	    a += asm2_f;
+
+	    asm4 = ebx;
+	    ecx = ((ecx&0xffffff00)|(ebx&0xff));
+	    if (ebx >= 8) ecx = ((ecx&0xffffff00)|8);
+
+	    ebx = esi;
+	    edx = edi;
+	    while ((ecx&0xff))
+	    {
+		    ebx >>= slopemach_ah2;
+		    esi += ecx;
+		    edx >>= slopemach_ah1;
+		    ebx &= slopemach_edx;
+		    edi += eax;
+		    ebp += slopemach_ecx;
+		    edx = ((edx&0xffffff00)|((((unsigned char *)(ebx+edx))[slopemach_ebx])));
+		    ebx = *((unsigned long*)esp); // register trickery
+		    esp -= 4;
+		    eax = ((eax&0xffffff00)|(*((unsigned char *)(ebx+edx))));
+		    ebx = esi;
+		    *((unsigned char *)ebp) = (eax&0xff);
+		    edx = edi;
+		    ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
+	    }
+	    ebx = asm4;
+	    ebx -= 8;	// BITSOFPRECISIONPOW
+    // jg = jump if overflow or 0
+    } while ((long)ebx > 0);
+    //if (((ebx + 8) < ebx) || (ebx == 0)) goto bigslopeloop;
+    }
+
 /*
 _asm_slopevlin:
 	mov [ebpbak], ebp		; Added [] AH
