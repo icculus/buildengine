@@ -562,6 +562,9 @@ void deinit_network_transport(gcomtype *gcom)
 #  ifndef MSG_ERRQUEUE  /* legacy glibc header workaround... */
 #    define MSG_ERRQUEUE 0x2000
 #  endif
+#  if PLATFORM_MACOSX
+#    define socklen_t int
+#  endif
 #endif
 
 #define SOCKET_SHUTDOWN_BOTH 2
@@ -913,7 +916,7 @@ static int open_udp_socket(int ip, int port)
     if (!set_socket_blockmode(0))
         return(0);
 
-    #if (defined __linux__)
+    #if !PLATFORM_WIN32 && !PLATFORM_MACOSX
     {
         /* Linux-specific. */
         int flags = 1;

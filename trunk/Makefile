@@ -6,6 +6,7 @@
 #----------------------------------------------------------------------------
 
 beos := false
+macosx := false
 
 #-----------------------------------------------------------------------------#
 # If this makefile fails to detect Cygwin correctly, or you want to force
@@ -118,6 +119,11 @@ else
   DLL_EXT = .so
   EXE_EXT =
   ASMOBJFMT = elf
+endif
+
+ifeq ($(strip $(macosx)),true)
+  CFLAGS += -DPLATFORM_MACOSX=1
+  LDFLAGS += -framework AppKit -lSDL -lSDLmain
 endif
 
 ifeq ($(strip $(useopengl)),true)

@@ -546,7 +546,7 @@ int kread16(long handle, short *buffer)
     if (kread(handle, buffer, 2) != 2)
         return(0);
 
-    *buffer = BUILDSWAP_INTEL16(*buffer);
+    *buffer = BUILDSWAP_INTEL16(*(unsigned short *)buffer);
     return(1);
 }
 
@@ -555,7 +555,7 @@ int kread32(long handle, long *buffer)
     if (kread(handle, buffer, 4) != 4)
         return(0);
 
-    *buffer = BUILDSWAP_INTEL32(*buffer);
+    *buffer = BUILDSWAP_INTEL32(*(unsigned long *)buffer);
     return(1);
 }
 
@@ -681,6 +681,33 @@ void kdfread(void *buffer, size_t dasizeof, size_t count, long fil)
 	lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
 }
 
+void kdfread8(char *_buffer, size_t count, long fil)
+{
+    kdfread(_buffer, 1, count, fil);
+}
+
+void kdfread16(short *_buffer, size_t count, long fil)
+{
+    int i;
+    kdfread(_buffer, 2, count, fil);
+#if PLATFORM_BIGENDIAN
+    unsigned short *buffer = (unsigned short *) _buffer;
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
+#endif
+}
+
+void kdfread32(long *_buffer, size_t count, long fil)
+{
+    int i;
+    kdfread(_buffer, 4, count, fil);
+#if PLATFORM_BIGENDIAN
+    unsigned long *buffer = (unsigned long *) _buffer;
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
+#endif
+}
+
 void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 {
 	size_t i, j;
@@ -717,6 +744,34 @@ void dfread(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 	}
 	lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
 }
+
+void dfread8(char *buffer, size_t count, FILE *fil)
+{
+    dfread(buffer, 1, count, fil);
+}
+
+void dfread16(short *_buffer, size_t count, FILE *fil)
+{
+    int i;
+    dfread(_buffer, 2, count, fil);
+#if PLATFORM_BIGENDIAN
+    unsigned short *buffer = (unsigned short *) _buffer;
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
+#endif
+}
+
+void dfread32(long *_buffer, size_t count, FILE *fil)
+{
+    int i;
+    dfread(_buffer, 4, count, fil);
+#if PLATFORM_BIGENDIAN
+    unsigned long *buffer = (unsigned long *) _buffer;
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
+#endif
+}
+
 
 void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 {
@@ -761,6 +816,45 @@ void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 	}
 	lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
 }
+
+void dfwrite8(char *_buffer, size_t count, FILE *fil)
+{
+    dfwrite(_buffer, 1, count, fil);
+}
+
+void dfwrite16(short *_buffer, size_t count, FILE *fil)
+{
+#if PLATFORM_BIGENDIAN
+    unsigned long *buffer = (unsigned long *) _buffer;
+    int i;
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
+#endif
+
+    dfwrite(_buffer, 2, count, fil);
+
+#if PLATFORM_BIGENDIAN
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL16(buffer[i]);
+#endif
+}
+void dfwrite32(long *_buffer, size_t count, FILE *fil)
+{
+#if PLATFORM_BIGENDIAN
+    unsigned long *buffer = (unsigned long *) _buffer;
+    int i;
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
+#endif
+
+    dfwrite(_buffer, 4, count, fil);
+
+#if PLATFORM_BIGENDIAN
+    for (i = 0; i < count; i++)
+        buffer[i] = BUILDSWAP_INTEL32(buffer[i]);
+#endif
+}
+
 
 long compress(char *lzwinbuf, long uncompleng, char *lzwoutbuf)
 {

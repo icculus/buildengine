@@ -742,35 +742,6 @@ extern long drawslab(long,long,long,long,long,long);
         }
 #endif /* defined USE_I386_ASM */
 
-
-__inline unsigned short _swap16(unsigned short D)
-{
-#ifdef PLATFORM_MACOSX
-    register unsigned short returnValue;
-    __asm__ volatile("lhbrx %0,0,%1"
-        : "=r" (returnValue)
-        : "r" (&D)
-    );
-    return returnValue;
-#else
-    return((D<<8)|(D>>8));
-#endif
-}
-
-__inline unsigned int _swap32(unsigned int D)
-{
-#ifdef PLATFORM_MACOSX
-    register unsigned int returnValue;
-    __asm__ volatile("lwbrx %0,0,%1"
-        : "=r" (returnValue)
-        : "r" (&D)
-    );
-    return returnValue;
-#else
-    return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
-#endif
-}
-
 static void scansector (short sectnum)
 {
 	walltype *wal, *wal2;
@@ -3414,7 +3385,7 @@ void initengine(void)
 		for(j=0;j<MAXVOXMIPS;j++)
 		{
 			voxoff[i][j] = 0L;
-			voxlock[i][j] = 200;
+			voxlock[i][j] = BUILDSWAP_INTEL32(200);
 		}
 #endif
 
@@ -4140,7 +4111,7 @@ void qloadkvx(long voxindex, char *filename)
 		kread32(fil,&dasiz);
 
 			/* Must store filenames to use cacheing system :( */
-		voxlock[voxindex][i] = 200;
+		voxlock[voxindex][i] = BUILDSWAP_INTEL32(200);
 		allocache(&voxoff[voxindex][i],dasiz,(unsigned char *)&voxlock[voxindex][i]);
 		ptr = (char *)voxoff[voxindex][i];
 		kread(fil,ptr,dasiz);
