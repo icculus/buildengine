@@ -7,20 +7,6 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#ifdef PLATFORM_UNIX
-// !!! need support for Windows.  --ryan.
-#if ((defined __GNUC__) && (!defined __CYGWIN__))
-// need this to get FNM_CASEFOLD to be defined in fnmatch.h ...
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-
-#include <fnmatch.h>
-#endif
-
-#include <dirent.h>
-#endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -29,10 +15,6 @@
 #include "pragmas.h"
 
 #include "display.h"
-
-#if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
-#define ENDLINE_CHAR '\r'
-#endif
 
 #define MAXMENUFILES 256
 #define updatecrc16(crc,dat) (crc = (((crc<<8)&65535)^crctable[((((unsigned short)crc)>>8)&65535)^dat]))
@@ -302,7 +284,7 @@ int main(int argc,char **argv)
 
     _platform_init(argc, argv, "BUILD editor by Ken Silverman", "BUILD");
 
-    if (getenv("BUILD_NOPENTIUM") != NULL)
+//    if (getenv("BUILD_NOPENTIUM") != NULL)
         dommxoverlay = 0;
 
 	editstatus = 1;
@@ -5927,7 +5909,7 @@ void initmenupaths(char *filename)
 
 int getfilenames(char kind[6])
 {
-#ifdef PLATFORM_DOS
+#if (defined __WATCOMC__)
 	short type;
 	struct find_t fileinfo;
 
@@ -5962,8 +5944,10 @@ int getfilenames(char kind[6])
     struct dirent *dent;
     struct stat statbuf;
     int add_this;
-
+    char *ptr = NULL;
+    int len = 0;
     int subdirs = 0;
+
 	if (strcmp(kind,"SUBD") == 0)
         subdirs = 1;
 
@@ -5979,21 +5963,31 @@ int getfilenames(char kind[6])
         {
             if (stat(dent->d_name, &statbuf) == 0)
             {
-                if ((subdirs) && (S_ISDIR(statbuf.st_mode)))
+                if (subdirs)
+                {
+                    if (S_ISDIR(statbuf.st_mode))
                     add_this = 1;
-
-                // !!! need support for Windows.  --ryan.
-                #ifndef __CYGWIN__
-                else if (fnmatch(kind, dent->d_name, FNM_CASEFOLD) == 0)
+                } // if
+                else
+                {
+                    // need to expand support if this assertion ever fails.
+                    assert(strcmp(kind, "*.MAP") == 0);
+                    len = strlen(dent->d_name);
+                    if (len >= 5)
+                    {
+                        ptr = ((char *) dent->d_name) + len;
+                        ptr += strlen(ptr) - 4;
+                        if (strcasecmp(ptr, ".MAP") == 0)
                     add_this = 1;
-                #endif
+                    } // if
+                } // else
 
                 if (add_this)
     			{
 	    			strcpy(menuname[menunamecnt],dent->d_name);
 		    		menuname[menunamecnt][16] = subdirs;
 			    	menunamecnt++;
-    			}
+                } // if
             } // if
         } // if
     } while (dent != NULL);
@@ -6309,8 +6303,6 @@ short whitelinescan(short dalinehighlight)
 }                                               \
 
 
-// !!! we really need to lose this ENDLINE_CHAR shit.
-
 int loadnames(void)
 {
 	char buffer[80], firstch, ch;
@@ -6338,15 +6330,14 @@ int loadnames(void)
 			loadbyte(fil,tempbuf,bufplc,ch);
 			if ((ch >= 48) && (ch <= 57)) num = num*10+(ch-48);
 		}
-		while (ch != ENDLINE_CHAR);
+		while ((ch != '\r') && (ch != '\n'));
 		for(i=0;i<buffercnt;i++) names[num][i] = buffer[i];
 		names[num][buffercnt] = 0;
 
 		loadbyte(fil,tempbuf,bufplc,firstch);
 
-        #if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
-    		if (firstch == 10) loadbyte(fil,tempbuf,bufplc,firstch);
-        #endif
+    		while ((firstch == '\r') || (firstch == '\n'))
+			loadbyte(fil,tempbuf,bufplc,firstch);
 	}
 	close(fil);
 	return(0);
