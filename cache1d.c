@@ -788,7 +788,7 @@ void dfread32(long *_buffer, size_t count, FILE *fil)
 void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 {
 	size_t i, j, k;
-	short leng;
+	short leng, byteswapped;
 	char *ptr;
 
 	lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 200;
@@ -807,7 +807,8 @@ void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 	if (k > LZWSIZE-dasizeof)
 	{
 		leng = (short)compress(lzwbuf4,k,lzwbuf5); k = 0;
-		fwrite(&leng,2,1,fil); fwrite(lzwbuf5,(long)leng,1,fil);
+		byteswapped = BUILDSWAP_INTEL16(leng);
+		fwrite(&byteswapped,2,1,fil); fwrite(lzwbuf5,(long)leng,1,fil);
 	}
 
 	for(i=1;i<count;i++)
@@ -817,14 +818,16 @@ void dfwrite(void *buffer, size_t dasizeof, size_t count, FILE *fil)
 		if (k > LZWSIZE-dasizeof)
 		{
 			leng = (short)compress(lzwbuf4,k,lzwbuf5); k = 0;
-			fwrite(&leng,2,1,fil); fwrite(lzwbuf5,(long)leng,1,fil);
+			byteswapped = BUILDSWAP_INTEL16(leng);
+			fwrite(&byteswapped,2,1,fil); fwrite(lzwbuf5,(long)leng,1,fil);
 		}
 		ptr += dasizeof;
 	}
 	if (k > 0)
 	{
 		leng = (short)compress(lzwbuf4,k,lzwbuf5);
-		fwrite(&leng,2,1,fil); fwrite(lzwbuf5,(long)leng,1,fil);
+		byteswapped = BUILDSWAP_INTEL16(leng);
+		fwrite(&byteswapped,2,1,fil); fwrite(lzwbuf5,(long)leng,1,fil);
 	}
 	lzwbuflock[0] = lzwbuflock[1] = lzwbuflock[2] = lzwbuflock[3] = lzwbuflock[4] = 1;
 }
@@ -874,11 +877,6 @@ long compress(char *lzwinbuf, long uncompleng, char *lzwoutbuf)
 	long bytecnt1, bitcnt, numbits, oneupnumbits;
 	short *shortptr;
 
-#if PLATFORM_BIGENDIAN
-fprintf(stderr, "Not byte order safe, yet!");
-assert(0);
-#endif
-
 	for(i=255;i>=0;i--) { lzwbuf1[i] = (char) i; lzwbuf3[i] = (short) ((i+1)&255); }
 	clearbuf((void *) FP_OFF(lzwbuf2),256>>1,0xffffffff);
 	clearbuf((void *) FP_OFF(lzwoutbuf),((uncompleng+15)+3)>>2,0L);
@@ -908,7 +906,9 @@ assert(0);
 		lzwbuf3[addrcnt] = -1;
 
 		longptr = (long *)&lzwoutbuf[bitcnt>>3];
-		longptr[0] |= (addr<<(bitcnt&7));
+		*longptr = BUILDSWAP_INTEL32(*longptr);  //convert to native format.
+		*longptr |= (addr<<(bitcnt&7));  // add new data.
+		*longptr = BUILDSWAP_INTEL32(*longptr);  //convert back to littleendian
 		bitcnt += numbits;
 		if ((addr&((oneupnumbits>>1)-1)) > ((addrcnt-1)&((oneupnumbits>>1)-1)))
 			bitcnt--;
@@ -918,16 +918,20 @@ assert(0);
 	} while ((bytecnt1 < uncompleng) && (bitcnt < (uncompleng<<3)));
 
 	longptr = (long *)&lzwoutbuf[bitcnt>>3];
-	longptr[0] |= (addr<<(bitcnt&7));
+	*longptr = BUILDSWAP_INTEL32(*longptr);  //convert to native format.
+	*longptr |= (addr<<(bitcnt&7));
+	*longptr = BUILDSWAP_INTEL32(*longptr);  //convert back.
 	bitcnt += numbits;
 	if ((addr&((oneupnumbits>>1)-1)) > ((addrcnt-1)&((oneupnumbits>>1)-1)))
 		bitcnt--;
 
 	shortptr = (short *)lzwoutbuf;
-	shortptr[0] = (short)uncompleng;
+	*shortptr = (short)uncompleng;
+	*shortptr = BUILDSWAP_INTEL16(*shortptr);
 	if (((bitcnt+7)>>3) < uncompleng)
 	{
 		shortptr[1] = (short)addrcnt;
+		shortptr[1] = BUILDSWAP_INTEL16(shortptr[1]);
 		return((bitcnt+7)>>3);
 	}
 	shortptr[1] = (short)0;
