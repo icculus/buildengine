@@ -918,14 +918,14 @@ int boundmulscale(int i1, int i2, int i3) {
 
 int divscale(int i1, int i2, int i3) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-i3)))<<32)|(((__int64)(i1<<i3))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-i3)))<<32)|(((__int64)(i1<<i3))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale1(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-1)))<<32)|(((__int64)(i1<<1))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-1)))<<32)|(((__int64)(i1<<1))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
@@ -933,210 +933,210 @@ int divscale1(int i1, int i2) {
 
 int divscale2(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-2)))<<32)|(((__int64)(i1<<2))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-2)))<<32)|(((__int64)(i1<<2))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale3(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-3)))<<32)|(((__int64)(i1<<3))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-3)))<<32)|(((__int64)(i1<<3))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale4(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-4)))<<32)|(((__int64)(i1<<4))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-4)))<<32)|(((__int64)(i1<<4))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale5(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-5)))<<32)|(((__int64)(i1<<5))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-5)))<<32)|(((__int64)(i1<<5))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale6(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-6)))<<32)|(((__int64)(i1<<6))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-6)))<<32)|(((__int64)(i1<<6))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale7(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-7)))<<32)|(((__int64)(i1<<7))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-7)))<<32)|(((__int64)(i1<<7))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale8(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-8)))<<32)|(((__int64)(i1<<8))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-8)))<<32)|(((__int64)(i1<<8))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale9(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-9)))<<32)|(((__int64)(i1<<9))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-9)))<<32)|(((__int64)(i1<<9))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale10(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-10)))<<32)|(((__int64)(i1<<10))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-10)))<<32)|(((__int64)(i1<<10))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale11(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-11)))<<32)|(((__int64)(i1<<11))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-11)))<<32)|(((__int64)(i1<<11))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale12(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-12)))<<32)|(((__int64)(i1<<12))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-12)))<<32)|(((__int64)(i1<<12))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale13(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-13)))<<32)|(((__int64)(i1<<13))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-13)))<<32)|(((__int64)(i1<<13))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale14(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-14)))<<32)|(((__int64)(i1<<14))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-14)))<<32)|(((__int64)(i1<<14))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale15(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-15)))<<32)|(((__int64)(i1<<15))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-15)))<<32)|(((__int64)(i1<<15))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale16(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-16)))<<32)|(((__int64)(i1<<16))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-16)))<<32)|(((__int64)(i1<<16))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale17(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-17)))<<32)|(((__int64)(i1<<17))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-17)))<<32)|(((__int64)(i1<<17))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale18(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-18)))<<32)|(((__int64)(i1<<18))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-18)))<<32)|(((__int64)(i1<<18))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale19(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-19)))<<32)|(((__int64)(i1<<19))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-19)))<<32)|(((__int64)(i1<<19))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale20(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-20)))<<32)|(((__int64)(i1<<20))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-20)))<<32)|(((__int64)(i1<<20))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale21(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-21)))<<32)|(((__int64)(i1<<21))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-21)))<<32)|(((__int64)(i1<<21))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale22(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-22)))<<32)|(((__int64)(i1<<22))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-22)))<<32)|(((__int64)(i1<<22))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale23(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-23)))<<32)|(((__int64)(i1<<23))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-23)))<<32)|(((__int64)(i1<<23))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale24(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-24)))<<32)|(((__int64)(i1<<24))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-24)))<<32)|(((__int64)(i1<<24))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale25(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-25)))<<32)|(((__int64)(i1<<25))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-25)))<<32)|(((__int64)(i1<<25))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale26(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-26)))<<32)|(((__int64)(i1<<26))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-26)))<<32)|(((__int64)(i1<<26))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale27(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-27)))<<32)|(((__int64)(i1<<27))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-27)))<<32)|(((__int64)(i1<<27))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale28(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-28)))<<32)|(((__int64)(i1<<28))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-28)))<<32)|(((__int64)(i1<<28))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale29(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-29)))<<32)|(((__int64)(i1<<29))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-29)))<<32)|(((__int64)(i1<<29))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale30(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-30)))<<32)|(((__int64)(i1<<30))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-30)))<<32)|(((__int64)(i1<<30))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
 
 int divscale31(int i1, int i2) {
   int retval = 0;
-  __int64 temp = ((((__int64)(i1>>(32-31)))<<32)|(((__int64)(i1<<31))&(__int64)0x00000000ffffffff)) / (__int64)i2;
+  __int64 temp = ((((__int64)(i1>>(32-31)))<<32)|(((__int64)(i1<<31))&(__int64)0xffffffff)) / (__int64)i2;
   retval = low32(temp);
   return(retval);
 }
