@@ -25,6 +25,15 @@ NEXT ON TAP:
 - Make a statically linked binary option in the Linux Makefile.
 - Make a linuxbins target (like msbins target) in the Linux Makefile.
 - Lose those sound stubs. SDL_mixer support is my vote.
+- Hardware surface/page flipping for more rendering speed?
+- Make all standard resolutions (up to max supported by display) available,
+  since, for example, on fbcon we get one resolution reported by
+  SDL_ListVideoModes(), but in 1024x768 mode, we can still comfortably switch
+  to 640x480, 320x200, etc. If ListVideoModes gives us -1 (windowed), make
+  everything up to 1600x1200 available.
+- OpenGL? This would accelerate rendering, get us out of 8-bit hell, make it
+  prettier, and take out most of the ASM code, for porting to other processors.
+  But it will also give us all ulcers.  :)
 
 // end of TODO ...
 

@@ -372,6 +372,10 @@
             added. Changed all occurances of my email address from
             lokigames.com to linuxgames.com. One or two comment tweaks
             elsewhere. Updated README with SDL12 CVS instructions.
+05192001 - Demands SDL_HWPALETTE, which seems to fix 8bit color targets. Added
+            other debugging info to sdl_driver.c, and put the (commented out)
+            starts of hardware surface/double buffering/page flipping support.
+            Updated TODO.
 
 --ryan. (icculus@linuxgames.com)
 
