@@ -542,7 +542,7 @@ long stretchhline(long i1, long i2, long i3, long i4, long i5, long i6)
     return(retval);
 } /* drawslab */
 
-#else  /* below is the C version of all that nasty self-modifying ASM... */
+#if 0  /* below is the C version of all that nasty self-modifying ASM... */
 
 /* !!! FIXME: This should be moved to a_generic.c or something. */
 
