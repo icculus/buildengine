@@ -253,25 +253,6 @@ static long tmach;
 void fixtransluscence(long i1)
 {
     tmach = i1;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_fixtransluscence   \n\t"
-        : : "a" (i1)
-        : "cc", "memory");
-	*/
-/*
-_asm_fixtransluscence:
-	mov dword [transmach4+2], eax
-	mov dword [tmach1+2], eax
-	mov dword [tmach2+2], eax
-	mov dword [tmach3+2], eax
-	mov dword [tmach4+2], eax
-	mov dword [tran2traa+2], eax
-	mov dword [tran2trab+2], eax
-	mov dword [tran2trac+2], eax
-	mov dword [tran2trad+2], eax
-    ret
-*/ 
 } /* fixtransluscence */
 
 long vlineasm1(long i1, long i2, long i3, long i4, long i5, long i6);
@@ -317,215 +298,106 @@ long vlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 
 
 /* #pragma aux setuptvlineasm parm [eax] */
-static unsigned char transmach3_al;
+static unsigned char transmach3_al = 32;
 void setuptvlineasm(long i1)
 {
     transmach3_al = i1;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setuptvlineasm   \n\t"
-        : : "a" (i1)
-        : "cc", "memory");
-	*/
-/*
-_asm_setuptvlineasm:
-	mov byte [transmach3a+2], al
-	ret
-*/
 } /* setuptvlineasm */
 
-
 /* #pragma aux tvlineasm1 parm [eax][ebx][ecx][edx][esi][edi] */
+static int transrev = 0;
 long tvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_tvlineasm1   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-*/
-    return(retval);
-/*
-_asm_tvlineasm1:
-	push ebp
-	mov ebp, eax
-	xor eax, eax
-	inc ecx
-	mov dword [transmach3c+2], ebx
-	jmp short begintvline
+	unsigned char *source = (unsigned char *)i5;
+	unsigned char *dest = (unsigned char *)i6;
 
-ALIGN 16
-begintvline:
-	mov ebx, edx
-transmach3a: shr ebx, 32
-	mov bl, byte [esi+ebx]
-	cmp bl, 255
-	je short skiptrans1
-transrev0:
-transmach3c: mov al, [ebx+88888888h]
-transrev1:
-	mov ah, byte [edi]
-transmach4: mov al, byte [eax+88888888h]   ;transluc[eax]
-	mov byte [edi], al
-skiptrans1:
-	add edx, ebp
-fixchain1t: add edi, 320
-	dec ecx
-	jnz short begintvline
-
-	pop ebp
-	mov eax, edx
-	ret
-*/
+	i3++;
+	while (i3)
+	{
+		unsigned long temp = i4;
+		temp >>= transmach3_al;
+		temp = (temp&0xffffff00) | (source[temp]&0xff);
+		if ((temp&0xff) != 0xff)
+		{
+			unsigned short val;
+			val = ((unsigned char *)i2)[temp];
+			val |= ((*dest)<<8);
+			if (transrev) val = ((val>>8)|(val<<8));
+			*dest = ((unsigned char *)tmach)[val];
+		}
+		i4 += i1;
+		dest += fixchain;
+		i3--;
+	}
+	return i4;
 } /* tvlineasm1 */
 
 /* #pragma aux setuptvlineasm2 parm [eax][ebx][ecx] */
-long setuptvlineasm2(long i1, long i2, long i3)
+static unsigned char tran2shr;
+static unsigned long tran2pal_ebx;
+static unsigned long tran2pal_ecx;
+void setuptvlineasm2(long i1, long i2, long i3)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setuptvlineasm2   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3)
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_setuptvlineasm2:
-	mov byte [tran2shra+2], al
-	mov byte [tran2shrb+2], al
-	mov dword [tran2pala+2], ebx
-	mov dword [tran2palb+2], ecx
-	mov dword [tran2palc+2], ebx
-	mov dword [tran2pald+2], ecx
-	ret
-*/
+	tran2shr = (i1&0xff);
+	tran2pal_ebx = i2;
+	tran2pal_ecx = i3;
 } /* */
 
 /* #pragma aux tvlineasm2 parm [eax][ebx][ecx][edx][esi][edi] */
-long tvlineasm2(long i1, long i2, long i3, long i4, long i5, long i6)
+void tvlineasm2(unsigned long i1, unsigned long i2, unsigned long i3, unsigned long i4, unsigned long i5, unsigned long i6)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_tvlineasm2   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_tvlineasm2:
-	push ebp
+	unsigned long ebp = i1;
+	unsigned long tran2inca = i2;
+	unsigned long tran2incb = asm1;
+	unsigned long tran2bufa = i3;
+	unsigned long tran2bufb = i4;
+	unsigned long tran2edi = asm2;
+	unsigned long tran2edi1 = asm2 + 1;
 
-	mov ebp, eax
+	i6 -= asm2;
 
-	mov dword [tran2inca+2], ebx
-	mov eax, [asm1]
-	mov dword [tran2incb+2], eax
-
-	mov dword [tran2bufa+2], ecx         ;bufplc1
-	mov dword [tran2bufb+2], edx         ;bufplc2
-
-	mov eax, [asm2]
-	sub edi, eax
-	mov dword [tran2edia+3], eax
-	mov dword [tran2edic+2], eax
-	inc eax
-	mov dword [tran2edie+2], eax
-fixchaint2a: sub eax, 320
-	mov dword [tran2edif+2], eax
-	dec eax
-	mov dword [tran2edib+3], eax
-	mov dword [tran2edid+2], eax
-
-	xor ecx, ecx
-	xor edx, edx
-	jmp short begintvline2
-
-		;eax 0000000000  temp  temp
-		;ebx 0000000000 odat2 odat1
-		;ecx 0000000000000000 ndat1
-		;edx 0000000000000000 ndat2
-		;esi          vplc1
-		;edi videoplc--------------
-		;ebp          vplc2
-
-ALIGN 16
-		;LEFT ONLY
-skipdraw2:
-transrev10:
-tran2edic: mov ah, byte [edi+88888888h]      ;getpixel
-transrev11:
-tran2palc: mov al, byte [ecx+88888888h]      ;palookup1
-fixchaint2d: add edi, 320
-tran2trac: mov bl, byte [eax+88888888h]      ;transluc
-tran2edid: mov byte [edi+88888888h-320], bl  ;drawpixel
-	jnc short begintvline2
-	jmp endtvline2
-
-skipdraw1:
-	cmp dl, 255
-	jne short skipdraw3
-fixchaint2b: add edi, 320
-	jc short endtvline2
-
-begintvline2:
-	mov eax, esi
-tran2shra: shr eax, 88h                      ;globalshift
-	mov ebx, ebp
-tran2shrb: shr ebx, 88h                      ;globalshift
-tran2inca: add esi, 88888888h                ;vinc1
-tran2incb: add ebp, 88888888h                ;vinc2
-tran2bufa: mov cl, byte [eax+88888888h]  ;bufplc1
-	cmp cl, 255
-tran2bufb: mov dl, byte [ebx+88888888h]  ;bufplc2
-	je short skipdraw1
-	cmp dl, 255
-	je short skipdraw2
-
-	;mov ax        The transluscent reverse of both!
-	;mov bl, ah
-	;mov ah
-	;mov bh
-
-		;BOTH
-transrev12:
-tran2edia: mov bx, word [edi+88888888h]      ;getpixels
-transrev13:
-	mov ah, bl
-transrev14:
-tran2pala: mov al, byte [ecx+88888888h]      ;palookup1
-transrev15:
-tran2palb: mov bl, byte [edx+88888888h]      ;palookup2
-fixchaint2c: add edi, 320
-tran2traa: mov al, byte [eax+88888888h]      ;transluc
-tran2trab: mov ah, byte [ebx+88888888h]      ;transluc
-tran2edib: mov word [edi+88888888h-320], ax  ;drawpixels
-	jnc short begintvline2
-	jmp short endtvline2
-
-	;RIGHT ONLY
-skipdraw3:
-transrev16:
-tran2edie: mov ah, byte [edi+88888889h]      ;getpixel
-transrev17:
-tran2pald: mov al, byte [edx+88888888h]      ;palookup2
-fixchaint2e: add edi, 320
-tran2trad: mov bl, byte [eax+88888888h]      ;transluc
-tran2edif: mov byte [edi+88888889h-320], bl  ;drawpixel
-	jnc short begintvline2
-
-endtvline2:
-	mov [asm1], esi
-	mov [asm2], ebp
-
-	pop ebp
-	ret
-*/
+	do {
+		i1 = i5 >> tran2shr;
+		i2 = ebp >> tran2shr;
+		i5 += tran2inca;
+		ebp += tran2incb;
+		i3 = ((unsigned char *)tran2bufa)[i1];
+		i4 = ((unsigned char *)tran2bufb)[i2];
+		if (i3 == 0xff) { // skipdraw1
+			if (i4 != 0xff) { // skipdraw3
+				unsigned short val;
+				val = ((unsigned char *)tran2pal_ebx)[i3];
+				val |= (((unsigned char *)tran2edi1)[i6]<<8);
+				if (transrev) val = ((val>>8)|(val<<8));
+				((unsigned char *)i6)[tran2edi1] =
+					((unsigned char *)tmach)[val];
+			}
+		} else if (i4 == 0xff) { // skipdraw2
+			unsigned short val;
+			val = ((unsigned char *)tran2pal_ecx)[i4];
+			val |= (((unsigned char *)tran2edi)[i6]<<8);
+			if (transrev) val = ((val>>8)|(val<<8));
+			((unsigned char *)i6)[tran2edi] =
+				((unsigned char *)tmach)[val];
+		} else {
+			// DDOI - doesn't look endian safe
+			unsigned short val = *((unsigned short *)(tran2edi+(signed)i6));
+			unsigned short val2 = (val << 8); // mov ah, bl
+			val |= (((unsigned char *)tran2pal_ecx)[i4]<<8);
+			val2 |= ((unsigned char *)tran2pal_ebx)[i3];
+			if (transrev) {
+				val = ((val>>8)|(val<<8));
+				val2= ((val2>>8)|(val2<<8));
+			}
+			((unsigned char *)i6)[tran2edi] =
+				((unsigned char *)tmach)[val2];
+			((unsigned char *)i6)[tran2edi1] =
+				((unsigned char *)tmach)[val];
+		}
+		i6 += fixchain;
+	} while (i6 < i6 - fixchain);
+	asm1 = i5;
+	asm2 = ebp;
 } /* tvlineasm2 */
 
 
@@ -906,83 +778,48 @@ msdumblabel2:
 } /* mspritevline */
 
 /* #pragma aux tsetupspritevline parm [eax][ebx][ecx][edx][esi][edi] */
+unsigned long tspal;
+unsigned long tsmach_eax1;
+unsigned long tsmach_eax2;
+unsigned long tsmach_eax3;
+unsigned long tsmach_ecx;
 void tsetupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-	/*
-    __asm__ __volatile__ (
-        "call _asm_tsetupspritevline   \n\t"
-       :
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_tsetupspritevline:
-	mov dword [tspal+2], eax
-
-	mov eax, esi                      ;xinc's
-	shl eax, 16
-	mov dword [tsmach1+2], eax
-	mov dword [tsmach4+2], eax
-	mov eax, esi
-	sar eax, 16
-	add eax, ebx                      ;watch out with ebx - it's passed
-	mov dword [tsmach2+2], eax
-	add eax, edx
-	mov dword [tsmach5+2], eax
-
-	mov dword [tsmach3+2], ecx  ;yinc's
-	ret
-*/
+	tspal = i1;
+	tsmach_eax1 = i5 << 16;
+	tsmach_eax2 = (i5 >> 16) + i2;
+	tsmach_eax3 = tsmach_eax2 + i4;
+	tsmach_ecx = i3;
 } /* tsetupspritevline */
 
 /* #pragma aux tspritevline parm [eax][ebx][ecx][edx][esi][edi] */
-void tspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
+void tspritevline(long i1, long i2, long i3, unsigned long i4, long i5, long i6)
 {
-	/*
-    __asm__ __volatile__ (
-        "call _asm_tspritevline   \n\t"
-       :
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_tspritevline:
-	;eax = 0, ebx = x, ecx = cnt, edx = y, esi = yplc, edi = p
-	push ebp
-	mov ebp, ebx
-	xor ebx, ebx
-	jmp tenterspritevline
-ALIGN 16
-tprestartsvline:
-tsmach1: add ebp, 88888888h              ;xincshl16
-	mov al, byte [esi]
-tsmach2: adc esi, 88888888h              ;xincshr16+yalwaysinc
-
-tstartsvline:
-	cmp al, 255
-	je short tskipsvline
-transrev2:
-	mov bh, byte [edi]
-transrev3:
-tspal: mov bl, [eax+88888888h]               ;palookup
-tmach4: mov al, byte [ebx+88888888h]     ;transluc
-	mov byte [edi], al
-tskipsvline:
-tfixchain1s: add edi, 320
-
-tenterspritevline:
-tsmach3: add edx, 88888888h              ;dayinc
-	dec ecx
-	ja short tprestartsvline     ;jump if (no carry (add)) and (not zero (dec))!
-	jz short tendsvline
-tsmach4: add ebp, 88888888h              ;xincshl16
-	mov al, byte [esi]
-tsmach5: adc esi, 88888888h              ;xincshr16+yalwaysinc+daydime
-	jmp short tstartsvline
-tendsvline:
-	pop ebp
-	ret
-*/
+	while (i3)
+	{
+		i3--;
+		if (i3 != 0)
+		{
+			unsigned long adder = tsmach_eax2;
+			i4 += tsmach_ecx;
+			if (i4 < (i4 - tsmach_ecx)) adder = tsmach_eax3;
+			i1 = *((unsigned char *)i5);
+			i2 += tsmach_eax1;
+			if (i2 < (i2 - tsmach_eax1)) i5++;
+			i5 += adder;
+			// tstartsvline
+			if (i1 != 0xff)
+			{
+				unsigned short val;
+				val = ((unsigned char*)tspal)[i1];
+				val |= ((*((unsigned char *)i6))<<8);
+				if (transrev) val = ((val>>8)|(val<<8));
+				i1 = ((unsigned char *)tmach)[val];
+				*((unsigned char *)i6) = (i1&0xff);
+			}
+			i6 += fixchain;
+		}
+	}
 } /* tspritevline */
 
 /* #pragma aux mhline parm [eax][ebx][ecx][edx][esi][edi] */
@@ -998,161 +835,28 @@ void mhline(long i1, long i2, long i3, long i4, long i5, long i6)
     mmach_asm1 = asm1;
     mmach_asm2 = asm2;
     mhlineskipmodify(asm2,i2,i3,i4,i5,i6);
-/*
-_asm_mhline:
-	;asm1 = bxinc
-	;asm2 = byinc
-	;asm3 = shadeoffs
-	;eax = picoffs
-	;ebx = bx
-	;ecx = cnt
-	;edx = ?
-	;esi = by
-	;edi = p
-
-	mov dword [mmach1d+2], eax
-	mov dword [mmach5d+2], eax
-	mov dword [mmach9d+2], eax
-	mov eax, [asm3]
-	mov dword [mmach2d+2], eax
-	mov dword [mmach2da+2], eax
-	mov dword [mmach2db+2], eax
-	mov dword [mmach6d+2], eax
-	mov dword [mmach10d+2], eax
-	mov eax, [asm1]
-	mov dword [mmach3d+2], eax
-	mov dword [mmach7d+2], eax
-	mov eax, [asm2]
-	mov dword [mmach4d+2], eax
-	mov dword [mmach8d+2], eax
-	jmp short _asm_mhlineskipmodify
-*/
 } /* mhline */
 
 /* #pragma aux mhlineskipmodify parm [eax][ebx][ecx][edx][esi][edi] */
-static unsigned char mshift_al;
-static unsigned char mshift_bl;
+static unsigned char mshift_al = 26;
+static unsigned char mshift_bl = 6;
 void mhlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long i5, long i6)
 {
-    unsigned long ebx = i2;
-    i1 = 0;
-    //if (i3 & 0x10000)
-    while (1)
+    unsigned long ebx;
+    int counter = (i3>>16);
+    while (counter >= 0)
     {
-	    ebx >>= mshift_al;
+	    ebx = i2 >> mshift_al;
 	    ebx = shld (ebx, (unsigned)i5, mshift_bl);
-	    i2 += asm1;
 	    i1 = ((unsigned char *)mmach_eax)[ebx];
-	    i5 += asm2;
-	    if ((i1&0xff) != 255)
-	    {
-		    i3 = ((i3&0xffffff00)|(((unsigned char*)mmach_asm3)[i1]));
-		    *((unsigned char *)i6) = (i3&0xff);
-	    }
+	    if ((i1&0xff) != 0xff)
+		    *((unsigned char *)i6) = (((unsigned char*)mmach_asm3)[i1]);
+
+	    i2 += mmach_asm1;
+	    i5 += mmach_asm2;
 	    i6++;
-	    i3 -= 65536;
-	    if (i3 > i3 + 65536) return;
+	    counter--;
     }
-    
-    /*
-    ebx = i2 + mmach_asm1;
-    i2 >>= mshift_al;
-    shld (i2, (unsigned)i5, mshift_bl);
-    esi += mmach_asm2;
-    i3 = ((i3&0xffffff00)|(((unsigned char*)mmach_eax)[i2]));
-    i2 = ebx + mmach_asm1;
-    
-    ebx >>= mshift_al;
-    shld (ebx, (unsigned)i5, mshift_bl);
-    esi += mmach_asm2;
-    i3 = ((i3&0xffff00ff)|(((((unsigned char*)mmach_eax)[ebx])<<8);
-    */
-    /*
-    __asm__ __volatile__ (
-        "call _asm_mhlineskipmodify   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_mhlineskipmodify:
-
-	push ebp
-
-	xor eax, eax
-	mov ebp, ebx
-
-	test ecx, 00010000h
-	jnz short mbeghline
-
-msh1d: shr ebx, 26
-msh2d: shld ebx, esi, 6
-	add ebp, [asm1]
-mmach9d: mov al, byte [ebx+88888888h]    ;picoffs
-	add esi, [asm2]
-	cmp al, 255
-	je mskip5
-
-	mmach10d: mov cl, byte [eax+88888888h]    ;shadeoffs
-	mov byte [edi], cl
-mskip5:
-	inc edi
-	sub ecx, 65536
-	jc NEAR mendhline
-	jmp short mbeghline
-
-ALIGN 16
-mpreprebeghline:                                            ;1st only
-	mov al, cl
-mmach2d: mov al, byte [eax+88888888h]    ;shadeoffs
-	mov byte [edi], al
-
-mprebeghline:
-	add edi, 2
-	sub ecx, 131072
-	jc NEAR mendhline
-mbeghline:
-mmach3d: lea ebx, [ebp+88888888h]            ;bxinc
-msh3d: shr ebp, 26
-msh4d: shld ebp, esi, 6
-mmach4d: add esi, 88888888h                  ;byinc
-mmach1d: mov cl, byte [ebp+88888888h]    ;picoffs
-mmach7d: lea ebp, [ebx+88888888h]            ;bxinc
-
-msh5d: shr ebx, 26
-msh6d: shld ebx, esi, 6
-mmach8d: add esi, 88888888h                  ;byinc
-mmach5d: mov ch, byte [ebx+88888888h]    ;picoffs
-
-	cmp cl, 255
-	je short mskip1
-	cmp ch, 255
-	je short mpreprebeghline
-
-	mov al, cl                                                  ;BOTH
-mmach2da: mov bl, byte [eax+88888888h]    ;shadeoffs
-	mov al, ch
-mmach2db: mov bh, byte [eax+88888888h]    ;shadeoffs
-	mov word [edi], bx
-	add edi, 2
-	sub ecx, 131072
-	jnc short mbeghline
-	jmp mendhline
-mskip1:                                                     ;2nd only
-	cmp ch, 255
-	je short mprebeghline
-
-	mov al, ch
-mmach6d: mov al, byte [eax+88888888h]    ;shadeoffs
-	mov byte [edi+1], al
-	add edi, 2
-	sub ecx, 131072
-	jnc short mbeghline
-mendhline:
-
-	pop ebp
-	ret
-*/
 } /* mhlineskipmodify */
 
 /* #pragma aux msethlineshift parm [eax][ebx] */
@@ -1161,189 +865,56 @@ void msethlineshift(long i1, long i2)
     i1 = 256-i1;
     mshift_al = (i1&0xff);
     mshift_bl = (i2&0xff);
-    /*
-    __asm__ __volatile__ (
-        "call _asm_msethlineshift   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2)
-        : "cc", "memory");
-	*/
-/*
-_asm_msethlineshift:
-	neg al
-	mov byte [msh1d+2], al
-	mov byte [msh2d+3], bl
-	mov byte [msh3d+2], al
-	mov byte [msh4d+3], bl
-	mov byte [msh5d+2], al
-	mov byte [msh6d+3], bl
-	ret
-*/
 } /* msethlineshift */
 
 /* #pragma aux thline parm [eax][ebx][ecx][edx][esi][edi] */
-long thline(long i1, long i2, long i3, long i4, long i5, long i6)
+static long tmach_eax;
+static long tmach_asm3;
+static long tmach_asm1;
+static long tmach_asm2;
+void thlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long i5, long i6);
+void thline(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_thline   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_thline:
-	;asm1 = bxinc
-	;asm2 = byinc
-	;asm3 = shadeoffs
-	;eax = picoffs
-	;ebx = bx
-	;ecx = cnt
-	;edx = ?
-	;esi = by
-	;edi = p
-
-	mov dword [tmach1d+2], eax
-	mov dword [tmach5d+2], eax
-	mov dword [tmach9d+2], eax
-	mov eax, [asm3]
-	mov dword [tmach2d+2], eax
-	mov dword [tmach6d+2], eax
-	mov dword [tmach10d+2], eax
-	mov eax, [asm1]
-	mov dword [tmach3d+2], eax
-	mov dword [tmach7d+2], eax
-	mov eax, [asm2]
-	mov dword [tmach4d+2], eax
-	mov dword [tmach8d+2], eax
-	jmp _asm_thlineskipmodify
-*/
+    tmach_eax = i1;
+    tmach_asm3 = asm3;
+    tmach_asm1 = asm1;
+    tmach_asm2 = asm2;
+    thlineskipmodify(asm2,i2,i3,i4,i5,i6);
 } /* thline */
 
 /* #pragma aux thlineskipmodify parm [eax][ebx][ecx][edx][esi][edi] */
-long thlineskipmodify(long i1, long i2, long i3, long i4, long i5, long i6)
+static unsigned char tshift_al = 26;
+static unsigned char tshift_bl = 6;
+void thlineskipmodify(long i1, unsigned long i2, unsigned long i3, long i4, long i5, long i6)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_thlineskipmodify   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_thlineskipmodify:
+    unsigned long ebx;
+    int counter = (i3>>16);
+    while (counter >= 0)
+    {
+	    ebx = i2 >> tshift_al;
+	    ebx = shld (ebx, (unsigned)i5, tshift_bl);
+	    i1 = ((unsigned char *)tmach_eax)[ebx];
+	    if ((i1&0xff) != 0xff)
+	    {
+		    unsigned short val = (((unsigned char*)tmach_asm3)[i1]);
+		    val |=  (*((unsigned char *)i6)<<8);
+		    if (transrev) val = ((val>>8)|(val<<8));
+		    *((unsigned char *)i6) = (((unsigned char*)tmach_eax)[val]);
+	    }
 
-	push ebp
-
-	xor eax, eax
-	xor edx, edx
-	mov ebp, ebx
-
-	test ecx, 00010000h
-	jnz short tbeghline
-
-tsh1d: shr ebx, 26
-tsh2d: shld ebx, esi, 6
-	add ebp, [asm1]
-tmach9d: mov al, byte [ebx+88888888h]    ;picoffs
-	add esi, [asm2]
-	cmp al, 255
-	je tskip5
-
-transrev4:
-tmach10d: mov dl, byte [eax+88888888h]   ;shadeoffs
-transrev5:
-	mov dh, byte [edi]
-tmach1: mov al, byte [edx+88888888h]     ;transluc
-	mov byte [edi], al
-tskip5:
-	inc edi
-	sub ecx, 65536
-	jc NEAR tendhline
-	jmp short tbeghline
-
-ALIGN 16
-tprebeghline:
-	add edi, 2
-	sub ecx, 131072
-	jc short tendhline
-tbeghline:
-tmach3d: lea ebx, [ebp+88888888h]            ;bxinc
-tsh3d: shr ebp, 26
-tsh4d: shld ebp, esi, 6
-tmach4d: add esi, 88888888h                  ;byinc
-tmach1d: mov cl, byte [ebp+88888888h]    ;picoffs
-tmach7d: lea ebp, [ebx+88888888h]            ;bxinc
-
-tsh5d: shr ebx, 26
-tsh6d: shld ebx, esi, 6
-tmach8d: add esi, 88888888h                  ;byinc
-tmach5d: mov ch, byte [ebx+88888888h]    ;picoffs
-
-	cmp cx, 0ffffh
-	je short tprebeghline
-
-	mov bx, word [edi]
-
-	cmp cl, 255
-	je short tskip1
-	mov al, cl
-transrev6:
-tmach2d: mov dl, byte [eax+88888888h]    ;shadeoffs
-transrev7:
-	mov dh, bl
-tmach2: mov al, byte [edx+88888888h]     ;transluc
-	mov byte [edi], al
-
-	cmp ch, 255
-	je short tskip2
-tskip1:
-	mov al, ch
-transrev8:
-tmach6d: mov dl, byte [eax+88888888h]    ;shadeoffs
-transrev9:
-	mov dh, bh
-tmach3: mov al, byte [edx+88888888h]     ;transluc
-	mov byte [edi+1], al
-tskip2:
-
-	add edi, 2
-	sub ecx, 131072
-	jnc tbeghline
-tendhline:
-
-	pop ebp
-	ret
-*/
+	    i2 += tmach_asm1;
+	    i5 += tmach_asm2;
+	    i6++;
+	    counter--;
+    }
 } /* thlineskipmodify */
 
 /* #pragma aux tsethlineshift parm [eax][ebx] */
-long tsethlineshift(long i1, long i2)
+void tsethlineshift(long i1, long i2)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_tsethlineshift   \n\t"
-       : "=a" (retval)
-        : "a" (i1), "b" (i2)
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_tsethlineshift:
-	neg al
-	mov byte [tsh1d+2], al
-	mov byte [tsh2d+3], bl
-	mov byte [tsh3d+2], al
-	mov byte [tsh4d+3], bl
-	mov byte [tsh5d+2], al
-	mov byte [tsh6d+3], bl
-	ret
-*/
+    i1 = 256-i1;
+    tshift_al = (i1&0xff);
+    tshift_bl = (i2&0xff);
 } /* tsethlineshift */
 
 /* #pragma aux setupslopevlin parm [eax][ebx][ecx] modify [edx] */
@@ -1365,38 +936,6 @@ void setupslopevlin(long i1, long i2, long i3)
     slopemach_ah2 = slopemach_ah1 - (i1&0xff);
     c.f = asm2_f = (float)asm1;
     asm2 = c.i;
-
-    /*
-    __asm__ __volatile__ (
-        "call _asm_setupslopevlin   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3)
-        : "cc", "edx", "memory");
-	*/
-/*
-_asm_setupslopevlin:
-	mov dword [slopmach3+3], ebx    ;ptr
-	mov dword [slopmach5+2], ecx    ;pinc
-	neg ecx
-	mov dword [slopmach6+2], ecx    ;-pinc
-
-	mov edx, 1
-	mov cl, al
-	shl edx, cl
-	dec edx
-	mov cl, ah
-	shl edx, cl
-	mov dword [slopmach7+2], edx
-
-	neg ah
-	mov byte [slopmach2+2], ah
-
-	sub ah, al
-	mov byte [slopmach1+2], ah
-
-	fild dword [asm1]
-	fstp dword [asm2]
-	ret
-*/
 } /* setupslopevlin */
 
 extern long reciptable[2048];
@@ -1408,44 +947,32 @@ extern long fpuasm;
 /* #pragma aux slopevlin parm [eax][ebx][ecx][edx][esi][edi] */
 void slopevlin(long i1, unsigned long i2, long i3, long i4, long i5, long i6)
 {
-	/*
-    __asm__ __volatile__ (
-        "call _asm_slopevlin   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-    return;
-    */
-    {
     bitwisef2i c;
-    unsigned long ebp,ecx,eax,ebx,edx,esi,edi,esp;
+    unsigned long ecx,eax,ebx,edx,esi,edi;
     float a = (float) asm3 + asm2_f;
-    esp = i3;
-    ebp = i1 - slopemach_ecx;
-    asm1 = i2;
-    eax = low32((__int64)globalx3 * (__int64)(i2<<3));	// imull!
-    ecx = low32((__int64)globaly3 * (__int64)(i2<<3));	// imull!
-    esi = i5 + eax;
-    edi = i6 + ecx;
+    i1 -= slopemach_ecx;
+    esi = i5 + low32((__int64)globalx3 * (__int64)(i2<<3));
+    edi = i6 + low32((__int64)globaly3 * (__int64)(i2<<3));
     ebx = i4;
     do {
+	    // -------------
+	    // All this is calculating a fixed point approx. of 1/a
 	    c.f = a;
 	    fpuasm = eax = c.i;
-	    edx = 0;
-	    if ((eax + eax) < eax) edx--;	// edx = sign bit
-	    eax += eax;
+	    edx = (((long)eax) < 0) ? 0xffffffff : 0;
+	    eax = eax << 1;
 	    ecx = (eax>>24);	//  exponent
 	    eax = ((eax&0xffe000)>>11);
 	    ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
 	    eax = reciptable[eax/4];
 	    eax >>= (ecx&0xff);
 	    eax ^= edx;
-	    edx = asm1;
-	    ecx = globalx3;
-	    asm1 = eax;
+	    // -------------
+	    edx = i2;
+	    i2 = eax;
 	    eax -= edx;
-	    edx = globaly3;
-	    ecx = low32((__int64)ecx * (__int64)eax);	// warning! imull
-	    eax = low32((__int64)eax * (__int64)edx);	// warning! imull
+	    ecx = low32((__int64)globalx3 * (__int64)eax);
+	    eax = low32((__int64)globaly3 * (__int64)eax);
 	    a += asm2_f;
 
 	    asm4 = ebx;
@@ -1461,189 +988,31 @@ void slopevlin(long i1, unsigned long i2, long i3, long i4, long i5, long i6)
 		    edx >>= slopemach_ah1;
 		    ebx &= slopemach_edx;
 		    edi += eax;
-		    ebp += slopemach_ecx;
+		    i1 += slopemach_ecx;
 		    edx = ((edx&0xffffff00)|((((unsigned char *)(ebx+edx))[slopemach_ebx])));
-		    ebx = *((unsigned long*)esp); // register trickery
-		    esp -= 4;
+		    ebx = *((unsigned long*)i3); // register trickery
+		    i3 -= 4;
 		    eax = ((eax&0xffffff00)|(*((unsigned char *)(ebx+edx))));
 		    ebx = esi;
-		    *((unsigned char *)ebp) = (eax&0xff);
+		    *((unsigned char *)i1) = (eax&0xff);
 		    edx = edi;
 		    ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
 	    }
 	    ebx = asm4;
 	    ebx -= 8;	// BITSOFPRECISIONPOW
-    // jg = jump if overflow or 0
     } while ((long)ebx > 0);
-    //if (((ebx + 8) < ebx) || (ebx == 0)) goto bigslopeloop;
-    }
-
-/*
-_asm_slopevlin:
-	mov [ebpbak], ebp		; Added [] AH
-	mov [espbak], esp         	; Added [] AH
-
-	sub ecx, esp
-	mov dword [slopmach4+3], ecx
-
-	fild dword [asm3]
-slopmach6: lea ebp, [eax+88888888h]
-	fadd dword [asm2]
-
-	mov [asm1], ebx			; Added [] AH
-	shl ebx, 3
-
-	mov eax, [globalx3]
-	mov ecx, [globaly3]
-	imul eax, ebx
-	imul ecx, ebx
-	add esi, eax
-	add edi, ecx
-
-	mov ebx, edx
-	jmp short bigslopeloop
-ALIGN 16
-bigslopeloop:
-	fst dword [fpuasm]
-
-	mov eax, [fpuasm]
-	add eax, eax
-	sbb edx, edx
-	mov ecx, eax
-	shr ecx, 24
-	and eax, 00ffe000h
-	shr eax, 11
-	sub cl, 2
-	mov eax, dword [reciptable + eax]
-	shr eax, cl
-	xor eax, edx
-	mov edx, [asm1]
-	mov ecx, [globalx3]
-	mov [asm1], eax			; Added [] AH
-	sub eax, edx
-	mov edx, [globaly3]
-	imul ecx, eax
-	imul eax, edx
-
-	fadd dword [asm2]
-
-	cmp ebx, BITSOFPRECISIONPOW
-	mov [asm4], ebx			; Added [] AH
-	mov cl, bl
-	jl short slopeskipmin
-	mov cl, BITSOFPRECISIONPOW
-slopeskipmin:
-
-;eax: yinc.............
-;ebx:   0   0   0   ?
-;ecx: xinc......... cnt
-;edx:         ?
-;esi: xplc.............
-;edi: yplc.............
-;ebp:     videopos
-
-	mov ebx, esi
-	mov edx, edi
-
-beginnerslopeloop:
-slopmach1: shr ebx, 20
-	add esi, ecx
-slopmach2: shr edx, 26
-slopmach7: and ebx, 88888888h
-	add edi, eax
-slopmach5: add ebp, 88888888h                   ;pinc
-slopmach3: mov dl, byte [ebx+edx+88888888h] ;ptr
-slopmach4: mov ebx, dword [esp+88888888h]
-slopmach41: 	sub esp, 4
-slopmach42: 	dec cl
-slopmach43: 	mov al, byte [ebx+edx] ;tptr
-slopmach44: 	mov ebx, esi
-slopmach45: 	mov [ebp], al
-slopmach46: 	mov edx, edi
-slopmach47: 	jnz short beginnerslopeloop
-
-slopmach48: 	mov ebx, [asm4]
-slopmach49: 	sub ebx, BITSOFPRECISIONPOW
-slopmach4a: 	jg NEAR bigslopeloop
-
-slopmach4b: 	ffree st0
-
-slopmach4c: 	mov esp, [espbak]
-slopmach4d: 	mov ebp, [ebpbak]
-	ret
-*/
 } /* slopevlin */
 
 /* #pragma aux settransnormal parm */
-long settransnormal(void)
+void settransnormal(void)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_settransnormal   \n\t"
-       : "=a" (retval)
-        :
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_settransnormal:
-	mov byte [transrev0+1], 83h
-	mov byte [transrev1+1], 27h
-	mov byte [transrev2+1], 3fh
-	mov byte [transrev3+1], 98h
-	mov byte [transrev4+1], 90h
-	mov byte [transrev5+1], 37h
-	mov byte [transrev6+1], 90h
-	mov word [transrev7+0], 0f38ah
-	mov byte [transrev8+1], 90h
-	mov word [transrev9+0], 0f78ah
-	mov byte [transrev10+1], 0a7h
-	mov byte [transrev11+1], 81h
-	mov byte [transrev12+2], 9fh
-	mov word [transrev13+0], 0dc88h
-	mov byte [transrev14+1], 81h
-	mov byte [transrev15+1], 9ah
-	mov byte [transrev16+1], 0a7h
-	mov byte [transrev17+1], 82h
-    ret
-*/
+	transrev = 0;
 } /* settransnormal */
 
 /* #pragma aux settransreverse parm */
-long settransreverse(void)
+void settransreverse(void)
 {
-    long retval = 0;
-    /*
-    __asm__ __volatile__ (
-        "call _asm_settransreverse   \n\t"
-       : "=a" (retval)
-        :
-        : "cc", "memory");
-	*/
-    return(retval);
-/*
-_asm_settransreverse:
-	mov byte [transrev0+1], 0a3h
-	mov byte [transrev1+1], 7h
-	mov byte [transrev2+1], 1fh
-	mov byte [transrev3+1], 0b8h
-	mov byte [transrev4+1], 0b0h
-	mov byte [transrev5+1], 17h
-	mov byte [transrev6+1], 0b0h
-	mov word [transrev7+0], 0d38ah
-	mov byte [transrev8+1], 0b0h
-	mov word [transrev9+0], 0d78ah
-	mov byte [transrev10+1], 87h
-	mov byte [transrev11+1], 0a1h
-	mov byte [transrev12+2], 87h
-	mov word [transrev13+0], 0e388h
-	mov byte [transrev14+1], 0a1h
-	mov byte [transrev15+1], 0bah
-	mov byte [transrev16+1], 87h
-	mov byte [transrev17+1], 0a2h
-    ret
-*/
+	transrev = 1;
 } /* settransreverse */
 
 /* #pragma aux setupdrawslab parm [eax][ebx] */
