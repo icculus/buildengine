@@ -1,0 +1,39 @@
+
+# Makefile for Watcom C 10.6 compilation for DOS i386 protected mode target.
+#
+#  Original file by Ken Silverman, Hacked by Ryan C. Gordon.
+#
+# // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+# // Ken Silverman's official web site: "http://www.advsys.net/ken"
+# // See the included license file "BUILDLIC.TXT" for license info.
+# // This file has been modified from Ken Silverman's original release
+
+game.exe : game.obj engine.obj cache1d.obj multi.obj a.obj kdmeng.obj k.obj
+	wlink f game f engine f cache1d f multi f a f kdmeng f k
+build.exe : build.obj engine.obj cache1d.obj a.obj bstub.obj
+	wlink f build f engine f cache1d f a f bstub
+
+game.obj : game.c build.h names.h pragmas.h
+	wcc386 game /we /5r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+build.obj : build.c build.h pragmas.h
+	wcc386 build /we /5r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+bstub.obj : bstub.c build.h
+	wcc386 bstub /we /5r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+cache1d.obj : cache1d.c pragmas.h
+	wcc386 cache1d /we /5r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+engine.obj : engine.c build.h pragmas.h ves2.h
+	wcc386 engine /we /5r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+a.obj : a.asm
+	wasm a.asm
+multi.obj : multi.c
+	wcc386 multi /we /4r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+kdmeng.obj : kdmeng.c makefile.dos
+	wcc386 kdmeng /we /4r /s /or /d2 /dPLATFORM_DOS /dUSE_I386_ASM
+k.obj : k.asm makefile.
+	wasm k.asm
+dos_drvr.obj : dos_drvr.c doscmpat.h
+	wcc386 dos_drvr /we /5r /s /or /dPLATFORM_DOS /dUSE_I386_ASM
+
+# end of Makefile.dos ...
+
+
