@@ -18,7 +18,6 @@ NEXT ON TAP:
   save.
 - Looking up/down in the editor seems to screw things up. This might not be
   the case in 320x200 resolution. Look into it.
-- Segfault when going to overhead view (right enter twice) in Ken's game.
 - The timer issue.
 - Sound.
 
