@@ -71,7 +71,7 @@ else
 endif
 
 LINKER = gcc
-CFLAGS = $(USE_ASM) -Werror -funsigned-char -DPLATFORM_UNIX -O2 -g -MMD -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
+CFLAGS = $(USE_ASM) -Werror -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
 LDFLAGS = -g $(SDL_LDFLAGS)
 
 GAMEEXE = game
