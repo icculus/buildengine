@@ -5,28 +5,45 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
-# set this to "true" if you are building on Cygwin. Leave it false otherwise.
-#  If you are using cygwin, make sure that NASM is in your path.
-cygwin = false
+# If this makefile fails to detect Cygwin correctly, or you want to force
+#  the build process's behaviour, set it to "true" or "false" (w/o quotes).
+#cygwin := true
+#cygwin := false
+cygwin := autodetect
 
 # You only need to set SDL_INC_DIR and SDL_LIB_DIR if you are using cygwin.
 #  SDL_INC_DIR is where SDL.h and associated headers can be found, and
-#  SDL_LIB_DIR is where SDL.lib is located.
+#  SDL_LIB_DIR is where SDL.lib is located. These may be set as environment
+#  variables, if you'd prefer to not hack the Makefile.
 # examples:
-#   SDL_INC_DIR = C:/2/SDL-1.1.8/include/
-#   SDL_LIB_DIR = C:/2/SDL-1.1.8/lib/
-SDL_INC_DIR = please_set_me_cygwin_users
-SDL_LIB_DIR = please_set_me_cygwin_users
+#   SDL_INC_DIR := C:/2/SDL-1.1.8/include/
+#   SDL_LIB_DIR := C:/2/SDL-1.1.8/lib/
+ifeq ($(strip $(SDL_INC_DIR)),)
+  SDL_INC_DIR := please_set_me_cygwin_users
+endif
+
+ifeq ($(strip $(SDL_LIB_DIR)),)
+  SDL_LIB_DIR := please_set_me_cygwin_users
+endif
 
 
 # To use a different platform's ASM or portable C, change this.
 #  (note that this MUST be -DUSE_I386_ASM right now if you even want a
 #   prayer of having a successful compilation.)
-USE_ASM = -DUSE_I386_ASM
+USE_ASM := -DUSE_I386_ASM
 
 
 
 # Everything below this line is probably okay.
+
+ifeq ($(strip $(cygwin)),autodetect)
+  ifneq ($(strip $(shell gcc -v 2>&1 |grep "cygwin")),)
+    cygwin := true
+  else
+    cygwin := false
+  endif
+endif
+
 
 ifeq ($(strip $(cygwin)),true)
   ifeq ($(strip $(SDL_INC_DIR)),please_set_me_cygwin_users)
@@ -91,7 +108,8 @@ BUILDOBJS := $(BUILDOBJS1:.asm=.o)
 
 CLEANUP = $(GAMEOBJS) $(BUILDOBJS) \
           $(GAMEEXE) $(BUILDEXE) \
-          core
+          $(wildcard *.exe) $(wildcard *.obj) \
+          $(wildcard *~) $(wildcard *.err) core
 
 all: $(BUILDEXE) $(GAMEEXE)
 
