@@ -13,10 +13,10 @@ cygwin = false
 #  SDL_INC_DIR is where SDL.h and associated headers can be found, and
 #  SDL_LIB_DIR is where SDL.lib is located.
 # examples:
-   SDL_INC_DIR = C:/2/SDL-1.1.8/include/
-   SDL_LIB_DIR = C:/2/SDL-1.1.8/lib/
-#SDL_INC_DIR = please_set_me_cygwin_users
-#SDL_LIB_DIR = please_set_me_cygwin_users
+#   SDL_INC_DIR = C:/2/SDL-1.1.8/include/
+#   SDL_LIB_DIR = C:/2/SDL-1.1.8/lib/
+SDL_INC_DIR = please_set_me_cygwin_users
+SDL_LIB_DIR = please_set_me_cygwin_users
 
 
 # To use a different platform's ASM or portable C, change this.
