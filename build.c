@@ -284,7 +284,7 @@ int main(int argc,char **argv)
 
     _platform_init(argc, argv, "BUILD editor by Ken Silverman", "BUILD");
 
-//    if (getenv("BUILD_NOPENTIUM") != NULL)
+    if (getenv("BUILD_NOPENTIUM") != NULL)
         dommxoverlay = 0;
 
 	editstatus = 1;
