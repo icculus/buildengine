@@ -1004,22 +1004,19 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
             else if (packet.header != HEADER_PEER_GREETING)
                 printf("Unexpected packet type from %s\n", ipstr);
 
-            else
+            else if (heard_from[i] == 0)
             {
-                if (heard_from[i] == 0)
-                {
-                    heard_from[i] = packet.id;
-                    remaining--;
+                heard_from[i] = packet.id;
+                remaining--;
 
-                    printf("Heard from %s (id 0x%X). %d player%s to go.\n",
-                            ipstr, (int) packet.id,
-                            remaining, remaining == 1 ? "" : "s");
+                printf("Heard from %s (id 0x%X). %d player%s to go.\n",
+                        ipstr, (int) packet.id,
+                        remaining, remaining == 1 ? "" : "s");
 
-                    /* make sure they've heard from us at all... */
-                    /* !!! FIXME: Could be fatal if packet is dropped... */
-                    send_peer_greeting(allowed_addresses[i].host,
-                                       allowed_addresses[i].port, my_id);
-                } /* if */
+                /* make sure they've heard from us at all... */
+                /* !!! FIXME: Could be fatal if packet is dropped... */
+                send_peer_greeting(allowed_addresses[i].host,
+                                   allowed_addresses[i].port, my_id);
             }
         }
     }
