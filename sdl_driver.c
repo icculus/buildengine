@@ -136,6 +136,174 @@ static int audio_disabled = 0;
 void restore256_palette (void);
 void set16color_palette (void);
 
+static int root_sdl_event_filter(const SDL_Event *event);
+
+
+#define print_sdl_surface_flag(x) if (_surface->flags & x) fprintf( stderr, " %s", #x )
+
+static void output_surface_info(SDL_Surface *_surface)
+{
+    if (_surface == NULL)
+    {
+        fprintf(stderr, "BUILDSDL: -WARNING- You've got a NULL screen surface!\n");
+    }
+    else
+    {
+        fprintf(stderr, "BUILDSDL: screen surface is (%dx%dx%dbpp).\n",
+                _surface->w, _surface->h, _surface->format->BitsPerPixel);
+        fprintf(stderr, "BUILDSDL: New vidmode flags:");
+        print_sdl_surface_flag(SDL_SWSURFACE);
+        print_sdl_surface_flag(SDL_HWSURFACE);
+        print_sdl_surface_flag(SDL_ASYNCBLIT);
+        print_sdl_surface_flag(SDL_ANYFORMAT);
+        print_sdl_surface_flag(SDL_HWPALETTE);
+        print_sdl_surface_flag(SDL_DOUBLEBUF);
+        print_sdl_surface_flag(SDL_FULLSCREEN);
+        print_sdl_surface_flag(SDL_OPENGL);
+        print_sdl_surface_flag(SDL_OPENGLBLIT);
+        print_sdl_surface_flag(SDL_RESIZABLE);
+        print_sdl_surface_flag(SDL_NOFRAME);
+        print_sdl_surface_flag(SDL_HWACCEL);
+        print_sdl_surface_flag(SDL_SRCCOLORKEY);
+        print_sdl_surface_flag(SDL_RLEACCELOK);
+        print_sdl_surface_flag(SDL_RLEACCEL);
+        print_sdl_surface_flag(SDL_SRCALPHA);
+        print_sdl_surface_flag(SDL_PREALLOC);
+        fprintf(stderr, "\n");
+    } // else
+} // output_surface_info
+
+
+static void output_driver_info(void)
+{
+    char buffer[256];
+
+    if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
+    {
+        fprintf(stderr, "BUILDSDL: -WARNING- SDL_VideoDriverName() returned NULL!\n");
+    } // if
+    else
+    {
+        fprintf(stderr, "BUILDSDL: Using video driver \"%s\".\n", buffer);
+    } // else
+} // output_driver_info
+
+
+// !!! This is almost an entire copy of the original setgamemode().
+// !!!  Figure out what is needed for just 2D mode, and separate that
+// !!!  out. Then, place the original setgamemode() back into engine.c,
+// !!!  and remove our simple implementation (and this function.)
+// !!!  Just be sure to keep the non-DOS things, like the window's
+// !!!  titlebar caption.   --ryan.
+static char screenalloctype = 255;
+static void init_new_res_vars(int davidoption)
+{
+    int i = 0;
+    int j = 0;
+
+    setupmouse();
+
+    SDL_WM_SetCaption(titlelong, titleshort);
+
+    xdim = xres = surface->w;
+    ydim = yres = surface->h;
+
+    bytesperline = surface->w;
+    vesachecked = 1;
+    vgacompatible = 1;
+    linearmode = 1;
+	qsetmode = surface->h;
+	activepage = visualpage = 0;
+    horizlookup = horizlookup2 = NULL;
+
+    // !!! add me in!
+    //if (surface->flags & SDL_OPENGL)
+    //    frameplace = NULL;
+    //else
+        frameplace = (long) ( ((Uint8 *) surface->pixels) );
+
+
+  	if (screen != NULL)
+   	{
+       	if (screenalloctype == 0) kkfree((void *)screen);
+   	    if (screenalloctype == 1) suckcache((long *)screen);
+   		screen = NULL;
+   	} // if
+
+    if (davidoption != -1)
+    {
+    	switch(vidoption)
+    	{
+    		case 1:i = xdim*ydim; break;
+    		case 2: xdim = 320; ydim = 200; i = xdim*ydim; break;
+    		case 6: xdim = 320; ydim = 200; i = 131072; break;
+    		default: assert(0);
+    	}
+    	j = ydim*4*sizeof(long);  //Leave room for horizlookup&horizlookup2
+
+    	screenalloctype = 0;
+	    if ((screen = (char *)kkmalloc(i+(j<<1))) == NULL)
+    	{
+	    	 allocache((long *)&screen,i+(j<<1),&permanentlock);
+    		 screenalloctype = 1;
+    	}
+
+        // !!! add me in!
+        //if (surface->flags & SDL_OPENGL)
+        //    frameplace = NULL;
+        //else
+        //{
+            frameplace = FP_OFF(screen);
+          	horizlookup = (long *)(frameplace+i);
+           	horizlookup2 = (long *)(frameplace+i+j);
+        //} // else
+    } // if
+
+    j = 0;
+  	for(i = 0; i <= ydim; i++)
+    {
+        ylookup[i] = j;
+        j += bytesperline;
+    } // for
+
+   	horizycent = ((ydim*4)>>1);
+
+		//Force drawrooms to call dosetaspect & recalculate stuff
+	oxyaspect = oxdimen = oviewingrange = -1;
+
+	setvlinebpl(bytesperline);
+
+    if (davidoption != -1)
+    {
+    	setview(0L,0L,xdim-1,ydim-1);
+    	clearallviews(0L);
+    } // if
+	setbrightness((char)curbrightness,(char *)&palette[0]);
+
+	if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
+
+    SDL_SetEventFilter(root_sdl_event_filter);
+} // init_new_res_vars
+
+
+static void go_to_new_vid_mode(int vidoption, int w, int h)
+{
+    getvalidvesamodes();
+    SDL_ClearError();
+    surface = SDL_SetVideoMode(w, h, 8, sdl_flags);
+    if (surface == NULL)
+    {
+        fprintf(stderr, "BUILDSDL: Failed to set %dx%d video mode!\n"
+                        "  SDL_Error() says [%s].\n", w, h, SDL_GetError());
+        SDL_Quit();
+        exit(13);
+    } // if
+
+    output_surface_info(surface);
+    init_new_res_vars(vidoption);
+} // go_to_new_vid_mode
+
+
 static int sdl_mouse_button_filter(SDL_Event const *event)
 {
         /*
@@ -195,6 +363,103 @@ static int sdl_mouse_motion_filter(SDL_Event const *event)
 } // sdl_mouse_motion_filter
 
 
+/**
+ * Attempt to flip the video surface to fullscreen or windowed mode.
+ *  Attempts to maintain the surface's state, but makes no guarantee
+ *  that pointers (i.e., the surface's pixels field) will be the same
+ *  after this call.
+ *
+ * Thread safe? Likely not.
+ *
+ *   @param surface pointer to surface ptr to toggle. May be different
+ *                  pointer on return. MAY BE NULL ON RETURN IF FAILURE!
+ *   @param flags   pointer to flags to set on surface. The value pointed
+ *                  to will be XOR'd with SDL_FULLSCREEN before use. Actual
+ *                  flags set will be filled into pointer. Contents are
+ *                  undefined on failure. Can be NULL, in which case the
+ *                  surface's current flags are used.
+ *  @return non-zero on success, zero on failure.
+ */
+static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
+{
+    long framesize = 0;
+    void *pixels = NULL;
+    SDL_Color *palette = NULL;
+    SDL_Rect clip;
+    int ncolors = 0;
+    Uint32 tmpflags = 0;
+    int w = 0;
+    int h = 0;
+    int bpp = 0;
+
+    if ( (!surface) || (!(*surface)) )  // don't bother if there's no surface.
+        return(0);
+
+    tmpflags = (*surface)->flags;
+    w = (*surface)->w;
+    h = (*surface)->h;
+    bpp = (*surface)->format->BitsPerPixel;
+
+    if (flags == NULL)  // use the surface's flags.
+        flags = &tmpflags;
+
+    if (!SDL_VideoModeOK(w, h, bpp, (*flags) ^ SDL_FULLSCREEN))
+        return(0);
+
+    SDL_GetClipRect(*surface, &clip);
+
+        // save the contents of the screen.
+    framesize = (w * h) * bpp;
+    pixels = malloc(framesize);
+    if (pixels == NULL)
+        return(0);
+    memcpy(pixels, (*surface)->pixels, framesize);
+
+    if ((*surface)->format->palette != NULL)
+    {
+        ncolors = (*surface)->format->palette->ncolors;
+        palette = malloc(ncolors * sizeof (SDL_Color));
+        if (palette == NULL)
+        {
+            free(pixels);
+            return(0);
+        } // if
+        memcpy(palette, (*surface)->format->palette->colors,
+               ncolors * sizeof (SDL_Color));
+    } // if
+
+    *surface = SDL_SetVideoMode(w, h, bpp, (*flags) ^ SDL_FULLSCREEN);
+
+    if (*surface != NULL)
+        *flags ^= SDL_FULLSCREEN;
+
+    else  // yikes! Try to put it back as it was...
+    {
+        *surface = SDL_SetVideoMode(w, h, bpp, tmpflags);
+        if (*surface == NULL)  // completely screwed.
+        {
+            free(pixels);
+            return(0);
+        } // if
+    } // if
+
+    memcpy((*surface)->pixels, pixels, framesize);
+    free(pixels);
+
+    if (palette != NULL)
+    {
+            // !!! FIXME : No idea if that flags param is right.
+        SDL_SetPalette(*surface, SDL_LOGPAL, palette, 0, ncolors);
+        free(palette);
+    } // if
+
+    SDL_SetClipRect(*surface, &clip);
+
+    output_surface_info(*surface);
+    return(1);
+} // attempt_fullscreen_toggle
+
+
 static int sdl_key_filter(const SDL_Event *event)
 {
     SDL_GrabMode grab_mode = SDL_GRAB_OFF;
@@ -216,8 +481,8 @@ static int sdl_key_filter(const SDL_Event *event)
               (event->key.state == SDL_PRESSED) &&
               (event->key.keysym.mod & KMOD_ALT) )
     {
-        sdl_flags ^= SDL_FULLSCREEN;
-        SDL_WM_ToggleFullScreen(surface);
+        attempt_fullscreen_toggle(&surface, &sdl_flags);
+        assert(surface != NULL);
         return(0);
     } // if
 
@@ -460,22 +725,6 @@ static int load_opengl_library(void)
 #endif  // defined USE_OPENGL
 
 
-
-static void output_video_info(void)
-{
-    char buffer[256];
-
-    if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
-    {
-        fprintf(stderr, "BUILDSDL: -WARNING- SDL_VideoDriverName() returned NULL!\n");
-    } // if
-    else
-    {
-        printf("BUILDSDL: Using video driver \"%s\".\n", buffer);
-    } // else
-} // output_video_info
-
-
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
     #if ((PLATFORM_UNIX) && (defined USE_I386_ASM))
@@ -612,7 +861,7 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         exit(1);
     } // if
 
-    output_video_info();
+    output_driver_info();
 
     #ifdef USE_OPENGL
         if (load_opengl_library() == -1)
@@ -637,143 +886,6 @@ int screencapture(char *filename, char inverseit)
     fprintf(stderr, "screencapture() is a stub in the SDL driver.\n");
     return(0);
 } // screencapture
-
-
-// !!! This is almost an entire copy of the original setgamemode().
-// !!!  Figure out what is needed for just 2D mode, and separate that
-// !!!  out. Then, place the original setgamemode() back into engine.c,
-// !!!  and remove our simple implementation (and this function.)
-// !!!  Just be sure to keep the non-DOS things, like the window's
-// !!!  titlebar caption.   --ryan.
-static char screenalloctype = 255;
-static void init_new_res_vars(int davidoption)
-{
-    int i = 0;
-    int j = 0;
-
-    setupmouse();
-
-    SDL_WM_SetCaption(titlelong, titleshort);
-
-    xdim = xres = surface->w;
-    ydim = yres = surface->h;
-
-    bytesperline = surface->w;
-    vesachecked = 1;
-    vgacompatible = 1;
-    linearmode = 1;
-	qsetmode = surface->h;
-	activepage = visualpage = 0;
-    horizlookup = horizlookup2 = NULL;
-
-    // !!! add me in!
-    //if (surface->flags & SDL_OPENGL)
-    //    frameplace = NULL;
-    //else
-        frameplace = (long) ( ((Uint8 *) surface->pixels) );
-
-
-  	if (screen != NULL)
-   	{
-       	if (screenalloctype == 0) kkfree((void *)screen);
-   	    if (screenalloctype == 1) suckcache((long *)screen);
-   		screen = NULL;
-   	} // if
-
-    if (davidoption != -1)
-    {
-    	switch(vidoption)
-    	{
-    		case 1:i = xdim*ydim; break;
-    		case 2: xdim = 320; ydim = 200; i = xdim*ydim; break;
-    		case 6: xdim = 320; ydim = 200; i = 131072; break;
-    		default: assert(0);
-    	}
-    	j = ydim*4*sizeof(long);  //Leave room for horizlookup&horizlookup2
-
-    	screenalloctype = 0;
-	    if ((screen = (char *)kkmalloc(i+(j<<1))) == NULL)
-    	{
-	    	 allocache((long *)&screen,i+(j<<1),&permanentlock);
-    		 screenalloctype = 1;
-    	}
-
-        // !!! add me in!
-        //if (surface->flags & SDL_OPENGL)
-        //    frameplace = NULL;
-        //else
-        //{
-            frameplace = FP_OFF(screen);
-          	horizlookup = (long *)(frameplace+i);
-           	horizlookup2 = (long *)(frameplace+i+j);
-        //} // else
-    } // if
-
-    j = 0;
-  	for(i = 0; i <= ydim; i++)
-    {
-        ylookup[i] = j;
-        j += bytesperline;
-    } // for
-
-   	horizycent = ((ydim*4)>>1);
-
-		//Force drawrooms to call dosetaspect & recalculate stuff
-	oxyaspect = oxdimen = oviewingrange = -1;
-
-	setvlinebpl(bytesperline);
-
-    if (davidoption != -1)
-    {
-    	setview(0L,0L,xdim-1,ydim-1);
-    	clearallviews(0L);
-    } // if
-	setbrightness((char)curbrightness,(char *)&palette[0]);
-
-	if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
-
-    SDL_SetEventFilter(root_sdl_event_filter);
-} // init_new_res_vars
-
-
-#define print_flag(x) if (surface->flags & x) printf( " %s", #x )
-
-void go_to_new_vid_mode(int vidoption, int w, int h)
-{
-    getvalidvesamodes();
-    SDL_ClearError();
-    surface = SDL_SetVideoMode(w, h, 8, sdl_flags);
-    if (surface == NULL)
-    {
-        fprintf(stderr, "BUILDSDL: Failed to set %dx%d video mode!\n"
-                        "  SDL_Error() says [%s].\n", w, h, SDL_GetError());
-        SDL_Quit();
-        exit(13);
-    } // if
-
-    fprintf(stderr, "BUILDSDL: New vidmode flags:");
-    print_flag(SDL_SWSURFACE);
-    print_flag(SDL_HWSURFACE);
-    print_flag(SDL_ASYNCBLIT);
-    print_flag(SDL_ANYFORMAT);
-    print_flag(SDL_HWPALETTE);
-    print_flag(SDL_DOUBLEBUF);
-    print_flag(SDL_FULLSCREEN);
-    print_flag(SDL_OPENGL);
-    print_flag(SDL_OPENGLBLIT);
-    print_flag(SDL_RESIZABLE);
-    print_flag(SDL_NOFRAME);
-    print_flag(SDL_HWACCEL);
-    print_flag(SDL_SRCCOLORKEY);
-    print_flag(SDL_RLEACCELOK);
-    print_flag(SDL_RLEACCEL);
-    print_flag(SDL_SRCALPHA);
-    print_flag(SDL_PREALLOC);
-    fprintf(stderr, "\n");
-
-    init_new_res_vars(vidoption);
-} // go_to_new_vid_mode
-
 
 
 void setvmode(int mode)
