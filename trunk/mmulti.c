@@ -1065,6 +1065,10 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
                 allowed_addresses[i].host = allowed_addresses[i+1].host;
                 allowed_addresses[i+1].host = tmpi;
 
+                tmps = allowed_addresses[i].port;
+                allowed_addresses[i].port = allowed_addresses[i+1].port;
+                allowed_addresses[i+1].port = tmps;
+
                 remaining = 1;  /* yay for bubble sorting! */
             }
         }
@@ -1124,8 +1128,7 @@ static int parse_interface(char *str, int *ip, short *udpport)
     if (!parse_ip(str, ip))
         return(0);
 
-    if (ptr) /* portnum specified? */
-        *udpport = (short) atoi(ptr + 1);
+    *udpport = (ptr != NULL) ? (short) atoi(ptr + 1) : BUILD_DEFAULT_UDP_PORT;
 
     return(1);
 }
@@ -1220,7 +1223,7 @@ static int parse_udp_config(const char *cfgfile, gcomtype *gcom)
                 if (gcom->numplayers >= MAX_PLAYERS - 1)
                     printf("WARNING: Too many allowed IP addresses.\n");
 
-                else if (parse_interface(tok, &host,&port))
+                else if (parse_interface(tok, &host, &port))
                 {
                     allowed_addresses[gcom->numplayers].host = host;
                     allowed_addresses[gcom->numplayers].port = port;
