@@ -18,6 +18,9 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #ifndef PLATFORM_WIN32
 #include <sys/param.h>
 #endif
@@ -98,6 +101,29 @@ extern long setvlinebpl(long);
 
 
 #define UNLOCK_SURFACE_AND_RETURN  if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface); return;
+
+static unsigned char tempbuf[MAXWALLS];
+static char pcxheader[128] =
+{
+        0xa,0x5,0x1,0x8,0x0,0x0,0x0,0x0,0x3f,0x1,0xc7,0x0,
+        0x40,0x1,0xc8,0x0,0x0,0x0,0x0,0x8,0x8,0x8,0x10,0x10,
+        0x10,0x18,0x18,0x18,0x20,0x20,0x20,0x28,0x28,0x28,0x30,0x30,
+        0x30,0x38,0x38,0x38,0x40,0x40,0x40,0x48,0x48,0x48,0x50,0x50,
+        0x50,0x58,0x58,0x58,0x60,0x60,0x60,0x68,0x68,0x68,0x70,0x70,
+        0x70,0x78,0x78,0x78,0x0,0x1,0x40,0x1,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+};
+
+
+static char vgapal16[48] =
+{
+        00,00,00,00,00,42,00,42,00,00,42,42,42,00,00,42,00,42,42,21,00,42,42,42,
+        21,21,21,21,21,63,21,63,21,21,63,63,63,21,21,63,21,63,63,63,21,63,63,63,
+};
 
 
 int _argc = 0;
@@ -1414,11 +1440,140 @@ int setvesa(long x, long y)
     return(0);
 } /* setvesa */
 
-
-int screencapture(char *filename, char inverseit)
+int screencapture(char *_filename, char inverseit)
 {
-    fprintf(stderr, "screencapture() is a stub in the SDL driver.\n");
-    return(0);
+	char *ptr = NULL;
+	int fil = -1;
+    long i, bufplc, p, col, ncol, leng, numbytes, xres;
+    int captcnt;
+    size_t flen = strlen(_filename);
+    char *filename = alloca(flen + 1);
+    strcpy(filename, _filename);
+
+    for (captcnt = 0; (captcnt <= 9999) && (fil == -1); captcnt++)
+    {
+        filename[flen-8] = ((captcnt/1000)%10)+48;
+        filename[flen-7] = ((captcnt/100)%10)+48;
+        filename[flen-6] = ((captcnt/10)%10)+48;
+        filename[flen-5] = (captcnt%10)+48;
+        fil = open(filename, O_BINARY|O_CREAT|O_EXCL|O_WRONLY,
+                    S_IRUSR|S_IWUSR|S_IRGRP|S_IROTH);
+    }
+
+    if (fil == -1)
+        return -1;
+
+	if (qsetmode == 200)
+	{
+		pcxheader[8] = ((xdim-1)&255); pcxheader[9] = (((xdim-1)>>8)&255);
+		pcxheader[10] = ((ydim-1)&255); pcxheader[11] = (((ydim-1)>>8)&255);
+		pcxheader[12] = (xdim&255); pcxheader[13] = ((xdim>>8)&255);
+		pcxheader[14] = (ydim&255); pcxheader[15] = ((ydim>>8)&255);
+		pcxheader[66] = (xdim&255); pcxheader[67] = ((xdim>>8)&255);
+	}
+	else
+	{
+		pcxheader[8] = ((640-1)&255); pcxheader[9] = (((640-1)>>8)&255);
+		pcxheader[10] = ((qsetmode-1)&255); pcxheader[11] = (((qsetmode-1)>>8)&255);
+		pcxheader[12] = (640&255); pcxheader[13] = ((640>>8)&255);
+		pcxheader[14] = (qsetmode&255); pcxheader[15] = ((qsetmode>>8)&255);
+		pcxheader[66] = (640&255); pcxheader[67] = ((640>>8)&255);
+	}
+
+	write(fil,&pcxheader[0],128);
+
+	if (qsetmode == 200)
+	{
+		ptr = (char *)frameplace;
+		numbytes = xdim*ydim;
+		xres = xdim;
+	}
+	else
+	{
+		numbytes = (mul5(qsetmode)<<7);
+		xres = 640;
+	}
+
+	bufplc = 0; p = 0;
+	while (p < numbytes)
+	{
+//		koutp(97,kinp(97)|3);
+
+		if (qsetmode == 200) { col = *ptr; p++; ptr++; }
+		else
+		{
+			col = readpixel(p);
+			p++;
+			if ((inverseit == 1) && (((col&7) == 0) || ((col&7) == 7))) col ^= 15;
+		}
+
+		leng = 1;
+
+		if (qsetmode == 200) ncol = *ptr;
+		else
+		{
+			ncol = readpixel(p);
+			if ((inverseit == 1) && (((ncol&7) == 0) || ((ncol&7) == 7))) ncol ^= 15;
+		}
+
+		while ((ncol == col) && (p < numbytes) && (leng < 63) && ((p%xres) != 0))
+		{
+			leng++;
+
+			if (qsetmode == 200) { p++; ptr++; ncol = *ptr; }
+			else
+			{
+				p++;
+				ncol = readpixel(p);
+				if ((inverseit == 1) && (((ncol&7) == 0) || ((ncol&7) == 7))) ncol ^= 15;
+			}
+		}
+
+		//koutp(97,kinp(97)&252);
+
+		if ((leng > 1) || (col >= 0xc0))
+		{
+			tempbuf[bufplc++] = (leng|0xc0);
+			if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+		}
+		tempbuf[bufplc++] = col;
+		if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+	}
+
+	tempbuf[bufplc++] = 0xc;
+	if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+
+	if (qsetmode == 200)
+	{
+		VBE_getPalette(0,256,&tempbuf[4096]);
+		for(i=0;i<256;i++)
+		{
+			tempbuf[bufplc++] = (tempbuf[(i<<2)+4096+2]<<2);
+			if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+			tempbuf[bufplc++] = (tempbuf[(i<<2)+4096+1]<<2);
+			if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+			tempbuf[bufplc++] = (tempbuf[(i<<2)+4096+0]<<2);
+			if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+		}
+	}
+	else
+	{
+		for(i=0;i<768;i++)
+		{
+			if (i < 48)
+				tempbuf[bufplc++] = (vgapal16[i]<<2);
+			else
+				tempbuf[bufplc++] = 0;
+			if (bufplc == 4096) { bufplc = 0; if (write(fil,&tempbuf[0],4096) < 4096) { close(fil); return(-1); } }
+		}
+
+	}
+
+	if (bufplc > 0)
+		if (write(fil,&tempbuf[0],bufplc) < bufplc) { close(fil); return(-1); }
+
+	close(fil);
+	return(0);
 } /* screencapture */
 
 
