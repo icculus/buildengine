@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <malloc.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -510,7 +511,8 @@ extern long drawslab(long,long,long,long,long,long);
 
 #else
 
-    #ifdef USE_I386_ASM
+    // This isn't working right now?  --ryan.
+    #if 0  // def USE_I386_ASM
 
         static long nsqrtasm(int i1)
         {
@@ -536,13 +538,7 @@ extern long drawslab(long,long,long,long,long,long);
 
         static long nsqrtasm(long eax)
         {
-            int cx = (eax & 0xff000000) ? shlookup[((eax >> 24)) + (4096)] :
-                                          shlookup[(eax >> 12)];
-            eax >>= (cx & 0xff);
-            cx = ((cx & 0xff00) >> 8);
-            eax = sqrtable[eax] | (eax & 0xffff0000);
-            eax >>= cx;
-            return(eax);
+            return((long) sqrt(eax));
         } // nsqrtasm
 
     #endif
@@ -579,14 +575,14 @@ extern long drawslab(long,long,long,long,long,long);
             __asm__ __volatile__ ("
               movl $0x40000000, %%eax
         	  movl $0x20000000, %%ebx
-	          begit: cmpl %%eax, %%ecx
-        	  jl skip
+	          msqrasm_begit: cmpl %%eax, %%ecx
+        	  jl msqrasm_skip
 	          subl %%eax, %%ecx
     	      leal (%%eax, %%ebx, $4), %%eax
-        	  skip: subl %%ebx, %%eax
+        	  msqrasm_skip: subl %%ebx, %%eax
 	          shrl $1, %%eax
     	      shrl $2, %%ebx
-         	  jnz begit
+         	  jnz msqrasm_begit
         	  cmpl %%eax, %%ecx
     	      sbbl $-1, %%eax
         	  shrl $1, %%eax
@@ -595,9 +591,10 @@ extern long drawslab(long,long,long,long,long,long);
         } // msqrtasm
 
     #else
-        static long msqrtasm (int input1)
+        static inline long msqrtasm (int input1)
         {
-            fprintf(stderr, "%s, line %d; msqrtasm(): STUB.\n", __FILE__, __LINE__);
+            // this isn't used in the C version, as it just sets up a table
+            //  for use by the ASM version of ksqrtasm. --ryan.
         } // msqrtasm
     #endif
 #endif
