@@ -18,7 +18,9 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <string.h>
+#ifndef PLATFORM_WIN32
 #include <sys/param.h>
+#endif
 #include "platform.h"
 
 #if (!defined PLATFORM_SUPPORTS_SDL)
@@ -885,6 +887,15 @@ int _joystick_axis(int axis)
     return(SDL_JoystickGetAxis(joystick, axis));
 } /* _joystick_axis */
 
+int _joystick_hat(int hat)
+{
+    if (joystick == NULL)
+    {   
+        return(-1);
+    }
+
+    return(SDL_JoystickGetHat(joystick, hat));
+} /* _joystick_axis */
 
 int _joystick_button(int button)
 {
