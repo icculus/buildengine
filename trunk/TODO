@@ -46,5 +46,7 @@ NEXT ON TAP:
    the align at 4-space tabstops? Tabs suck.
 - Can we move those SDL __cdecl pragmas out of display.h?
 - Add info to README on porting to new compilers.
+- Long filenames confuse the editor's file "dialog".
+
 // end of TODO ...
 
