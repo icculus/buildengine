@@ -274,14 +274,14 @@ void rmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
     i6 = i1;
     do {
 	    i3 = ((i3&0xffffff00)|(*((unsigned char *)i2)));
-	    i4 -= rmach_eax;
-	    ebp = (((i4+rmach_eax) < i4) ? -1 : 0);
-	    i5 -= rmach_ebx;
-	    if ((i5 + rmach_ebx) < i5) i2 -= (rmach_ecx+1);
-	    else i2 -= rmach_ecx;
-	    ebp &= rmach_esi;
+	    i4 -= rmmach_eax;
+	    ebp = (((i4+rmmach_eax) < i4) ? -1 : 0);
+	    i5 -= rmmach_ebx;
+	    if ((i5 + rmmach_ebx) < i5) i2 -= (rmmach_ecx+1);
+	    else i2 -= rmmach_ecx;
+	    ebp &= rmmach_esi;
 	    if ((i3&0xff) != 255) {
-		    i1 = ((i1&0xffffff00)|(((unsigned char *)i3)[rmach_edx]));
+		    i1 = ((i1&0xffffff00)|(((unsigned char *)i3)[rmmach_edx]));
 		    ((unsigned char *)rmach6b)[i6] = (i1&0xff);
 	    }
 	    i2 -= ebp;
