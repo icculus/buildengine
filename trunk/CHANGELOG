@@ -330,6 +330,11 @@
             compat header cleanups. Figured out how to get SDL working fully
             with Watcom C (-ei command line to wcc386.exe, and declare your
             SDL callbacks as __cdecl, etc.).
+02192001 - More Watcom fixes; build.exe's 3D mode is now fully operational.
+            One graphical glitch in 2D mode, still, but otherwise appears
+            fully functional. Put safety checks in a.h. Put a fix in build.c's
+            overheadeditor(), so it doesn't try to reference element -1 in an
+            array when clicking the left mouse button. Other ASM cleanups.
 
 --ryan. (icculus@lokigames.com)
 
