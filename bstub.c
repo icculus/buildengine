@@ -5,6 +5,10 @@
  * This file has been modified from Ken Silverman's original release
  */
 
+#if PLATFORM_DOS
+#include <io.h>
+#endif
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <sys/types.h>
