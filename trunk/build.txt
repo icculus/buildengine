@@ -4939,18 +4939,24 @@ spriteisdeletedskip:
 							 volatile char keyfifoplc, keyfifoend;
 							 volatile char readch, oldreadch, extended, keytemp;
 
-					2.  initkeys()
+					2.  _initkeys()
 
 					3.  uninitkeys()
 
 					4.  keyhandler()
 
-					5.  Make sure to call initkeys and uninitkeys.  A good place
+					5.  Make sure to call _initkeys and uninitkeys.  A good place
 							would be next to where you call inittimer / uninittimer.
 
 					I didn't put my keyboard handler into BSTUB since I am using
 				keystatus throughout build.obj.  Besides I didn't want to anybody
 				too bad of a headache for one upload.
+
+                [ Updated "initkeys" to "_initkeys", above. This is to
+                  intentionally crash the linking process for games that
+                  haven't updated to use the port's engine; otherwise, the
+                  keyboard driver init won't run, and god knows what would
+                  happen then. --ryan. ]
 
 			 - Did you know that screencapture inverses black and white if you
 					hold either shift key down?  This option is useful for

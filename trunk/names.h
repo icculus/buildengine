@@ -1,4 +1,4 @@
-//Be careful when changing this file - it is parsed by Editart and Build.
+/*Be careful when changing this file - it is parsed by Editart and Build.*/
 #define SWITCH1ON 15
 #define SLIME 34
 #define BACKGROUND 37

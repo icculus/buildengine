@@ -7,24 +7,30 @@
  *  (including this file) to BUILD.
  */
 
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file IS NOT A PART OF Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file IS NOT A PART OF Ken Silverman's original release
+ */
 
 #ifndef _INCLUDE_ENGINE_H_
 #define _INCLUDE_ENGINE_H_
 
-#define SUPERBUILD  // don't touch this.
+#define SUPERBUILD  /* don't touch this. */
 
-// this must be implemented by every program that uses the BUILD engine.
-//  engine.c calls this function in several places.
-//  See Ken's test game (in game.c), and his editor (in bstub.c) for examples.
+/*
+ * this must be implemented by every program that uses the BUILD engine.
+ *  engine.c calls this function in several places.
+ *  See Ken's test game (in game.c), and his editor (in bstub.c) for examples.
+ */
 void faketimerhandler(void);
 
-// exported engine functions, in absolutely no particular order.
-//  See build.txt, build2.txt...and anything else with a .txt extention for
-//  information on using these functions that may or may not be accurate. :)
+/*
+ * exported engine functions, in absolutely no particular order.
+ *  See build.txt, build2.txt...and anything else with a .txt extention for
+ *  information on using these functions that may or may not be accurate. :)
+ */
 int initmouse(void);
 int setgamemode(char davidoption, long daxdim, long daydim);
 int getceilzofslope(short sectnum, long dax, long day);
@@ -48,8 +54,8 @@ int getmmxoverlay(void);
 void nextpage(void);
 void drawrooms(long daposx, long daposy, long daposz,
                short daang, long dahoriz, short dacursectnum);
-int loadboard(unsigned char *filename, long *daposx, long *daposy,
-			long *daposz, short *daang, short *dacursectnum);
+int loadboard(char *filename, long *daposx, long *daposy,
+			  long *daposz, short *daang, short *dacursectnum);
 void drawmasks(void);
 void printext256(long xpos, long ypos, short col, short backcol,
 			char name[82], char fontsize);
@@ -137,9 +143,9 @@ int clipinsidebox(long x, long y, short wallnum, long walldist);
 void qloadkvx(long voxindex, char *filename);
 #endif
 
-#endif // !defined _INCLUDE_ENGINE_H_
+#endif /* !defined _INCLUDE_ENGINE_H_ */
 
-// end of engine.h ...
+/* end of engine.h ... */
 
 
 

@@ -1,7 +1,9 @@
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file has been modified from Ken Silverman's original release
+ */
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -15,10 +17,10 @@
 #include "pragmas.h"
 #include "names.h"
 #include "bstub.h"
-#include "cache1d.h"  // rcg05232001 need groupfile support.
-#include "display.h"  // rcg05232001 need some "vesa" routines.
+#include "cache1d.h"  /* rcg05232001 need groupfile support. */
+#include "display.h"  /* rcg05232001 need some "vesa" routines. */
 
-// !!! temporary externs.
+/* !!! temporary externs. */
 extern long total_rendered_frames, total_render_time;
 
 extern char keystatus[256];
@@ -72,24 +74,26 @@ extern void printext16(long xpos, long ypos, short col, short backcol,
 extern void statusbar_printext16(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
 #endif
 
-//Detecting 2D / 3D mode:
-//   qsetmode is 200 in 3D mode
-//   qsetmode is 350/480 in 2D mode
-//
-//You can read these variables when F5-F8 is pressed in 3D mode only:
-//
-//   If (searchstat == 0)  WALL        searchsector=sector, searchwall=wall
-//   If (searchstat == 1)  CEILING     searchsector=sector
-//   If (searchstat == 2)  FLOOR       searchsector=sector
-//   If (searchstat == 3)  SPRITE      searchsector=sector, searchwall=sprite
-//   If (searchstat == 4)  MASKED WALL searchsector=sector, searchwall=wall
-//
-//   searchsector is the sector of the selected item for all 5 searchstat's
-//
-//   searchwall is undefined if searchstat is 1 or 2
-//   searchwall is the wall if searchstat = 0 or 4
-//   searchwall is the sprite if searchstat = 3 (Yeah, I know - it says wall,
-//                                      but trust me, it's the sprite number)
+/*
+ * Detecting 2D / 3D mode:
+ *    qsetmode is 200 in 3D mode
+ *    qsetmode is 350/480 in 2D mode
+ * 
+ * You can read these variables when F5-F8 is pressed in 3D mode only:
+ * 
+ *    If (searchstat == 0)  WALL        searchsector=sector, searchwall=wall
+ *    If (searchstat == 1)  CEILING     searchsector=sector
+ *    If (searchstat == 2)  FLOOR       searchsector=sector
+ *    If (searchstat == 3)  SPRITE      searchsector=sector, searchwall=sprite
+ *    If (searchstat == 4)  MASKED WALL searchsector=sector, searchwall=wall
+ * 
+ *    searchsector is the sector of the selected item for all 5 searchstat's
+ * 
+ *    searchwall is undefined if searchstat is 1 or 2
+ *    searchwall is the wall if searchstat = 0 or 4
+ *    searchwall is the sprite if searchstat = 3 (Yeah, I know - it says wall,
+ *                                       but trust me, it's the sprite number)
+ */
 
 long ofinetotalclock, ototalclock, averagefps;
 #define AVERAGEFRAMES 32
@@ -134,14 +138,14 @@ long gettimer42(void);
 #endif
 
 
-// rcg05232001 These are defined in build.c ...
+/* rcg05232001 These are defined in build.c ... */
 void editinput(void);
 void clearmidstatbar16(void);
 short getnumber16(char namestart[80], short num, long maxnumber);
 void printmessage16(char name[82]);
 
 
-// rcg05232001 much thanks to TerminX (Mapster) for the lookup.dat info!
+/* rcg05232001 much thanks to TerminX (Mapster) for the lookup.dat info! */
 static int use_palette_lookup_file(const char *lookup_file)
 {
     int retval = 0;
@@ -164,19 +168,19 @@ static int use_palette_lookup_file(const char *lookup_file)
                 {
                     for (i = 0, ptr = tempbuf; i < num_palettes; i++)
                     {
-                        makepalookup(*ptr, ptr + 1, 0, 0, 0, 1);
+                        makepalookup(*ptr, (char *) ptr + 1, 0, 0, 0, 1);
                         ptr += 257;
-                    } // for
-                    retval = 1;  // success.
-                } // if
+                    } /* for */
+                    retval = 1;  /* success. */
+                } /* if */
                 free(tempbuf);
-            } // if
-        } // if
+            } /* if */
+        } /* if */
         kclose(in);
-    } // if
+    } /* if */
 
     return(retval);
-} // use_lookup_dat
+} /* use_lookup_dat */
 
 
 void ExtInit(void)
@@ -195,22 +199,22 @@ void ExtInit(void)
 	getch();
 	*/
 
-        // Now we check for an envr variable first, for Duke/SW/etc groups.
+        /* Now we check for an envr variable first, for Duke/SW/etc groups. */
     if (grpname == NULL)
         grpname = "stuff.dat";
 
-        // rcg08122000 panic if groupfile is missing.
+        /* rcg08122000 panic if groupfile is missing. */
 	if (initgroupfile(grpname) < 0)
     {
         fprintf(stderr, "BUILDGRP: Cannot open \"%s\"! Aborting...\n", grpname);
         exit(55);
-    } // if
+    } /* if */
 
 	if ((fil = open("setup.dat",O_BINARY|O_RDWR,S_IREAD)) != -1)
 	{
 		read(fil,&option[0],NUMOPTIONS);
 		read(fil,&keys[0],NUMKEYS);
-		memcpy((void *)buildkeys,(void *)keys,NUMKEYS);   //Trick to make build use setup.dat keys
+		memcpy((void *)buildkeys,(void *)keys,NUMKEYS);   /* Trick to make build use setup.dat keys */
 		close(fil);
 	}
 	if (option[4] > 0) option[4] = 0;
@@ -218,17 +222,19 @@ void ExtInit(void)
 	initengine();
 	vidoption = option[0]; xdim = vesares[option[6]&15][0]; ydim = vesares[option[6]&15][1];
 
-		//You can load your own palette lookup tables here if you just
-		//copy the right code!
-
-        // We try to use a Duke3D lookup.dat first. If that fails, then
-        //  we revert to KenBuild's original method.  --ryan.
+		/*
+         * You can load your own palette lookup tables here if you just
+		 * copy the right code! (sez Ken).
+         *
+         * We try to use a Duke3D lookup.dat first. If that fails, then
+         *  we revert to KenBuild's original method.  (sez Ryan).
+         */
     if (!use_palette_lookup_file("lookup.dat"))
     {
     	for(i=0;i<256;i++)
-    		tempbuf[i] = ((i+32)&255);  //remap colors for screwy palette sectors
+    		tempbuf[i] = ((i+32)&255);  /* remap colors for screwy palette sectors */
     	makepalookup(16,tempbuf,0,0,0,1);
-    } // if
+    } /* if */
 
 	kensplayerheight = 32;
 	zmode = 0;
@@ -247,11 +253,11 @@ void ExtPreCheckKeys(void)
 {
 	long cosang, sinang, dx, dy, mindx, i;
 
-	if (keystatus[0x3e])  //F4 - screen re-size
+	if (keystatus[0x3e])  /* F4 - screen re-size */
 	{
 		keystatus[0x3e] = 0;
 
-			//cycle through all vesa modes, then screen-buffer mode
+			/* cycle through all vesa modes, then screen-buffer mode */
 		getvalidvesamodes();
 		if (vidoption == 1)
 		{
@@ -268,7 +274,7 @@ void ExtPreCheckKeys(void)
 		else if (validmodecnt > 0)
 			setgamemode(1,validmodexdim[0],validmodeydim[0]);
 
-		inittimer42();  //Must init here because VESA 0x4F02 messes timer 2
+		inittimer42();  /* Must init here because VESA 0x4F02 messes timer 2 */
 	}
 
 	if (keystatus[0x2a]|keystatus[0x36])
@@ -285,7 +291,7 @@ void ExtPreCheckKeys(void)
 	if (hang != 0)
 	{
 		walock[4094] = 255;
-		if (waloff[4094] == 0) allocache(&waloff[4094],240L*384L,&walock[4094]);
+		if (waloff[4094] == 0) allocache(&waloff[4094],240L*384L,(unsigned char *) &walock[4094]);
 		setviewtotile(4094,240L,384L);
 
 		cosang = sintable[(hang+512)&2047];
@@ -346,7 +352,7 @@ void ExtCheckKeys(void)
 {
 	long i, j, p, y, dx, dy, cosang, sinang, bufplc, tsizy, tsizyup15;
 
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
 		if (hang != 0)
 		{
@@ -375,7 +381,7 @@ void ExtCheckKeys(void)
 			sprintf(tempbuf,"%ld",(hang*180)>>10);
 
             #ifdef USE_OPENGL
-//!!! Fill me in!
+                /* !!! Fill me in! */
             #else
     			printext256(0L,8L,31,-1,tempbuf,1);
             #endif
@@ -389,15 +395,15 @@ void ExtCheckKeys(void)
 		if (!timerinited)
 		{
 			timerinited = 1;
-			inittimer42();  //Must init here because VESA 0x4F02 messes timer 2
+			inittimer42();  /* Must init here because VESA 0x4F02 messes timer 2 */
 		}
 		i = totalclock-ototalclock; ototalclock += i;
 		j = ofinetotalclock-gettimer42(); ofinetotalclock -= j;
 		i = ((i*(1193181/120)-(j&65535)+32768)&0xffff0000)+(j&65535);
 		if (i) { frameval[framecnt&(AVERAGEFRAMES-1)] = 11931810/i; framecnt++; }
 
-            // !!! This ifdef should be temporary!  --ryan.  !!!
-  			//Print MAX FRAME RATE
+            /* !!! This ifdef should be temporary!  --ryan.  !!! */
+  			/*Print MAX FRAME RATE */
         #ifdef PLATFORM_DOS
     		i = frameval[(framecnt-1)&(AVERAGEFRAMES-1)];
     		for(j=AVERAGEFRAMES-1;j>0;j--) i = max(i,frameval[j]);
@@ -408,7 +414,7 @@ void ExtCheckKeys(void)
         #endif
 
         #ifdef USE_OPENGL
-            // !!! Fill me in!
+            /* !!! Fill me in! */
         #else
     		printext256(0L,0L,31,-1,tempbuf,1);
         #endif
@@ -475,30 +481,32 @@ const char *ExtGetSpriteCaption(short spritenum)
 	return(tempbuf);
 }
 
-//printext16 parameters:
-//printext16(long xpos, long ypos, short col, short backcol,
-//           char name[82], char fontsize)
-//  xpos 0-639   (top left)
-//  ypos 0-479   (top left)
-//  col 0-15
-//  backcol 0-15, -1 is transparent background
-//  name
-//  fontsize 0=8*8, 1=3*5
+/*
+ * printext16 parameters:
+ * printext16(long xpos, long ypos, short col, short backcol,
+ *            char name[82], char fontsize)
+ *   xpos 0-639   (top left)
+ *   ypos 0-479   (top left)
+ *   col 0-15
+ *   backcol 0-15, -1 is transparent background
+ *   name
+ *   fontsize 0=8*8, 1=3*5
+ *
+ * drawline16 parameters:
+ *  drawline16(long x1, long y1, long x2, long y2, char col)
+ *   x1, x2  0-639
+ *   y1, y2  0-143  (status bar is 144 high, origin is top-left of STATUS BAR)
+ *   col     0-15
+ */
 
-//drawline16 parameters:
-// drawline16(long x1, long y1, long x2, long y2, char col)
-//  x1, x2  0-639
-//  y1, y2  0-143  (status bar is 144 high, origin is top-left of STATUS BAR)
-//  col     0-15
-
-void ExtShowSectorData(short sectnum)   //F5
+void ExtShowSectorData(short sectnum)   /* F5 */
 {
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
 	}
 	else
 	{
-		clearmidstatbar16();             //Clear middle of status bar
+		clearmidstatbar16();             /* Clear middle of status bar */
 
 		sprintf(tempbuf,"Sector %d",sectnum);
 		statusbar_printext16(8,32,11,-1,tempbuf,0);
@@ -506,7 +514,7 @@ void ExtShowSectorData(short sectnum)   //F5
 		statusbar_printext16(8,48,11,-1,"8*8 font: ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789",0);
 		statusbar_printext16(8,56,11,-1,"3*5 font: ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789",1);
 
-		drawline16(320,68,344,80,4);       //Draw house
+		drawline16(320,68,344,80,4);       /* Draw house */
 		drawline16(344,80,344,116,4);
 		drawline16(344,116,296,116,4);
 		drawline16(296,116,296,80,4);
@@ -514,64 +522,64 @@ void ExtShowSectorData(short sectnum)   //F5
 	}
 }
 
-void ExtShowWallData(short wallnum)       //F6
+void ExtShowWallData(short wallnum)       /* F6 */
 {
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
 	}
 	else
 	{
-		clearmidstatbar16();             //Clear middle of status bar
+		clearmidstatbar16();             /* Clear middle of status bar */
 
 		sprintf(tempbuf,"Wall %d",wallnum);
 		statusbar_printext16(8,32,11,-1,tempbuf,0);
 	}
 }
 
-void ExtShowSpriteData(short spritenum)   //F6
+void ExtShowSpriteData(short spritenum)   /* F6 */
 {
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
 	}
 	else
 	{
-		clearmidstatbar16();             //Clear middle of status bar
+		clearmidstatbar16();             /* Clear middle of status bar */
 
 		sprintf(tempbuf,"Sprite %d",spritenum);
 		statusbar_printext16(8,32,11,-1,tempbuf,0);
 	}
 }
 
-void ExtEditSectorData(short sectnum)    //F7
+void ExtEditSectorData(short sectnum)    /* F7 */
 {
 	short nickdata;
 
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
-			//Ceiling
+			/* Ceiling */
 		if (searchstat == 1)
-			sector[searchsector].ceilingpicnum++;   //Just a stupid example
+			sector[searchsector].ceilingpicnum++;   /* Just a stupid example */
 
-			//Floor
+			/* Floor */
 		if (searchstat == 2)
-			sector[searchsector].floorshade++;      //Just a stupid example
+			sector[searchsector].floorshade++;      /* Just a stupid example */
 	}
-	else                    //In 2D mode
+	else                    /* In 2D mode */
 	{
 		sprintf(tempbuf,"Sector (%d) Nick's variable: ",sectnum);
 		nickdata = 0;
 		nickdata = getnumber16(tempbuf,nickdata,65536L);
 
-		printmessage16("");              //Clear message box (top right of status bar)
+		printmessage16("");              /* Clear message box (top right of status bar) */
 		ExtShowSectorData(sectnum);
 	}
 }
 
-void ExtEditWallData(short wallnum)       //F8
+void ExtEditWallData(short wallnum)       /* F8 */
 {
 	short nickdata;
 
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
 	}
 	else
@@ -580,16 +588,16 @@ void ExtEditWallData(short wallnum)       //F8
 		nickdata = 0;
 		nickdata = getnumber16(tempbuf,nickdata,65536L);
 
-		printmessage16("");              //Clear message box (top right of status bar)
+		printmessage16("");              /* Clear message box (top right of status bar) */
 		ExtShowWallData(wallnum);
 	}
 }
 
-void ExtEditSpriteData(short spritenum)   //F8
+void ExtEditSpriteData(short spritenum)   /* F8 */
 {
 	short nickdata;
 
-	if (qsetmode == 200)    //In 3D mode
+	if (qsetmode == 200)    /* In 3D mode */
 	{
 	}
 	else
@@ -599,7 +607,7 @@ void ExtEditSpriteData(short spritenum)   //F8
 		nickdata = getnumber16(tempbuf,nickdata,65536L);
 		printmessage16("");
 
-		printmessage16("");              //Clear message box (top right of status bar)
+		printmessage16("");              /* Clear message box (top right of status bar) */
 		ExtShowSpriteData(spritenum);
 	}
 }
@@ -608,21 +616,22 @@ void faketimerhandler(void)
 {
 }
 
-	//Just thought you might want my getnumber16 code
-/*
-getnumber16(char namestart[80], short num, long maxnumber)
+	/* Just thought you might want my getnumber16 code */
+
+#if 0
+int getnumber16(char namestart[80], short num, long maxnumber)
 {
 	char buffer[80];
 	long j, k, n, danum, oldnum;
 
 	danum = (long)num;
 	oldnum = danum;
-	while ((keystatus[0x1c] != 2) && (keystatus[0x1] == 0))  //Enter, ESC
+	while ((keystatus[0x1c] != 2) && (keystatus[0x1] == 0))  /* Enter, ESC */
 	{
 		sprintf(&buffer,"%s%ld_ ",namestart,danum);
 		printmessage16(buffer);
 
-		for(j=2;j<=11;j++)                //Scan numbers 0-9
+		for(j=2;j<=11;j++)                /* Scan numbers 0-9 */
 			if (keystatus[j] > 0)
 			{
 				keystatus[j] = 0;
@@ -631,12 +640,12 @@ getnumber16(char namestart[80], short num, long maxnumber)
 				n = (danum*10)+k;
 				if (n < maxnumber) danum = n;
 			}
-		if (keystatus[0xe] > 0)    // backspace
+		if (keystatus[0xe] > 0)    /* backspace */
 		{
 			danum /= 10;
 			keystatus[0xe] = 0;
 		}
-		if (keystatus[0x1c] == 1)   //L. enter
+		if (keystatus[0x1c] == 1)   /* L. enter */
 		{
 			oldnum = danum;
 			keystatus[0x1c] = 2;
@@ -647,4 +656,8 @@ getnumber16(char namestart[80], short num, long maxnumber)
 	keystatus[0x1] = 0;
 	return((short)oldnum);
 }
-*/
+#endif
+
+
+/* end of bstub.c ... */
+

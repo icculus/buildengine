@@ -109,17 +109,17 @@ ifeq ($(strip $(useperl)),true)
 endif
 
 LINKER = gcc
-CFLAGS += $(USE_ASM) -Werror -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
+CFLAGS += $(USE_ASM) -Werror -ansi -pedantic -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
 
 GAMEEXE = game
 GAMESRCS = game.c engine.c cache1d.c sdl_driver.c unix_compat.c
-GAMESRCS += a_linux.asm pragmas.c a.c multi_tcpip.c
+GAMESRCS += a_nasm.asm pragmas.c a.c multi_tcpip.c
 #GAMESRCS += multi.c k.asm kdmeng.c
 
 BUILDEXE = build
 BUILDSRCS = build.c bstub.c engine.c cache1d.c sdl_driver.c unix_compat.c
-BUILDSRCS += a_linux.asm pragmas.c a.c
+BUILDSRCS += a_nasm.asm pragmas.c a.c
 
 ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 

@@ -7,10 +7,15 @@
  *  (including this file) to BUILD.
  */
 
-// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
-// Ken Silverman's official web site: "http://www.advsys.net/ken"
-// See the included license file "BUILDLIC.TXT" for license info.
-// This file IS NOT A PART OF Ken Silverman's original release
+/*
+ * "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+ * Ken Silverman's official web site: "http://www.advsys.net/ken"
+ * See the included license file "BUILDLIC.TXT" for license info.
+ * This file IS NOT A PART OF Ken Silverman's original release
+ */
+
+/* need _GNU_SOURCE to get snprintf()... */
+#define _GNU_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,8 +37,10 @@
 #if (defined USE_OPENGL)
 #include "buildgl.h"
 
-// !!! move this to buildgl.c, and add a function to that to abstract
-// !!!  SDL_GL_GetProcAddress().
+/*
+ * !!! move this to buildgl.c, and add a function to that to abstract
+ * !!!  SDL_GL_GetProcAddress().
+ */
 const GLubyte* (*dglGetString)(GLenum name) = NULL;
 void (*dglBegin)(GLenum mode) = NULL;
 void (*dglEnd)(void) = NULL;
@@ -42,22 +49,24 @@ void (*dglClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alph
 #endif
 
 
-// !!! ugh. Clean this up.
+/* !!! ugh. Clean this up. */
 #if (defined USE_I386_ASM)
 #if (!defined __WATCOMC__)
 #include "a.h"
 #else
 extern long setvlinebpl(long);
 #pragma aux setvlinebpl parm [eax];
-#endif  // __WATCOMC__
-#endif  // USE_I386_ASM
+#endif  /* __WATCOMC__ */
+#endif  /* USE_I386_ASM */
 
 
 #include "cache1d.h"
 
 
-// !!! I'd like this to be temporary. --ryan.
-// !!!  That is, the self-modifying part, so I can ditch the mprotect() stuff.
+/*
+ * !!! I'd like this to be temporary. --ryan.
+ * !!!  That is, the self-modifying part, so I can ditch the mprotect() stuff.
+ */
 #if ((defined PLATFORM_UNIX) && (defined USE_I386_ASM))
 
 #include <sys/mman.h>
@@ -70,13 +79,16 @@ extern long setvlinebpl(long);
 #endif
 
 
-// !!! remove the surface_end checks, for speed's sake. They are a
-// !!!  needed safety right now. --ryan.
+/*
+ * !!! remove the surface_end checks, for speed's sake. They are a
+ * !!!  needed safety right now. --ryan.
+ */
+
 
 #define DEFAULT_MAXRESWIDTH  1600
 #define DEFAULT_MAXRESHEIGHT 1200
 
-// environment variables names.
+/* environment variables names... */
 #define BUILD_NOMOUSEGRAB    "BUILD_NOMOUSEGRAB"
 #define BUILD_WINDOWED       "BUILD_WINDOWED"
 #define BUILD_SDLDEBUG       "BUILD_SDLDEBUG"
@@ -88,7 +100,7 @@ extern long setvlinebpl(long);
 #define UNLOCK_SURFACE_AND_RETURN  if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface); return;
 
 
-    // !!! move these elsewhere?
+    /* !!! move these elsewhere? */
 long xres, yres, bytesperline, frameplace, imageSize, maxpages;
 char *screen, vesachecked;
 long buffermode, origbuffermode, linearmode;
@@ -105,28 +117,28 @@ static short mouse_buttons = 0;
 static int mouse_grabbed = 0;
 static unsigned int lastkey = 0;
 static SDL_TimerID primary_timer = NULL;
-// so we can make use of setcolor16()... - DDOI
+/* so we can make use of setcolor16()... - DDOI */
 static unsigned char drawpixel_color=0;
-// These hold the colors for the 256 color palette when in 16-color mode - DDOI
+/* These hold the colors for the 256 color palette when in 16-color mode - DDOI */
 static char backup_palette[48];
 static int in_egapalette = 0;
-// The standard EGA palette in BUILD format - DDOI
-static char egapalette[] = { 0, 0, 0, // 0,
-			    0, 0, 42, //0,
-			    0, 42, 0, //0,
-			    0, 42, 42,// 0,
-			    42, 0, 0, //0,
-			    42, 0, 42, //0,
-			    42, 21, 0, //0,
-			    42, 42, 42,// 0,
-			    21, 21, 21, //0,
-			    21, 21, 63, //0,
-			    21, 63, 21, //0,
-			    21, 63, 63, //0,
-			    63, 21, 21, //0,
-			    63, 21, 63, //0,
-			    63, 63, 21, //0,
-			    63, 63, 63 //, 0
+/* The standard EGA palette in BUILD format - DDOI */
+static char egapalette[] = { 0, 0, 0,
+			    0, 0, 42,
+			    0, 42, 0,
+			    0, 42, 42,
+			    42, 0, 0,
+			    42, 0, 42,
+			    42, 21, 0,
+			    42, 42, 42,
+			    21, 21, 21,
+			    21, 21, 63,
+			    21, 63, 21,
+			    21, 63, 63,
+			    63, 21, 21,
+			    63, 21, 63,
+			    63, 63, 21,
+			    63, 63, 63
 			   };
 
 static unsigned int scancodes[SDLK_LAST];
@@ -138,13 +150,21 @@ long total_rendered_frames = 0;
 static char *titlelong = NULL;
 static char *titleshort = NULL;
 
-static int audio_disabled = 0;
-
 void restore256_palette (void);
 void set16color_palette (void);
 
 
 static FILE *debug_file = NULL;
+
+static inline void __out_sdldebug(const char *subsystem,
+                                  const char *fmt, va_list ap)
+{
+    fprintf(debug_file, "%s: ", subsystem);
+    vfprintf(debug_file, fmt, ap);
+    fprintf(debug_file, "\n");
+    fflush(debug_file);
+} /* __out_sdldebug */
+
 
 static void sdldebug(const char *fmt, ...)
 {
@@ -152,14 +172,26 @@ static void sdldebug(const char *fmt, ...)
 
     if (debug_file)
     {
-        fprintf(debug_file, "BUILDSDL: ");
         va_start(ap, fmt);
-        vfprintf(debug_file, fmt, ap);
+        __out_sdldebug("BUILDSDL", fmt, ap);
         va_end(ap);
-        fprintf(debug_file, "\n");
-        fflush(debug_file);
-    } // if
-} // sdldebug
+    } /* if */
+} /* sdldebug */
+
+
+#if (defined USE_OPENGL)
+static void sgldebug(const char *fmt, ...)
+{
+    va_list ap;
+
+    if (debug_file)
+    {
+        va_start(ap, fmt);
+        __out_sdldebug("BUILDSDL/GL", fmt, ap);
+        va_end(ap);
+    } /* if */
+} /* sgldebug */
+#endif
 
 
 static void __append_sdl_surface_flag(SDL_Surface *_surface, char *str,
@@ -172,8 +204,8 @@ static void __append_sdl_surface_flag(SDL_Surface *_surface, char *str,
             strcpy(str + (strsize - 5), " ...");
         else
             strcat(str, flagstr);
-    } // if
-} // append_sdl_surface_flag
+    } /* if */
+} /* append_sdl_surface_flag */
 
 
 #define append_sdl_surface_flag(a, b, c, fl) __append_sdl_surface_flag(a, b, c, fl, " " #fl)
@@ -234,8 +266,8 @@ static void output_surface_info(SDL_Surface *_surface)
         print_tf_state("accelerated color fills", info->blit_fill);
 
         sdldebug("video memory: (%d)", info->video_mem);
-    } // else
-} // output_surface_info
+    } /* else */
+} /* output_surface_info */
 
 
 static void output_driver_info(void)
@@ -248,20 +280,22 @@ static void output_driver_info(void)
     if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
     {
         sdldebug("-WARNING- SDL_VideoDriverName() returned NULL!");
-    } // if
+    } /* if */
     else
     {
         sdldebug("Using video driver \"%s\".", buffer);
-    } // else
-} // output_driver_info
+    } /* else */
+} /* output_driver_info */
 
 
-// !!! This is almost an entire copy of the original setgamemode().
-// !!!  Figure out what is needed for just 2D mode, and separate that
-// !!!  out. Then, place the original setgamemode() back into engine.c,
-// !!!  and remove our simple implementation (and this function.)
-// !!!  Just be sure to keep the non-DOS things, like the window's
-// !!!  titlebar caption.   --ryan.
+/*
+ * !!! This is almost an entire copy of the original setgamemode().
+ * !!!  Figure out what is needed for just 2D mode, and separate that
+ * !!!  out. Then, place the original setgamemode() back into engine.c,
+ * !!!  and remove our simple implementation (and this function.)
+ * !!!  Just be sure to keep the non-DOS things, like the window's
+ * !!!  titlebar caption.   --ryan.
+ */
 static char screenalloctype = 255;
 static void init_new_res_vars(int davidoption)
 {
@@ -283,10 +317,11 @@ static void init_new_res_vars(int davidoption)
 	activepage = visualpage = 0;
     horizlookup = horizlookup2 = NULL;
 
-    // !!! add me in!
-    //if (surface->flags & SDL_OPENGL)
-    //    frameplace = NULL;
-    //else
+    #if 0 /* !!! add me in! */
+    if (surface->flags & SDL_OPENGL)
+        frameplace = NULL;
+    else
+    #endif
         frameplace = (long) ( ((Uint8 *) surface->pixels) );
 
 
@@ -295,7 +330,7 @@ static void init_new_res_vars(int davidoption)
        	if (screenalloctype == 0) kkfree((void *)screen);
    	    if (screenalloctype == 1) suckcache((long *)screen);
    		screen = NULL;
-   	} // if
+   	} /* if */
 
     if (davidoption != -1)
     {
@@ -306,7 +341,7 @@ static void init_new_res_vars(int davidoption)
     		case 6: xdim = 320; ydim = 200; i = 131072; break;
     		default: assert(0);
     	}
-    	j = ydim*4*sizeof(long);  //Leave room for horizlookup&horizlookup2
+    	j = ydim*4*sizeof(long);  /* Leave room for horizlookup&horizlookup2 */
 
     	screenalloctype = 0;
 	    if ((screen = (char *)kkmalloc(i+(j<<1))) == NULL)
@@ -315,27 +350,28 @@ static void init_new_res_vars(int davidoption)
     		 screenalloctype = 1;
     	}
 
-        // !!! add me in!
-        //if (surface->flags & SDL_OPENGL)
-        //    frameplace = NULL;
-        //else
-        //{
+        #if 0 /* !!! add me in! */
+        if (surface->flags & SDL_OPENGL)
+            frameplace = NULL;
+        else
+        #endif
+        {
             frameplace = FP_OFF(screen);
           	horizlookup = (long *)(frameplace+i);
            	horizlookup2 = (long *)(frameplace+i+j);
-        //} // else
-    } // if
+        } /* else */
+    } /* if */
 
     j = 0;
   	for(i = 0; i <= ydim; i++)
     {
         ylookup[i] = j;
         j += bytesperline;
-    } // for
+    } /* for */
 
    	horizycent = ((ydim*4)>>1);
 
-		//Force drawrooms to call dosetaspect & recalculate stuff
+		/* Force drawrooms to call dosetaspect & recalculate stuff */
 	oxyaspect = oxdimen = oviewingrange = -1;
 
 	setvlinebpl(bytesperline);
@@ -344,11 +380,12 @@ static void init_new_res_vars(int davidoption)
     {
     	setview(0L,0L,xdim-1,ydim-1);
     	clearallviews(0L);
-    } // if
-	setbrightness((char)curbrightness,(char *)&palette[0]);
+    } /* if */
+
+	setbrightness((char) curbrightness, (unsigned char *) &palette[0]);
 
 	if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
-} // init_new_res_vars
+} /* init_new_res_vars */
 
 
 static void go_to_new_vid_mode(int vidoption, int w, int h)
@@ -362,11 +399,11 @@ static void go_to_new_vid_mode(int vidoption, int w, int h)
                         "  SDL_Error() says [%s].\n", w, h, SDL_GetError());
         SDL_Quit();
         exit(13);
-    } // if
+    } /* if */
 
     output_surface_info(surface);
     init_new_res_vars(vidoption);
-} // go_to_new_vid_mode
+} /* go_to_new_vid_mode */
 
 
 static int sdl_mouse_button_filter(SDL_Event const *event)
@@ -386,7 +423,7 @@ static int sdl_mouse_button_filter(SDL_Event const *event)
     if (bmask & SDL_BUTTON_RMASK) mouse_buttons |= 2;
     if (bmask & SDL_BUTTON_MMASK) mouse_buttons |= 4;
     return(0);
-} // sdl_mouse_up_filter
+} /* sdl_mouse_up_filter */
 
 
 static int sdl_mouse_motion_filter(SDL_Event const *event)
@@ -400,7 +437,7 @@ static int sdl_mouse_motion_filter(SDL_Event const *event)
         mouse_relative_y = event->jball.yrel/100;
        	mouse_x += mouse_relative_x;
        	mouse_y += mouse_relative_y;
-    } // if
+    } /* if */
     else
     {
         if (mouse_grabbed)
@@ -409,15 +446,15 @@ static int sdl_mouse_motion_filter(SDL_Event const *event)
        	    mouse_relative_y = event->motion.yrel;
            	mouse_x += mouse_relative_x;
            	mouse_y += mouse_relative_y;
-        } // if
+        } /* if */
         else
         {
           	mouse_relative_x = event->motion.x - mouse_x;
            	mouse_relative_y = event->motion.y - mouse_y;
            	mouse_x = event->motion.x;
            	mouse_y = event->motion.y;
-        } // else
-    } // else
+        } /* else */
+    } /* else */
 
    	if (mouse_x < 0) mouse_x = 0;
    	if (mouse_x > surface->w) mouse_x = surface->w;
@@ -425,7 +462,7 @@ static int sdl_mouse_motion_filter(SDL_Event const *event)
    	if (mouse_y > surface->h) mouse_y = surface->h;
 
     return(0);
-} // sdl_mouse_motion_filter
+} /* sdl_mouse_motion_filter */
 
 
 /**
@@ -471,23 +508,23 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
 
     sdldebug("attempting to toggle fullscreen flag...");
 
-    if ( (!surface) || (!(*surface)) )  // don't bother if there's no surface.
+    if ( (!surface) || (!(*surface)) )  /* don't try if there's no surface. */
     {
         sdldebug("Null surface (?!). Not toggling fullscreen flag.");
         return(0);
-    } // if
+    } /* if */
 
     if (SDL_WM_ToggleFullScreen(*surface))
     {
         sdldebug("SDL_WM_ToggleFullScreen() seems to work on this system.");
         return(1);
-    } // if
+    } /* if */
 
     if ( !(SDL_GetVideoInfo()->wm_available) )
     {
         sdldebug("No window manager. Not toggling fullscreen flag.");
         return(0);
-    } // if
+    } /* if */
 
     sdldebug("toggling fullscreen flag The Hard Way...");
     tmpflags = (*surface)->flags;
@@ -495,12 +532,12 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
     h = (*surface)->h;
     bpp = (*surface)->format->BitsPerPixel;
 
-    if (flags == NULL)  // use the surface's flags.
+    if (flags == NULL)  /* use the surface's flags. */
         flags = &tmpflags;
 
     SDL_GetClipRect(*surface, &clip);
 
-        // save the contents of the screen.
+        /* save the contents of the screen. */
     framesize = (w * h) * ((*surface)->format->BytesPerPixel);
     pixels = malloc(framesize);
     if (pixels == NULL)
@@ -516,10 +553,10 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
         {
             free(pixels);
             return(0);
-        } // if
+        } /* if */
         memcpy(palette, (*surface)->format->palette->colors,
                ncolors * sizeof (SDL_Color));
-    } // if
+    } /* if */
 #endif
 
     if (grabmouse)
@@ -532,15 +569,15 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
     if (*surface != NULL)
         *flags ^= SDL_FULLSCREEN;
 
-    else  // yikes! Try to put it back as it was...
+    else  /* yikes! Try to put it back as it was... */
     {
         *surface = SDL_SetVideoMode(w, h, bpp, tmpflags);
-        if (*surface == NULL)  // completely screwed.
+        if (*surface == NULL)  /* completely screwed. */
         {
             free(pixels);
             return(0);
-        } // if
-    } // if
+        } /* if */
+    } /* if */
 
     memcpy((*surface)->pixels, pixels, framesize);
     free(pixels);
@@ -548,12 +585,12 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
 #if 0
     if (palette != NULL)
     {
-            // !!! FIXME : No idea if that flags param is right.
+            /* !!! FIXME : No idea if that flags param is right. */
         SDL_SetPalette(*surface, SDL_LOGPAL, palette, 0, ncolors);
         free(palette);
-    } // if
+    } /* if */
 #else
-	setbrightness((char)curbrightness,(char *)&palette[0]);
+	setbrightness((char) curbrightness, (unsigned char *) &palette[0]);
 #endif
 
     SDL_SetClipRect(*surface, &clip);
@@ -566,14 +603,16 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
     output_surface_info(*surface);
 
     return(1);
-} // attempt_fullscreen_toggle
+} /* attempt_fullscreen_toggle */
 
 
-    // The windib driver can't alert us to the keypad enter key, which
-    //  Ken's code depends on heavily. It sends it as the same key as the
-    //  regular return key. These users will have to hit SHIFT-ENTER,
-    //  which we check for explicitly, and give the engine a keypad enter
-    //  enter event.
+    /*
+     * The windib driver can't alert us to the keypad enter key, which
+     *  Ken's code depends on heavily. It sends it as the same key as the
+     *  regular return key. These users will have to hit SHIFT-ENTER,
+     *  which we check for explicitly, and give the engine a keypad enter
+     *  enter event.
+     */
 static inline int handle_keypad_enter_hack(const SDL_Event *event)
 {
     static int kp_enter_hack = 0;
@@ -588,22 +627,22 @@ static inline int handle_keypad_enter_hack(const SDL_Event *event)
                 kp_enter_hack = 1;
                 lastkey = scancodes[SDLK_KP_ENTER];
                 retval = 1;
-            } // if
-        } // if
+            } /* if */
+        } /* if */
 
-        else  // key released
+        else  /* key released */
         {
             if (kp_enter_hack)
             {
                 kp_enter_hack = 0;
                 lastkey = scancodes[SDLK_KP_ENTER];
                 retval = 1;
-            } // if
-        } // if
-    } // if
+            } /* if */
+        } /* if */
+    } /* if */
 
     return(retval);
-} // handle_keypad_enter_hack
+} /* handle_keypad_enter_hack */
 
 
 static int sdl_key_filter(const SDL_Event *event)
@@ -621,7 +660,7 @@ static int sdl_key_filter(const SDL_Event *event)
             grab_mode = SDL_GRAB_ON;
         SDL_WM_GrabInput(grab_mode);
         return(0);
-    } // if
+    } /* if */
 
     else if ( ( (event->key.keysym.sym == SDLK_RETURN) ||
                 (event->key.keysym.sym == SDLK_KP_ENTER) ) &&
@@ -634,12 +673,12 @@ static int sdl_key_filter(const SDL_Event *event)
         if (tmp)
             frameplace = (long) surface->pixels;
         return(0);
-    } // if
+    } /* if */
 
     if (!handle_keypad_enter_hack(event))
         lastkey = scancodes[event->key.keysym.sym];
 
-    if (lastkey == 0x0000)   // No DOS equivalent defined.
+    if (lastkey == 0x0000)   /* No DOS equivalent defined. */
         return(0);
 
     extended = ((lastkey & 0xFF00) >> 8);
@@ -648,14 +687,14 @@ static int sdl_key_filter(const SDL_Event *event)
         lastkey = extended;
         keyhandler();
         lastkey = (scancodes[event->key.keysym.sym] & 0xFF);
-    } // if
+    } /* if */
 
     if (event->key.state == SDL_RELEASED)
-        lastkey += 128;  // +128 signifies that the key is released in DOS.
+        lastkey += 128;  /* +128 signifies that the key is released in DOS. */
 
     keyhandler();
     return(0);
-} // sdl_key_filter
+} /* sdl_key_filter */
 
 
 static int root_sdl_event_filter(const SDL_Event *event)
@@ -672,11 +711,13 @@ static int root_sdl_event_filter(const SDL_Event *event)
         case SDL_MOUSEBUTTONDOWN:
             return(sdl_mouse_button_filter(event));
         case SDL_QUIT:
-            exit(0);   // !!! rcg TEMP
-    } // switch
+            /* !!! rcg TEMP */
+            SDL_Quit();
+            exit(0);   
+    } /* switch */
 
     return(1);
-} // root_sdl_event_filter
+} /* root_sdl_event_filter */
 
 
 static void handle_events(void)
@@ -685,16 +726,16 @@ static void handle_events(void)
 
     while (SDL_PollEvent(&event))
         root_sdl_event_filter(&event);
-} // handle_events
+} /* handle_events */
 
 
 unsigned char _readlastkeyhit(void)
 {
     return(lastkey);
-} // _readlastkeyhit
+} /* _readlastkeyhit */
 
 
-// !!! I'd like this to be temporary. --ryan.
+/* !!! I'd like this to be temporary. --ryan. */
 #if ((defined PLATFORM_UNIX) && (defined USE_I386_ASM))
 
 #define PROT_R_W_X (PROT_READ | PROT_WRITE | PROT_EXEC)
@@ -707,7 +748,7 @@ int mprotect_align(const void *addr, size_t len, int prot)
     retval = mprotect((void *) l, len * 2, prot);
     assert(retval == 0);
     return(retval);
-} // mprotect_align
+} /* mprotect_align */
 
 
 void unprotect_ASM_pages(void)
@@ -724,7 +765,7 @@ void unprotect_ASM_pages(void)
     mprotect_align((const void *) asm_thline, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_prohlineasm4, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_stretchhline, PAGESIZE, PROT_R_W_X);
-} // unprotect_ASM_pages
+} /* unprotect_ASM_pages */
 
 
 /*
@@ -802,15 +843,15 @@ static void *try_glsym_load(const char *sym)
 {
     void *retval = NULL;
 
-    fprintf(stderr, "BUILDGL: Looking up \"%s\"...", sym);
     SDL_ClearError();
     retval = SDL_GL_GetProcAddress(sym);
     if (retval == NULL)
-        fprintf(stderr, "failure: [%s]\n", SDL_GetError());
+        sgldebug("Symbol \"%s\" NOT located; [%s].", sym, SDL_GetError());
     else
-        fprintf(stderr, "success!\n");
+        sgldebug("Symbol \"%s\" located.", sym);
+
     return(retval);
-} // try_glsym_load
+} /* try_glsym_load */
 
 
 static int load_opengl_symbols(void)
@@ -822,7 +863,7 @@ static int load_opengl_symbols(void)
     if (!(dglClearColor = try_glsym_load("glClearColor"))) return(-1);
 
     return(0);
-} // load_opengl_symbols
+} /* load_opengl_symbols */
 
 
 static int try_opengl_libname(const char *libname)
@@ -831,21 +872,21 @@ static int try_opengl_libname(const char *libname)
 
     if (libname != NULL)
     {
-        fprintf(stderr, "BUILDGL: Trying to open \"%s\"...", libname);
+        sgldebug("Trying to open library \"%s\"...", libname);
         SDL_ClearError();
         rc = SDL_GL_LoadLibrary(libname);
 
         if (rc == -1)
-            fprintf(stderr, "failure: [%s]\n", SDL_GetError());
+            sgldebug("Library opening failed; [%s].", SDL_GetError());
         else
         {
-            fprintf(stderr, "success!\n");
+            sgldebug("Library opened successfully!");
             rc = load_opengl_symbols();
-        } // else
-    } // if
+        } /* else */
+    } /* if */
 
     return(rc);
-} // try_gl_libname
+} /* try_gl_libname */
 
 
 static int load_opengl_library(void)
@@ -854,7 +895,7 @@ static int load_opengl_library(void)
     int rc = 0;
     int i;
 
-    if (!opengl_lib_is_loaded)  // it's cool. Go on.
+    if (!opengl_lib_is_loaded)  /* it's cool. Go on. */
     {
         if (envlib)
             rc = try_opengl_libname(envlib);
@@ -865,21 +906,22 @@ static int load_opengl_library(void)
                 rc = try_opengl_libname(default_gl_libs[i]);
                 if (rc != -1)
                     break;
-            } // for
-        } // else
+            } /* for */
+        } /* else */
 
         if (rc == -1)
         {
-            fprintf(stderr, "BUILDGL: Out of ideas. Giving up.\n");
+            sgldebug("Out of ideas. Giving up.");
             return(-1);
-        } // if
+        } /* if */
 
         opengl_lib_is_loaded = 1;
-    } // if
+    } /* if */
     return(0);
-} // load_opengl_library
+} /* load_opengl_library */
 
-#endif  // defined USE_OPENGL
+#endif  /* defined USE_OPENGL */
+
 
 static inline void init_debugging(void)
 {
@@ -891,7 +933,7 @@ static inline void init_debugging(void)
     {
         fclose(debug_file);
         debug_file = NULL;
-    } // if
+    } /* if */
 
     if (envr != NULL)
     {
@@ -904,8 +946,8 @@ static inline void init_debugging(void)
             printf("BUILDSDL: -WARNING- Could not open debug file!\n");
         else
             setbuf(debug_file, NULL);
-    } // if
-} // init_debugging
+    } /* if */
+} /* init_debugging */
 
 
 static inline void output_sdl_versions(void)
@@ -916,18 +958,18 @@ static inline void output_sdl_versions(void)
                 SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
     sdldebug("Linked SDL version is %d.%d.%d ...",
                 linked_ver->major, linked_ver->minor, linked_ver->patch);
-} // output_sdl_versions
+} /* output_sdl_versions */
 
 
 static int in_vmware = 0;
 static inline void detect_vmware(void)
 {
-    // !!! need root access to touch i/o ports on Linux.
+    /* !!! need root access to touch i/o ports on Linux. */
     #if (!defined __linux__)
         in_vmware = (int) is_vmware_running();
     #endif
     sdldebug("vmWare %s running.", (in_vmware) ? "is" : "is not");
-} // detect_vmware
+} /* detect_vmware */
 
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
@@ -959,8 +1001,8 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     sdl_flags = ((getenv(BUILD_WINDOWED) == NULL) ? SDL_FULLSCREEN : 0);
 
     sdl_flags |= SDL_HWPALETTE;
-    //sdl_flags |= SDL_HWSURFACE;  // !!!
-    //sdl_flags |= SDL_DOUBLEBUF;
+    /*sdl_flags |= SDL_HWSURFACE;   !!! */
+    /*sdl_flags |= SDL_DOUBLEBUF; */
 
     memset(scancodes, '\0', sizeof (scancodes));
     scancodes[SDLK_ESCAPE]          = 0x01;
@@ -1067,7 +1109,7 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         fprintf(stderr, "BUILDSDL: SDL_Init() failed!\n");
         fprintf(stderr, "BUILDSDL: SDL_GetError() says \"%s\".\n", SDL_GetError());
         exit(1);
-    } // if
+    } /* if */
 
     output_driver_info();
 
@@ -1076,9 +1118,9 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
         {
             SDL_Quit();
             _exit(42);
-        } // if
+        } /* if */
     #endif
-} // _platform_init
+} /* _platform_init */
 
 
 int setvesa(long x, long y)
@@ -1086,14 +1128,14 @@ int setvesa(long x, long y)
     fprintf(stderr, "setvesa() called in SDL driver!\n");
     exit(23);
     return(0);
-} // setvesa
+} /* setvesa */
 
 
 int screencapture(char *filename, char inverseit)
 {
     fprintf(stderr, "screencapture() is a stub in the SDL driver.\n");
     return(0);
-} // screencapture
+} /* screencapture */
 
 
 void setvmode(int mode)
@@ -1101,29 +1143,29 @@ void setvmode(int mode)
     int w = -1;
     int h = -1;
 
-    if (mode == 0x3)  // text mode.
+    if (mode == 0x3)  /* text mode. */
     {
         SDL_QuitSubSystem(SDL_INIT_VIDEO);
         return;
-    } // if
+    } /* if */
 
     if (mode == 0x13)
     {
         w = 800;
         h = 600;
-    } // if
+    } /* if */
 
     else
     {
         fprintf(stderr, "setvmode(0x%x) is unsupported in SDL driver.\n", mode);
         exit(13);
-    } // if
+    } /* if */
 
     assert(w > 0);
     assert(h > 0);
 
     go_to_new_vid_mode(-1, w, h);
-} // setvmode
+} /* setvmode */
 
 
 int _setgamemode(char davidoption, long daxdim, long daydim)
@@ -1141,26 +1183,18 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
     #ifdef USE_OPENGL
         if (!shown_gl_strings)
         {
-            fprintf(stderr, "BUILDGL: GL_VENDOR [%s]\n",
-                        (char *) dglGetString(GL_VENDOR));
-
-            fprintf(stderr, "BUILDGL: GL_RENDERER [%s]\n",
-                        (char *) dglGetString(GL_RENDERER));
-
-            fprintf(stderr, "BUILDGL: GL_VERSION [%s]\n",
-                        (char *) dglGetString(GL_VERSION));
-
-            fprintf(stderr, "BUILDGL: GL_EXTENSIONS [%s]\n",
-                        (char *) dglGetString(GL_EXTENSIONS));
-
+            sgldebug("GL_VENDOR [%s]\n", (char *) dglGetString(GL_VENDOR));
+            sgldebug("GL_RENDERER [%s]\n", (char *) dglGetString(GL_RENDERER));
+            sgldebug("GL_VERSION [%s]\n", (char *) dglGetString(GL_VERSION));
+            sgldebug("GL_EXTENSIONS [%s]\n", (char *) dglGetString(GL_EXTENSIONS));
             shown_gl_strings = 1;
-        } // if
+        } /* if */
     #endif
 
     qsetmode = 200;
     last_render_ticks = SDL_GetTicks();
     return(0);
-} // setgamemode
+} /* setgamemode */
 
 
 void qsetmode640350(void)
@@ -1172,7 +1206,7 @@ void qsetmode640350(void)
     #endif
 
     go_to_new_vid_mode(-1, 640, 350);
-} // qsetmode640350
+} /* qsetmode640350 */
 
 
 void qsetmode640480(void)
@@ -1185,9 +1219,9 @@ void qsetmode640480(void)
     #endif
 
     go_to_new_vid_mode(-1, 640, 480);
-    pageoffset = 0;	// Make sure it goes to the right place - DDOI
+    pageoffset = 0;	/* Make sure it goes to the right place - DDOI */
     fillscreen16(0L,8L,640L*144L);
-} // qsetmode640480
+} /* qsetmode640480 */
 
 
 static int get_dimensions_from_str(const char *str, long *_w, long *_h)
@@ -1223,7 +1257,7 @@ static int get_dimensions_from_str(const char *str, long *_w, long *_h)
         *_h = h;
 
     return(1);
-} // get_dimensions_from_str
+} /* get_dimensions_from_str */
 
 
 static inline void get_max_screen_res(long *max_w, long *max_h)
@@ -1239,15 +1273,15 @@ static inline void get_max_screen_res(long *max_w, long *max_h)
             sdldebug("User's resolution ceiling [%s] is bogus!", envr);
             w = DEFAULT_MAXRESWIDTH;
             h = DEFAULT_MAXRESHEIGHT;
-        } // if
-    } // if
+        } /* if */
+    } /* if */
 
     if (max_w != NULL)
         *max_w = w;
 
     if (max_h != NULL)
         *max_h = h;
-} // get_max_screen_res
+} /* get_max_screen_res */
 
 
 static void add_vesa_mode(const char *typestr, int w, int h)
@@ -1257,10 +1291,10 @@ static void add_vesa_mode(const char *typestr, int w, int h)
     validmodexdim[validmodecnt] = w;
     validmodeydim[validmodecnt] = h;
     validmodecnt++;
-} // add_vesa_mode
+} /* add_vesa_mode */
 
 
-// Let the user specify a specific mode via environment variable.
+/* Let the user specify a specific mode via environment variable. */
 static inline void add_user_defined_resolution(void)
 {
     long w;
@@ -1274,7 +1308,7 @@ static inline void add_user_defined_resolution(void)
         add_vesa_mode("user defined", w, h);
     else
         sdldebug("User defined resolution [%s] is bogus!", envr);
-} // add_user_defined_resolution
+} /* add_user_defined_resolution */
 
 
 static inline SDL_Rect **get_physical_resolutions(void)
@@ -1284,10 +1318,10 @@ static inline SDL_Rect **get_physical_resolutions(void)
     if (modes == NULL)
     {
         sdl_flags &= ~SDL_FULLSCREEN;
-        modes = SDL_ListModes(vidInfo->vfmt, sdl_flags); // try without fullscreen.
+        modes = SDL_ListModes(vidInfo->vfmt, sdl_flags); /* try without fullscreen. */
         if (modes == NULL)
-            modes = (SDL_Rect **) -1;  // fuck it.
-    } // if
+            modes = (SDL_Rect **) -1;  /* fuck it. */
+    } /* if */
 
     if (modes == (SDL_Rect **) -1)
         sdldebug("Couldn't get any physical resolutions.");
@@ -1295,10 +1329,10 @@ static inline SDL_Rect **get_physical_resolutions(void)
     {
         sdldebug("Highest physical resolution is (%dx%d).",
                   modes[0]->w, modes[0]->h);
-    } // else
+    } /* else */
 
     return(modes);
-} // get_physical_resolutions
+} /* get_physical_resolutions */
 
 
 static void remove_vesa_mode(int index, const char *reason)
@@ -1314,10 +1348,10 @@ static void remove_vesa_mode(int index, const char *reason)
         validmode[i] = validmode[i + 1];
         validmodexdim[i] = validmodexdim[i + 1];
         validmodeydim[i] = validmodeydim[i + 1];
-    } // for
+    } /* for */
 
     validmodecnt--;
-} // remove_vesa_mode
+} /* remove_vesa_mode */
 
 
 static inline void cull_large_vesa_modes(void)
@@ -1334,10 +1368,10 @@ static inline void cull_large_vesa_modes(void)
         if ((validmodexdim[i] > max_w) || (validmodeydim[i] > max_h))
         {
             remove_vesa_mode(i, "above resolution ceiling");
-            i--;  // list shrinks.
-        } // if
-    } // for
-} // call_large_vesa_modes
+            i--;  /* list shrinks. */
+        } /* if */
+    } /* for */
+} /* cull_large_vesa_modes */
 
 
 static inline void cull_duplicate_vesa_modes(void)
@@ -1353,16 +1387,16 @@ static inline void cull_duplicate_vesa_modes(void)
                  (validmodeydim[i] == validmodeydim[j]) )
             {
                 remove_vesa_mode(j, "duplicate");
-                j--;  // list shrinks.
-            } // if
-        } // for
-    } // for
-} // call_duplicate_vesa_modes
+                j--;  /* list shrinks. */
+            } /* if */
+        } /* for */
+    } /* for */
+} /* cull_duplicate_vesa_modes */
 
 
 #define swap_macro(tmp, x, y) { tmp = x; x = y; y = tmp; }
 
-// be sure to call cull_duplicate_vesa_modes() before calling this.
+/* be sure to call cull_duplicate_vesa_modes() before calling this. */
 static inline void sort_vesa_modelist(void)
 {
     int i;
@@ -1381,10 +1415,10 @@ static inline void sort_vesa_modelist(void)
                 swap_macro(tmp, validmode[i], validmode[i+1]);
                 swap_macro(tmp, validmodexdim[i], validmodexdim[i+1]);
                 swap_macro(tmp, validmodeydim[i], validmodeydim[i+1]);
-            } // if
-        } // for
+            } /* if */
+        } /* for */
     } while (!sorted);
-} // sort_vesa_modelist
+} /* sort_vesa_modelist */
 
 
 static inline void cleanup_vesa_modelist(void)
@@ -1392,7 +1426,7 @@ static inline void cleanup_vesa_modelist(void)
     cull_large_vesa_modes();
     cull_duplicate_vesa_modes();
     sort_vesa_modelist();
-} // cleanup_vesa_modelist
+} /* cleanup_vesa_modelist */
 
 
 static inline void output_vesa_modelist(void)
@@ -1415,10 +1449,10 @@ static inline void output_vesa_modelist(void)
             strcpy(buffer + (sizeof (buffer) - 5), " ...");
         else
             strcat(buffer, numbuf);
-    } // for
+    } /* for */
 
     sdldebug("Final sorted modelist:%s", buffer);
-} // output_vesa_modelist
+} /* output_vesa_modelist */
 
 
 void getvalidvesamodes(void)
@@ -1426,33 +1460,36 @@ void getvalidvesamodes(void)
     static int already_checked = 0;
     int i;
     SDL_Rect **modes = NULL;
-    int stdres[][2] = {   // !!! is this legal C?!
-                       {320, 200}, {640, 350}, {640, 480},
-                       {800, 600}, {1024, 768}
-                     };
+    int stdres[][2] = {
+                        {320, 200}, {640, 350}, {640, 480},
+                        {800, 600}, {1024, 768}
+                      };
 
     if (already_checked)
         return;
 
     already_checked = 1;
    	validmodecnt = 0;
-    vidoption = 1;  //!!! tmp
+    vidoption = 1;  /* !!! tmp */
 
-        // fill in the standard resolutions...
+        /* fill in the standard resolutions... */
     for (i = 0; i < sizeof (stdres) / sizeof (stdres[0]); i++)
         add_vesa_mode("standard", stdres[i][0], stdres[i][1]);
 
-        //  Anything the hardware can specifically do is added now if it
-        //   isn't in our standard list already.
-
+         /* Anything the hardware can specifically do is added now... */
     modes = get_physical_resolutions();
     for (i = 0; (modes != (SDL_Rect **) -1) && (modes[i] != NULL); i++)
         add_vesa_mode("physical", modes[i]->w, modes[i]->h);
 
+        /* Now add specific resolutions that the user wants... */
     add_user_defined_resolution();
+
+        /* get rid of dupes and bogus resolutions... */
     cleanup_vesa_modelist();
+
+        /* print it out for debugging purposes... */
     output_vesa_modelist();
-} // getvalidvesamodes
+} /* getvalidvesamodes */
 
 
 int VBE_setPalette(long start, long num, char *palettebuffer)
@@ -1470,7 +1507,7 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
  *  so we do a conversion.
  */
 {
-    SDL_Color fmt_swap[256];  // !!! used to be: [start + num];
+    SDL_Color fmt_swap[256];
     SDL_Color *sdlp = &fmt_swap[start];
     char *p = palettebuffer;
     int i;
@@ -1482,12 +1519,12 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
         sdlp->b = (Uint8) ((((float) *p++) / 63.0) * 255.0);
         sdlp->g = (Uint8) ((((float) *p++) / 63.0) * 255.0);
         sdlp->r = (Uint8) ((((float) *p++) / 63.0) * 255.0);
-        sdlp->unused = *p++;   // This byte is unused in BUILD, too.
+        sdlp->unused = *p++;   /* This byte is unused in BUILD, too. */
         sdlp++;
-    } // for
+    } /* for */
 
     return(SDL_SetColors(surface, fmt_swap, start, num));
-} // VBE_setPalette
+} /* VBE_setPalette */
 
 
 int VBE_getPalette(long start, long num, char *palettebuffer)
@@ -1501,24 +1538,24 @@ int VBE_getPalette(long start, long num, char *palettebuffer)
         *p++ = (Uint8) ((((float) sdlp->b) / 255.0) * 63.0);
         *p++ = (Uint8) ((((float) sdlp->g) / 255.0) * 63.0);
         *p++ = (Uint8) ((((float) sdlp->r) / 255.0) * 63.0);
-        *p++ = sdlp->unused;   // This byte is unused in both SDL and BUILD.
+        *p++ = sdlp->unused;   /* This byte is unused in both SDL and BUILD. */
         sdlp++;
-    } // for
+    } /* for */
 
     return(1);
-} // VBE_getPalette
+} /* VBE_getPalette */
 
 
 void _uninitengine(void)
 {
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-} // _uninitengine
+} /* _uninitengine */
 
 
 void uninitvesa(void)
 {
    SDL_QuitSubSystem(SDL_INIT_VIDEO);
-} // uninitvesa
+} /* uninitvesa */
 
 
 int setupmouse(void)
@@ -1538,12 +1575,14 @@ int setupmouse(void)
     mouse_y = surface->h / 2;
     mouse_relative_x = mouse_relative_y = 0;
 
-        // this global usually gets set by BUILD, but it's a one-shot
-        //  deal, and we may not have an SDL surface at that point. --ryan.
+        /*
+         * this global usually gets set by BUILD, but it's a one-shot
+         *  deal, and we may not have an SDL surface at that point. --ryan.
+         */
     moustat = 1;
 
     return(1);
-} // setupmouse
+} /* setupmouse */
 
 
 void readmousexy(short *x, short *y)
@@ -1552,14 +1591,14 @@ void readmousexy(short *x, short *y)
     if (y) *y = mouse_relative_y << 2;
 
     mouse_relative_x = mouse_relative_y = 0;
-} // readmousexy
+} /* readmousexy */
 
 
 void readmousebstatus(short *bstatus)
 {
     if (bstatus)
         *bstatus = mouse_buttons;
-} // readmousebstatus
+} /* readmousebstatus */
 
 
 static unsigned char mirrorcolor = 0;
@@ -1574,9 +1613,9 @@ void _nextpage(void)
     if (qsetmode != 200)
     {
         SDL_UpdateRect(surface, 0, 0, 0, 0);
-        //SDL_Flip(surface);  // !!!
+        /*SDL_Flip(surface);  !!! */
         return;
-    } // if
+    } /* if */
 
     #ifdef USE_OPENGL
         if (surface->flags & SDL_OPENGL)
@@ -1586,10 +1625,10 @@ void _nextpage(void)
             {
                 dglClearColor3ub(mirrorcolor, 0, 0);
                 mirrorcolor++;
-            } // if
+            } /* if */
             dglClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
             return;
-        } // if
+        } /* if */
     #endif
 
     memcpy(surface->pixels, (const void *) frameplace, surface->w * surface->h);
@@ -1598,36 +1637,35 @@ void _nextpage(void)
     {
         memset((void *) frameplace, mirrorcolor, surface->w * surface->h);
         mirrorcolor++;
-    } // if
+    } /* if */
 
     SDL_UpdateRect(surface, 0, 0, 0, 0);
-    //SDL_Flip(surface);  // !!!
+    /*SDL_Flip(surface);  !!! */
 
     ticks = SDL_GetTicks();
     total_render_time = (ticks - last_render_ticks);
     if (total_render_time > 1000)
     {
-        //printf("fps == (%.2f).\n", (double) (total_rendered_frames / ((double) total_render_time / 1000.0)));
         total_rendered_frames = 0;
         total_render_time = 1;
         last_render_ticks = ticks;
-    } // if
+    } /* if */
     total_rendered_frames++;
-} // _nextpage
+} /* _nextpage */
 
 
 unsigned char readpixel(long offset)
 {
     return( *((unsigned char *) offset) );
-}
+} /* readpixel */
 
 void drawpixel(long offset, Uint8 pixel)
 {
     *((unsigned char *) offset) = pixel;
-}
+} /* drawpixel */
 
 
-// !!! These are incorrect.
+/* !!! These are incorrect. */
 void drawpixels(long offset, Uint16 pixels)
 {
     Uint8 *surface_end;
@@ -1646,7 +1684,7 @@ void drawpixels(long offset, Uint16 pixels)
 
     if (SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
-} // drawpixels
+} /* drawpixels */
 
 
 void drawpixelses(long offset, Uint32 pixelses)
@@ -1667,10 +1705,10 @@ void drawpixelses(long offset, Uint32 pixelses)
 
     if (SDL_MUSTLOCK(surface))
         SDL_UnlockSurface(surface);
-} // drawpixelses
+} /* drawpixelses */
 
 
-// Fix this up The Right Way (TM) - DDOI
+/* Fix this up The Right Way (TM) - DDOI */
 void setcolor16 (int col)
 {
 	drawpixel_color = col;
@@ -1679,7 +1717,7 @@ void setcolor16 (int col)
 void drawpixel16(long offset)
 {
     drawpixel(((long) surface->pixels + offset), drawpixel_color);
-} // drawpixel16
+} /* drawpixel16 */
 
 
 void fillscreen16 (long offset, long color, long blocksize)
@@ -1690,7 +1728,7 @@ void fillscreen16 (long offset, long color, long blocksize)
     if (SDL_MUSTLOCK(surface))
         SDL_LockSurface(surface);
 
-    // Make this function pageoffset aware - DDOI
+    /* Make this function pageoffset aware - DDOI */
     if (!pageoffset) { 
 	    offset = offset << 3;
 	    offset += 640*336;
@@ -1711,7 +1749,7 @@ void fillscreen16 (long offset, long color, long blocksize)
         SDL_UnlockSurface(surface);
 
     SDL_UpdateRect(surface, 0, 0, 0, 0);
-} // fillscreen16
+} /* fillscreen16 */
 
 
 /* Most of this line code is taken from Abrash's "Graphics Programming Blackbook".
@@ -1780,7 +1818,7 @@ void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color)
 		if (YStart >= ydim16) { if (dx) XStart += scale(ydim16-1-YStart,dx,dy); YStart = ydim16-1; }
 	}
 
-	// Make sure the status bar border draws correctly - DDOI
+	/* Make sure the status bar border draws correctly - DDOI */
 	if (!pageoffset) { YStart += 336; YEnd += 336; }
 
     /* We'll always draw top to bottom */
@@ -1794,7 +1832,7 @@ void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color)
     }
 
     /* Point to the bitmap address first pixel to draw */
-    ScreenPtr = ((Uint8 *) surface->pixels) + XStart + (surface->w * YStart);
+    ScreenPtr = (char *) ((Uint8 *) surface->pixels) + XStart + (surface->w * YStart);
 
     /* Figure out whether we're going left or right, and how far we're going horizontally */
     if ((XDelta = XEnd - XStart) < 0)
@@ -1897,7 +1935,7 @@ void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color)
         DrawVerticalRun(&ScreenPtr, XAdvance, FinalPixelCount, Color);
         UNLOCK_SURFACE_AND_RETURN;
      }
-} // drawline16
+} /* drawline16 */
 
 
 void clear2dscreen(void)
@@ -1915,17 +1953,17 @@ void clear2dscreen(void)
             rect.h = 336;
         else
             rect.h = 480;
-	} // else if
+	} /* else if */
 
     SDL_FillRect(surface, &rect, 0);
-} // clear2dscreen
+} /* clear2dscreen */
 
 
 void _idle(void)
 {
     handle_events();
     SDL_Delay(1);
-} // _idle
+} /* _idle */
 
 void *_getVideoBase(void)
 {
@@ -1934,20 +1972,20 @@ void *_getVideoBase(void)
 
 void setactivepage(long dapagenum)
 {
-	// Is this really still needed? - DDOI
-    //fprintf(stderr, "%s, line %d; setactivepage(): STUB.\n", __FILE__, __LINE__);
-} // setactivepage
+	/* !!! Is this really still needed? - DDOI */
+    /*fprintf(stderr, "%s, line %d; setactivepage(): STUB.\n", __FILE__, __LINE__);*/
+} /* setactivepage */
 
 void limitrate(void)
 {
-    // this is a no-op in SDL. It was for buggy VGA cards in DOS.
-} // limitrate
+    /* this is a no-op in SDL. It was for buggy VGA cards in DOS. */
+} /* limitrate */
 
 Uint32 _timer_catcher(Uint32 interval, void *bleh)
 {
     timerhandler();
     return(1);
-} // _timer_catcher
+} /* _timer_catcher */
 
 void inittimer(void)
 {
@@ -1959,7 +1997,7 @@ void inittimer(void)
         fprintf(stderr, "BUILDSDL:  Reason: [%s]\n", SDL_GetError());
         SDL_Quit();
         exit(2);
-    } // if
+    } /* if */
 }
 
 void uninittimer(void)
@@ -1968,99 +2006,43 @@ void uninittimer(void)
     {
         SDL_RemoveTimer(primary_timer);
         primary_timer = NULL;
-    } // if
+    } /* if */
 }
 
-void _initkeys(void)
+void initkeys(void)
 {
-    // does nothing in SDL. Key input handling is set up elsewhere.
-    // !!! why not here?
+    /* does nothing in SDL. Key input handling is set up elsewhere. */
+    /* !!! why not here? */
 }
 
 void uninitkeys(void)
 {
-    // does nothing in SDL. Key input handling is set up elsewhere.
+    /* does nothing in SDL. Key input handling is set up elsewhere. */
 }
 
-void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeakers, char dabytespersample, char daintspersec, char daquality)
+void set16color_palette(void)
 {
-    audio_disabled = (SDL_Init(SDL_INIT_AUDIO) == -1);
-
-    if (audio_disabled)
-    {
-        fprintf(stderr, "BUILDSDL: SDL_Init(SDL_INIT_AUDIO) failed!\n");
-        fprintf(stderr, "BUILDSDL: SDL_GetError() says \"%s\".\n", SDL_GetError());
-        fprintf(stderr, "BUILDSDL: We'll continue without sound.\n");
-        audio_disabled = 1;
-        return;
-    } // if
-
-    
-
-} // initsb
-
-void uninitsb(void)
-{
-    fprintf(stderr, "%s, line %d; uninitsb(): STUB.\n", __FILE__, __LINE__);
-} // uninitsb
-
-int loadsong(char *filename)
-{
-    fprintf(stderr, "%s, line %d; loadsong(): STUB.\n", __FILE__, __LINE__);
-    return 0;
-} // loadsong
-
-void musicon(void)
-{
-    fprintf(stderr, "%s, line %d; musicon(): STUB.\n", __FILE__, __LINE__);
-} // musicon
-
-void musicoff(void)
-{
-    fprintf(stderr, "%s, line %d; musicoff(): STUB.\n", __FILE__, __LINE__);
-} // musicoff
-
-void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat)
-{
-    fprintf(stderr, "%s, line %d; wsayfollow(): STUB.\n", __FILE__, __LINE__);
-} // wsayfollow    
-
-void wsay(char *dafilename, long dafreq, long volume1, long volume2)
-{
-    fprintf(stderr, "%s, line %d; wsay(): STUB.\n", __FILE__, __LINE__);
-} // wsay
-
-void preparesndbuf(void)
-{
-    fprintf(stderr,"%s, line %d; preparesndbuf(): STUB.\n", __FILE__, __LINE__);
-} // preparesndbuf
-
-void setears(long daposx, long daposy, long daxvect, long dayvect)
-{
-//    fprintf(stderr, "%s, line %d; setears(): STUB.\n", __FILE__, __LINE__);
-} // setears
-
-void set16color_palette (void)
-{
-	// Backup old palette
-	//VBE_getPalette (0, 16, (char *)&backup_palette);
+	/* Backup old palette */
+	/*VBE_getPalette (0, 16, (char *)&backup_palette);*/
 	memcpy (&backup_palette, &palette, 16*3);
 
-	// Set new palette
-	//VBE_setPalette (0, 16, (char *)&egapalette);
+	/* Set new palette */
+	/*VBE_setPalette (0, 16, (char *)&egapalette);*/
 	memcpy (&palette, &egapalette, 16*3);
 	in_egapalette = 1;
-}
+} /* set16color_palette */
 
-void restore256_palette (void)
+void restore256_palette(void)
 {
-	//VBE_setPalette (0, 16, (char *)&backup_palette);
+	/*VBE_setPalette (0, 16, (char *)&backup_palette);*/
 	memcpy (&palette, &backup_palette, 16*3);
 	in_egapalette = 0;
-}
+} /* restore256_palette */
 
-unsigned long getticks()
+unsigned long getticks(void)
 {
     return(SDL_GetTicks());
-} // getticks
+} /* getticks */
+
+/* end of sdl_driver.c ... */
 

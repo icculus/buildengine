@@ -156,14 +156,41 @@ GOOD REFERENCES:
 - The Art of Assembly Language, complete text:
     http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
 
+HOW TO FIX ALL YOUR "//" COMMENTS:
+- We now compile BUILD with the most anal compiler settings available for any
+  given platform. This forces us to write cleaner, more portable, and less
+  buggy code, but sometimes it limits what we can get away with. There are
+  some compilers on some platforms (*coughcoughSolariscoughcough*) that are
+  very anal about (the old version of) the C specification they follow.
+  Therefore, you can NOT use "//" single line comments in code compiled on
+  those toolchains. Since Ken used nothing but // comments, I needed to
+  automate the conversion process a little bit. Here's the quick and dirty
+  way to convert them, using Perl:
+
+        --- snip. ---
+
+        while (<STDIN>) {
+            chomp;
+            s/(.*)(?<!:)\/\/\s*(.*)\s*/$1\/\* $2 \*\//;
+            print("$_\n");
+        }
+
+        --- snip. ---
+
+  Just put that in a file, convert.pl, and run:
+    perl convert.pl < mysrc.c > myconvertedsrc.c
+
+    (patches to that code are welcome.)
+
 TO PORT TO NEW COMPILERS AND TOOLCHAINS:
-- Try to get nasm to generate object files that your linker. That is the
-  easiest for the asm modules. Use a_linux.asm (which is inaccurately named at
-  this point), which is the NASM version.
+- Try to get nasm to generate object files that your linker can understand.
+  That is the easiest for the asm modules. Use a_nasm.asm, which is the NASM
+  version. a.asm is the Watcom Assembler (wasm) version that Ken distributed
+  with the original Build source release.
 - The alternative is to write portable C code to avoid all the self-modifying
-  ASM. Have fun.
+  ASM. Have the appropriate amount of fun.
 - There is inline assembly in engine.c, game.c, pragmas.c, and pragmas.h.
-  Every compiler has their own syntax for this. Have fun.
+  Every compiler has their own syntax for this. Have more fun.
 - Try to find clean syntax fixes that work everywhere instead of #ifdef'ing,
   if you can. Platform.h is a good starting point.
 
@@ -194,6 +221,8 @@ TO PORT TO NEW PROCESSORS:
 - Most of your work will be in pragmas.*, a_linux.*, and a.*.  Look for
   USE_I386_ASM. Define your own version.
 
-// end of README.
+/* end of README ... */
+
+
 
 

@@ -82,7 +82,8 @@ extern unsigned char permanentlock;
 void _platform_init(int argc, char **argv, const char *title, const char *icon);
 void _idle(void);
 void *_getVideoBase(void);
-void _initkeys(void);
+void initkeys(void);
+void uninitkeys(void);
 void _nextpage(void);
 void _uninitengine(void);
 
@@ -118,6 +119,10 @@ void __interrupt __far keyhandler(void);
 unsigned char _readlastkeyhit(void);
 
 /* timer krap. */
+void inittimer(void);
+void uninittimer(void);
+
+/* this is implemented in the game, and your driver calls it. */
 void __interrupt __far timerhandler(void);
 
 /* resolution inits. sdl_driver.c ... */

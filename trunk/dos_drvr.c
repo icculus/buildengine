@@ -814,7 +814,7 @@ void uninittimer(void)
 	_disable(); _dos_setvect(0x8, oldtimerhandler); _enable();
 }
 
-void _initkeys(void)
+void initkeys(void)
 {
 	oldkeyhandler = _dos_getvect(0x9);
 	_disable(); _dos_setvect(0x9, keyhandler); _enable();
@@ -899,7 +899,7 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
 
         setview(0L,0L,xdim-1,ydim-1);
         clearallviews(0L);
-        setbrightness((char)curbrightness,(char *)&palette[0]);
+        setbrightness(curbrightness, &palette[0]);
 
         if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
 
