@@ -840,7 +840,7 @@ void dfwrite8(char *_buffer, size_t count, FILE *fil)
 void dfwrite16(short *_buffer, size_t count, FILE *fil)
 {
 #if PLATFORM_BIGENDIAN
-    unsigned long *buffer = (unsigned long *) _buffer;
+    unsigned short *buffer = (unsigned short *) _buffer;
     int i;
     for (i = 0; i < count; i++)
         buffer[i] = BUILDSWAP_INTEL16(buffer[i]);

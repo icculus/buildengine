@@ -135,10 +135,19 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 
 	while (size >= 0)
 	{
+		// DDOI - this fix is from the Amiga port guys
+		// http://www.neoscientists.org/~dante/
+#ifdef PLATFORM_BIGENDIAN
+		int temp = linum & 0xffff0000;
+		linum += linum_inc;
+		temp |= (linum>>16);
+		linum += linum_inc;
+#else
 		int temp = linum>>16;
 		linum += linum_inc;
 		temp += (linum&0xffff0000);
 		linum += linum_inc;
+#endif
 		*source = temp;
 		source++;
 		size -= 2;
