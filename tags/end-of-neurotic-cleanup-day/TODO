@@ -1,0 +1,46 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+(questions to Ryan C. Gordon, icculus@linuxgames.com)
+
+NEXT ON TAP:
+- Litter the code with assertions.
+- ASM->C port for non-intel boxes?
+- Look for the string "!!!" ... these are TODOs in the source.
+- Tie the window manager quit request to the program, so it reacts like an
+  ESC in 3D mode, and a "ESC, Q" in 2D mode. This will allows the user to
+  abort the shutdown, save if there are changes, etc...
+- Make 2D mode only prompt to save changes on exit if there are changes to
+  save.
+- Looking up/down in the editor seems to screw things up. This might not be
+  the case in 320x200 resolution. Look into it.
+- Slopes are misdrawn in kensig.map.  (still?)
+- Sound.
+- Networking.
+- Port to Visual C?
+- Port to Mingwin32?  (the mprotect()s need to be #ifdef'd out. That should
+  be the biggest change.)
+- Port to BeOS?
+- Make a statically linked binary option in the Linux Makefile.
+- Make a linuxbins target (like msbins target) in the Linux Makefile.
+- Hardware surface/page flipping for more rendering speed?
+- Can we sync to vblank in SDL?
+- OpenGL? This would accelerate rendering, get us out of 8-bit hell, make it
+  prettier, and take out most of the ASM code, for porting to other processors.
+  But it will also give us all ulcers.  :)
+- Update Ken's docs, where applicable.
+- Remove all possible global variables, and expose getter/setter functions
+   instead.
+- There's an SDL_UpdateRect() call in engine.c (__printext256().) Do something
+   about it.
+- Can we convert any existing tabs into equivalent spaces ASCII 32 chars, so
+   the align at 4-space tabstops? Tabs suck.
+- Can we move those SDL __cdecl pragmas out of display.h?
+- Long filenames confuse the editor's file "dialog".
+- boardfilename (and others) in build.c and elsewhere are hardcoded to 13 chars.
+- Might be worth moving all that resolution management code from sdl_driver.c
+   to engine.c ...
+
+// end of TODO ...
+

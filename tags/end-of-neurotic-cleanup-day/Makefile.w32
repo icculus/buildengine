@@ -1,0 +1,136 @@
+#-----------------------------------------------------------------------------#
+# Makefile for creating Build with Watcom C for win32.
+#
+#  Written by Ryan C. Gordon. (icculus@linuxgames.com)
+#
+#  PLEASE FOLLOW ALL THE INSTRUCTIONS BEFORE BUILDING.
+#-----------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------#
+# Don't touch this '!define BLANK ""' line.
+#-----------------------------------------------------------------------------#
+!define BLANK ""
+
+#-----------------------------------------------------------------------------#
+# Directory where Watcom C is installed. Should have an "h" child directory,
+#  so if you specify "C:\WATCOM", there should be a "C:\WATCOM\h" directory
+#  on your drive. DON'T ADD THE TRAILING '\' CHARACTER!
+#-----------------------------------------------------------------------------#
+WATCOMDIR = C:\WATCOM
+
+#-----------------------------------------------------------------------------#
+# Directory where Simple Directmedia Layer (SDL) is installed. SDL can be
+#  downloaded from http://www.libsdl.org/. There should be "include" and "lib"
+#  child directories, so if you specify "C:\SDL-1.1.8", there should be
+#  C:\SDL-1.1.8\lib" and "C:\SDL-1.1.8\include" directories on your drive.
+#  DON'T ADD THE TRAILING '\' CHARACTER!
+#-----------------------------------------------------------------------------#
+SDLDIR = C:\SDL-1.2.0
+
+
+#-----------------------------------------------------------------------------#
+# When debugging, use "d all", otherwise use the "op el" line.
+#-----------------------------------------------------------------------------#
+#LINKDEBUGFLAGS = d all
+LINKDEBUGFLAGS = op el
+
+
+#-----------------------------------------------------------------------------#
+# Choose one, or mix and match. Releases should use the full line,
+#  debug builds should probably use the blank one.
+#-----------------------------------------------------------------------------#
+#OPTIMIZEFLAGS =
+OPTIMIZEFLAGS = -oa -oe -of+ -ol -ol+ -om -oc -oi -or -otexan
+
+#-----------------------------------------------------------------------------#
+# Set this to "nt" to create a console window for viewing stdio output
+#  along with the usual graphical windows. This is for debugging only.
+# Set it to nt_win to just get the graphical windows. This is for release
+#  builds.
+#-----------------------------------------------------------------------------#
+#LINKSYS=nt
+LINKSYS=nt_win
+
+
+#-----------------------------------------------------------------------------#
+# Okay, you're done. Save this file and run "wmake -f Makefile.w32" ...
+#-----------------------------------------------------------------------------#
+
+
+
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+# Don't touch anything below this line, unless you know what you're doing.
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+
+WATCOM_INC_DIR = $(WATCOMDIR)\h;$(WATCOMDIR)\h\nt
+SDL_INC_DIR = $(SDLDIR)\include
+SDL_LIB_DIR = $(SDLDIR)\lib
+
+INCLUDES = -i=$(WATCOM_INC_DIR);$(SDL_INC_DIR)
+DEFINES = -dUSE_I386_ASM -dPLATFORM_WIN32
+
+CFLAGS = $(INCLUDES) $(DEFINES) -w4 -we -e25 -ei -zq &
+         $(OPTIMIZEFLAGS) $(DEBUGFLAGS) -bm -5r -bt=nt -mf 
+ASMFLAGS = $(INCLUDES) -mf -5r -w4 -we -e25 -zq
+
+CC = wcc386.exe
+ASM = wasm.exe
+
+BUILDOBJS = a.obj bstub.obj build.obj cache1d.obj engine.obj &
+            multi_tcpip.obj sdl_driver.obj
+GAMEOBJS  = a.obj game.obj cache1d.obj engine.obj multi_tcpip.obj &
+            sdl_driver.obj
+
+BUILDOBJS_COMMAS = a.obj,bstub.obj,build.obj,cache1d.obj,engine.obj,multi_tcpip.obj,sdl_driver.obj
+GAMEOBJS_COMMAS  = a.obj,game.obj,cache1d.obj,engine.obj,multi_tcpip.obj,sdl_driver.obj
+
+all : project .SYMBOLIC
+
+project : build.exe game.exe .SYMBOLIC
+
+clean : .SYMBOLIC
+	erase *.obj
+	erase *.exe
+	erase *.o
+	erase *~
+
+.asm.obj : .AUTODEPEND
+	*$(ASM) $[* $(ASMFLAGS)
+
+.c.obj :  .AUTODEPEND
+	*$(CC) $[* $(CFLAGS)
+
+build.exe : $(BUILDOBJS) .AUTODEPEND
+ @%write build.lk1 NAME build
+ @%append build.lk1 FIL $(BUILDOBJS_COMMAS)
+ @%append build.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b build.imp 
+ @%append build.lk1 LIBR build.imp
+!endif
+ *wlink $(LINKDEBUGFLAGS) SYS $(LINKSYS) libp $(SDL_LIB_DIR) libf SDL.lib &
+$(LINKDEBUGFLAGS) op c op maxe=25 op q @build.lk1
+ erase build.lk1
+!ifneq BLANK ""
+ wrc -q -ad -t  build.exe
+!endif
+
+game.exe : $(GAMEOBJS) .AUTODEPEND
+ @%write game.lk1 NAME game
+ @%append game.lk1 FIL $(GAMEOBJS_COMMAS)
+ @%append game.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b game.imp 
+ @%append game.lk1 LIBR game.imp
+!endif
+ *wlink $(LINKDEBUGFLAGS) SYS $(LINKSYS) libp $(SDL_LIB_DIR) libf SDL.lib &
+$(LINKDEBUGFLAGS) op c op maxe=25 op q @game.lk1
+ erase game.lk1
+!ifneq BLANK ""
+ wrc -q -ad -t  game.exe
+!endif
+
+# end of Makefile.w32 ...
+

@@ -1,0 +1,120 @@
+#-----------------------------------------------------------------------------#
+# Makefile for Watcom C 10.6 compilation for DOS i386 protected mode target.
+#
+#  Written by Ryan C. Gordon. (icculus@linuxgames.com)
+#
+#  PLEASE FOLLOW ALL THE INSTRUCTIONS BEFORE BUILDING.
+#-----------------------------------------------------------------------------#
+
+#-----------------------------------------------------------------------------#
+# Don't touch this '!define BLANK ""' line.
+#-----------------------------------------------------------------------------#
+!define BLANK ""
+
+#-----------------------------------------------------------------------------#
+# Directory where Watcom C is installed. Should have an "h" child directory,
+#  so if you specify "C:\WATCOM", there should be a "C:\WATCOM\h" directory
+#  on your drive. DON'T ADD THE TRAILING '\' CHARACTER!
+#-----------------------------------------------------------------------------#
+WATCOMDIR = C:\WATCOM
+
+#-----------------------------------------------------------------------------#
+# When debugging, use "-d2", otherwise use the blank line.
+#-----------------------------------------------------------------------------#
+#DEBUGFLAGS = -d2
+DEBUGFLAGS =
+
+#-----------------------------------------------------------------------------#
+# When debugging, use "d all", otherwise use the "op el" line.
+#-----------------------------------------------------------------------------#
+#LINKDEBUGFLAGS = d all
+LINKDEBUGFLAGS = op el
+
+#-----------------------------------------------------------------------------#
+# Choose one, or mix and match. Releases should use the full line,
+#  debug builds should probably use the blank one.
+#-----------------------------------------------------------------------------#
+#OPTIMIZEFLAGS =
+OPTIMIZEFLAGS = -oa -oe -of+ -ol -ol+ -om -oc -oi -or -otexan
+
+
+#-----------------------------------------------------------------------------#
+# Okay, you're done. Save this file and run "wmake -f Makefile.dos" ...
+#-----------------------------------------------------------------------------#
+
+
+
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+# Don't touch anything below this line, unless you know what you're doing.
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+
+LINKSYS=dos4g
+
+WATCOM_INC_DIR = $(WATCOMDIR)\h
+
+INCLUDES = -i=$(WATCOM_INC_DIR)
+DEFINES = -dUSE_I386_ASM -dPLATFORM_DOS
+
+CFLAGS = $(INCLUDES) $(DEFINES) -w4 -we -e25 -ei -zq &
+         $(OPTIMIZEFLAGS) $(DEBUGFLAGS) -5r -bt=dos -mf 
+ASMFLAGS = $(INCLUDES) -mf -5r -w4 -we -e25 -zq
+
+CC = wcc386.exe
+ASM = wasm.exe
+
+BUILDOBJS = a.obj bstub.obj build.obj cache1d.obj engine.obj &
+            multi_tcpip.obj dos_drvr.obj
+GAMEOBJS  = a.obj game.obj cache1d.obj engine.obj multi_tcpip.obj &
+            dos_drvr.obj kdmeng.obj k.obj
+
+BUILDOBJS_COMMAS = a.obj,bstub.obj,build.obj,cache1d.obj,engine.obj,multi_tcpip.obj,dos_drvr.obj
+GAMEOBJS_COMMAS  = a.obj,game.obj,cache1d.obj,engine.obj,multi_tcpip.obj,dos_drvr.obj,kdmeng.obj,k.obj
+
+all : project .SYMBOLIC
+
+project : build.exe game.exe .SYMBOLIC
+
+clean : .SYMBOLIC
+	erase *.obj
+	erase *.exe
+	erase *.o
+	erase *~
+
+.asm.obj : .AUTODEPEND
+	*$(ASM) $[* $(ASMFLAGS)
+
+.c.obj :  .AUTODEPEND
+	*$(CC) $[* $(CFLAGS)
+
+build.exe : $(BUILDOBJS) .AUTODEPEND
+ @%write build.lk1 NAME build
+ @%append build.lk1 FIL $(BUILDOBJS_COMMAS)
+ @%append build.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b build.imp 
+ @%append build.lk1 LIBR build.imp
+!endif
+ *wlink $(LINKDEBUGFLAGS) SYS $(LINKSYS) op c op maxe=25 op q @build.lk1 
+ erase build.lk1
+!ifneq BLANK ""
+ wrc -q -ad -t  build.exe
+!endif
+
+game.exe : $(GAMEOBJS) .AUTODEPEND
+ @%write game.lk1 NAME game
+ @%append game.lk1 FIL $(GAMEOBJS_COMMAS)
+ @%append game.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b game.imp 
+ @%append game.lk1 LIBR game.imp
+!endif
+ *wlink $(LINKDEBUGFLAGS) SYS $(LINKSYS) op c op maxe=25 op q @game.lk1
+ erase game.lk1
+!ifneq BLANK ""
+ wrc -q -ad -t  game.exe
+!endif
+
+# end of Makefile.w32 ...
+

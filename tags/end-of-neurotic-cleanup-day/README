@@ -1,0 +1,228 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+/*
+ * README.
+ *
+ *  Please do NOT harrass Ken Silverman about any code modifications
+ *   (including this file) to BUILD.
+ */
+
+(This code DOES run on Windows. Read on.)
+
+You NEED gcc 2.95.2 (or maybe later) to compile this code correctly.
+You'll also need Netwide Assembler (NASM). Get it at:
+
+  http://www.kernel.org/pub/software/devel/nasm/
+
+
+(May I reiterate? Earlier than 2.95.2 revisions of GCC and EGCS do NOT
+compile this code correctly! It will run, but there will be all sorts of
+strange graphic glitches and odd crashes.)
+
+This code uses Simple Directmedia Layer (SDL) for graphics, sound, and other
+platform abstractions. Build relies on a fairly recent SDL code snapshot.
+
+Get SDL from CVS like this:
+
+cvs -d :pserver:guest@cvs.lokigames.com:/cvs login
+# password is "guest", without the quotes.
+cvs -z3 -d :pserver:guest@cvs.lokigames.com:/cvs checkout SDL12
+cd SDL12; ./autogen.sh; make; make install
+
+
+CVS is also good if you want the up-to-the-minute changes of BUILD:
+
+cvs -d:pserver:anonymous@linux.ucla.edu:/var/cvs login
+# password is "anonymous", without the quotes.
+cvs -z3 -d:pserver:anonymous@linux.ucla.edu:/var/cvs co buildengine
+
+
+PLEASE READ THE CHANGELOG AND TODO FILE FOR DETAILS ON WHAT'S NEW AND
+ WHAT'S NEEDED! They're in the tarball.
+
+Have fun!
+
+--ryan. (icculus@linuxgames.com)
+
+
+INFO:
+- Patches go to Ryan at icculus@linuxgames.com.
+- Please try to keep it so the original source can still be compiled with
+  Watcom C for DOS. Maybe if we do a good enough job, we can just get Ken
+  to make this his official version, although this is not the goal right now.
+  You may #ifdef DOSisms with PLATFORM_DOS, and Unixism with PLATFORM_UNIX, but
+  try not to touch the original code if you can circumvent it (i.e. reimplement
+  the functionality of missing functions in a separate file, #define
+  __interrupt to be blank, etc...) Reference unix_compat.[ch] and sdl_driver.c
+  for examples of this behaviour.
+- See us in #loki at irc.openprojects.net with questions.
+- This is NOT a Loki-sponsored project. We are (er...WERE) Loki employees
+  that get off on this stuff. Don't harrass info@lokigames.com about it.
+- Yes, you CAN edit Duke3D maps with this. Sort of.
+  Find your DUKE3D.GRP file, and set this environment variable:
+
+    (on Windows: "set BUILD_GROUPFILE=C:\where\grpfile\is\DUKE3D.GRP")
+    (on Linux/bash: "export BUILD_GROUPFILE=/where/grpfile/is/DUKE3D.GRP")
+
+    Without this environment variable, Build looks for "stuff.dat" in the
+    current directory; that's KenBuild's groupfile.
+
+  Now go get a Duke3D map off the net and open it in build.
+  I haven't tried Blood, Shadow Warrior, or anything else, but someone sent
+  me screenshots of Shadow Warrior. Your mileage may vary.
+
+   Either way, there's lots of screenshots up at:
+    http://www.icculus.org/BUILD/screenshots/duke3d_data_files/
+    http://www.icculus.org/BUILD/screenshots/shadow_warrior_data_files/
+
+ There is still much missing from Build that is needed to use it as a Duke3D
+  editor, and that is not the focus of this project. It is DEFINITELY not
+  enough to PLAY duke3d, as there is no CON interpreter or correct physics
+  or enemy AI or equivilent sector tags etc.
+
+ If an editor is all you want, there is a project called Mapster
+  (http://mapster-rtcm.totalconversions.com/) that is a KenBuild source
+  modification to support all of DukeBUILD's features, and add some new
+  enhancements, too. Stay tuned, as there may be a win32 (and Linux?) version
+  of Mapster sooner or later.
+
+ In short, is this enough to play Duke/Shadow/Blood? No. But it's a good start.
+
+- Can Windows users use this code? You bet. Binaries available.
+
+- To build this from source under Windows:
+  You can use Cygwin, a Windows port of the GNU C compiler. Cygwin is free (as
+  in speech and beer), and can be downloaded from
+  http://sources.redhat.com/cygwin/. You will also need to have a development
+  version of SDL installed (I used the prebuilt SDL libraries under
+  Windows, look at http://www.libsdl.org/). And, as under Linux, you will
+  need NASM (http://www.kernel.org/pub/software/devel/nasm/). Make sure
+  nasmw.exe ends up somewhere in your PATH, and SDL is somewhere you have
+  access to. Once you have all this set up, unpack the BUILD sources.
+  Make sure your in the buildengine directory. Set these two environment
+  variables:
+
+    export SDL_LIB_DIR=C:/where/i/installed/SDL-1.2.0/lib
+    export SDL_INC_DIR=C:/where/i/installed/SDL-1.2.0/include
+
+   (Yes, those directory separators are backwards; it is intentional.)
+
+  ...then, type "make", and it should produce binaries for you if you did
+  everything right.
+
+  You will have to make sure that SDL.DLL and CYGWIN1.DLL are in your path
+  somewhere.
+
+  This isn't all as hard as it sounds.  :)
+
+- To build with Watcom C for Win32: Get SDL (as above). Unpack the source,
+  edit Makefile.w32 (instructions are in that file). Change the paths at the
+  top to point to your Watcom and SDL installs. Run "wmake -f Makefile.w32"
+  ... that's all. I tried this with Watcom C 10.6 and 11.0 using the win32
+  (both "nt" and "nt_win") targets. Anything older than Watcom C 11.0 will
+  NOT build an EXE that will work on Windows NT 4.0 or Windows 2000, even
+  though the same binary will work on Windows 95 and 98. Your mileage may vary.
+
+- If anyone wants to make this work with Visual C++ to make this easier
+  for Windows users, I'll happily accept your changes and additions.
+
+- One more thing, about licensing. If you build this with Cygwin, you are
+  NOT permitted to release binaries, as Cygwin's POSIX-support DLL is
+  under the GPL license, which forbids distribution of code linked with it
+  that doesn't abide by the OpenSource definition (Ken's license does
+  not). Harrassing Ken Silverman to change his license to the GPL is not
+  only rude, it's unproductive. Distributing binaries built with Cygwin
+  opens you up to lawsuits from Red Hat and the Free Software
+  Foundation. Do the right thing; if you must distribute BUILD binaries,
+  don't build them with Cygwin.
+
+- Does this code still work under DOS?  Yup. You use Watcom C the same as you
+  would for the Windows target, except you use Makefile.dos. Note that the
+  Windows and Linux versions are better maintained, more stable, and support
+  more hardware. Don't ask Ken about the DOS port either. He probably wouldn't
+  recognize his own code after all the mangling we did.  :)
+
+GOOD REFERENCES:
+- VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
+- http://www-cgi.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html
+  (THE Interrupt List, from Ralf Brown. Good stuff, here.)
+- FreeVGA: A VGA documentation project.
+  http://www.goodnet.com/~tinara/FreeVGA/home.htm
+- BUILD keyboard reference: http://home.online.no/~flovstak/duke/bkeys.htm
+- mapFAQ: http://mapfaq.3dportal.com/
+- Ken Silverman's homepage: http://www.advsys.net/ken/
+- The Art of Assembly Language, complete text:
+    http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
+
+HOW TO FIX ALL YOUR "//" COMMENTS:
+- We now compile BUILD with the most anal compiler settings available for any
+  given platform. This forces us to write cleaner, more portable, and less
+  buggy code, but sometimes it limits what we can get away with. There are
+  some compilers on some platforms (*coughcoughSolariscoughcough*) that are
+  very anal about (the old version of) the C specification they follow.
+  Therefore, you can NOT use "//" single line comments in code compiled on
+  those toolchains. Since Ken used nothing but // comments, I needed to
+  automate the conversion process a little bit. Here's the quick and dirty
+  way to convert them, using Perl:
+
+        --- snip. ---
+
+        while (<STDIN>) {
+            chomp;
+            s/(.*)(?<!:)\/\/\s*(.*)\s*/$1\/\* $2 \*\//;
+            print("$_\n");
+        }
+
+        --- snip. ---
+
+  Just put that in a file, convert.pl, and run:
+    perl convert.pl < mysrc.c > myconvertedsrc.c
+
+    (patches to that code are welcome.)
+
+TO PORT TO NEW COMPILERS AND TOOLCHAINS:
+- Try to get nasm to generate object files that your linker can understand.
+  That is the easiest for the asm modules. Use a_nasm.asm, which is the NASM
+  version. a.asm is the Watcom Assembler (wasm) version that Ken distributed
+  with the original Build source release.
+- The alternative is to write portable C code to avoid all the self-modifying
+  ASM. Have the appropriate amount of fun.
+- There is inline assembly in engine.c, game.c, pragmas.c, and pragmas.h.
+  Every compiler has their own syntax for this. Have more fun.
+- Try to find clean syntax fixes that work everywhere instead of #ifdef'ing,
+  if you can. Platform.h is a good starting point.
+
+TO PORT TO NEW OPERATING SYSTEMS:
+- If Simple Directmedia Layer supports your OS, you're in luck. Just get
+  everything building (see above). If not, look at display.h for what you
+  need to implement, and sdl_driver.c and dos_drvr.c for examples. Consider
+  getting SDL working on your platform instead.
+- Your platform needs at least an 8-bit linear framebuffer for video.
+  Otherwise, you can pray the OpenGL code gets written and is useful to you.
+- The code doesn't necessarily NEED a keyboard, but the input device has GOT
+  to have a lot of buttons. The renderer itself doesn't deal with input, just
+  the apps (build, game, duke3d) that use it, so this may not be a problem,
+  depending on your needs. Some apps (the editor itself, for example) seem to
+  demand a mouse.
+- Your platform needs to be 32-bit clean, in all likelihood. You might be able
+  to make enough band-aids to get this working otherwise. No one's tried it on
+  a 64-bit platform yet, partially due to all the (32-bit) assembly code.
+  16-bits or less will likely be a nightmare.
+- Start in platform.h for an idea of where to add anything that's
+  platform-specific. If you can't get by on PLATFORM_UNIX, then define
+  PLATFORM_WHATEVER.
+- Try not to wedge in platform dependent code, but find good abstractions.
+
+TO PORT TO NEW PROCESSORS:
+- You can either write new ASM for your processor, or better yet, implement
+  the stuff in portable C, so everyone can benefit.
+- Most of your work will be in pragmas.*, a_linux.*, and a.*.  Look for
+  USE_I386_ASM. Define your own version.
+
+/* end of README ... */
+
+
+
+
