@@ -381,20 +381,21 @@ extern long drawslab(long,long,long,long,long,long);
         static long nsqrtasm(int i1)
         {
             long retval;
-            __asm__ __volatile__ ( "
-            	testl $0xff000000, %%eax
-	            movl %%eax, %%ebx
-    	        jnz nsqrover24
-        	    shrl $12, %%ebx
-            	movw " SYM_shlookup "(, %%ebx, 2), %%cx
-	            jmp nsqrunder24
-        	    nsqrover24: shr $24, %%ebx
-    	        movw (" SYM_shlookup "+ 8192)(, %%ebx, 2), %%cx
-        	    nsqrunder24: shrl %%cl, %%eax
-    	        movb %%ch, %%cl
-        	    movw " SYM_sqrtable "(, %%eax, 2), %%ax
-    	        shrl %%cl, %%eax
-            " : "=a" (retval) : "a" (i1) : "ebx", "ecx", "cc");
+            __asm__ __volatile__ (
+                "\n\t"
+            	"testl $0xff000000, %%eax\n\t"
+	            "movl %%eax, %%ebx\n\t"
+    	        "jnz nsqrover24\n\t"
+        	    "shrl $12, %%ebx\n\t"
+            	"movw " SYM_shlookup "(, %%ebx, 2), %%cx\n\t"
+	            "jmp nsqrunder24\n\t"
+        	    "nsqrover24: shr $24, %%ebx\n\t"
+    	        "movw (" SYM_shlookup "+ 8192)(, %%ebx, 2), %%cx\n\t"
+        	    "nsqrunder24: shrl %%cl, %%eax\n\t"
+    	        "movb %%ch, %%cl\n\t"
+        	    "movw " SYM_sqrtable "(, %%eax, 2), %%ax\n\t"
+    	        "shrl %%cl, %%eax\n\t"
+            : "=a" (retval) : "a" (i1) : "ebx", "ecx", "cc");
             return(retval);
         } // nsqrtasm
 
@@ -438,12 +439,13 @@ extern long drawslab(long,long,long,long,long,long);
   #elif (defined __GNUC__)
         static long krecipasm(long i1)
         {
-          long retval;
-          __asm__ __volatile__ ("
-            call _asm_krecipasm
-                   " : "=a" (retval) : "a" (i1)
-        			: "cc", "ebx", "ecx", "memory");
-          return(retval);
+            long retval;
+            __asm__ __volatile__ (
+                "\n\t"
+                "call _asm_krecipasm\n\t"
+            : "=a" (retval) : "a" (i1)
+        	: "cc", "ebx", "ecx", "memory");
+            return(retval);
         } // krecipasm
     
     #else
@@ -514,18 +516,19 @@ extern long drawslab(long,long,long,long,long,long);
         int setgotpic(long i1)
         {
             int retval = 0;
-            __asm__ __volatile__ ("
-                movl %%eax, %%ebx
-            	cmpb $200, " SYM_walock "(%%eax)
-            	jae setgotpic_skipit
-            	movb $199, " SYM_walock "(%%eax)
-            	setgotpic_skipit: shrl $3, %%eax
-            	andl $7, %%ebx
-            	movb " SYM_gotpic "(%%eax), %%dl
-            	movb " SYM_pow2char "(%%ebx), %%bl
-            	orb %%bl, %%dl
-            	movb %%dl, (" SYM_gotpic ")(%%eax)
-            " : "=a" (retval) : "a" (i1) : "ebx", "ecx", "edx", "cc", "memory");
+            __asm__ __volatile__ (
+                "\n\t"
+                "movl %%eax, %%ebx\n\t"
+            	"cmpb $200, " SYM_walock "(%%eax)\n\t"
+            	"jae setgotpic_skipit\n\t"
+            	"movb $199, " SYM_walock "(%%eax)\n\t"
+            	"setgotpic_skipit: shrl $3, %%eax\n\t"
+            	"andl $7, %%ebx\n\t"
+            	"movb " SYM_gotpic "(%%eax), %%dl\n\t"
+            	"movb " SYM_pow2char "(%%ebx), %%bl\n\t"
+            	"orb %%bl, %%dl\n\t"
+            	"movb %%dl, (" SYM_gotpic ")(%%eax)\n\t"
+            : "=a" (retval) : "a" (i1) : "ebx", "ecx", "edx", "cc", "memory");
             return(retval);
         } // if
 
@@ -561,20 +564,21 @@ extern long drawslab(long,long,long,long,long,long);
         long getclipmask(int i1, int i2, int i3, int i4)
         {
             int retval;
-            __asm__ __volatile__ ("
-        		sarl $31, %%eax
-        		addl %%ebx, %%ebx
-        		adcl %%eax, %%eax
-        		addl %%ecx, %%ecx
-        		adcl %%eax, %%eax
-        		addl %%edx, %%edx
-        		adcl %%eax, %%eax
-        		movl %%eax, %%ebx
-        		shll $4, %%ebx
-        		orb $0xf0, %%al
-        		xorl %%ebx, %%eax
-        	" : "=a" (retval) : "a" (i1), "b" (i2), "c" (i3), "d" (i4)
-        	  : "cc", "memory");
+            __asm__ __volatile__ (
+        		"\n\t"
+                "sarl $31, %%eax\n\t"
+        		"addl %%ebx, %%ebx\n\t"
+        		"adcl %%eax, %%eax\n\t"
+        		"addl %%ecx, %%ecx\n\t"
+        		"adcl %%eax, %%eax\n\t"
+        		"addl %%edx, %%edx\n\t"
+        		"adcl %%eax, %%eax\n\t"
+        		"movl %%eax, %%ebx\n\t"
+        		"shll $4, %%ebx\n\t"
+        		"orb $0xf0, %%al\n\t"
+        		"xorl %%ebx, %%eax\n\t"
+        	: "=a" (retval) : "a" (i1), "b" (i2), "c" (i3), "d" (i4)
+        	: "cc", "memory");
             return(retval);
         } // getclipmask
 

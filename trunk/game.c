@@ -4936,18 +4936,19 @@ void initlava(void)
   #elif (defined __GNUC__)
 	static long addlava (int i1)
 	{
-	long retval;
-	__asm__ __volatile__ ( "
-		movb -133(%%ebx), %%al
-		movb -1(%%ebx), %%dl
-		addb -132(%%ebx), %%al
-		addb 131(%%ebx), %%dl
-		addb -131(%%ebx), %%al
-		addb 132(%%ebx), %%dl
-		addb 1(%%ebx), %%al
-		addb %%dl, %%al
-	" : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
-	return (retval);
+        long retval;
+        __asm__ __volatile__ (
+            "\n\t"
+            "movb -133(%%ebx), %%al\n\t"
+            "movb -1(%%ebx), %%dl\n\t"
+            "addb -132(%%ebx), %%al\n\t"
+            "addb 131(%%ebx), %%dl\n\t"
+            "addb -131(%%ebx), %%al\n\t"
+            "addb 132(%%ebx), %%dl\n\t"
+            "addb 1(%%ebx), %%al\n\t"
+            "addb %%dl, %%al\n\t"
+        : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
+        return (retval);
 	}	
 
   #else
