@@ -34,6 +34,16 @@ NEXT ON TAP:
 - OpenGL? This would accelerate rendering, get us out of 8-bit hell, make it
   prettier, and take out most of the ASM code, for porting to other processors.
   But it will also give us all ulcers.  :)
+- Flag all the functions that need not be exported as static.
+- Move all these ugly-ass forward function declares into appropriate headers.
+  ...or get rid of them by reordering the source, where appropriate.
+- Update Ken's docs, where applicable.
+- Remove all possible global variables, and expose getter/setter functions
+   instead.
+- There's an SDL_UpdateRect() call in engine.c (__printext256().) Do something
+   about it.
+- Can we convert any existing tabs into equivalent spaces ASCII 32 chars, so
+   the align at 4-space tabstops? Tabs suck.
 
 // end of TODO ...
 

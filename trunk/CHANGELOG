@@ -376,6 +376,31 @@
             other debugging info to sdl_driver.c, and put the (commented out)
             starts of hardware surface/double buffering/page flipping support.
             Updated TODO.
+05222001 - Updated TODO again. Cleaned up engine.c's forward function
+            references. Put together engine.h, so that the engine's exported
+            functionality can be referenced via one header instead of a list
+            of function declarations plugged into every file. Made everything
+            that shouldn't be exported from engine.c static, but this is an
+            error-prone process, so it'll probably get tweaked as other Build
+            related code gets tried with this engine. Similar cleanups in
+            build.c, display.h, and elsewhere. Laid foundation for an OpenGL
+            renderer. No actual rendering is done, just context creation and
+            library setup when _setgamemode() is called on a system that uses
+            the SDL driver. This work may never get finished, but why not try?
+            Flip the "useopengl" flag in the Makefile to use this code.
+            Cleaned out a commented-out printf in maskwallscan(). Moved
+            New static flag in engine.c: initengine_called is set when
+            (surprise) initengine() is called. This is currently just used
+            with the MMX overlay code...now dommxoverlay is no longer exposed;
+            use setmmxoverlay() and getmmxoverlay() instead. Updated
+            build2.txt with this information. Removed global var: cachedebug
+            in engine.c, and put #define BUILD_CACHEDEBUG 0 at the top of the
+            source. Flip it to 1 if you ever need to tinker in the cache code.
+            Removed krecip() from engine.c, since nothing uses it (it just
+            wrapped krecipasm(), which IS used all over the place).
+            Other cleanups were made, along with update in build.txt. Lots of
+            code was touched in ways not appropriate to mention in polite
+            company.
 
 --ryan. (icculus@linuxgames.com)
 
