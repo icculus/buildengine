@@ -46,7 +46,7 @@ void hlineasm4(long count, unsigned long source, long shade, unsigned long i4, u
     shade &= 0xffffff00;
     count += 1;
     while (count) {
-	    source = i5 >> (256-machxbits_al);
+	    source = i5 >> ((256-machxbits_al) & 0x1f);
 	    source = shld(source,i4,machxbits_bl);
 	    source = ((unsigned char*)source)[machxbits_ecx];
 	    *((unsigned char*)i6) = pal_eax[shade|source];
@@ -617,10 +617,10 @@ void setupslopevlin(long i1, long i2, long i3)
     bitwisef2i c;
     slopemach_ebx = i2;
     slopemach_ecx = i3;
-    slopemach_edx = (1<<(i1&0xff)) - 1;
-    slopemach_edx <<= ((i1&0xff00)>>8);
-    slopemach_ah1 = 256-((i1&0xff00)>>8);
-    slopemach_ah2 = slopemach_ah1 - (i1&0xff);
+    slopemach_edx = (1<<(i1&0x1f)) - 1;
+    slopemach_edx <<= ((i1&0x1f00)>>8);
+    slopemach_ah1 = 32-((i1&0x1f00)>>8);
+    slopemach_ah2 = (slopemach_ah1 - (i1&0x1f)) & 0x1f;
     c.f = asm2_f = (float)asm1;
     asm2 = c.i;
 } /* setupslopevlin */
@@ -652,7 +652,7 @@ void slopevlin(long i1, unsigned long i2, long i3, long i4, long i5, long i6)
 	    eax = ((eax&0xffe000)>>11);
 	    ecx = ((ecx&0xffffff00)|((ecx-2)&0xff));
 	    eax = reciptable[eax/4];
-	    eax >>= (ecx&0xff);
+	    eax >>= (ecx&0x1f);
 	    eax ^= edx;
 	    // -------------
 	    edx = i2;
