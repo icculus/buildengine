@@ -50,7 +50,7 @@ useperl := false
 useopengl := false
 GL_INCLDIR := /usr/X11R6/include
 
-
+usedlls := true
 
 #-----------------------------------------------------------------------------#
 # Everything below this line is probably okay.
@@ -86,12 +86,14 @@ CC = gcc
 
 ifeq ($(strip $(cygwin)),true)
   ASM = nasmw
+  DLL_EXT = .dll
   EXE_EXT = .exe
   ASMOBJFMT = win32
   ASMDEFS = -dC_IDENTIFIERS_UNDERSCORED
   CFLAGS += -DC_IDENTIFIERS_UNDERSCORED
 else
   ASM = nasm
+  DLL_EXT = .so
   EXE_EXT =
   ASMOBJFMT = elf
 endif
@@ -108,20 +110,38 @@ ifeq ($(strip $(useperl)),true)
   PERLOBJS += buildperl.o /usr/lib/perl5/i386-linux/CORE/libperl.a
 endif
 
+ifeq ($(strip $(usedlls)),true)
+ENGINEBASE = buildengine
+ENGINEDLL = $(strip $(ENGINEBASE))$(strip $(DLL_EXT))
+NETBASE = buildnet
+NETDLL = $(strip $(NETBASE))$(strip $(DLL_EXT))
+endif
+
+ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
+ENGINESRCS += a_nasm.asm pragmas.c a.c
+
+NETSRCS = multi_tcpip.c
+
+GAMEEXE = game
+GAMESRCS = game.c 
+#GAMESRCS += multi.c k.asm kdmeng.c
+ifneq ($(strip $(usedlls)),true)
+GAMESRCS += $(ENGINESRCS)
+GAMESRCS += $(NETSRCS)
+endif
+
+BUILDEXE = build
+BUILDSRCS = build.c bstub.c
+ifneq ($(strip $(usedlls)),true)
+BUILDSRCS += $(ENGINESRCS)
+endif
+
+
+ENGINEDIR = .
+ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 LINKER = gcc
 CFLAGS += $(USE_ASM) -Werror -ansi -pedantic -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
-
-GAMEEXE = game
-GAMESRCS = game.c engine.c cache1d.c sdl_driver.c unix_compat.c
-GAMESRCS += a_nasm.asm pragmas.c a.c multi_tcpip.c
-#GAMESRCS += multi.c k.asm kdmeng.c
-
-BUILDEXE = build
-BUILDSRCS = build.c bstub.c engine.c cache1d.c sdl_driver.c unix_compat.c
-BUILDSRCS += a_nasm.asm pragmas.c a.c
-
-ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 
 # Rules for turning source files into .o files
 %.o: %.c
@@ -131,13 +151,17 @@ ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 	$(ASM) $(ASMFLAGS) -o $@ $<
 
 # Rule for getting list of objects from source
+ENGINEOBJS1 := $(ENGINESRCS:.c=.o)
+ENGINEOBJS := $(ENGINEOBJS1:.asm=.o)
+NETOBJS1 := $(NETSRCS:.c=.o)
+NETOBJS := $(NETOBJS1:.asm=.o)
 GAMEOBJS1 := $(GAMESRCS:.c=.o)
 GAMEOBJS := $(GAMEOBJS1:.asm=.o)
 BUILDOBJS1 := $(BUILDSRCS:.c=.o)
 BUILDOBJS := $(BUILDOBJS1:.asm=.o)
 
-CLEANUP = $(GAMEOBJS) $(BUILDOBJS) $(PERLOBJS) \
-          $(GAMEEXE) $(BUILDEXE) \
+CLEANUP = $(GAMEOBJS) $(BUILDOBJS) $(PERLOBJS) $(NETOBJS) \
+          $(GAMEEXE) $(BUILDEXE) $(ENGINEOBJS) $(ENGINEDLL) \
           $(wildcard *.exe) $(wildcard *.obj) \
           $(wildcard *~) $(wildcard *.err) \
           $(wildcard .\#*) core
@@ -149,11 +173,22 @@ buildperl.o : buildperl.c
 	$(CC) -c -o $@ $< $(CFLAGS) $(CCPERL)
 endif
 
-$(GAMEEXE) : $(GAMEOBJS) $(PERLOBJS)
-	$(LINKER) -o $(GAMEEXE) $(LDFLAGS) $(LDPERL) $(PERLOBJS) $(GAMEOBJS)
+ifeq ($(strip $(usedlls)),true)
+$(ENGINEDLL) : $(ENGINEOBJS)
+	$(LINKER) -shared -o $(ENGINEDLL) $(LDFLAGS) $(ENGINEOBJS)
 
-$(BUILDEXE) : $(BUILDOBJS)
-	$(LINKER) -o $(BUILDEXE) $(LDFLAGS) $(BUILDOBJS)
+$(NETDLL) : $(NETOBJS)
+	$(LINKER) -shared -o $(NETDLL) $(LDFLAGS) $(NETOBJS)
+endif
+
+$(GAMEEXE) : $(ENGINEDLL) $(NETDLL) $(GAMEOBJS) $(PERLOBJS)
+	$(LINKER) -o $(GAMEEXE) $(LDFLAGS) $(LDPERL) $(PERLOBJS) $(GAMEOBJS) $(ENGINEDLL) $(NETDLL)
+
+$(BUILDEXE) : $(ENGINEDLL) $(BUILDOBJS)
+	$(LINKER) -o $(BUILDEXE) $(LDFLAGS) $(BUILDOBJS) $(ENGINEDLL)
+
+listclean:
+	@echo "A 'make clean' would remove" $(CLEANUP)
 
 clean:
 	rm -f $(CLEANUP)
