@@ -133,7 +133,7 @@ long tilefileoffs[MAXTILES];
 
 long artsize = 0, cachesize = 0;
 
-static short radarang[1280], radarang2[MAXXDIM];
+static short radarang[1280], radarang2[MAXXDIM+1];
 static unsigned short sqrtable[4096], shlookup[4096+256];
 char pow2char[8] = {1,2,4,8,16,32,64,-128};
 long pow2long[32] =
@@ -190,12 +190,12 @@ static long spritesy[MAXSPRITESONSCREEN+1];
 static long spritesz[MAXSPRITESONSCREEN];
 static spritetype *tspriteptr[MAXSPRITESONSCREEN];
 
-short umost[MAXXDIM], dmost[MAXXDIM];
-static short bakumost[MAXXDIM], bakdmost[MAXXDIM];
-short uplc[MAXXDIM], dplc[MAXXDIM];
-static short uwall[MAXXDIM], dwall[MAXXDIM];
-static long swplc[MAXXDIM], lplc[MAXXDIM];
-static long swall[MAXXDIM], lwall[MAXXDIM+4];
+short umost[MAXXDIM+1], dmost[MAXXDIM+1];
+static short bakumost[MAXXDIM+1], bakdmost[MAXXDIM+1];
+short uplc[MAXXDIM+1], dplc[MAXXDIM+1];
+static short uwall[MAXXDIM+1], dwall[MAXXDIM+1];
+static long swplc[MAXXDIM+1], lplc[MAXXDIM+1];
+static long swall[MAXXDIM+1], lwall[MAXXDIM+4];
 long xdimen = -1, xdimenrecip, halfxdimen, xdimenscale, xdimscale;
 long wx1, wy1, wx2, wy2, ydimen;
 long viewoffset, frameoffset;
