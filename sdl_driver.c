@@ -932,7 +932,9 @@ static __inline void output_sdl_versions(void)
 static int in_vmware = 0;
 static __inline void detect_vmware(void)
 {
-#if 0
+#if 1
+    in_vmware = 0;  /* oh well. */
+#else
     /* !!! need root access to touch i/o ports on Linux. */
     #if (!defined __linux__)
         in_vmware = (int) is_vmware_running();
