@@ -151,6 +151,7 @@ long reciptable[2048], fpuasm;
 
 char kensmessage[128];
 
+int has_altivec = 0;  /* PowerPC-specific. */
 
 
 /* rcg02132001 Cygwin support. */

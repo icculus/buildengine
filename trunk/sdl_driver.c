@@ -81,12 +81,15 @@ extern long setvlinebpl(long);
 
 #endif
 
+#ifdef PLATFORM_MACOSX
+#include <CoreServices/CoreServices.h>
+#endif
+
 
 /*
  * !!! remove the surface_end checks, for speed's sake. They are a
  * !!!  needed safety right now. --ryan.
  */
-
 
 #define DEFAULT_MAXRESWIDTH  1600
 #define DEFAULT_MAXRESHEIGHT 1200
@@ -1167,10 +1170,21 @@ void set_splash(void)
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
-    /* deal with Application Bundles on MacOS X... */
     #if (defined PLATFORM_MACOSX)
     char buf[MAXPATHLEN];
     char realbuf[MAXPATHLEN];
+    long cpufeature = 0;
+    OSErr err;
+
+	has_altivec = 0;
+    err = Gestalt(gestaltPowerPCProcessorFeatures, &cpufeature);
+    if (err == noErr)
+    {
+        if ((1 << gestaltPowerPCHasVectorInstructions) & cpufeature)
+	       has_altivec = 1;
+    } /* if */
+
+    /* deal with Application Bundles on MacOS X... */
     if ((argv[0] != NULL) && (strchr(argv[0], '/') != NULL))
         strcpy(buf, argv[0]);
     else
@@ -1336,6 +1350,9 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_PAGEDOWN]        = 0xE051;
     scancodes[SDLK_INSERT]          = 0xE052;
     scancodes[SDLK_DELETE]          = 0xE053;
+
+    if (has_altivec)
+        sdldebug("CPU feature: Altivec\n");
 } /* _platform_init */
 
 
