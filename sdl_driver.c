@@ -577,6 +577,8 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
     if (SDL_WM_ToggleFullScreen(*surface))
     {
         sdldebug("SDL_WM_ToggleFullScreen() seems to work on this system.");
+        if (flags)
+            *flags ^= SDL_FULLSCREEN;
         return(1);
     } /* if */
 
