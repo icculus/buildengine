@@ -323,6 +323,13 @@
             the quality of my own life. Added (har) a FILEID.DIZ file, which
             is really used for the package's zipfile comment, but I always
             wanted to have one of those.  :)
+02182001 - Removed the ENDLINE_CHAR stuff in build.c; that textfile reading
+            code is now able to handle '\n', '\r', and "\r\n" endlines.
+            The findfirst/findnext/whatnot code now works on Linux, Cygwin,
+            and Watcom C (dos, and win32). It's still kludgy, though. More
+            compat header cleanups. Figured out how to get SDL working fully
+            with Watcom C (-ei command line to wcc386.exe, and declare your
+            SDL callbacks as __cdecl, etc.).
 
 --ryan. (icculus@lokigames.com)
 
