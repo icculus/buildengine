@@ -15,7 +15,7 @@ NEXT ON TAP:
   save.
 - Looking up/down in the editor seems to screw things up. This might not be
   the case in 320x200 resolution. Look into it.
-- Slopes are misdrawn in kensig.map.
+- Slopes are misdrawn in kensig.map.  (still?)
 - Sound.
 - Networking.
 - Port to Visual C?
@@ -24,19 +24,11 @@ NEXT ON TAP:
 - Port to BeOS?
 - Make a statically linked binary option in the Linux Makefile.
 - Make a linuxbins target (like msbins target) in the Linux Makefile.
-- Lose those sound stubs. SDL_mixer support is my vote.
 - Hardware surface/page flipping for more rendering speed?
-- Make all standard resolutions (up to max supported by display) available,
-  since, for example, on fbcon we get one resolution reported by
-  SDL_ListVideoModes(), but in 1024x768 mode, we can still comfortably switch
-  to 640x480, 320x200, etc. If ListVideoModes gives us -1 (windowed), make
-  everything up to 1600x1200 available.
+- Can we sync to vblank in SDL?
 - OpenGL? This would accelerate rendering, get us out of 8-bit hell, make it
   prettier, and take out most of the ASM code, for porting to other processors.
   But it will also give us all ulcers.  :)
-- Flag all the functions that need not be exported as static.
-- Move all these ugly-ass forward function declares into appropriate headers.
-  ...or get rid of them by reordering the source, where appropriate.
 - Update Ken's docs, where applicable.
 - Remove all possible global variables, and expose getter/setter functions
    instead.
@@ -45,11 +37,10 @@ NEXT ON TAP:
 - Can we convert any existing tabs into equivalent spaces ASCII 32 chars, so
    the align at 4-space tabstops? Tabs suck.
 - Can we move those SDL __cdecl pragmas out of display.h?
-- Add info to README on porting to new compilers.
 - Long filenames confuse the editor's file "dialog".
+- boardfilename (and others) in build.c and elsewhere are hardcoded to 13 chars.
 - Might be worth moving all that resolution management code from sdl_driver.c
    to engine.c ...
-- boardfilename (and others) in build.c and elsewhere are hardcoded to 13 chars.
 
 // end of TODO ...
 
