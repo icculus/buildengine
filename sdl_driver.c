@@ -565,11 +565,13 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
         return(1);
     } /* if */
 
+#if !PLATFORM_MACOSX
     if ( !(SDL_GetVideoInfo()->wm_available) )
     {
         sdldebug("No window manager. Not toggling fullscreen flag.");
         return(0);
     } /* if */
+#endif
 
     sdldebug("toggling fullscreen flag The Hard Way...");
     tmpflags = (*surface)->flags;
