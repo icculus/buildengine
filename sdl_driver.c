@@ -220,6 +220,10 @@ unsigned char _readlastkeyhit(void)
 } // _readlastkeyhit
 
 
+#if (defined __WATCOMC__)
+#pragma aux (__cdecl) root_sdl_event_filter
+#endif
+
 static int root_sdl_event_filter(const SDL_Event *event)
 {
     switch (event->type)
