@@ -5,15 +5,15 @@
  * This file IS NOT A PART OF Ken Silverman's original release
  */
 
-#ifndef __LINUX_A_H__
-#define __LINUX_A_H__
+#ifndef _INCLUDE_A_H_
+#define _INCLUDE_A_H_
 
 #if (defined __WATCOMC__)
 #error Do not include this header with Watcom C.
 #endif
 
 #if (!defined USE_I386_ASM)
-#warning You do not have USE_I386_ASM defined. This might be a problem.
+#error You do not have USE_I386_ASM defined. This might be a problem.
 #endif
 
 #ifdef __cplusplus

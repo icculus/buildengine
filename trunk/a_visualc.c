@@ -21,7 +21,7 @@ long is_vmware_running(void)
     int retval;
     __asm
     {
-        call _asm_isvmwarerunning
+        call asm_isvmwarerunning
         mov retval, eax
     } /* asm */
     return(retval);
@@ -34,7 +34,7 @@ long mmxoverlay(void)
     long retval;
     __asm
     {
-        call _asm_mmxoverlay
+        call asm_mmxoverlay
         mov retval, eax
     } /* asm */
     return(retval);
@@ -49,7 +49,7 @@ long sethlinesizes(long i1, long i2, long i3)
         mov eax, i1
         mov ebx, i2
         mov ecx, i3
-        call _asm_sethlinesizes
+        call asm_sethlinesizes
         mov retval, eax
     } /* asm */
     return(retval);
@@ -62,7 +62,7 @@ long setpalookupaddress(char *i1)
     __asm
     {
         mov eax, i1
-        call _asm_setpalookupaddress
+        call asm_setpalookupaddress
         mov retval, eax
     } /* asm */
     return(retval);
@@ -76,7 +76,7 @@ long setuphlineasm4(long i1, long i2)
     {
         mov eax, i1
         mov ebx, i2
-        call _asm_setuphlineasm4
+        call asm_setuphlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -94,7 +94,7 @@ long hlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_hlineasm4
+        call asm_hlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -112,7 +112,7 @@ long setuprhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_setuprhlineasm4
+        call asm_setuprhlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -132,7 +132,7 @@ long rhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_rhlineasm4
+        call asm_rhlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -151,7 +151,7 @@ long setuprmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_setuprmhlineasm4
+        call asm_setuprmhlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -169,7 +169,7 @@ long rmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_rmhlineasm4
+        call asm_rmhlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -188,7 +188,7 @@ long setupqrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_setupqrhlineasm4
+        call asm_setupqrhlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -207,7 +207,7 @@ long qrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_qrhlineasm4
+        call asm_qrhlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -220,7 +220,7 @@ long setvlinebpl(long i1)
     __asm
     {
         mov eax, i1
-        call _asm_setvlinebpl
+        call asm_setvlinebpl
         mov retval, eax
     } /* asm */
     return(retval);
@@ -233,7 +233,7 @@ long fixtransluscence(long i1)
     __asm
     {
         mov eax, i1
-        call _asm_fixtransluscence
+        call asm_fixtransluscence
         mov retval, eax
     } /* asm */
     return(retval);
@@ -251,7 +251,7 @@ long prevlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_prevlineasm1
+        call asm_prevlineasm1
         mov retval, eax
     } /* asm */
     return(retval);
@@ -269,7 +269,7 @@ long vlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_vlineasm1
+        call asm_vlineasm1
         mov retval, eax
     } /* asm */
     return(retval);
@@ -283,7 +283,7 @@ long setuptvlineasm(long i1)
     __asm
     {
         mov eax, i1
-        call _asm_setuptvlineasm
+        call asm_setuptvlineasm
         mov retval, eax
     } /* asm */
     return(retval);
@@ -302,7 +302,7 @@ long tvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_tvlineasm1
+        call asm_tvlineasm1
         mov retval, eax
     } /* asm */
     return(retval);
@@ -317,7 +317,7 @@ long setuptvlineasm2(long i1, long i2, long i3)
         mov eax, i1
         mov ebx, i2
         mov ecx, i3
-        call _asm_setuptvlineasm2
+        call asm_setuptvlineasm2
         mov retval, eax
     } /* asm */
     return(retval);
@@ -335,7 +335,7 @@ long tvlineasm2(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_tvlineasm2
+        call asm_tvlineasm2
         mov retval, eax
     } /* asm */
     return(retval);
@@ -354,7 +354,7 @@ long mvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_mvlineasm1
+        call asm_mvlineasm1
         mov retval, eax
     } /* asm */
     return(retval);
@@ -367,7 +367,7 @@ long setupvlineasm(long i1)
     __asm
     {
         mov eax, i1
-        call _asm_setupvlineasm
+        call asm_setupvlineasm
         mov retval, eax
     } /* asm */
     return(retval);
@@ -381,7 +381,7 @@ long vlineasm4(long i1, long i2)
     {
         mov ecx, i1
         mov edi, i2
-        call _asm_vlineasm4
+        call asm_vlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -394,7 +394,7 @@ long setupmvlineasm(long i1)
     __asm
     {
         mov eax, i1
-        call _asm_setupmvlineasm
+        call asm_setupmvlineasm
         mov retval, eax
     } /* asm */
     return(retval);
@@ -408,7 +408,7 @@ long mvlineasm4(long i1, long i2)
     {
         mov ecx, i1
         mov edi, i2
-        call _asm_mvlineasm4
+        call asm_mvlineasm4
         mov retval, eax
     } /* asm */
     return(retval);
@@ -425,7 +425,7 @@ void setupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_setupspritevline
+        call asm_setupspritevline
     } /* asm */
 } /* setupspritevline */
 
@@ -440,7 +440,7 @@ void spritevline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_spritevline
+        call asm_spritevline
     } /* asm */
 } /* spritevline */
 
@@ -455,7 +455,7 @@ void msetupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_msetupspritevline
+        call asm_msetupspritevline
     } /* asm */
 } /* msetupspritevline */
 
@@ -470,7 +470,7 @@ void mspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_mspritevline
+        call asm_mspritevline
     } /* asm */
 } /* mspritevline */
 
@@ -485,7 +485,7 @@ void tsetupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_tsetupspritevline
+        call asm_tsetupspritevline
     } /* asm */
 } /* tsetupspritevline */
 
@@ -500,7 +500,7 @@ void tspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_tspritevline
+        call asm_tspritevline
     } /* asm */
 } /* tspritevline */
 
@@ -516,7 +516,7 @@ long mhline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_mhline
+        call asm_mhline
         mov retval, eax
     } /* asm */
     return(retval);
@@ -534,7 +534,7 @@ long mhlineskipmodify(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_mhlineskipmodify
+        call asm_mhlineskipmodify
         mov retval, eax
     } /* asm */
     return(retval);
@@ -548,7 +548,7 @@ long msethlineshift(long i1, long i2)
     {
         mov eax, i1
         mov ebx, i2
-        call _asm_msethlineshift
+        call asm_msethlineshift
         mov retval, eax
     } /* asm */
     return(retval);
@@ -566,7 +566,7 @@ long thline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_thline
+        call asm_thline
         mov retval, eax
     } /* asm */
     return(retval);
@@ -584,7 +584,7 @@ long thlineskipmodify(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_thlineskipmodify
+        call asm_thlineskipmodify
         mov retval, eax
     } /* asm */
     return(retval);
@@ -598,7 +598,7 @@ long tsethlineshift(long i1, long i2)
     {
         mov eax, i1
         mov ebx, i2
-        call _asm_tsethlineshift
+        call asm_tsethlineshift
         mov retval, eax
     } /* asm */
     return(retval);
@@ -613,7 +613,7 @@ long setupslopevlin(long i1, long i2, long i3)
         mov eax, i1
         mov ebx, i2
         mov ecx, i3
-        call _asm_setupslopevlin
+        call asm_setupslopevlin
         mov retval, eax
     } /* asm */
     return(retval);
@@ -631,7 +631,7 @@ long slopevlin(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_slopevlin
+        call asm_slopevlin
         mov retval, eax
     } /* asm */
     return(retval);
@@ -643,7 +643,7 @@ long settransnormal(void)
     long retval;
     __asm
     {
-        call _asm_settransnormal
+        call asm_settransnormal
         mov retval, eax
     } /* asm */
     return(retval);
@@ -655,7 +655,7 @@ long settransreverse(void)
     long retval;
     __asm
     {
-        call _asm_settransreverse
+        call asm_settransreverse
         mov retval, eax
     } /* asm */
     return(retval);
@@ -669,7 +669,7 @@ long setupdrawslab(long i1, long i2)
     {
         mov eax, i1
         mov ebx, i2
-        call _asm_setupdrawslab
+        call asm_setupdrawslab
         mov retval, eax
     } /* asm */
     return(retval);
@@ -687,7 +687,7 @@ long drawslab(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_drawslab
+        call asm_drawslab
         mov retval, eax
     } /* asm */
     return(retval);
@@ -705,7 +705,7 @@ long stretchhline(long i1, long i2, long i3, long i4, long i5, long i6)
         mov edx, i4
         mov esi, i5
         mov edi, i6
-        call _asm_stretchhline
+        call asm_stretchhline
         mov retval, eax
     } /* asm */
     return(retval);

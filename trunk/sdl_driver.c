@@ -13,7 +13,6 @@
  * See the included license file "BUILDLIC.TXT" for license info.
  * This file IS NOT A PART OF Ken Silverman's original release
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -152,7 +151,7 @@ void set16color_palette (void);
 
 static FILE *_sdl_debug_file = NULL;
 
-static inline void __out_sdldebug(const char *subsystem,
+static __inline void __out_sdldebug(const char *subsystem,
                                   const char *fmt, va_list ap)
 {
     fprintf(_sdl_debug_file, "%s: ", subsystem);
@@ -641,7 +640,7 @@ static int attempt_fullscreen_toggle(SDL_Surface **surface, Uint32 *flags)
      *  which we check for explicitly, and give the engine a keypad enter
      *  enter event.
      */
-static inline int handle_keypad_enter_hack(const SDL_Event *event)
+static __inline int handle_keypad_enter_hack(const SDL_Event *event)
 {
     static int kp_enter_hack = 0;
     int retval = 0;
@@ -854,7 +853,7 @@ void unprotect_ASM_pages(void)
 #endif
 
 
-static inline void init_debugging(void)
+static __inline void init_debugging(void)
 {
     const char *envr = getenv(BUILD_SDLDEBUG); 
 
@@ -885,7 +884,7 @@ static inline void init_debugging(void)
 #define __DATE__ "a long, long time ago"
 #endif
 
-static inline void output_sdl_versions(void)
+static __inline void output_sdl_versions(void)
 {
     const SDL_version *linked_ver = SDL_Linked_Version();
     SDL_version compiled_ver;
@@ -902,7 +901,7 @@ static inline void output_sdl_versions(void)
 
 
 static int in_vmware = 0;
-static inline void detect_vmware(void)
+static __inline void detect_vmware(void)
 {
     /* !!! need root access to touch i/o ports on Linux. */
     #if (!defined __linux__)
@@ -981,7 +980,7 @@ static void set_sdl_renderer(void)
 
 static void init_renderer_names(void)
 {
-    memset(renderer_name, '\0', sizeof (renderer_name));
+    memset((void *) renderer_name, '\0', sizeof (renderer_name));
     renderer_name[RENDERER_SOFTWARE] = "RENDERER_SOFTWARE";
     renderer_name[RENDERER_OPENGL3D] = "RENDERER_OPENGL3D";
 } /* init_renderer_names */
@@ -1285,7 +1284,7 @@ static int get_dimensions_from_str(const char *str, long *_w, long *_h)
 } /* get_dimensions_from_str */
 
 
-static inline void get_max_screen_res(long *max_w, long *max_h)
+static __inline void get_max_screen_res(long *max_w, long *max_h)
 {
     long w = DEFAULT_MAXRESWIDTH;
     long h = DEFAULT_MAXRESHEIGHT;
@@ -1320,7 +1319,7 @@ static void add_vesa_mode(const char *typestr, int w, int h)
 
 
 /* Let the user specify a specific mode via environment variable. */
-static inline void add_user_defined_resolution(void)
+static __inline void add_user_defined_resolution(void)
 {
     long w;
     long h;
@@ -1336,7 +1335,7 @@ static inline void add_user_defined_resolution(void)
 } /* add_user_defined_resolution */
 
 
-static inline SDL_Rect **get_physical_resolutions(void)
+static __inline SDL_Rect **get_physical_resolutions(void)
 {
     const SDL_VideoInfo *vidInfo = SDL_GetVideoInfo();
     SDL_Rect **modes = SDL_ListModes(vidInfo->vfmt, sdl_flags | SDL_FULLSCREEN);
@@ -1379,7 +1378,7 @@ static void remove_vesa_mode(int index, const char *reason)
 } /* remove_vesa_mode */
 
 
-static inline void cull_large_vesa_modes(void)
+static __inline void cull_large_vesa_modes(void)
 {
     long max_w;
     long max_h;
@@ -1399,7 +1398,7 @@ static inline void cull_large_vesa_modes(void)
 } /* cull_large_vesa_modes */
 
 
-static inline void cull_duplicate_vesa_modes(void)
+static __inline void cull_duplicate_vesa_modes(void)
 {
     int i;
     int j;
@@ -1422,7 +1421,7 @@ static inline void cull_duplicate_vesa_modes(void)
 #define swap_macro(tmp, x, y) { tmp = x; x = y; y = tmp; }
 
 /* be sure to call cull_duplicate_vesa_modes() before calling this. */
-static inline void sort_vesa_modelist(void)
+static __inline void sort_vesa_modelist(void)
 {
     int i;
     int sorted;
@@ -1446,7 +1445,7 @@ static inline void sort_vesa_modelist(void)
 } /* sort_vesa_modelist */
 
 
-static inline void cleanup_vesa_modelist(void)
+static __inline void cleanup_vesa_modelist(void)
 {
     cull_large_vesa_modes();
     cull_duplicate_vesa_modes();
@@ -1454,7 +1453,7 @@ static inline void cleanup_vesa_modelist(void)
 } /* cleanup_vesa_modelist */
 
 
-static inline void output_vesa_modelist(void)
+static __inline void output_vesa_modelist(void)
 {
     char buffer[256];
     char numbuf[20];
@@ -1822,7 +1821,7 @@ void fillscreen16(long offset, long color, long blocksize)
 
 /* Most of this line code is taken from Abrash's "Graphics Programming Blackbook".
 Remember, sharing code is A Good Thing. AH */
-inline void DrawHorizontalRun (char **ScreenPtr, int XAdvance, int RunLength, char Color)
+static __inline void DrawHorizontalRun (char **ScreenPtr, int XAdvance, int RunLength, char Color)
 {
     int i;
     char *WorkingScreenPtr = *ScreenPtr;
@@ -1836,7 +1835,7 @@ inline void DrawHorizontalRun (char **ScreenPtr, int XAdvance, int RunLength, ch
     *ScreenPtr = WorkingScreenPtr;
 }
 
-inline void DrawVerticalRun (char **ScreenPtr, int XAdvance, int RunLength, char Color)
+static __inline void DrawVerticalRun (char **ScreenPtr, int XAdvance, int RunLength, char Color)
 {
     int i;
     char *WorkingScreenPtr = *ScreenPtr;

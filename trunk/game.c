@@ -547,41 +547,59 @@ void initlava(void)
 }
 
 #if (defined USE_I386_ASM)
-  #if (defined __WATCOMC__)
-
+    #if (defined __WATCOMC__)
         long addlava(int param);
-    #pragma aux addlava =\
-	"mov al, byte ptr [ebx-133]",\
-	"mov dl, byte ptr [ebx-1]",\
-	"add al, byte ptr [ebx-132]",\
-	"add dl, byte ptr [ebx+131]",\
-	"add al, byte ptr [ebx-131]",\
-	"add dl, byte ptr [ebx+132]",\
-	"add al, byte ptr [ebx+1]",\
-	"add al, dl",\
-	parm [ebx]\
-	modify exact [eax edx]
+        #pragma aux addlava =\
+        "mov al, byte ptr [ebx-133]",\
+        "mov dl, byte ptr [ebx-1]",\
+        "add al, byte ptr [ebx-132]",\
+        "add dl, byte ptr [ebx+131]",\
+        "add al, byte ptr [ebx-131]",\
+        "add dl, byte ptr [ebx+132]",\
+        "add al, byte ptr [ebx+1]",\
+        "add al, dl",\
+        parm [ebx]\
+        modify exact [eax edx]
 
-  #elif (defined __GNUC__)
-	static long addlava (int i1)
-	{
-        long retval;
-        __asm__ __volatile__ (
-            "\n\t"
-            "movb -133(%%ebx), %%al\n\t"
-            "movb -1(%%ebx), %%dl\n\t"
-            "addb -132(%%ebx), %%al\n\t"
-            "addb 131(%%ebx), %%dl\n\t"
-            "addb -131(%%ebx), %%al\n\t"
-            "addb 132(%%ebx), %%dl\n\t"
-            "addb 1(%%ebx), %%al\n\t"
-            "addb %%dl, %%al\n\t"
-        : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
-        return (retval);
-	}	
+    #elif (defined __GNUC__)
+        static long addlava (int i1)
+        {
+            long retval;
+            __asm__ __volatile__ (
+                "\n\t"
+                "movb -133(%%ebx), %%al\n\t"
+                "movb -1(%%ebx), %%dl\n\t"
+                "addb -132(%%ebx), %%al\n\t"
+                "addb 131(%%ebx), %%dl\n\t"
+                "addb -131(%%ebx), %%al\n\t"
+                "addb 132(%%ebx), %%dl\n\t"
+                "addb 1(%%ebx), %%al\n\t"
+                "addb %%dl, %%al\n\t"
+            : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
+            return (retval);
+        } /* addlava */
 
-  #else
-      #error Please write Assembly code for your platform!
+    #elif (defined _MSC_VER)
+        long addlava(int param)
+        {
+            __asm
+            {
+                mov ebx, param
+                mov al, byte ptr [ebx-133]
+                mov dl, byte ptr [ebx-1]
+                add al, byte ptr [ebx-132]
+                add dl, byte ptr [ebx+131]
+                add al, byte ptr [ebx-131]
+                add dl, byte ptr [ebx+132]
+                add al, byte ptr [ebx+1]
+                add al, dl
+                mov param, eax
+            } /* asm */
+            return(param);
+        } /* addlava */
+
+    #else
+        #error Please write Assembly code for your platform!
     #endif
 
 #else   /* USE_I386_ASM */
@@ -1124,8 +1142,8 @@ void prepareboard(char *daboardfilename)
 						else
 						{     /* Door opens clockwise */
 							swingwall[swingcnt][0] = wall[j].point2;
-							swingwall[swingcnt][1] = j;
-							swingwall[swingcnt][2] = lastwall(j);
+							swingwall[swingcnt][1] = (short) j;
+							swingwall[swingcnt][2] = lastwall((short) j);
 							swingwall[swingcnt][3] = lastwall(swingwall[swingcnt][2]);
 							swingwall[swingcnt][4] = lastwall(swingwall[swingcnt][3]);
 							swingangopen[swingcnt] = 512;
@@ -1345,20 +1363,20 @@ void prepareboard(char *daboardfilename)
 						sprite[i].cstat |= 128;
 					}
 					sprite[i].extra = sprite[i].ang;
-					sprite[i].clipdist = mulscale7(sprite[i].xrepeat,tilesizx[sprite[i].picnum]);
-					if (sprite[i].statnum != 1) changespritestat(i,2);   /* on waiting for you (list 2) */
+					sprite[i].clipdist = mulscale7((long) sprite[i].xrepeat,tilesizx[sprite[i].picnum]);
+					if (sprite[i].statnum != 1) changespritestat((short) i,2);   /* on waiting for you (list 2) */
 					sprite[i].lotag = mulscale5(sprite[i].xrepeat,sprite[i].yrepeat);
 					sprite[i].cstat |= 0x101;    /* Set the hitscan sensitivity bit */
 					break;
 				case AL:
 					sprite[i].cstat |= 0x101;    /* Set the hitscan sensitivity bit */
 					sprite[i].lotag = 0x60;
-					changespritestat(i,0);
+					changespritestat((short) i,0);
 					break;
 				case EVILAL:
 					sprite[i].cstat |= 0x101;    /* Set the hitscan sensitivity bit */
 					sprite[i].lotag = 0x60;
-					changespritestat(i,10);
+					changespritestat((short) i,10);
 					break;
 			}
 	}
@@ -1911,7 +1929,7 @@ void shootgun(short snum, long x, long y, long z,
 								if (playersprite[j] == hitsprite)
 								{
 									wsayfollow("ouch.wav",4096L+(krand()&127)-64,256L,&hitx,&hity,0);
-									changehealth(j,-10);
+									changehealth((short) j,-10);
 									break;
 								}
 							break;
@@ -2016,7 +2034,7 @@ void checktouchsprite(short snum, short sectnum)
 					break;
 				case GIFTBOX:
 					wsayfollow("getstuff.wav",4096L+(krand()&127)+256-mulscale4(sprite[i].xrepeat,sprite[i].yrepeat),208L,&sprite[i].x,&sprite[i].y,0);
-					changehealth(snum,max(mulscale8(sprite[i].xrepeat,sprite[i].yrepeat),1));
+					changehealth(snum,(short) max(mulscale8(sprite[i].xrepeat,sprite[i].yrepeat),1));
 					if (sprite[i].statnum == 12) deletesprite((short)i);
 					else {
 						sprite[i].cstat |= 0x8000;
@@ -2027,7 +2045,7 @@ void checktouchsprite(short snum, short sectnum)
 				case CANNON:
 					wsayfollow("getstuff.wav",3584L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
 					if (snum == myconnectindex) keystatus[4] = 1;
-					changenumbombs(snum,((sprite[i].xrepeat+sprite[i].yrepeat)>>1));
+					changenumbombs(snum,(short) ((sprite[i].xrepeat+sprite[i].yrepeat)>>1));
 					if (sprite[i].statnum == 12) deletesprite((short)i);
 					else {
 						sprite[i].cstat |= 0x8000;
@@ -2038,7 +2056,7 @@ void checktouchsprite(short snum, short sectnum)
 				case LAUNCHER:
 					wsayfollow("getstuff.wav",3584L+(krand()&127)-64,256L,&sprite[i].x,&sprite[i].y,0);
 					if (snum == myconnectindex) keystatus[5] = 1;
-					changenummissiles(snum,((sprite[i].xrepeat+sprite[i].yrepeat)>>1));
+					changenummissiles(snum,(short) ((sprite[i].xrepeat+sprite[i].yrepeat)>>1));
 					if (sprite[i].statnum == 12) deletesprite((short)i);
 					else {
 						sprite[i].cstat |= 0x8000;
