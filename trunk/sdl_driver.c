@@ -422,7 +422,7 @@ static void go_to_new_vid_mode(int vidoption, int w, int h)
 } /* go_to_new_vid_mode */
 
 
-static inline int sdl_mouse_button_filter(SDL_MouseButtonEvent const *event)
+static __inline int sdl_mouse_button_filter(SDL_MouseButtonEvent const *event)
 {
         /*
          * What bits BUILD expects:
