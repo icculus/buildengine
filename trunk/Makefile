@@ -46,11 +46,11 @@ USE_ASM := -DUSE_I386_ASM
 #useperl := true
 useperl := false
 
-#useopengl := true
-useopengl := false
+useopengl := true
+#useopengl := false
 GL_INCLDIR := /usr/X11R6/include
 
-usedlls := true
+usedlls := false
 
 #-----------------------------------------------------------------------------#
 # Everything below this line is probably okay.
