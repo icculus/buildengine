@@ -74,15 +74,17 @@ INFO:
 
  Is this enough to play Duke/Shadow/Blood? No. But it's a good start.
 
-- Can Windows users use this code? You bet. But, there are some complications.
-  First, you have to build it, currently, with Cygwin, a Windows port of the
-  GNU C compiler. Cygwin is free (as in speech and beer), and can be
-  downloaded from http://sources.redhat.com/cygwin/. You will also need to
-  have a development version of SDL installed (I used the prebuilt SDL
-  libraries under Windows, look at http://www.libsdl.org/). And, as under
-  Linux, you will need NASM (http://www.kernel.org/pub/software/devel/nasm/).
-  Make sure nasmw.exe ends up somewhere in your PATH, and SDL is somewhere you
-  have access to. Once you have all this set up, unpack the BUILD sources, and
+- Can Windows users use this code? You bet. Binaries available.
+
+- To build this from source under Windows:
+  You can use Cygwin, a Windows port of the GNU C compiler. Cygwin is free (as
+  in speech and beer), and can be downloaded from
+  http://sources.redhat.com/cygwin/. You will also need to have a development
+  version of SDL installed (I used the prebuilt SDL libraries under
+  Windows, look at http://www.libsdl.org/). And, as under Linux, you will
+  need NASM (http://www.kernel.org/pub/software/devel/nasm/). Make sure
+  nasmw.exe ends up somewhere in your PATH, and SDL is somewhere you have
+  access to. Once you have all this set up, unpack the BUILD sources, and
   edit "Makefile" in the newly created directory. Change the line that says
   "cygwin = false" to "cygwin = true", and the SDL_INC_DIR and SDL_LIB_DIR
   lines to the correct values. (Note the examples: C:/2/SDL-1.1.8/include/
@@ -90,23 +92,24 @@ INFO:
   intentional.) Run "make" in the buildengine directory. If everything is
   correct, this should build BUILD.EXE and GAME.EXE. You will probably have
   to make sure that SDL.DLL and CYGWIN1.DLL are in your path somewhere.
-  This isn't as hard as it sounds.  :)  If anyone wants to make this work with
-  Visual C++ to make this easier for Windows users, I'll happily accept your
-  changes. One more thing, about licensing. If you build this with Cygwin, you
-  are NOT permitted to release binaries, as Cygwin's POSIX-support DLL is
-  under the GPL license, which forbids distribution of code linked with it
-  that doesn't abide by the OpenSource definition (Ken's license does not).
-  The solution here is to remove the dependency on the POSIX layer; the most
-  notable target is the mprotect() calls. Getting the code to build under
-  Visual C (or Mingw32, which is Cygwin without the POSIX layer) removes this
-  problem. Harrassing Ken Silverman to change his license to the GPL is not
-  only rude, it's unproductive. Distributing binaries built with Cygwin opens
-  you up to lawsuits from Red Hat and the Free Software Foundation. Do the
-  right thing, and move this to Mingw32. I accept patches.  :)  If any
-  commercial BUILD games are to make their way to Windows via this port, this
-  will need to be done, anyhow.  (update: Work to build Build with other
-  win32 compilers is under way. Stay tuned, true believers.)
+  This isn't as hard as it sounds.  :) 
 
+- To build with Watcom C for Win32: Get SDL (as above). Unpack the source,
+  edit Makefile.w32. Change the paths at the top to point to your Watcom
+  and SDL installs. Run "wmake -f Makefile.w32" ... that's all.
+
+- If anyone wants to make this work with Visual C++ to make this easier
+  for Windows users, I'll happily accept your changes.
+
+- One more thing, about licensing. If you build this with Cygwin, you are
+  NOT permitted to release binaries, as Cygwin's POSIX-support DLL is
+  under the GPL license, which forbids distribution of code linked with it
+  that doesn't abide by the OpenSource definition (Ken's license does
+  not). Harrassing Ken Silverman to change his license to the GPL is not
+  only rude, it's unproductive. Distributing binaries built with Cygwin
+  opens you up to lawsuits from Red Hat and the Free Software
+  Foundation. Do the right thing; if you must distribute BUILD binaries,
+  don't build them with Cygwin.
 
 GOOD REFERENCES:
 - VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
