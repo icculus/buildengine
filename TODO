@@ -20,7 +20,6 @@ NEXT ON TAP:
   the case in 320x200 resolution. Look into it.
 - Segfault when going to overhead view (right enter twice) in Ken's game.
 - The timer issue.
-- Complete merge of changes from Cygwin building.
 - Sound.
 
 // end of TODO ...
