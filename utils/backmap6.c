@@ -1,7 +1,6 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
 
 #include <stdio.h>
 #include <string.h>
@@ -11,17 +10,13 @@
 #include <sys\types.h>
 #include <sys\stat.h>
 #include <dos.h>
+#include "dos_compat.h"
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "unix_compat.h"
 #endif
-
-#ifdef PLATFORM_UNIX
-#define O_BINARY 0
-#define min(x,y) (((x) < (y)) ? (x) : (y))
-#endif
-
 
 #define NEWMAPVERSION 6
 #define MAXMENUFILES 1024
@@ -312,13 +307,7 @@ int savenewboard(char *filename)
 	long fil;
         int permissions = 0;
 
-#ifdef PLATFORM_DOS
-	permissions = S_IWRITE;
-#else
-	permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-#endif
-
-	if ((fil = open(filename,O_BINARY|O_TRUNC|O_CREAT|O_WRONLY,permissions)) == -1)
+	if ((fil = open(filename,O_BINARY|O_TRUNC|O_CREAT|O_WRONLY,UC_PERMS)) == -1)
 		return(-1);
 
 		 //Version control

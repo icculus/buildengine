@@ -1,7 +1,6 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
-// This file has been modified from Ken Silverman's original release
 
 #include <stdio.h>
 #include <string.h>
@@ -12,17 +11,14 @@
 #include <sys\stat.h>
 #include <dos.h>
 #include <conio.h>
+#include "dos_compat.h"
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <dirent.h>
+#include "unix_compat.h"
 #include <fnmatch.h>
-#endif
-
-#ifdef PLATFORM_UNIX
-#define O_BINARY 0
-#define min(x, y) (((x) < (y)) ? (x) : (y))
 #endif
 
 #define MAXFILES 4096
@@ -40,13 +36,6 @@ int main(int argc, char **argv)
 {
 	long i, j, k, l, fil, fil2;
 	char stuffile[16], filename[128];
-        int permissions = 0;
-
-#ifdef PLATFORM_DOS
-	permissions = S_IWRITE;
-#else
-	permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-#endif
 
 	if (argc < 3)
 	{
@@ -89,7 +78,7 @@ int main(int argc, char **argv)
 
 	strcpy(stuffile,argv[1]);
 
-	if ((fil = open(stuffile,O_BINARY|O_TRUNC|O_CREAT|O_WRONLY,permissions)) == -1)
+	if ((fil = open(stuffile,O_BINARY|O_TRUNC|O_CREAT|O_WRONLY,UC_PERMS)) == -1)
 	{
 		printf("Error: %s could not be opened\n",stuffile);
 		exit(0);
@@ -117,12 +106,7 @@ int main(int argc, char **argv)
 				close(fil2);
 				close(fil);
 				printf("OUT OF HD SPACE!  Press any key to continue.\n");
-#ifdef PLATFORM_DOS
 				getch();
-#else
-				// getch() is a DOS'ism - DDOI
-				getchar();
-#endif
 				exit(0);
 			}
 		}
@@ -186,7 +170,7 @@ void findfiles(char *dafilespec)
 		dent = readdir(dir);
 		if (dent != NULL)
 		{
-			if (fnmatch(dafilespec, dent->d_name, (1 << 4))
+			if (fnmatch(dafilespec, dent->d_name, FNM_CASEFOLD)
 			       	== 0 && stat(dent->d_name, &statbuf) == 0) {
 				strcpy(&filelist[numfiles][0], dent->d_name);
 				fileleng[numfiles] = statbuf.st_size;
