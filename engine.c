@@ -4151,7 +4151,7 @@ int clipinsidebox(long x, long y, short wallnum, long walldist)
 	return((x2 >= y2)<<1);
 }
 
-static int clipinsideboxline(long x, long y, long x1, long y1, long x2, long y2, long walldist)
+int clipinsideboxline(long x, long y, long x1, long y1, long x2, long y2, long walldist)
 {
 	long r;
 
