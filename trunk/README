@@ -162,6 +162,12 @@ INFO:
   more hardware. Don't ask Ken about the DOS port either. He probably wouldn't
   recognize his own code after all the mangling we did.  :)
 
+- Wish your GRP files weren't so big? Convert them to PkZip format, build
+  the engine with PhysicsFS support, and set the environment variable
+  BUILD_GROUPFILE=mygroupfile.zip ... Look at PhysicsFS's homepage for more
+  information: http://www.icculus.org/physfs/  ...
+
+
 GOOD REFERENCES:
 - VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
 - http://www-cgi.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html
