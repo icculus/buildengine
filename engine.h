@@ -55,6 +55,7 @@ void printext256(long xpos, long ypos, short col, short backcol,
 			char name[82], char fontsize);
 void printext256_noupdate(long xpos, long ypos, short col, short backcol,
 			char name[82], char fontsize);
+void initengine(void);
 void uninitengine(void);
 int loadpics(char *filename);
 int saveboard(char *filename, long *daposx, long *daposy, long *daposz,
