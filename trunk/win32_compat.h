@@ -29,6 +29,8 @@
 #include <io.h>
 #include <direct.h>
 #include <conio.h>
+#include <dos.h>
+#include <assert.h>
 
 extern const int hbits[];   // !!! what is this, and why is it here?
 
@@ -79,15 +81,18 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #define kkmalloc(x) malloc(x)
 #define kfree(x) free(x)
 #define kkfree(x) free(x)
+
+#ifdef FP_OFF
+#undef FP_OFF
+#endif
+
 #define FP_OFF(x) ((long) (x))
 
 // !!! This might be temporary.
 #define printext16 printext256
 #define printext16_noupdate printext256_noupdate
 
-#define ENDLINE_CHAR '\r'
-
-#if 0
+#if (!defined __WATCOMC__)
 #ifndef max
 #define max(x, y)  (((x) > (y)) ? (x) : (y))
 #endif
@@ -97,11 +102,10 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #endif
 #endif
 
-#pragma intrinsic(min);
-#pragma intrinsic(max);
-
 #if (defined __WATCOMC__)
 #define inline
+#pragma intrinsic(min);
+#pragma intrinsic(max);
 #endif
 
 #endif

@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <assert.h>
 
 extern const int hbits[];
 
@@ -87,11 +89,8 @@ int _kinp_handler(int port, char *source_file, int source_line);
 #define stricmp(a,b) strcasecmp(a,b)
 #endif
 
-// !!! This might be temporary.
 #define printext16 printext256
 #define printext16_noupdate printext256_noupdate
-
-#define ENDLINE_CHAR '\n'
 
 // Other DOSisms. See unix_compat.c for implementation.
 long filelength(int fhandle);
