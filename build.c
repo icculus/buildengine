@@ -305,12 +305,17 @@ void initkeys(void)
 }
 
 
+extern long dommxoverlay;
+
 int main(int argc,char **argv)
 {
 	char ch, quitflag;
 	long i, j, k;
 
     _platform_init(argc, argv);
+
+    if (getenv("BUILD_NOPENTIUM") != NULL)
+        dommxoverlay = 0;
 
 	editstatus = 1;
 	if (argc >= 2)
@@ -6445,55 +6450,55 @@ void showsectordata(short sectnum)
 	char snotbuf[80];
 
 	sprintf(snotbuf,"Sector %d",sectnum);
-	printext16(8,32,11,-1,snotbuf,0);
+	statusbar_printext16(8,32,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Firstwall: %d",sector[sectnum].wallptr);
-	printext16(8,48,11,-1,snotbuf,0);
+	statusbar_printext16(8,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Numberofwalls: %d",sector[sectnum].wallnum);
-	printext16(8,56,11,-1,snotbuf,0);
+	statusbar_printext16(8,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Firstsprite: %d",headspritesect[sectnum]);
-	printext16(8,64,11,-1,snotbuf,0);
+	statusbar_printext16(8,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Tags: %d, %d",sector[sectnum].hitag,sector[sectnum].lotag);
-	printext16(8,72,11,-1,snotbuf,0);
+	statusbar_printext16(8,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"     (0x%x), (0x%x)",sector[sectnum].hitag,sector[sectnum].lotag);
-	printext16(8,80,11,-1,snotbuf,0);
+	statusbar_printext16(8,80,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Extra: %d",sector[sectnum].extra);
-	printext16(8,88,11,-1,snotbuf,0);
+	statusbar_printext16(8,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Visibility: %d",sector[sectnum].visibility);
-	printext16(8,96,11,-1,snotbuf,0);
+	statusbar_printext16(8,96,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Pixel height: %ld",(sector[sectnum].floorz-sector[sectnum].ceilingz)>>8);
-	printext16(8,104,11,-1,snotbuf,0);
+	statusbar_printext16(8,104,11,-1,snotbuf,0);
 
-	printext16(200,32,11,-1,"CEILINGS:",0);
+	statusbar_printext16(200,32,11,-1,"CEILINGS:",0);
 	sprintf(snotbuf,"Flags (hex): %x",sector[sectnum].ceilingstat);
-	printext16(200,48,11,-1,snotbuf,0);
+	statusbar_printext16(200,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"(X,Y)pan: %d, %d",sector[sectnum].ceilingxpanning,sector[sectnum].ceilingypanning);
-	printext16(200,56,11,-1,snotbuf,0);
+	statusbar_printext16(200,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Shade byte: %d",sector[sectnum].ceilingshade);
-	printext16(200,64,11,-1,snotbuf,0);
+	statusbar_printext16(200,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Z-coordinate: %ld",sector[sectnum].ceilingz);
-	printext16(200,72,11,-1,snotbuf,0);
+	statusbar_printext16(200,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Tile number: %d",sector[sectnum].ceilingpicnum);
-	printext16(200,80,11,-1,snotbuf,0);
+	statusbar_printext16(200,80,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Ceiling heinum: %d",sector[sectnum].ceilingheinum);
-	printext16(200,88,11,-1,snotbuf,0);
+	statusbar_printext16(200,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Palookup number: %d",sector[sectnum].ceilingpal);
-	printext16(200,96,11,-1,snotbuf,0);
+	statusbar_printext16(200,96,11,-1,snotbuf,0);
 
-	printext16(400,32,11,-1,"FLOORS:",0);
+	statusbar_printext16(400,32,11,-1,"FLOORS:",0);
 	sprintf(snotbuf,"Flags (hex): %x",sector[sectnum].floorstat);
-	printext16(400,48,11,-1,snotbuf,0);
+	statusbar_printext16(400,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"(X,Y)pan: %d, %d",sector[sectnum].floorxpanning,sector[sectnum].floorypanning);
-	printext16(400,56,11,-1,snotbuf,0);
+	statusbar_printext16(400,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Shade byte: %d",sector[sectnum].floorshade);
-	printext16(400,64,11,-1,snotbuf,0);
+	statusbar_printext16(400,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Z-coordinate: %ld",sector[sectnum].floorz);
-	printext16(400,72,11,-1,snotbuf,0);
+	statusbar_printext16(400,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Tile number: %d",sector[sectnum].floorpicnum);
-	printext16(400,80,11,-1,snotbuf,0);
+	statusbar_printext16(400,80,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Floor heinum: %d",sector[sectnum].floorheinum);
-	printext16(400,88,11,-1,snotbuf,0);
+	statusbar_printext16(400,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Palookup number: %d",sector[sectnum].floorpal);
-	printext16(400,96,11,-1,snotbuf,0);
+	statusbar_printext16(400,96,11,-1,snotbuf,0);
 }
 
 void showwalldata(short wallnum)
@@ -6502,54 +6507,54 @@ void showwalldata(short wallnum)
 	char snotbuf[80];
 
 	sprintf(snotbuf,"Wall %d",wallnum);
-	printext16(8,32,11,-1,snotbuf,0);
+	statusbar_printext16(8,32,11,-1,snotbuf,0);
 	sprintf(snotbuf,"X-coordinate: %ld",wall[wallnum].x);
-	printext16(8,48,11,-1,snotbuf,0);
+	statusbar_printext16(8,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Y-coordinate: %ld",wall[wallnum].y);
-	printext16(8,56,11,-1,snotbuf,0);
+	statusbar_printext16(8,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Point2: %d",wall[wallnum].point2);
-	printext16(8,64,11,-1,snotbuf,0);
+	statusbar_printext16(8,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Sector: %d",sectorofwall(wallnum));
-	printext16(8,72,11,-1,snotbuf,0);
+	statusbar_printext16(8,72,11,-1,snotbuf,0);
 
 	sprintf(snotbuf,"Tags: %d, %d",wall[wallnum].hitag,wall[wallnum].lotag);
-	printext16(8,88,11,-1,snotbuf,0);
+	statusbar_printext16(8,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"     (0x%x), (0x%x)",wall[wallnum].hitag,wall[wallnum].lotag);
-	printext16(8,96,11,-1,snotbuf,0);
+	statusbar_printext16(8,96,11,-1,snotbuf,0);
 
-	printext16(200,32,11,-1,names[wall[wallnum].picnum],0);
+	statusbar_printext16(200,32,11,-1,names[wall[wallnum].picnum],0);
 	sprintf(snotbuf,"Flags (hex): %x",wall[wallnum].cstat);
-	printext16(200,48,11,-1,snotbuf,0);
+	statusbar_printext16(200,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Shade: %d",wall[wallnum].shade);
-	printext16(200,56,11,-1,snotbuf,0);
+	statusbar_printext16(200,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Pal: %d",wall[wallnum].pal);
-	printext16(200,64,11,-1,snotbuf,0);
+	statusbar_printext16(200,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"(X,Y)repeat: %d, %d",wall[wallnum].xrepeat,wall[wallnum].yrepeat);
-	printext16(200,72,11,-1,snotbuf,0);
+	statusbar_printext16(200,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"(X,Y)pan: %d, %d",wall[wallnum].xpanning,wall[wallnum].ypanning);
-	printext16(200,80,11,-1,snotbuf,0);
+	statusbar_printext16(200,80,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Tile number: %d",wall[wallnum].picnum);
-	printext16(200,88,11,-1,snotbuf,0);
+	statusbar_printext16(200,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"OverTile number: %d",wall[wallnum].overpicnum);
-	printext16(200,96,11,-1,snotbuf,0);
+	statusbar_printext16(200,96,11,-1,snotbuf,0);
 
 	sprintf(snotbuf,"nextsector: %d",wall[wallnum].nextsector);
-	printext16(400,48,11,-1,snotbuf,0);
+	statusbar_printext16(400,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"nextwall: %d",wall[wallnum].nextwall);
-	printext16(400,56,11,-1,snotbuf,0);
+	statusbar_printext16(400,56,11,-1,snotbuf,0);
 
 	sprintf(snotbuf,"Extra: %d",wall[wallnum].extra);
-	printext16(400,72,11,-1,snotbuf,0);
+	statusbar_printext16(400,72,11,-1,snotbuf,0);
 
 	dax = wall[wallnum].x-wall[wall[wallnum].point2].x;
 	day = wall[wallnum].y-wall[wall[wallnum].point2].y;
 	dist = ksqrt(dax*dax+day*day);
 	sprintf(snotbuf,"Wall length: %ld",dist>>4);
-	printext16(400,96,11,-1,snotbuf,0);
+	statusbar_printext16(400,96,11,-1,snotbuf,0);
 
 	dax = (long)sectorofwall(wallnum);
 	sprintf(snotbuf,"Pixel height: %ld",(sector[dax].floorz-sector[dax].ceilingz)>>8);
-	printext16(400,104,11,-1,snotbuf,0);
+	statusbar_printext16(400,104,11,-1,snotbuf,0);
 }
 
 void showspritedata(short spritenum)
@@ -6557,52 +6562,52 @@ void showspritedata(short spritenum)
 	char snotbuf[80];
 
 	sprintf(snotbuf,"Sprite %d",spritenum);
-	printext16(8,32,11,-1,snotbuf,0);
+	statusbar_printext16(8,32,11,-1,snotbuf,0);
 	sprintf(snotbuf,"X-coordinate: %ld",sprite[spritenum].x);
-	printext16(8,48,11,-1,snotbuf,0);
+	statusbar_printext16(8,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Y-coordinate: %ld",sprite[spritenum].y);
-	printext16(8,56,11,-1,snotbuf,0);
+	statusbar_printext16(8,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Z-coordinate: %ld",sprite[spritenum].z);
-	printext16(8,64,11,-1,snotbuf,0);
+	statusbar_printext16(8,64,11,-1,snotbuf,0);
 
 	sprintf(snotbuf,"Sectnum: %d",sprite[spritenum].sectnum);
-	printext16(8,72,11,-1,snotbuf,0);
+	statusbar_printext16(8,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Statnum: %d",sprite[spritenum].statnum);
-	printext16(8,80,11,-1,snotbuf,0);
+	statusbar_printext16(8,80,11,-1,snotbuf,0);
 
 	sprintf(snotbuf,"Tags: %d, %d",sprite[spritenum].hitag,sprite[spritenum].lotag);
-	printext16(8,96,11,-1,snotbuf,0);
+	statusbar_printext16(8,96,11,-1,snotbuf,0);
 	sprintf(snotbuf,"     (0x%x), (0x%x)",sprite[spritenum].hitag,sprite[spritenum].lotag);
-	printext16(8,104,11,-1,snotbuf,0);
+	statusbar_printext16(8,104,11,-1,snotbuf,0);
 
-	printext16(200,32,11,-1,names[sprite[spritenum].picnum],0);
+	statusbar_printext16(200,32,11,-1,names[sprite[spritenum].picnum],0);
 	sprintf(snotbuf,"Flags (hex): %x",sprite[spritenum].cstat);
-	printext16(200,48,11,-1,snotbuf,0);
+	statusbar_printext16(200,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Shade: %d",sprite[spritenum].shade);
-	printext16(200,56,11,-1,snotbuf,0);
+	statusbar_printext16(200,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Pal: %d",sprite[spritenum].pal);
-	printext16(200,64,11,-1,snotbuf,0);
+	statusbar_printext16(200,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"(X,Y)repeat: %d, %d",sprite[spritenum].xrepeat,sprite[spritenum].yrepeat);
-	printext16(200,72,11,-1,snotbuf,0);
+	statusbar_printext16(200,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"(X,Y)offset: %d, %d",sprite[spritenum].xoffset,sprite[spritenum].yoffset);
-	printext16(200,80,11,-1,snotbuf,0);
+	statusbar_printext16(200,80,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Tile number: %d",sprite[spritenum].picnum);
-	printext16(200,88,11,-1,snotbuf,0);
+	statusbar_printext16(200,88,11,-1,snotbuf,0);
 
 	sprintf(snotbuf,"Angle (2048 degrees): %d",sprite[spritenum].ang);
-	printext16(400,48,11,-1,snotbuf,0);
+	statusbar_printext16(400,48,11,-1,snotbuf,0);
 	sprintf(snotbuf,"X-Velocity: %d",sprite[spritenum].xvel);
-	printext16(400,56,11,-1,snotbuf,0);
+	statusbar_printext16(400,56,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Y-Velocity: %d",sprite[spritenum].yvel);
-	printext16(400,64,11,-1,snotbuf,0);
+	statusbar_printext16(400,64,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Z-Velocity: %d",sprite[spritenum].zvel);
-	printext16(400,72,11,-1,snotbuf,0);
+	statusbar_printext16(400,72,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Owner: %d",sprite[spritenum].owner);
-	printext16(400,80,11,-1,snotbuf,0);
+	statusbar_printext16(400,80,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Clipdist: %d",sprite[spritenum].clipdist);
-	printext16(400,88,11,-1,snotbuf,0);
+	statusbar_printext16(400,88,11,-1,snotbuf,0);
 	sprintf(snotbuf,"Extra: %d",sprite[spritenum].extra);
-	printext16(400,96,11,-1,snotbuf,0);
+	statusbar_printext16(400,96,11,-1,snotbuf,0);
 }
 
 void __interrupt __far timerhandler(void)
