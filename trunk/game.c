@@ -451,8 +451,6 @@ int main(int argc, char **argv)
 	short other;
 //	char *ptr;
 
-    SDL_Init(SDL_INIT_VIDEO);
-
     _platform_init(argc, argv, "KenBuild by Ken Silverman", "KenBuild");
 
 	initgroupfile("stuff.dat");
