@@ -40,11 +40,13 @@ long sethlinesizes(long i1, long i2, long i3)
     machxbits_ecx = i3;
     machxbits_edx = -1;
     machxbits_edx >>= (256-machxbits_al-machxbits_bl);
+    /*
     __asm__ __volatile__ (
         "call _asm_sethlinesizes   \n\t"
        : "=a" (retval)
         : "a" (i1), "b" (i2), "c" (i3)
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_sethlinesizes:
@@ -94,11 +96,13 @@ long setpalookupaddress(char *i1)
 {
     long retval = 0;
     pal_eax = i1;
+    /*
     __asm__ __volatile__ (
         "call _asm_setpalookupaddress   \n\t"
        : "=a" (retval)
         : "a" (i1)
         : "cc", "memory");
+	*/
     return(retval);
 } /* setpalookupaddress */
 
@@ -110,11 +114,13 @@ long setuphlineasm4(long i1, long i2)
     long retval = 0;
     hmach4_eax = ((i1<<machxbits_al)|(((unsigned)i1)>>(32-machxbits_al)));
     hmach4_ebx = ((i2&0xffffff00)|(hmach4_eax&0xff));
+    /*
     __asm__ __volatile__ (
         "call _asm_setuphlineasm4   \n\t"
        : "=a" (retval)
         : "a" (i1), "b" (i2)
         : "cc", "memory");
+	*/
     return(retval);
 } /* setuphlineasm4 */
 
@@ -154,10 +160,12 @@ void setuprhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
     rmach_ecx = i3;
     rmach_edx = i4;
     rmach_esi = i5;
+    /*
     __asm__ __volatile__ (
         "call _asm_setuprhlineasm4   \n\t"
         : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 /*
 _asm_setuprhlineasm4:
 	mov dword [rmach1a+2], eax
@@ -301,10 +309,12 @@ void setuprmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
     rmmach_ecx = i3;
     rmmach_edx = i4;
     rmmach_esi = i5;
+    /*
     __asm__ __volatile__ (
         "call _asm_setuprmhlineasm4   \n\t"
         : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 /*
 _asm_setuprmhlineasm4:
 	mov dword [rmmach1+2], eax
@@ -378,10 +388,12 @@ void setupqrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
     qrmach_ebx2 = qrmach_ebx + qrmach_ebx;
     if (qrmach_ebx2 < qrmach_ebx) qrmach_ecx2 = qrmach_ecx + qrmach_ecx + 1;
     else qrmach_ecx2 = qrmach_ecx + qrmach_ecx;
+    /*
     __asm__ __volatile__ (
         "call _asm_setupqrhlineasm4   \n\t"
         : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 /*
 _asm_setupqrhlineasm4:
 	mov dword [qrmach2e+2], ebx
@@ -477,10 +489,12 @@ static long fixchain;
 void setvlinebpl(long i1)
 {
     fixchain = i1;
+    /*
     __asm__ __volatile__ (
         "call _asm_setvlinebpl   \n\t"
         : : "a" (i1)
         : "cc", "memory");
+	*/
 /*
 _asm_setvlinebpl:
 	mov dword [fixchain1a+2], eax
@@ -508,10 +522,12 @@ static long tmach;
 void fixtransluscence(long i1)
 {
     tmach = i1;
+    /*
     __asm__ __volatile__ (
         "call _asm_fixtransluscence   \n\t"
         : : "a" (i1)
         : "cc", "memory");
+	*/
 /*
 _asm_fixtransluscence:
 	mov dword [transmach4+2], eax
@@ -618,10 +634,12 @@ static unsigned char transmach3_al;
 void setuptvlineasm(long i1)
 {
     transmach3_al = i1;
+    /*
     __asm__ __volatile__ (
         "call _asm_setuptvlineasm   \n\t"
         : : "a" (i1)
         : "cc", "memory");
+	*/
 /*
 _asm_setuptvlineasm:
 	mov byte [transmach3a+2], al
@@ -680,11 +698,13 @@ fixchain1t: add edi, 320
 long setuptvlineasm2(long i1, long i2, long i3)
 {
     long retval = 0;
+    /*
     __asm__ __volatile__ (
         "call _asm_setuptvlineasm2   \n\t"
        : "=a" (retval)
         : "a" (i1), "b" (i2), "c" (i3)
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_setuptvlineasm2:
@@ -882,10 +902,12 @@ void setupvlineasm(long i1)
     mach3_al = i1;
     mach3_ah = mach3_al - 16;
     mach3_eax = (1<<(256-mach3_al)) - 1;
+    /*
     __asm__ __volatile__ (
         "call _asm_setupvlineasm   \n\t"
         : : "a" (i1)
         : "cc", "memory");
+	*/
 /*
 _asm_setupvlineasm:
 		;First 2 lines for VLINEASM1, rest for VLINEASM4
@@ -1178,20 +1200,24 @@ machvsh8: shl edx, 88h     ;16-sh
 	pop ebp
 	ret
 */
+	/*
     __asm__ __volatile__ (
         "call _asm_vlineasm4   \n\t"
         : : "c" (i1), "D" (i2)
         : "cc", "ebx", "edx", "esi", "memory");
+	*/
 } /* vlineasm4 */
 
 /* #pragma aux setupmvlineasm parm [eax] */
 void setupmvlineasm(long i1)
 {
     machmv = i1;
+    /*
     __asm__ __volatile__ (
         "call _asm_setupmvlineasm   \n\t"
         : : "a" (i1)
         : "cc", "memory");
+	*/
 /*
 _asm_setupmvlineasm:
 	mov byte [maskmach3a+2], al
@@ -1295,6 +1321,16 @@ beginmvlineasm42:
     eax = 0;
     edi += fixchain;
     eax = ((eax&0xffffff00)|(edx&0xff));
+    // DDOI - test
+    eax = 0;
+    if ((ebx&0xff000000)<0xff000000) eax |= 0xff000000;
+    if ((ebx&0xff0000)<0xff0000) eax |= 0xff0000;
+    if ((ebx&0xff00)<0xff00) eax |= 0xff00;
+    if ((ebx&0xff)<0xff) eax |= 0xff;
+    *((unsigned int *)edi) = ((*((unsigned int *)edi)&~eax)|(ebx&eax));
+    // DDOI - end test
+    
+    /*
     switch (eax)
     {
 	    case 0:
@@ -1360,9 +1396,10 @@ beginmvlineasm42:
 		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
 		    break;
 	    case 15:
-		    *(((unsigned int*)edi)+1) = ebx;
+		    *((unsigned int*)edi) = ebx;
 		    break;
     }
+    */
     goto beginmvlineasm4;
 endmvlineasm4:
     asm3--;
@@ -1572,11 +1609,13 @@ void setupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
     smach2_eax = (i5>>16)+i2;
     smach5_eax = smach2_eax + i4;
     smach_ecx = i3;
+    /*
     __asm__ __volatile__ (
         "call _asm_setupspritevline   \n\t"
        :
         : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 /*
 _asm_setupspritevline:
 	mov dword [spal+2], eax
@@ -1669,11 +1708,13 @@ void msetupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
     msmach2_eax = (i5>>16)+i2;
     msmach5_eax = smach2_eax + i4;
     msmach_ecx = i3;
+    /*
     __asm__ __volatile__ (
         "call _asm_msetupspritevline   \n\t"
        :
         : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 /*
 _asm_msetupspritevline:
 	mov dword [mspal+2], eax
@@ -1749,21 +1790,25 @@ msmach5: adc esi, 88888888h              ;xincshr16+yalwaysinc+daydime
 mendsvline:
 	ret
 */
+    /*
     __asm__ __volatile__ (
         "call _asm_mspritevline   \n\t"
        :
         : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 } /* mspritevline */
 
 /* #pragma aux tsetupspritevline parm [eax][ebx][ecx][edx][esi][edi] */
 void tsetupspritevline(long i1, long i2, long i3, long i4, long i5, long i6)
 {
+	/*
     __asm__ __volatile__ (
         "call _asm_tsetupspritevline   \n\t"
        :
         : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
+	*/
 /*
 _asm_tsetupspritevline:
 	mov dword [tspal+2], eax
@@ -1974,11 +2019,13 @@ mendhline:
 long msethlineshift(long i1, long i2)
 {
     long retval = 0;
+    /*
     __asm__ __volatile__ (
         "call _asm_msethlineshift   \n\t"
        : "=a" (retval)
         : "a" (i1), "b" (i2)
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_msethlineshift:
@@ -2137,11 +2184,13 @@ tendhline:
 long tsethlineshift(long i1, long i2)
 {
     long retval = 0;
+    /*
     __asm__ __volatile__ (
         "call _asm_tsethlineshift   \n\t"
        : "=a" (retval)
         : "a" (i1), "b" (i2)
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_tsethlineshift:
@@ -2176,10 +2225,12 @@ void setupslopevlin(long i1, long i2, long i3)
     c.f = asm2_f = (float)asm1;
     asm2 = c.i;
 
+    /*
     __asm__ __volatile__ (
         "call _asm_setupslopevlin   \n\t"
         : : "a" (i1), "b" (i2), "c" (i3)
         : "cc", "edx", "memory");
+	*/
 /*
 _asm_setupslopevlin:
 	mov dword [slopmach3+3], ebx    ;ptr
@@ -2386,11 +2437,13 @@ slopmach4d: 	mov ebp, [ebpbak]
 long settransnormal(void)
 {
     long retval = 0;
+    /*
     __asm__ __volatile__ (
         "call _asm_settransnormal   \n\t"
        : "=a" (retval)
         :
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_settransnormal:
@@ -2420,11 +2473,13 @@ _asm_settransnormal:
 long settransreverse(void)
 {
     long retval = 0;
+    /*
     __asm__ __volatile__ (
         "call _asm_settransreverse   \n\t"
        : "=a" (retval)
         :
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_settransreverse:
@@ -2454,11 +2509,13 @@ _asm_settransreverse:
 long setupdrawslab(long i1, long i2)
 {
     long retval = 0;
+    /*
     __asm__ __volatile__ (
         "call _asm_setupdrawslab   \n\t"
        : "=a" (retval)
         : "a" (i1), "b" (i2)
         : "cc", "memory");
+	*/
     return(retval);
 /*
 _asm_setupdrawslab:
