@@ -2107,6 +2107,38 @@ void qinterpolatedown16 (long *source, int size, int linum, int linum_inc) {
 
 void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 {
+#ifdef USE_DDOI_C
+	if (size == 0) return;
+
+	if ((long)source & 0x2)
+	{
+		*((unsigned short *)source) = ((linum>>16)&0xffff);
+		linum += linum_inc;
+		((unsigned char*)source) = ((unsigned char*)source) + 2;
+		size--;
+		if (size == 0) return;
+	}
+	size -= 2;
+	if (size < 0)
+	{
+		*((unsigned short *)source) = ((linum>>16)&0xffff);
+		return;
+	}
+
+	while (size >= 0)
+	{
+		int temp = linum>>16;
+		linum += linum_inc;
+		temp += (linum&0xffff0000);
+		linum += linum_inc;
+		*source = temp;
+		source++;
+		size -= 2;
+	}
+	if (size & 1)
+		*((unsigned short *)source) = ((linum>>16)&0xffff);
+
+#else
   __asm__ __volatile__ (
 	"testl %%ecx, %%ecx   \n\t"
 	"jz endit   \n\t"
@@ -2139,6 +2171,7 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc)
 	"movw %%bx, (%%eax)   \n\t"
 	"endit:   \n\t"
   : :"a" (source), "c" (size), "d" (linum), "S" (linum_inc) : "ebx", "edi", "cc", "memory");
+#endif
 }
 
 void vlin16first (long i1, long i2) {
