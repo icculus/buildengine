@@ -104,7 +104,8 @@ INFO:
   you up to lawsuits from Red Hat and the Free Software Foundation. Do the
   right thing, and move this to Mingw32. I accept patches.  :)  If any
   commercial BUILD games are to make their way to Windows via this port, this
-  will need to be done, anyhow.
+  will need to be done, anyhow.  (update: Work to build Build with other
+  win32 compilers is under way. Stay tuned, true believers.)
 
 
 GOOD REFERENCES:
