@@ -2349,6 +2349,7 @@ int dmulscale30 (int input1, int input2, int input3, int input4);
 int dmulscale31 (int input1, int input2, int input3, int input4);
 int dmulscale32 (int input1, int input2, int input3, int input4);
 
+int divscale(int i1, int i2, int i3);
 int divscale1 (int input1, int input2);
 int divscale2 (int input1, int input2);
 int divscale3 (int input1, int input2);
@@ -2381,6 +2382,19 @@ int divscale29 (int input1, int input2);
 int divscale30 (int input1, int input2);
 int divscale31 (int input1, int input2);
 int divscale32 (int input1, int input2);
+
+void copybuf(long source, void *dest, int size);
+void clearbuf(long buffer, int size, long fill_value);
+void clearbufbyte(long buffer, int size, long fill_value);
+void copybufbyte(long source, void *dest, int size);
+int ksgn(int i1);
+int klabs (int i1);
+int mul3 (int i1);
+int mul5 (int i1);
+int mul9 (int i1);
+
+void qinterpolatedown16 (long *source, int size, int linum, int linum_inc);
+void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);
 
 #else
 
