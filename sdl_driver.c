@@ -1,7 +1,7 @@
 /*
  * An SDL replacement for BUILD's VESA code.
  *
- *  Written by Ryan C. Gordon. (icculus@linuxgames.com)
+ *  Written by Ryan C. Gordon. (icculus@clutteredmind.org)
  *
  * Please do NOT harrass Ken Silverman about any code modifications
  *  (including this file) to BUILD.
@@ -893,7 +893,7 @@ static inline void output_sdl_versions(void)
     SDL_VERSION(&compiled_ver);
 
     sdldebug("SDL display driver for the BUILD engine initializing.");
-    sdldebug("  sdl_driver.c by Ryan C. Gordon (icculus@linuxgames.com).");
+    sdldebug("  sdl_driver.c by Ryan C. Gordon (icculus@clutteredmind.org).");
     sdldebug("Compiled %s against SDL version %d.%d.%d ...", __DATE__,
                 compiled_ver.major, compiled_ver.minor, compiled_ver.patch);
     sdldebug("Linked SDL version is %d.%d.%d ...",

@@ -2,7 +2,7 @@ BUILD binaries for DOS (i386 and greater) systems.
 
 These binaries are BETA quality. Expect crashes.
 
-Bug reports to Ryan C. Gordon (icculus@linuxgames.com).
+Bug reports to Ryan C. Gordon (icculus@clutteredmind.org).
 
 I've only tested this briefly on a Windows 98 (second edition) box, in a DOS
  window. YMMV.
@@ -33,7 +33,7 @@ Feel free to send me comments, complaints, suggestions, and donations.
 
 Enjoy!
 
---ryan. (icculus@linuxgames.com)
+--ryan. (icculus@clutteredmind.org)
 
 
 CHANGELOG of DOS binary releases:
