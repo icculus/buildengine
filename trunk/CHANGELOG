@@ -556,7 +556,8 @@
             Visual C. Added VisualC.zip. Unzip it and use those files to build
             with Visual C. Updated Makefiles, READMEs, etc with the new
             *_[gnu|visualc]* files. Cleanups elsewhere. Added a "distclean"
-            target which just calls "clean".
+            target which just calls "clean". The Visual C project doesn't work
+            right now; I gave up on it.
 
 --ryan. (icculus@clutteredmind.org)
 
