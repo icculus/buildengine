@@ -1444,13 +1444,14 @@ void callcommit(void)
     switch (gcom->command)
     {
         case COMMIT_CMD_GET:
-            rc = get_udp_packet(&ip, NULL, gcom->buffer, sizeof(gcom->buffer));
+            rc = get_udp_packet(&ip, &port, gcom->buffer, sizeof(gcom->buffer));
             if (rc > 0)
             {
                 gcom->numbytes = rc;  /* size of new packet. */
                 for (i = 1; i <= gcom->numplayers; i++)
                 {
-                    if (allowed_addresses[i].host == ip)
+                    if ( (allowed_addresses[i].host == ip) &&
+                         (allowed_addresses[i].port == port) )
                     {
                         gcom->other = i;
                         return;
