@@ -7,6 +7,7 @@
 
 beos := false
 macosx := false
+solaris := false
 
 #-----------------------------------------------------------------------------#
 # If this makefile fails to detect Cygwin correctly, or you want to force
@@ -71,6 +72,11 @@ ifeq ($(strip $(beos)),true)
   USE_ASM :=
 endif
 
+ifeq ($(strip $(solaris)),true)
+  LDFLAGS += -lsocket -lnsl
+  CFLAGS += -DPLATFORM_SOLARIS
+endif
+
 ifeq ($(strip $(cygwin)),autodetect)
   ifneq ($(strip $(shell gcc -v 2>&1 |grep "cygwin")),)
     cygwin := true
@@ -122,7 +128,7 @@ else
 endif
 
 ifeq ($(strip $(macosx)),true)
-  CFLAGS += -DPLATFORM_MACOSX=1 -faltivec
+  CFLAGS += -DPLATFORM_MACOSX=1 -faltivec -falign-loops=32 -falign-functions=32
   LDFLAGS += -framework AppKit -lSDL -lSDLmain
 endif
 
@@ -195,7 +201,7 @@ endif
 ENGINEDIR = .
 ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 LINKER = gcc
-CFLAGS += $(USE_ASM) -funsigned-char -O2 -DPLATFORM_UNIX -g -Wall $(SDL_CFLAGS) -fno-omit-frame-pointer
+CFLAGS += $(USE_ASM) -funsigned-char -O3 -DPLATFORM_UNIX -g -Wall $(SDL_CFLAGS) -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
 
 # Rules for turning source files into .o files
