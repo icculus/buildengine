@@ -19,7 +19,11 @@
 #error You need to define PLATFORM_TIMER_HZ for your platform.
 #endif
 
+#if (defined __WATCOMC__)
+#define snprintf _snprintf
 #endif
+
+#endif  // !defined _INCLUDE_PLATFORM_H_
 
 // end of platform.h ...
 

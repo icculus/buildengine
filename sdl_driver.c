@@ -214,7 +214,7 @@ static void output_surface_info(SDL_Surface *_surface)
         append_sdl_surface_flag(_surface, f, sizeof (f), SDL_SRCALPHA);
         append_sdl_surface_flag(_surface, f, sizeof (f), SDL_PREALLOC);
 
-        if (f[0] == '\0');
+        if (f[0] == '\0')
             strcpy(f, " (none)");
 
         sdldebug("New vidmode flags:%s", f);
