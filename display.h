@@ -39,6 +39,7 @@
 #pragma aux (__cdecl) SDL_RemoveTimer;
 #pragma aux (__cdecl) SDL_Flip;
 #pragma aux (__cdecl) SDL_UpdateRect;
+#pragma aux (__cdecl) SDL_GetVideoSurface;
 #endif  // __WATCOMC__
 
 #endif  // PLATFORM_SUPPORTS_SDL
