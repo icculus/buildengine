@@ -1144,6 +1144,26 @@ static void init_renderer_names(void)
 } /* init_renderer_names */
 
 
+void set_splash(void)
+{
+    SDL_Surface *bmp = SDL_LoadBMP("splash.bmp");
+    if (bmp == NULL)
+        return;
+
+    putenv("SDL_VIDEO_WINDOW_POS=center");
+    SDL_Surface *screen = SDL_SetVideoMode(bmp->w, bmp->h, 0, SDL_NOFRAME);
+    putenv("SDL_VIDEO_WINDOW_POS=nopref");
+
+    if (screen != NULL)
+    {
+        SDL_BlitSurface(bmp, NULL, screen, NULL);
+        SDL_Flip(screen);
+    }
+
+    SDL_FreeSurface(bmp);
+} /* set_splash */
+
+
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
     _argc = argc;
@@ -1176,6 +1196,13 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     sdl_flags |= SDL_HWPALETTE;
     /*sdl_flags |= SDL_HWSURFACE;   !!! */
     /*sdl_flags |= SDL_DOUBLEBUF; */
+
+    set_sdl_renderer();
+    set_splash();
+
+    output_sdl_versions();
+    output_driver_info();
+    detect_vmware();
 
     memset(scancodes, '\0', sizeof (scancodes));
     scancodes[SDLK_ESCAPE]          = 0x01;
@@ -1281,12 +1308,6 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_PAGEDOWN]        = 0xE051;
     scancodes[SDLK_INSERT]          = 0xE052;
     scancodes[SDLK_DELETE]          = 0xE053;
-    
-    set_sdl_renderer();
-
-    output_sdl_versions();
-    output_driver_info();
-    detect_vmware();
 } /* _platform_init */
 
 
