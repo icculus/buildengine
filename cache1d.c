@@ -19,6 +19,9 @@
 #include "pragmas.h"
 #include "cache1d.h"
 
+#if (defined USE_PHYSICSFS)
+#include "physfs.h"
+#endif
 
 /*
  *   This module keeps track of a standard linear cacheing system.
@@ -218,6 +221,7 @@ void reportandexit(char *errormessage)
 #define MAXGROUPFILES 4     /* Warning: Fix groupfil if this is changed */
 #define MAXOPENFILES 64     /* Warning: Fix filehan if this is changed  */
 
+#if (!defined USE_PHYSICSFS)
 static unsigned char toupperlookup[256] =
 {
 	0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,
@@ -255,8 +259,46 @@ static long filehan[MAXOPENFILES] =
 	-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
 };
 
+#else
+static PHYSFS_file *filehan[MAXOPENFILES] =
+{
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+};
+#endif
+
+
 long initgroupfile(const char *filename)
 {
+#if (defined USE_PHYSICSFS)
+    static int initted_physfs = 0;
+    static int added_cwd = 0;
+
+    if (!initted_physfs)
+    {
+        if (!PHYSFS_init(_argv[0]))
+            return(-1);
+        initted_physfs = 1;
+    } /* if */
+
+    if (!added_cwd)
+    {
+        if (!PHYSFS_addToSearchPath(".", 0))
+            return(-1);
+        added_cwd = 1;
+    } /* if */
+
+    if (!PHYSFS_addToSearchPath(filename, 1))
+        return(-1);
+
+    return(1); /* uhh...? */
+#else
 	char buf[16];
 	long i, j, k;
 
@@ -297,10 +339,15 @@ long initgroupfile(const char *filename)
 	}
 	numgroupfiles++;
 	return(groupfil[numgroupfiles-1]);
+#endif
 }
 
 void uninitgroupfile(void)
 {
+#if (defined USE_PHYSICSFS)
+    PHYSFS_deinit();
+    memset(filehan, '\0', sizeof (filehan));
+#else
 	long i;
 
 	for(i=numgroupfiles-1;i>=0;i--)
@@ -311,10 +358,30 @@ void uninitgroupfile(void)
 			close(groupfil[i]);
 			groupfil[i] = -1;
 		}
+#endif
 }
 
 long kopen4load(const char *filename, char searchfirst)
 {
+#if (defined USE_PHYSICSFS)
+    int i;
+    PHYSFS_file *rc = PHYSFS_openRead(filename);
+
+    if (rc == NULL)
+        return(-1);
+
+    for (i = 0; i < MAXOPENFILES; i++)
+    {
+        if (filehan[i] == NULL)
+        {
+            filehan[i] = rc;
+            return(i);
+        }
+    }
+
+    PHYSFS_close(rc);  /* oh well. */
+    return(-1);
+#else
 	long i, j, k, fil, newhandle;
 	unsigned char bad;
 	char *gfileptr;
@@ -364,10 +431,15 @@ long kopen4load(const char *filename, char searchfirst)
 		}
 	}
 	return(-1);
+#endif
 }
 
 long kread(long handle, void *buffer, long leng)
 {
+#if (defined USE_PHYSICSFS)
+    return(PHYSFS_read(filehan[handle], buffer, 1, leng));
+return(leng);
+#else
 	long i, filenum, groupnum;
 
 	filenum = filehan[handle];
@@ -390,10 +462,26 @@ long kread(long handle, void *buffer, long leng)
 	}
 
 	return(0);
+#endif
 }
 
 long klseek(long handle, long offset, long whence)
 {
+#if (defined USE_PHYSICSFS)
+    if (whence == SEEK_END)
+    {
+        printf("UNSUPPORTED SEEK SEMANTIC!\n");
+        exit(42);
+    } /* if */
+
+    if (whence == SEEK_CUR)
+        offset += PHYSFS_tell(filehan[handle]);
+
+    if (!PHYSFS_seek(filehan[handle], offset))
+        return(-1);
+
+    return(offset);
+#else
 	long i, groupnum;
 
 	groupnum = filegrp[handle];
@@ -412,23 +500,36 @@ long klseek(long handle, long offset, long whence)
 		return(filepos[handle]);
 	}
 	return(-1);
+#endif
 }
 
 long kfilelength(long handle)
 {
+#if (defined USE_PHYSICSFS)
+    return(PHYSFS_fileLength(filehan[handle]));
+#else
 	long i, groupnum;
 
 	groupnum = filegrp[handle];
 	if (groupnum == 255) return(filelength(filehan[handle]));
 	i = filehan[handle];
 	return(gfileoffs[groupnum][i+1]-gfileoffs[groupnum][i]);
+#endif
 }
 
 void kclose(long handle)
 {
+#if (defined USE_PHYSICSFS)
+    if (filehan[handle] != NULL)
+    {
+        PHYSFS_close(filehan[handle]);
+        filehan[handle] = NULL;
+    } /* if */
+#else
 	if (handle < 0) return;
 	if (filegrp[handle] == 255) close(filehan[handle]);
 	filehan[handle] = -1;
+#endif
 }
 
 
