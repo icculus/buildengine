@@ -2487,129 +2487,134 @@ long divscale32(long i1, long i2);
 
 #else  /* non-Watcom platforms land here: */
 
+#include "platform.h" //for __int64
 
-/* These are not defines, so they land in pragma.c for ASM and non-ASM. */
-void swapchar(unsigned char *p1, unsigned char *p2);
-void swapshort(short *p1, short *p2);
-void swaplong(long *p1, long *p2);
-void swapchar2(unsigned char *p1, unsigned char *p2, int xsiz);
+static inline void swapchar(unsigned char *p1, unsigned char *p2)
+{ unsigned char tmp = *p1; *p1 = *p2; *p2 = tmp; }
+static inline void swapshort(short *p1, short *p2)
+{ short tmp = *p1; *p1 = *p2; *p2 = tmp; }
+static inline void swaplong(long *p1, long *p2)
+{ long tmp = *p1; *p1 = *p2; *p2 = tmp; }
+static inline void swapchar2(unsigned char *p1, unsigned char *p2, int xsiz)
+{
+    swapchar(p1, p2);
+    swapchar(p1 + 1, p2 + xsiz);
+}
+
+
 unsigned long getkensmessagecrc(long param);
 long msqrtasm(int i1);
 
 void vlin16first (long i1, long i2);
-int sqr (int input1);
-int scale (int input1, int input2, int input3);
-int mulscale (int input1, int input2, short input3);
-int mulscale1 (int input1, int input2);
-int mulscale2 (int input1, int input2);
-int mulscale3 (int input1, int input2);
-int mulscale4 (int input1, int input2);
-int mulscale5 (int input1, int input2);
-int mulscale6 (int input1, int input2);
-int mulscale7 (int input1, int input2);
-int mulscale8 (int input1, int input2);
-int mulscale9 (int input1, int input2);
-int mulscale10 (int input1, int input2);
-int mulscale11 (int input1, int input2);
-int mulscale12 (int input1, int input2);
-int mulscale13 (int input1, int input2);
-int mulscale14 (int input1, int input2);
-int mulscale15 (int input1, int input2);
-int mulscale16 (int input1, int input2);
-int mulscale17 (int input1, int input2);
-int mulscale18 (int input1, int input2);
-int mulscale19 (int input1, int input2);
-int mulscale20 (int input1, int input2);
-int mulscale21 (int input1, int input2);
-int mulscale22 (int input1, int input2);
-int mulscale23 (int input1, int input2);
-int mulscale24 (int input1, int input2);
-int mulscale25 (int input1, int input2);
-int mulscale26 (int input1, int input2);
-int mulscale27 (int input1, int input2);
-int mulscale28 (int input1, int input2);
-int mulscale29 (int input1, int input2);
-int mulscale30 (int input1, int input2);
-int mulscale31 (int input1, int input2);
-int mulscale32 (int input1, int input2);
-int dmulscale  (int input1, int input2, int input3);
-int dmulscale1 (int input1, int input2, int input3, int input4);
-int dmulscale2 (int input1, int input2, int input3, int input4);
-int dmulscale3 (int input1, int input2, int input3, int input4);
-int dmulscale4 (int input1, int input2, int input3, int input4);
-int dmulscale5 (int input1, int input2, int input3, int input4);
-int dmulscale6 (int input1, int input2, int input3, int input4);
-int dmulscale7 (int input1, int input2, int input3, int input4);
-int dmulscale8 (int input1, int input2, int input3, int input4);
-int dmulscale9 (int input1, int input2, int input3, int input4);
-int dmulscale10 (int input1, int input2, int input3, int input4);
-int dmulscale11 (int input1, int input2, int input3, int input4);
-int dmulscale12 (int input1, int input2, int input3, int input4);
-int dmulscale13 (int input1, int input2, int input3, int input4);
-int dmulscale14 (int input1, int input2, int input3, int input4);
-int dmulscale15 (int input1, int input2, int input3, int input4);
-int dmulscale16 (int input1, int input2, int input3, int input4);
-int dmulscale17 (int input1, int input2, int input3, int input4);
-int dmulscale18 (int input1, int input2, int input3, int input4);
-int dmulscale19 (int input1, int input2, int input3, int input4);
-int dmulscale20 (int input1, int input2, int input3, int input4);
-int dmulscale21 (int input1, int input2, int input3, int input4);
-int dmulscale22 (int input1, int input2, int input3, int input4);
-int dmulscale23 (int input1, int input2, int input3, int input4);
-int dmulscale24 (int input1, int input2, int input3, int input4);
-int dmulscale25 (int input1, int input2, int input3, int input4);
-int dmulscale26 (int input1, int input2, int input3, int input4);
-int dmulscale27 (int input1, int input2, int input3, int input4);
-int dmulscale28 (int input1, int input2, int input3, int input4);
-int dmulscale29 (int input1, int input2, int input3, int input4);
-int dmulscale30 (int input1, int input2, int input3, int input4);
-int dmulscale31 (int input1, int input2, int input3, int input4);
-int dmulscale32 (int input1, int input2, int input3, int input4);
 
-int divscale(int i1, int i2, int i3);
-int divscale1 (int input1, int input2);
-int divscale2 (int input1, int input2);
-int divscale3 (int input1, int input2);
-int divscale4 (int input1, int input2);
-int divscale5 (int input1, int input2);
-int divscale6 (int input1, int input2);
-int divscale7 (int input1, int input2);
-int divscale8 (int input1, int input2);
-int divscale9 (int input1, int input2);
-int divscale10 (int input1, int input2);
-int divscale11 (int input1, int input2);
-int divscale12 (int input1, int input2);
-int divscale13 (int input1, int input2);
-int divscale14 (int input1, int input2);
-int divscale15 (int input1, int input2);
-int divscale16 (int input1, int input2);
-int divscale17 (int input1, int input2);
-int divscale18 (int input1, int input2);
-int divscale19 (int input1, int input2);
-int divscale20 (int input1, int input2);
-int divscale21 (int input1, int input2);
-int divscale22 (int input1, int input2);
-int divscale23 (int input1, int input2);
-int divscale24 (int input1, int input2);
-int divscale25 (int input1, int input2);
-int divscale26 (int input1, int input2);
-int divscale27 (int input1, int input2);
-int divscale28 (int input1, int input2);
-int divscale29 (int input1, int input2);
-int divscale30 (int input1, int input2);
-int divscale31 (int input1, int input2);
-int divscale32 (int input1, int input2);
+static inline int sqr (int input1) { return input1*input1; }
+
+/* internal use:32x32 = 64bit */
+static inline __int64 mul32_64(int i1,int i2)
+{
+	return (__int64)i1*i2;
+}
+static inline int scale (int input1, int input2, int input3)
+{
+	return mul32_64(input1,input2)/input3;
+}
+static inline int mulscale (int input1, int input2, int input3)
+{
+	return mul32_64(input1,input2)>>input3;
+}
+static inline int dmulscale  (int input1, int input2, int input3,int input4,int input5)
+{
+	return (mul32_64(input1,input2) + mul32_64(input3,input4))>>input5;
+}
+static inline int tmulscale(int i1, int i2, int i3, int i4, int i5, int i6,int shift)
+{
+	return (mul32_64(i1,i2) + mul32_64(i3,i4) + mul32_64(i5,i6))>>shift;
+}
+static inline int divscale(int i1, int i2, int i3)
+{
+	return ((__int64)i1<<i3)/i2;
+}
+
+#define DEFFUNCS \
+DEFFUN(1)\
+DEFFUN(2)\
+DEFFUN(3)\
+DEFFUN(4)\
+DEFFUN(5)\
+DEFFUN(6)\
+DEFFUN(7)\
+DEFFUN(8)\
+DEFFUN(9)\
+DEFFUN(10)\
+DEFFUN(11)\
+DEFFUN(12)\
+DEFFUN(13)\
+DEFFUN(14)\
+DEFFUN(15)\
+DEFFUN(16)\
+DEFFUN(17)\
+DEFFUN(18)\
+DEFFUN(19)\
+DEFFUN(20)\
+DEFFUN(21)\
+DEFFUN(22)\
+DEFFUN(23)\
+DEFFUN(24)\
+DEFFUN(25)\
+DEFFUN(26)\
+DEFFUN(27)\
+DEFFUN(28)\
+DEFFUN(29)\
+DEFFUN(30)\
+DEFFUN(31)\
+DEFFUN(32)
+
+#define DEFFUN(N) \
+static inline int mulscale##N(int input1, int input2) \
+{ return mulscale(input1,input2,N); }
+DEFFUNCS
+#undef DEFFUN
+
+#define DEFFUN(N) \
+static inline int dmulscale##N(int input1, int input2,int input3,int input4) \
+{ return dmulscale(input1,input2,input3,input4,N); }
+DEFFUNCS
+#undef DEFFUN
+
+#define DEFFUN(N) \
+static inline int tmulscale##N(int i1, int i2,int i3,int i4,int i5,int i6) \
+{ return tmulscale(i1,i2,i3,i4,i5,i6,N); }
+DEFFUNCS
+#undef DEFFUN
+
+#define DEFFUN(N) \
+static inline int divscale##N(int input1, int input2) \
+{ return divscale(input1,input2,N); }
+DEFFUNCS
+#undef DEFFUN
+
+static inline int ksgn(int i1)
+{
+  if (i1 < 0) return -1;
+  else if (i1 > 0) return 1;
+  else return 0;
+}
+
+static inline int sgn(int i1) { return ksgn(i1); }
+static inline int klabs (int i1)
+{
+  if (i1 < 0) i1 = -i1;
+  return i1;
+}
+static inline int mul3 (int i1) { return i1*3; }
+static inline int mul5 (int i1) { return i1*5; }
+static inline int mul9 (int i1) { return i1*9; }
 
 void copybufreverse(void *source, void *dest, int size);
 void copybuf(void *source, void *dest, int size);
 void clearbuf(void *buffer, int size, long fill_value);
 void clearbufbyte(void *buffer, int size, long fill_value);
 void copybufbyte(void *source, void *dest, int size);
-int ksgn(int i1);
-int klabs (int i1);
-int mul3 (int i1);
-int mul5 (int i1);
-int mul9 (int i1);
 
 void qinterpolatedown16 (long *source, int size, int linum, int linum_inc);
 void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);

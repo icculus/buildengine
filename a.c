@@ -186,25 +186,23 @@ long prevlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
 } /* prevlineasm1 */
 
 /* #pragma aux vlineasm1 parm [eax][ebx][ecx][edx][esi][edi] */
-long vlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
+long vlineasm1(long vince, long palookupoffse, long i3, long vplce, long bufplce, long i6)
 {
-    unsigned char *source = (unsigned char *)i5;
+    unsigned long temp;
     unsigned char *dest = (unsigned char *)i6;
 
     i3++;
     while (i3)
     {
-	    unsigned long temp = i4;
-	    temp >>= mach3_al;
-	    temp = (temp&0xffffff00) | (source[temp]&0xff);
-	    *dest = ((unsigned char*)i2)[temp];
-	    i4 += i1;
+	    temp = ((unsigned)vplce) >> mach3_al;
+	    temp = ((unsigned char *)bufplce)[temp];
+	    *dest = ((unsigned char*)palookupoffse)[temp];
+	    vplce += vince;
 	    dest += fixchain;
 	    i3--;
     }
-    return i4;
+    return vplce;
 } /* vlineasm1 */
-
 
 /* #pragma aux setuptvlineasm parm [eax] */
 static unsigned char transmach3_al = 32;
@@ -311,24 +309,21 @@ void tvlineasm2(unsigned long i1, unsigned long i2, unsigned long i3, unsigned l
 
 /* #pragma aux mvlineasm1 parm [eax][ebx][ecx][edx][esi][edi] */
 static unsigned char machmv;
-long mvlineasm1(long i1, long i2, long i3, long i4, long i5, long i6)
+long mvlineasm1(long vince, long palookupoffse, long i3, long vplce, long bufplce, long i6)
 {
-    unsigned char *source = (unsigned char *)i5;
+    unsigned long temp;
     unsigned char *dest = (unsigned char *)i6;
 
-    dest -= fixchain;
     while (i3)
     {
-	    unsigned long temp = i4;
-	    temp >>= machmv;
+	    temp = ((unsigned)vplce) >> machmv;
+	    temp = ((unsigned char *)bufplce)[temp];
+	    if (temp != 255) *dest = ((unsigned char*)palookupoffse)[temp];
+	    vplce += vince;
 	    dest += fixchain;
-	    temp = source[temp];
-	    if (temp != 255)
-		    *dest = ((unsigned char*)i2)[temp];
-	    i4 += i1;
 	    i3--;
     }
-    return i4;
+    return vplce;
 } /* mvlineasm1 */
 
 /* #pragma aux setupvlineasm parm [eax] */
@@ -341,40 +336,20 @@ extern long vplce[4], vince[4], palookupoffse[4], bufplce[4];
 /* #pragma aux vlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void vlineasm4(long i1, long i2)
 {
+    int i;
     unsigned long temp;
-    unsigned long lookup0 = vplce[0];
-    unsigned long lookup1 = vplce[1];
-    unsigned long lookup2 = vplce[2];
-    unsigned long lookup3 = vplce[3];
     unsigned long index = (i2 + ylookup[i1]);
     unsigned char *dest = (unsigned char*)(-ylookup[i1]);
     do {
-	    temp = lookup0 >> mach3_al;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[0]))[temp]));
-	    dest[index+0] = ((unsigned char*)(palookupoffse[0]))[temp];
-	    lookup0 += vince[0];
-
-	    temp = lookup1 >> mach3_al;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[1]))[temp]));
-	    dest[index+1] = ((unsigned char*)(palookupoffse[1]))[temp];
-	    lookup1 += vince[1];
-
-	    temp = lookup2 >> mach3_al;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[2]))[temp]));
-	    dest[index+2] = ((unsigned char*)(palookupoffse[2]))[temp];
-	    lookup2 += vince[2];
-
-	    temp = lookup3 >> mach3_al;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[3]))[temp]));
-	    dest[index+3] = ((unsigned char*)(palookupoffse[3]))[temp];
-	    lookup3 += vince[3];
-
-	    dest += fixchain;
+        for (i = 0; i < 4; i++)
+        {
+	    temp = ((unsigned)vplce[i]) >> mach3_al;
+	    temp = (((unsigned char*)(bufplce[i]))[temp]);
+	    dest[index+i] = ((unsigned char*)(palookupoffse[i]))[temp];
+	    vplce[i] += vince[i];
+        }
+        dest += fixchain;
     } while (((unsigned)dest - fixchain) < ((unsigned)dest));
-    vplce[0] = lookup0;
-    vplce[1] = lookup1;
-    vplce[2] = lookup2;
-    vplce[3] = lookup3;
 } /* vlineasm4 */
 
 /* #pragma aux setupmvlineasm parm [eax] */
@@ -386,197 +361,21 @@ void setupmvlineasm(long i1)
 /* #pragma aux mvlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void mvlineasm4(long i1, long i2)
 {
-    /*
+    int i;
     unsigned long temp;
-    unsigned long lookup0 = vplce[0];
-    unsigned long lookup1 = vplce[1];
-    unsigned long lookup2 = vplce[2];
-    unsigned long lookup3 = vplce[3];
     unsigned long index = (i2 + ylookup[i1]);
     unsigned char *dest = (unsigned char*)(-ylookup[i1]);
     do {
-	    temp = lookup0 >> machmv;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[0]))[temp]));
-	    temp = ((unsigned char*)(palookupoffse[0]))[temp];
-	    if (temp != 255) dest[index+0] = temp;
-	    lookup0 += vince[0];
-
-	    temp = lookup1 >> machmv;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[1]))[temp]));
-	    temp = ((unsigned char*)(palookupoffse[1]))[temp];
-	    if (temp != 255) dest[index+1] = temp;
-	    lookup1 += vince[1];
-
-	    temp = lookup2 >> machmv;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[2]))[temp]));
-	    temp = ((unsigned char*)(palookupoffse[2]))[temp];
-	    if (temp != 255) dest[index+2] = temp;
-	    lookup2 += vince[2];
-
-	    temp = lookup3 >> machmv;
-	    temp = ((temp&0xffffff00)|(((unsigned char*)(bufplce[3]))[temp]));
-	    temp = ((unsigned char*)(palookupoffse[3]))[temp];
-	    if (temp != 255) dest[index+3] = temp;
-	    lookup3 += vince[3];
-
-	    dest += fixchain;
+        for (i = 0; i < 4; i++)
+        {
+	    temp = ((unsigned)vplce[i]) >> machmv;
+	    temp = (((unsigned char*)(bufplce[i]))[temp]);
+	    if (temp != 255)
+		    dest[index+i] = ((unsigned char*)(palookupoffse[i]))[temp];
+	    vplce[i] += vince[i];
+        }
+        dest += fixchain;
     } while (((unsigned)dest - fixchain) < ((unsigned)dest));
-    vplce[0] = lookup0;
-    vplce[1] = lookup1;
-    vplce[2] = lookup2;
-    vplce[3] = lookup3;
-    */
-    long machmv1 = bufplce[0];
-    long machmv4 = bufplce[1];
-    long machmv7 = bufplce[2];
-    long machmv10 = bufplce[3];
-    long machmv2 = palookupoffse[0];
-    long machmv5 = palookupoffse[1];
-    long machmv8 = palookupoffse[2];
-    long machmv11 = palookupoffse[3];
-    long machmv3 = vince[0]&0xffffff00;
-    long machmv6 = vince[1]&0xffffff00;
-    long machmv9 = vince[2];
-    long machmv12 = vince[3];
-    unsigned long eax,ebx,ecx,edi,edx,esi,ebp;
-
-    ebx = i1;
-    edi = i2;
-    ecx = vplce[0];
-    edx = vplce[1];
-    esi = vplce[2];
-    ebp = vplce[3];
-    ecx = ((ecx&0xffffff00)|(ebx&0xff));
-    ecx = ((ecx&0xffffff00)|((ecx+1)&0xff));
-    ebx = ((ebx&0xffff00ff)|((ebx+0x100)&0xff00));
-    asm3 = ((ebx&0xff00)>>8);
-    edi -= fixchain;
-
-beginmvlineasm4:
-    ecx = ((ecx&0xffffff00)|((ecx-1)&0xff));
-    if ((ecx&0xff)==0) goto endmvlineasm4;
-beginmvlineasm42:
-    eax = ebp;
-    ebx = esi;
-    eax >>= machmv;
-    ebx >>= machmv;
-    ebp += machmv12;
-    esi += machmv9;
-    eax = ((eax&0xffffff00)|((unsigned char*)machmv10)[eax]);
-    ebx = ((ebx&0xffffff00)|((unsigned char*)machmv7)[ebx]);
-
-    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((eax&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
-
-    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((ebx&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
-
-    ebx = ((ebx&0xffffff00)|((unsigned char*)machmv8)[ebx]);
-    ebx = ((ebx&0xffff00ff)|(((unsigned char*)machmv11)[eax])<<8);
-
-    eax = edx;
-    eax >>= machmv;
-    ebx <<= 16;
-    eax = ((eax&0xffffff00)|((unsigned char*)machmv4)[eax]);
-
-    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((eax&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
-
-    edx += machmv6;
-    ebx = ((ebx&0xffff00ff)|(((unsigned char*)machmv5)[eax])<<8);
-
-    eax = ecx;
-    eax >>= machmv;
-    ecx += machmv3;
-    eax = ((eax&0xffffff00)|((unsigned char*)machmv1)[eax]);
-
-    edx = ((edx&0xffffff00)|((edx<<1)&0xff));
-    if ((eax&0xff)<255) edx = ((edx&0xffffff00)|((edx+1)&0xff));
-
-    ebx = ((ebx&0xffffff00)|((unsigned char*)machmv2)[eax]);
-
-    eax = 0;
-    eax = ((eax&0xffffff00)|(edx&0xff));
-    edx = ((edx&0xffffff00)|((edx<<4)&0xff));
-    edi += fixchain;
-    
-    switch (eax)
-    {
-	    case 0:
-		    break;
-	    case 1:
-		    *((unsigned char*)edi) = (ebx&0xff);
-		    break;
-	    case 2:
-		    *(((unsigned char*)edi)+1) = ((ebx&0xff00)>>8);
-		    break;
-	    case 3:
-		    *((unsigned short*)edi) = (ebx&0xffff);
-		    break;
-	    case 4:
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+2) = (ebx&0xff);
-		    break;
-	    case 5:
-		    *((unsigned char*)edi) = (ebx&0xff);
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+2) = (ebx&0xff);
-		    break;
-	    case 6:
-		    ebx >>= 8;
-		    *((unsigned short*)(edi+1)) = (ebx&0xffff);
-		    break;
-	    case 7:
-		    *((unsigned short*)edi) = (ebx&0xffff);
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+2) = (ebx&0xff);
-		    break;
-	    case 8:
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
-		    break;
-	    case 9:
-		    *((unsigned char*)edi) = (ebx&0xff);
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
-		    break;
-	    case 10:
-		    *(((unsigned char*)edi)+1) = ((ebx&0xff00)>>8);
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
-		    break;
-	    case 11:
-		    *((unsigned short*)edi) = (ebx&0xffff);
-		    ebx >>= 16;
-		    *(((unsigned char*)edi)+3) = ((ebx&0xff00)>>8);
-		    break;
-	    case 12:
-		    ebx >>= 16;
-		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
-		    break;
-	    case 13:
-		    *((unsigned char*)edi) = (ebx&0xff);
-		    ebx >>= 16;
-		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
-		    break;
-	    case 14:
-		    *(((unsigned char*)edi)+1) = ((ebx&0xff00)>>8);
-		    ebx >>= 16;
-		    *((unsigned short*)(edi+2)) = (ebx&0xffff);
-		    break;
-	    case 15:
-		    *((unsigned int*)edi) = ebx;
-		    break;
-    }
-    goto beginmvlineasm4;
-endmvlineasm4:
-    asm3--;
-    if (asm3 != 0) goto beginmvlineasm42;
-
-    vplce[0] = ecx;
-    vplce[1] = edx;
-    vplce[2] = esi;
-    vplce[3] = ebp;
 } /* mvlineasm4 */
 
 /* #pragma aux setupspritevline parm [eax][ebx][ecx][edx][esi][edi] */
