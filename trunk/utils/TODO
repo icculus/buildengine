@@ -1,0 +1,11 @@
+TODO for BUILD Utilities Package
+
+- A findfirst()/findnext() implementation
+- Utils that generate files should lowercase the names
+- Fix some asm in editart.c
+- Port setup to ncurses (is it even needed anymore?)
+
+As with the BUILD source, send patches to Ryan (icculus@lokigames.com)
+
+--
+Dan (theoddone33) Olson <dolson@raven-games.com>
