@@ -147,6 +147,20 @@ int clipinsidebox(long x, long y, short wallnum, long walldist);
 void qloadkvx(long voxindex, char *filename);
 #endif
 
+
+unsigned short _swap16(unsigned short D);
+unsigned int _swap32(unsigned int D);
+#if PLATFORM_MACOSX
+#define PLATFORM_BIGENDIAN 1
+#define BUILDSWAP_INTEL16(x) _swap16(x)
+#define BUILDSWAP_INTEL32(x) _swap32(x)
+#else
+#define PLATFORM_LITTLEENDIAN 1
+#define BUILDSWAP_INTEL16(x) (x)
+#define BUILDSWAP_INTEL32(x) (x)
+#endif
+
+
 #ifdef __cplusplus
 }
 #endif

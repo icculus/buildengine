@@ -13,7 +13,11 @@
 #define BUILD_CACHEDEBUG 0
 
 #include <string.h>
+
+#if !PLATFORM_MACOSX
 #include <malloc.h>
+#endif
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -737,6 +741,17 @@ extern long drawslab(long,long,long,long,long,long);
 	    return ((eax<<4)^(eax|0xf0));
         }
 #endif /* defined USE_I386_ASM */
+
+
+unsigned short _swap16(unsigned short D)
+{
+	return((D<<8)|(D>>8));
+}
+
+unsigned int _swap32(unsigned int D)
+{
+	return((D<<24)|((D<<8)&0x00FF0000)|((D>>8)&0x0000FF00)|(D>>24));
+}
 
 
 static void scansector (short sectnum)
@@ -3854,10 +3869,18 @@ int loadpics(char *filename)
 		if ((fil = kopen4load(artfilename,0)) != -1)
 		{
 			kread(fil,&artversion,4);
+			artversion = BUILDSWAP_INTEL32(artversion);
 			if (artversion != 1) return(-1);
+
 			kread(fil,&numtiles,4);
+			numtiles = BUILDSWAP_INTEL32(numtiles);
+
 			kread(fil,&localtilestart,4);
+			localtilestart = BUILDSWAP_INTEL32(localtilestart);
+
 			kread(fil,&localtileend,4);
+			localtileend = BUILDSWAP_INTEL32(localtileend);
+
 			kread(fil,&tilesizx[localtilestart],(localtileend-localtilestart+1)<<1);
 			kread(fil,&tilesizy[localtilestart],(localtileend-localtilestart+1)<<1);
 			kread(fil,&picanm[localtilestart],(localtileend-localtilestart+1)<<2);

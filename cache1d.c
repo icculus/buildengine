@@ -14,6 +14,7 @@
 #include <sys/stat.h>
 
 #include "platform.h"
+#include "engine.h"
 #include "display.h"
 
 #include "pragmas.h"
@@ -186,6 +187,8 @@ void agecache(void)
 	char ch;
 
 	if (agecount >= cacnum) agecount = cacnum-1;
+	assert(agecount >= 0);
+
 	for(cnt=(cacnum>>4);cnt>=0;cnt--)
 	{
 		ch = (*cac[agecount].lock);
@@ -318,7 +321,7 @@ long initgroupfile(const char *filename)
 			groupfil[numgroupfiles] = -1;
 			return(-1);
 		}
-		gnumfiles[numgroupfiles] = *((long *)&buf[12]);
+		gnumfiles[numgroupfiles] = BUILDSWAP_INTEL32(*((long *)&buf[12]));
 
 		if ((gfilelist[numgroupfiles] = (char *)kmalloc(gnumfiles[numgroupfiles]<<4)) == 0)
 			{ printf("Not enough memory for file grouping system\n"); exit(0); }
@@ -330,7 +333,7 @@ long initgroupfile(const char *filename)
 		j = 0;
 		for(i=0;i<gnumfiles[numgroupfiles];i++)
 		{
-			k = *((long *)&gfilelist[numgroupfiles][(i<<4)+12]);
+			k = BUILDSWAP_INTEL32(*((long *)&gfilelist[numgroupfiles][(i<<4)+12]));
 			gfilelist[numgroupfiles][(i<<4)+12] = 0;
 			gfileoffs[numgroupfiles][i] = j;
 			j += k;
