@@ -415,6 +415,13 @@
             of cleanliness and bughunting. Added some more function
             declarations to engine.h. Updated README with new info on
             Mapster and Duke3D.
+05262001 - Finally unearthed a copy of Watcom 11.0! Fixed up all the GNU
+            inline asm so that the Watcom preprocessor wouldn't puke on it,
+            and built new win32 binaries...apparently Watcom 11, unlike 10.6,
+            can make a PE header that WinNT and Win2000 will accept. Moved the
+            Win32 version up to SDL 1.2.0 from SDL-1.1.8, and added a Watcom
+            __cdecl pragma in display.h for SDL_VideoDriverName(). Updated
+            TODO.
 
 --ryan. (icculus@linuxgames.com)
 
