@@ -432,7 +432,7 @@ void _platform_init(int argc, char **argv)
     scancodes[SDLK_END]             = 0xE04F;
     scancodes[SDLK_DOWN]            = 0xE050;
     scancodes[SDLK_PAGEDOWN]        = 0xE0D1;
-    scancodes[SDLK_DELETE]          = 0xD3;
+    scancodes[SDLK_DELETE]          = 0xE0D3;
     scancodes[SDLK_KP0]             = 0xE052;
     scancodes[SDLK_INSERT]          = 0xE052;
 	scancodes[SDLK_KP_ENTER]		= 0xE01C;
