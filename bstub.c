@@ -545,7 +545,7 @@ void ExtEditSpriteData(short spritenum)   //F8
 	}
 }
 
-void faketimerhandler()
+void faketimerhandler(void)
 {
 }
 
