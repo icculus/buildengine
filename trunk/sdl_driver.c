@@ -809,6 +809,7 @@ int mprotect_align(const void *addr, size_t len, int prot)
 
 void unprotect_ASM_pages(void)
 {
+#ifdef USE_I386_ASM
     mprotect_align((const void *) asm_sethlinesizes, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_setpalookupaddress, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_setuphlineasm4, PAGESIZE, PROT_R_W_X);
@@ -821,6 +822,7 @@ void unprotect_ASM_pages(void)
     mprotect_align((const void *) asm_thline, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_prohlineasm4, PAGESIZE, PROT_R_W_X);
     mprotect_align((const void *) asm_stretchhline, PAGESIZE, PROT_R_W_X);
+#endif
 } /* unprotect_ASM_pages */
 
 
