@@ -1789,14 +1789,14 @@ void int5(void);
         "int 0x5",\
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void setvmode(long i1);
+void setvmode(int i1);
 #endif
 #pragma aux setvmode =\
         "int 0x10",\
         parm [eax]\
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void setupmouse(long i1);
+int setupmouse(void);
 #endif
 #pragma aux setupmouse =\
         "mov ax, 0",\
@@ -1805,7 +1805,7 @@ void setupmouse(long i1);
         modify exact [eax]\
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void setupmouse(unsigned short *x, unsigned short *y);
+void readmousexy(short *x, short *y);
 #endif
 #pragma aux readmousexy =\
         "mov ax, 11d",\
@@ -1816,7 +1816,7 @@ void setupmouse(unsigned short *x, unsigned short *y);
         modify exact [eax ebx ecx edx]\
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void readmousebstatus(unsigned short *buttons);
+void readmousebstatus(short *buttons);
 #endif
 #pragma aux readmousebstatus =\
         "mov ax, 5d",\
@@ -1826,7 +1826,7 @@ void readmousebstatus(unsigned short *buttons);
         modify exact [eax ebx ecx edx]\
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void readpixel(unsigned char *pixel);
+unsigned char readpixel(long offset);
 #endif
 #pragma aux readpixel =\
         "mov al, byte ptr [edi]",\
@@ -1834,7 +1834,7 @@ void readpixel(unsigned char *pixel);
         modify exact [eax]\
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void drawpixel(unsigned char *pixel, char p);
+void drawpixel(long offset, unsigned char p);
 #endif
 #pragma aux drawpixel =\
         "mov byte ptr [edi], al",\
@@ -1842,7 +1842,7 @@ void drawpixel(unsigned char *pixel, char p);
         modify exact \
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void drawpixels(unsigned char *pixel, unsigned short p);
+void drawpixels(long offset, unsigned short p);
 #endif
 #pragma aux drawpixels =\
         "mov word ptr [edi], ax",\
@@ -1850,7 +1850,7 @@ void drawpixels(unsigned char *pixel, unsigned short p);
         modify exact \
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void drawpixelses(unsigned char *pixel, unsigned long p);
+void drawpixelses(long offset, unsigned long p);
 #endif
 #pragma aux drawpixelses =\
         "mov dword ptr [edi], eax",\
@@ -2081,7 +2081,10 @@ void vlin16(long i1, long i2);
         modify exact [ecx esi edi]\
 
 #if (defined PLATFORM_DOS)   // !!! move this to dos_driver.c?
-#error fill in function declarations for these...
+
+#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+void drawpixel16(long offset);
+#endif
 #pragma aux drawpixel16 =\
         "mov ecx, edi",\
         "mov eax, 0x00008008",\
@@ -2094,6 +2097,9 @@ void vlin16(long i1, long i2);
         parm [edi]\
         modify exact [eax ecx edx edi]\
 
+#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+void fillscreen16(long i1, long i2, long i3);
+#endif
 #pragma aux fillscreen16 =\
         "mov dx, 0x3ce",\
         "shl ax, 8",\
@@ -2106,22 +2112,31 @@ void vlin16(long i1, long i2);
         parm [edi][eax][ecx]\
         modify exact [eax ecx edx edi]\
 
+#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+void koutp(long i1, long i);
+#endif
 #pragma aux koutp =\
         "out dx, al",\
         parm [edx][eax]\
         modify exact \
 
+#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+void koutpw(long i1, long i);
+#endif
 #pragma aux koutpw =\
         "out dx, ax",\
         parm [edx][eax]\
         modify exact \
 
+#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+int kinp(long i);
+#endif
 #pragma aux kinp =\
         "in al, dx",\
         parm nomemory [edx]\
         modify exact [eax]\
 
-#endif
+#endif  // PLATFORM_DOS
 
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.

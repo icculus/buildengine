@@ -5,9 +5,9 @@
 #ifndef _INCLUDE_DISPLAY_H_
 #define _INCLUDE_DISPLAY_H_
 
-#ifdef PLATFORM_DOS
-#include "ves2.h"
-#else
+#include "platform.h"
+
+#if (defined PLATFORM_SUPPORTS_SDL)
 #include "SDL.h"
 
 // This part sucks.
@@ -39,9 +39,9 @@
 #pragma aux (__cdecl) SDL_RemoveTimer;
 #pragma aux (__cdecl) SDL_Flip;
 #pragma aux (__cdecl) SDL_UpdateRect;
-#endif
+#endif  // __WATCOMC__
 
-#endif
+#endif  // PLATFORM_SUPPORTS_SDL
 
 extern long xres, yres, bytesperline, imageSize, maxpages;
 extern char *screen, vesachecked;
@@ -107,11 +107,11 @@ void setactivepage(long dapagenum);
 int setupmouse(void);
 void readmousexy(short *x, short *y);
 void readmousebstatus(short *bstatus);
-void keyhandler(void);
+void __interrupt __far keyhandler(void);
 unsigned char _readlastkeyhit(void);
 
 // timer krap.
-void timerhandler(void);
+void __interrupt __far timerhandler(void);
 
 // resolution inits. sdl_driver.c ...
 int setgamemode(char davidoption, long daxdim, long daydim);
@@ -121,5 +121,12 @@ void qsetmode640480(void);
 
 unsigned long getticks();
 
+#if (defined PLATFORM_DOS)
+#include "ves2.h"
 #endif
+
+#endif  // _INCLUDE_DISPLAY_H_
+
+// end of display.h ...
+
 

@@ -18,6 +18,16 @@
 #error PLATFORM_DOS is not defined.
 #endif
 
+#if (defined PLATFORM_SUPPORTS_SDL)
+#warning You have PLATFORM_SUPPORTS_SDL defined.
+#warning This is almost certainly wrong.
+#endif
+
+// need these for something where we abstracted with SDL...
+typedef unsigned long Uint32;
+typedef unsigned short Uint16;
+typedef unsigned char Uint8;
+
 #include <io.h>
 #include <conio.h>
 #include <i86.h>
