@@ -4537,8 +4537,12 @@ static void drawvox(long dasprx, long daspry, long dasprz, long dasprang,
 	dayscalerecip = (1<<30)/dayscale;
 
 	longptr = (long *)davoxptr;
-	daxsiz = longptr[0]; daysiz = longptr[1]; dazsiz = longptr[2];
-	daxpivot = longptr[3]; daypivot = longptr[4]; dazpivot = longptr[5];
+	daxsiz = BUILDSWAP_INTEL32(longptr[0]);
+	daysiz = BUILDSWAP_INTEL32(longptr[1]);
+	dazsiz = BUILDSWAP_INTEL32(longptr[2]);
+	daxpivot = BUILDSWAP_INTEL32(longptr[3]);
+	daypivot = BUILDSWAP_INTEL32(longptr[4]);
+	dazpivot = BUILDSWAP_INTEL32(longptr[5]);
 	davoxptr += (6<<2);
 
 	x = mulscale16(globalposx-dasprx,daxscalerecip);
@@ -4636,7 +4640,7 @@ static void drawvox(long dasprx, long daspry, long dasprz, long dasprang,
 
 		for(x=xs;x!=xe;x+=xi)
 		{
-			slabxoffs = (long)&davoxptr[longptr[x]];
+			slabxoffs = (long)&davoxptr[BUILDSWAP_INTEL32(longptr[x])];
 			shortptr = (short *)&davoxptr[((x*(daysiz+1))<<1)+xyvoxoffs];
 
 			nx = mulscale16(ggxstart+ggxinc[x],viewingrangerecip)+x1;
