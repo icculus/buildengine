@@ -426,24 +426,27 @@ static inline int sdl_mouse_button_filter(SDL_MouseButtonEvent const *event)
 {
         /*
          * What bits BUILD expects:
-         *  0	left button pressed if 1
-         *  1	right button pressed if 1
-         *  2	middle button pressed if 1
+         *  0 left button pressed if 1
+         *  1 right button pressed if 1
+         *  2 middle button pressed if 1
          *
          *   (That is, this is what Int 33h (AX=0x05) returns...)
-	 *
-	 *  additionally 3&4 are set for the mouse wheel
+         *
+         *  additionally 3&4 are set for the mouse wheel
          */
-	Uint8 button = event->button;
-	if(button>=sizeof(mouse_buttons)*8) return;
+    Uint8 button = event->button;
+    if (button >= sizeof (mouse_buttons) * 8)
+        return(0);
 
-	if(button == SDL_BUTTON_RIGHT) button = SDL_BUTTON_MIDDLE;
-	else if(button == SDL_BUTTON_MIDDLE) button = SDL_BUTTON_RIGHT;
+    if (button == SDL_BUTTON_RIGHT)
+        button = SDL_BUTTON_MIDDLE;
+    else if (button == SDL_BUTTON_MIDDLE)
+        button = SDL_BUTTON_RIGHT;
 
-	if(((const SDL_MouseButtonEvent*)event)->state)
-	    mouse_buttons |= 1<<(button-1);
-	else if(button != 4 && button != 5)
-	    mouse_buttons ^= 1<<(button-1);
+    if (((const SDL_MouseButtonEvent*)event)->state)
+        mouse_buttons |= 1<<(button-1);
+    else if (button != 4 && button != 5)
+        mouse_buttons ^= 1<<(button-1);
 
 #if 0
     Uint8 bmask = SDL_GetMouseState(NULL, NULL);
