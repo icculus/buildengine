@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "SDL.h"
 #include "unix_compat.h"
@@ -95,6 +96,9 @@ static unsigned int scancodes[SDLK_LAST];
 static long last_render_ticks = 0;
 long total_render_time = 1;
 long total_rendered_frames = 0;
+
+static char *titlelong = NULL;
+static char *titleshort = NULL;
 
 void restore256_palette (void);
 void set16color_palette (void);
@@ -321,12 +325,20 @@ void unprotect_ASM_pages(void)
 
 #endif
 
-
-void _platform_init(int argc, char **argv)
+void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
     #ifdef USE_I386_ASM
         unprotect_ASM_pages();
     #endif
+
+    if (title == NULL)
+        title = "BUILD";
+
+    if (icon == NULL)
+        icon = "BUILD";
+
+    titlelong = strdup(title);
+    titleshort = strdup(icon);
 
     setbuf(stderr, NULL);
     setbuf(stdout, NULL);
@@ -478,7 +490,7 @@ static void init_new_res_vars(int davidoption)
 
     setupmouse();
 
-    SDL_WM_SetCaption("BUILD engine by Ken Silverman", "BUILD");
+    SDL_WM_SetCaption(titlelong, titleshort);
 
     xdim = xres = surface->w;
     ydim = yres = surface->h;
