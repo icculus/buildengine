@@ -5,8 +5,7 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
-#networking := stubbed
-networking := udp
+beos := false
 
 #-----------------------------------------------------------------------------#
 # If this makefile fails to detect Cygwin correctly, or you want to force
@@ -57,9 +56,19 @@ usedlls := false
 #usephysfs := true
 usephysfs := false
 
+#networking := stubbed
+networking := udp
+
+
 #-----------------------------------------------------------------------------#
 # Everything below this line is probably okay.
 #-----------------------------------------------------------------------------#
+
+# been told this doesn't work on BeOS right now...
+ifeq ($(strip $(beos)),true)
+  networking := stubbed
+  USE_ASM :=
+endif
 
 ifeq ($(strip $(cygwin)),autodetect)
   ifneq ($(strip $(shell gcc -v 2>&1 |grep "cygwin")),)
@@ -141,6 +150,11 @@ endif
 
 ifeq ($(strip $(networking)),udp)
   CFLAGS += -DUDP_NETWORKING=1
+endif
+
+# fixes code generation bug.
+ifeq ($(strip $(beos)),true)
+  CFLAGS += -no-fpic
 endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
