@@ -133,7 +133,7 @@ void initmultiplayers(char damultioption, char dacomrateoption, char dapriority)
 	for(i=_argc-1;i>0;i--)
 		if ((parm = strtok(_argv[i],&delims[0])) != NULL)
 			if (!stricmp("net",parm)) break;
-	if (i == 0)
+	if ((i == 0) || (i+1 == _argc))
 	{
 		numplayers = 1; myconnectindex = 0;
 		connecthead = 0; connectpoint2[0] = -1;
