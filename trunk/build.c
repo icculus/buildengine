@@ -2172,7 +2172,8 @@ void overheadeditor(void)
 	short pag, suckwall=0, sucksect, newnumwalls, newnumsectors, split=0, bad;
 	short splitsect=0, danumwalls, secondstartwall, joinsector[2], joinsectnum;
 	short splitstartwall=0, splitendwall, loopnum;
-	short mousx, mousy, bstatus;
+	short mousx, mousy;
+    short bstatus = 0;
 	long centerx, centery, circlerad;
 	short circlewall, circlepoints, circleang1, circleang2, circleangdir;
 	long sectorhighlightx=0, sectorhighlighty=0;
