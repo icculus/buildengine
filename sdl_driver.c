@@ -10,12 +10,12 @@
 // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
 // Ken Silverman's official web site: "http://www.advsys.net/ken"
 // See the included license file "BUILDLIC.TXT" for license info.
+// This file IS NOT A PART OF Ken Silverman's original release
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
-
 #include "platform.h"
 
 #if (!defined PLATFORM_SUPPORTS_SDL)
@@ -26,6 +26,20 @@
 #include "build.h"
 #include "display.h"
 #include "pragmas.h"
+#include "engine.h"
+
+#if (defined USE_OPENGL)
+#include "buildgl.h"
+
+// !!! move this to buildgl.c, and add a function to that to abstract
+// !!!  SDL_GL_GetProcAddress().
+const GLubyte* (*dglGetString)(GLenum name) = NULL;
+void (*dglBegin)(GLenum mode) = NULL;
+void (*dglEnd)(void) = NULL;
+void (*dglClear)(GLbitfield mask) = NULL;
+void (*dglClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) = NULL;
+#endif
+
 
 // !!! ugh. Clean this up.
 #if (defined USE_I386_ASM)
@@ -349,17 +363,115 @@ void unprotect_ASM_pages(void)
 #endif
 
 
+#ifdef USE_OPENGL
+static int opengl_lib_is_loaded = 0;
+
+static char *default_gl_libs[] = {
+#ifdef PLATFORM_UNIX
+"libGL.so.1", "libGL.so"
+#elif PLATFORM_WIN32
+"opengl32.dll"
+#else
+#error Fill in your platform-specific GL libs!
+#endif
+};
+
+static void *try_glsym_load(const char *sym)
+{
+    void *retval = NULL;
+
+    fprintf(stderr, "BUILDGL: Looking up \"%s\"...", sym);
+    SDL_ClearError();
+    retval = SDL_GL_GetProcAddress(sym);
+    if (retval == NULL)
+        fprintf(stderr, "failure: [%s]\n", SDL_GetError());
+    else
+        fprintf(stderr, "success!\n");
+    return(retval);
+} // try_glsym_load
+
+
+static int load_opengl_symbols(void)
+{
+    if (!(dglGetString = try_glsym_load("glGetString"))) return(-1);
+    if (!(dglBegin = try_glsym_load("glBegin"))) return(-1);
+    if (!(dglEnd = try_glsym_load("glEnd"))) return(-1);
+    if (!(dglClear = try_glsym_load("glClear"))) return(-1);
+    if (!(dglClearColor = try_glsym_load("glClearColor"))) return(-1);
+
+    return(0);
+} // load_opengl_symbols
+
+
+static int try_opengl_libname(const char *libname)
+{
+    int rc = -1;
+
+    if (libname != NULL)
+    {
+        fprintf(stderr, "BUILDGL: Trying to open \"%s\"...", libname);
+        SDL_ClearError();
+        rc = SDL_GL_LoadLibrary(libname);
+
+        if (rc == -1)
+            fprintf(stderr, "failure: [%s]\n", SDL_GetError());
+        else
+        {
+            fprintf(stderr, "success!\n");
+            rc = load_opengl_symbols();
+        } // else
+    } // if
+
+    return(rc);
+} // try_gl_libname
+
+
+static int load_opengl_library(void)
+{
+    char *envlib = getenv("BUILD_GLLIBRARY");
+    int rc = 0;
+    int i;
+
+    if (!opengl_lib_is_loaded)  // it's cool. Go on.
+    {
+        if (envlib)
+            rc = try_opengl_libname(envlib);
+        else
+        {
+            for (i = 0; i < sizeof (default_gl_libs) / sizeof (char *); i++)
+            {
+                rc = try_opengl_libname(default_gl_libs[i]);
+                if (rc != -1)
+                    break;
+            } // for
+        } // else
+
+        if (rc == -1)
+        {
+            fprintf(stderr, "BUILDGL: Out of ideas. Giving up.\n");
+            return(-1);
+        } // if
+
+        opengl_lib_is_loaded = 1;
+    } // if
+    return(0);
+} // load_opengl_library
+
+#endif  // defined USE_OPENGL
+
+
+
 static void output_video_info(void)
 {
     char buffer[256];
 
     if (SDL_VideoDriverName(buffer, sizeof (buffer)) == NULL)
     {
-        fprintf(stderr, "WARNING: SDL_VideoDriverName() returned NULL!\n");
+        fprintf(stderr, "BUILDSDL: -WARNING- SDL_VideoDriverName() returned NULL!\n");
     } // if
     else
     {
-        printf("SDL: Using video driver \"%s\".\n", buffer);
+        printf("BUILDSDL: Using video driver \"%s\".\n", buffer);
     } // else
 } // output_video_info
 
@@ -495,12 +607,20 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) == -1)
     {
-        fprintf(stderr, "SDL_Init() failed!\n");
-        fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
+        fprintf(stderr, "BUILDSDL: SDL_Init() failed!\n");
+        fprintf(stderr, "BUILDSDL: SDL_GetError() says \"%s\".\n", SDL_GetError());
         exit(1);
     } // if
 
     output_video_info();
+
+    #ifdef USE_OPENGL
+        if (load_opengl_library() == -1)
+        {
+            SDL_Quit();
+            _exit(42);
+        } // if
+    #endif
 } // _platform_init
 
 
@@ -604,7 +724,7 @@ static void init_new_res_vars(int davidoption)
 } // init_new_res_vars
 
 
-#define print_flag(x) if (surface->flags & x) printf( "  %s\n", #x )
+#define print_flag(x) if (surface->flags & x) printf( " %s", #x )
 
 void go_to_new_vid_mode(int vidoption, int w, int h)
 {
@@ -613,14 +733,13 @@ void go_to_new_vid_mode(int vidoption, int w, int h)
     surface = SDL_SetVideoMode(w, h, 8, sdl_flags);
     if (surface == NULL)
     {
-        fprintf(stderr, "Failed to set %dx%d video mode!\n"
+        fprintf(stderr, "BUILDSDL: Failed to set %dx%d video mode!\n"
                         "  SDL_Error() says [%s].\n", w, h, SDL_GetError());
         SDL_Quit();
         exit(13);
     } // if
 
-#if 1
-    printf("new vidmode flags:\n");
+    fprintf(stderr, "BUILDSDL: New vidmode flags:");
     print_flag(SDL_SWSURFACE);
     print_flag(SDL_HWSURFACE);
     print_flag(SDL_ASYNCBLIT);
@@ -638,7 +757,7 @@ void go_to_new_vid_mode(int vidoption, int w, int h)
     print_flag(SDL_RLEACCEL);
     print_flag(SDL_SRCALPHA);
     print_flag(SDL_PREALLOC);
-#endif
+    fprintf(stderr, "\n");
 
     init_new_res_vars(vidoption);
 } // go_to_new_vid_mode
@@ -677,9 +796,35 @@ void setvmode(int mode)
 
 int _setgamemode(char davidoption, long daxdim, long daydim)
 {
+    #ifdef USE_OPENGL
+        static int shown_gl_strings = 0;
+        sdl_flags |= SDL_OPENGL;
+    #endif
+
     if (in_egapalette)
         restore256_palette();	    
+
     go_to_new_vid_mode((int) davidoption, daxdim, daydim);
+
+    #ifdef USE_OPENGL
+        if (!shown_gl_strings)
+        {
+            fprintf(stderr, "BUILDGL: GL_VENDOR [%s]\n",
+                        (char *) dglGetString(GL_VENDOR));
+
+            fprintf(stderr, "BUILDGL: GL_RENDERER [%s]\n",
+                        (char *) dglGetString(GL_RENDERER));
+
+            fprintf(stderr, "BUILDGL: GL_VERSION [%s]\n",
+                        (char *) dglGetString(GL_VERSION));
+
+            fprintf(stderr, "BUILDGL: GL_EXTENSIONS [%s]\n",
+                        (char *) dglGetString(GL_EXTENSIONS));
+
+            shown_gl_strings = 1;
+        } // if
+    #endif
+
     qsetmode = 200;
     last_render_ticks = SDL_GetTicks();
     return(0);
@@ -689,6 +834,11 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
 void qsetmode640350(void)
 {
     assert(0);
+
+    #ifdef USE_OPENGL
+        sdl_flags ^= SDL_OPENGL;
+    #endif
+
     go_to_new_vid_mode(-1, 640, 350);
 } // qsetmode640350
 
@@ -697,6 +847,11 @@ void qsetmode640480(void)
 {
     if (!in_egapalette)
     	set16color_palette();
+
+    #ifdef USE_OPENGL
+        sdl_flags ^= SDL_OPENGL;
+    #endif
+
     go_to_new_vid_mode(-1, 640, 480);
     pageoffset = 0;	// Make sure it goes to the right place - DDOI
     fillscreen16(0L,8L,640L*144L);
@@ -737,7 +892,7 @@ void getvalidvesamodes(void)
             modes = SDL_ListModes(vidInfo->vfmt, sdl_flags);   // give me ANYTHING.
             if (modes == NULL)
             {
-                fprintf(stderr, "SDL: SDL_ListModes() failed.\n");
+                fprintf(stderr, "BUILDSDL: SDL_ListModes() failed.\n");
                 return;
             } // if
         } // if
@@ -916,32 +1071,46 @@ void _nextpage(void)
 
     SDL_PumpEvents();
 
-    if (qsetmode == 200)
+    if (qsetmode != 200)
     {
-        memcpy(surface->pixels, (const void *) frameplace, surface->w * surface->h);
+        SDL_UpdateRect(surface, 0, 0, 0, 0);
+        //SDL_Flip(surface);  // !!!
+        return;
+    } // if
 
-        #ifdef DEBUG_HALL_OF_MIRRORS
-            memset((void *) frameplace, mirrorcolor, surface->w * surface->h);
-            mirrorcolor++;
-        #endif
-    }
+    #ifdef USE_OPENGL
+        if (surface->flags & SDL_OPENGL)
+        {
+            SDL_GL_SwapBuffers();
+            #ifdef DEBUG_HALL_OF_MIRRORS
+                dglClearColor3ub(mirrorcolor, 0, 0);
+                mirrorcolor++;
+            #endif
+            dglClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+            return;
+        } // if
+    #endif
+
+    memcpy(surface->pixels, (const void *) frameplace, surface->w * surface->h);
+
+    #ifdef DEBUG_HALL_OF_MIRRORS
+        memset((void *) frameplace, mirrorcolor, surface->w * surface->h);
+        mirrorcolor++;
+    #endif
 
     SDL_UpdateRect(surface, 0, 0, 0, 0);
     //SDL_Flip(surface);  // !!!
 
-    if (qsetmode == 200)
+    ticks = SDL_GetTicks();
+    total_render_time = (ticks - last_render_ticks);
+    if (total_render_time > 1000)
     {
-        ticks = SDL_GetTicks();
-        total_render_time = (ticks - last_render_ticks);
-        if (total_render_time > 1000)
-        {
-    		//printf("fps == (%.2f).\n", (double) (total_rendered_frames / ((double) total_render_time / 1000.0)));
-            total_rendered_frames = 0;
-            total_render_time = 1;
-            last_render_ticks = ticks;
-        } // if
-        total_rendered_frames++;
+        //printf("fps == (%.2f).\n", (double) (total_rendered_frames / ((double) total_render_time / 1000.0)));
+        total_rendered_frames = 0;
+        total_render_time = 1;
+        last_render_ticks = ticks;
     } // if
+    total_rendered_frames++;
 } // _nextpage
 
 
@@ -1082,7 +1251,6 @@ void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color)
 
     if (SDL_MUSTLOCK(surface))
         SDL_LockSurface(surface);
-
 
 	dx = XEnd-XStart; dy = YEnd-YStart;
 	if (dx >= 0)
@@ -1275,21 +1443,7 @@ void limitrate(void)
 
 Uint32 _timer_catcher(Uint32 interval, void *bleh)
 {
-#if 0
-    // SDL (or rather, Linux) cannot fire timer events as fast as BUILD needs
-    //  them, so we fire two in a row if we get behind.
-
-    static long total_fires = 0;
-    long ticks = SDL_GetTicks();
-
-    do
-    {
-        timerhandler();
-        total_fires++;
-    } while ( ( ((double) ticks) / ((double) total_fires) ) >= (1000.0 / 120.0) );
-#else
     timerhandler();
-#endif
     return(1);
 } // _timer_catcher
 
@@ -1299,8 +1453,8 @@ void inittimer(void)
     primary_timer = SDL_AddTimer(1000 / PLATFORM_TIMER_HZ, _timer_catcher, NULL);
     if (primary_timer == NULL)
     {
-        fprintf(stderr, "Error initializing primary timer!\n");
-        fprintf(stderr, "Reason: [%s]\n", SDL_GetError());
+        fprintf(stderr, "BUILDSDL: -ERROR- Problem initializing primary timer!\n");
+        fprintf(stderr, "BUILDSDL:  Reason: [%s]\n", SDL_GetError());
         SDL_Quit();
         exit(2);
     } // if
@@ -1332,9 +1486,9 @@ void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeak
 
     if (audio_disabled)
     {
-        fprintf(stderr, "SDL_Init(SDL_INIT_AUDIO) failed!\n");
-        fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
-        fprintf(stderr, "We'll continue without sound.\n");
+        fprintf(stderr, "BUILDSDL: SDL_Init(SDL_INIT_AUDIO) failed!\n");
+        fprintf(stderr, "BUILDSDL: SDL_GetError() says \"%s\".\n", SDL_GetError());
+        fprintf(stderr, "BUILDSDL: We'll continue without sound.\n");
         audio_disabled = 1;
         return;
     } // if
