@@ -286,6 +286,31 @@
             actually slower on most hardware, and it also breaks fullscreen
             mode in Win32 on my box). Had to #ifndef CYGWIN the fnmatch stuff
             in build.c until I find a portable, non-GPL solution.
+02142001 - Dan Olson nailed an assembly bug that caused segfaults in the
+            2nd overhead view in Ken's game. After that fix was applied, I
+            tagged the current CVS as "final-non-win32", as I start the effort
+            to make this thing compile as a native win32 executable with
+            (gasp!) Watcom C. Lots of stuff is getting torn around, as
+            assumptions get challenged: PLATFORM_UNIX vs. PLATFORM_DOS? Now
+            there's a PLATFORM_WIN32. unix_compat.h's display stuff has been
+            moved to display.h, and all the files include "platform.h" instead
+            of unix_compat.h, which allows us to choose the correct
+            compatibility header at compile time (win32_compat.h,
+            unix_compat.h, or doscmpat.h). All the platform-specific includes
+            (io.h, and such) have been moved into their respective compat
+            header, which cleaned up a lot of mess. Just to keep it real with
+            Cygwin, the Makefile now autodetects Cygwin, and sets the build
+            properties accordingly. Using a non-Cygwin GCC on Linux doesn't
+            set the Cygwin-related properties. SDL_INC_DIR and SDL_LIB_DIR can
+            be set as environment variables, so you never need to touch the
+            Makefile directly with Cygwin. "make clean" now cleans up various
+            Watcom C output, and vi's annoying "~" backup files. Tons of
+            patches and enhancements and little cleanups just to get this
+            to build on Watcom. Thing builds now, but has lots of problems
+            running, which will be resolved, hopefully, tonight. The Linux
+            version still works fine, and presumably so will the Cygwin
+            version. Overall, the quality of the port's codebase is improving
+            through this effort. I wonder if the DOS version will build now...
 
 --ryan. (icculus@lokigames.com)
 
