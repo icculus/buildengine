@@ -32,6 +32,7 @@
 #define MOVEFIFOSIZ 256
 #define EYEHEIGHT (32<<8)   //Normally (32<<8), (51<<8) to make mirrors happy
 
+extern int ksqrt(long num);
 extern void drawmasks(void);
 extern void allocache (long *newhandle, long newbytes, unsigned char *newlockptr);
 extern int pushmove (long *x, long *y, long *z, short *sectnum, long walldist, long ceildist, long flordist, unsigned long cliptype);
@@ -70,12 +71,8 @@ extern int nextsectorneighborz(short sectnum, long thez, short topbottom, short 
 extern void wsayfollow(char *dafilename, long dafreq, long davol, long *daxplc, long *dayplc, char followstat);
 extern int krand(void);
 extern int loadboard(unsigned char *filename, long *daposx, long *daposy, long *daposz, short *daang, short *dacursectnum);
-extern void clearbufbyte(void *buffer, int size, long fill_value);
 extern int lastwall(short point);
-extern int klabs (int i1);
 extern int changespritestat(short spritenum, short newstatnum);
-extern void copybuf(void *source, void *dest, int size);
-extern void copybufbyte(void *source, void *dest, int size);
 extern void setviewback(void);
 extern void setviewtotile(short tilenume, long xsiz, long ysiz);
 extern void setview(long x1, long y1, long x2, long y2);
@@ -87,11 +84,9 @@ extern int setsprite(short spritenum, long newx, long newy, long newz);
 extern void rotatepoint(long xpivot, long ypivot, long x, long y, short daang, long *x2, long *y2);
 extern int clipinsidebox(long x, long y, short wallnum, long walldist);
 extern int cansee(long x1, long y1, long z1, short sect1, long x2, long y2, long z2, short sect2);
-extern int ksqrt(long num);
 extern void loadtile (short tilenume);
 extern int clipmove (long *x, long *y, long *z, short *sectnum, long xvect, long yvect, long walldist, long ceildist, long flordist, unsigned long cliptype);
 extern int getangle(long xvect, long yvect);
-extern int ksgn(int i1);
 extern void getzsofslope(short sectnum, long dax, long day, long *ceilz, long *florz);
 extern void getzrange(long x, long y, long z, short sectnum, long *ceilz, long *ceilhit, long *florz, long *florhit, long walldist, unsigned long cliptype);
 extern int getflorzofslope(short sectnum, long dax, long day);
@@ -458,7 +453,7 @@ int main(int argc, char **argv)
 
     SDL_Init(SDL_INIT_VIDEO);
 
-    _platform_init(argc, argv);
+    _platform_init(argc, argv, "KenBuild by Ken Silverman", "KenBuild");
 
 	initgroupfile("stuff.dat");
 
