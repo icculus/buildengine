@@ -3,6 +3,9 @@
 
 #if (defined PLATFORM_WIN32)
 #include "win32_compat.h"
+#elif (defined PLATFORM_MACOSX)
+#include "unix_compat.h"
+#include <machine/endian.h>
 #elif (defined PLATFORM_UNIX)
 #include "unix_compat.h"
 #include <endian.h>
