@@ -1,0 +1,71 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+/*
+ * README.
+ *
+ *  Please do NOT harrass Ken Silverman about any code modifications
+ *   (including this file) to BUILD.
+ */
+
+Do not expect much from the code. We are making progress, but as of yet:
+ - The 2D editor seems to mostly work.
+ - 3D mode is working more and more, but is incomplete in some ways.
+ - Lots of stuff doesn't work correctly.
+ - Lots of stuff downright doesn't work at all.
+
+
+You NEED gcc 2.95.2 (or maybe later) to compile this code correctly.
+You'll also need Netwide Assembler (NASM). Get it at:
+
+  http://nasm.sourceforge.net/
+
+
+PLEASE READ THE CHANGELOG AND TODO FILE FOR DETAILS ON WHAT'S NEW AND
+ WHAT'S NEEDED! They're in the tarball.
+
+Have fun!
+
+--ryan. (icculus@lokigames.com)
+
+
+INFO:
+- Patches go to Ryan at icculus@lokigames.com. I'll put this in CVS later.
+  For now, the latest source is at http://www.lokigames.com/~icculus/BUILD/
+- Please try to keep it so the original source can still be compiled with
+  Watcom C for DOS. Maybe if we do a good enough job, we can just get Ken
+  to make this his official version, although this is not the goal right now.
+  You may #ifdef DOSisms with PLATFORM_DOS, and Unixism with PLATFORM_UNIX, but
+  try not to touch the original code if you can circumvent it (i.e. reimplement
+  the functionality of missing functions in a separate file, #define
+  __interrupt to be blank, etc...) Reference unix_compat.[ch] and sdl_driver.c
+  for examples of this behaviour.
+- See us in #loki at irc.openprojects.net with questions.
+- This is NOT a Loki-sponsored project. We're Loki employees that get off on
+  this stuff. Don't harrass info@lokigames.com about it.
+
+
+GOOD REFERENCES:
+- VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
+- http://www-cgi.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html
+  (THE Interrupt List, from Ralf Brown. Good stuff, here.)
+- FreeVGA: A VGA documentation project.
+  http://www.goodnet.com/~tinara/FreeVGA/home.htm
+- BUILD keyboard reference: http://home.online.no/~flovstak/duke/bkeys.htm
+- mapFAQ: http://mapfaq.3dportal.com/
+- Ken Silverman's homepage: http://www.advsys.net/ken/
+- Ken Silverman's leg: http://www.advsys.net/ken/kenwebrv.htm
+- The Art of Assembly Language, complete text:
+    http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
+
+
+TO PORT TO NEW PROCESSORS:
+- You can either write new ASM for your processor, or better yet, implement
+  the stuff in C, so everyone can benefit.
+- Most of your work will be in pragmas.*, a_linux.*, and a.*.  Look for
+  USE_I386_ASM. Define your own version.
+
+// end of README.
+
+

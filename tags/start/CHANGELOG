@@ -1,0 +1,223 @@
+/*
+ * CHANGELOG.
+ *
+ *  Please do NOT harrass Ken Silverman about any code modifications
+ *   (including this file) to BUILD.
+ */
+
+07112000 - Initial release from icculus.  C code compiles, doesn't link, lots
+            of bastard assembly.
+07122000 - LOTS of ASM cleanups by Andrew Henderson.
+07132000 - Ryan adds some missing functionality: SDL equivalents for most of
+            the VESA functions, filelength(), and some other piddly stuff.
+07142000 - Dan Olson cleans up the code a bunch, fills in a bunch of the
+            ASM routines with C equivalents, and puts some VESA replacements
+            in place. Other good stuff. Ryan cleans up some, too, put some
+            more stubs/implementations in place, and continues to flesh out
+            the SDL driver.
+07212000 - A BUTTLOAD of updates. "build" links, and segfaults, because I
+            screwed up all the inline ASM that I did. Will be correcting,
+            shorting. "game" doesn't link yet. Haven't looked at it in detail.
+            Moved anything with i/o port calls into dos_driver.c, and put
+            stub equivalents in sdl_driver.c ... The setupmouse() function got
+            commented out because it was getting called before the video got
+            setup, I think. Will check.  (never released.)
+07272000 - Assembly in pragmas.c was borked (thanks to RYAN.), and is now
+            halfway fixed. Ryan will be fixing this completely Real Soon Now.
+            Other ASM may be screwey, too, if Ryan touched it, but the NASM
+            code that Andrew did is probably fine (mostly because he knows
+            what he's doing... :)  )
+07282000 - Fixed borked ASM code. Fixed a text file reading routine that
+            depended on finding DOS-style newlines. Moved some more stuff to
+            sdl_driver.c and dos_driver.c ...
+07292000 - Fixes in pragmas.c by Dan Olson, who also knows more about this
+            inline ASM stuff than Ryan. Dan also cleaned up engine.c's ASM.
+            Thanks to Dan and Ryan, game.c now compiles, albeit with a
+            thousand warnings. "game" does not link yet.
+07312000 - Thanks to Dan, "game" now links, other minor fixups by Ryan. Broke
+            up CHANGELOG into some standard docs. (README, CREDITS, etc...)
+08012000 - Andrew does some graphic porting. Looks like we've got blocks where
+            fonts should be, and a mouse cursor. Huh. Ryan abstracts 0xa0000
+            addresses to VIDEOBASE define. Under non-DOS platforms, this is
+            currently "surface->pixels". Basic events were hooked up. Added
+            FreeVGA to README. Lots of fun new segfaults.
+08042000 - Ryan gets the keyboard working apparently fully, and the mouse
+            sorta. The grid now draws correctly. No more segfaults on exit.
+            You can zoom in and out on the grid with the 'Z' and 'A' keys.
+            Fun, huh? sdl_driver's drawing routines (most notably, drawline16)
+            are MUCH more robust. Some minor structure changes. Other things
+            seem to work within build (space draws a line from a point to the
+            mouse, etc.), but I dunno what any of this means; must find a
+            BUILD HOWTO. Probably other stuff. Timer is hooked up, but SDL
+            won't fire a timer faster than every 10ms, or 100 times a second.
+            BUILD expects this timer to fire every 8.3~ seconds, or 120 times
+            a second. This may be problematic in the game, but it probably won't
+            be a problem in the BUILD editor, where it just handles keyboard
+            updates. An alternate timer system might get swapped in later.
+            Game still links, but aborts on initing the timer, since I need to
+            sync with the editor; Ken saw it fit to commit the mortal sin of
+            cut-and-paste instead of having a unified BUILD_Init() function,
+            so I need to update it to the new structure (using sdl_driver or
+            dos_driver, calling _platform_init(), blah blah blah...)
+08052000 - Dan fixed an ASM screwup in getkensmessagecrc(). Ryan fixed the
+            mouse button event code. Added event thread, and some bits of
+            thread safety in sdl_driver.c. Mouse now seems to move okay if the
+            X11 cursor is hidded, and we grab the input. Goes to fullscreen
+            and grabs input by default; export BUILD_WINDOWED=y and
+            BUILD_NO_MOUSE_GRAB=y, respectively, to disable. Got myself a
+            copy of Duke3D Atomic Edition for the data files. Fixed the
+            #pragma packs in build.h. Fixed _platform_init() functions.
+            Improved SDL driver. Commented out a bunch of self-modifying ASM.
+            Dan got the fonts to display. Ryan got the correct palette loaded.
+            Lots of other little cleanups. Good stuff.
+08062000 - Ryan fixed clear2dscreen() in SDL driver. It's (hopefully) correct,
+            now. Also, all that missing text should (hopefully) now display.
+            drawline16 is more correct now. Other little cleanups and
+            move-arounds. It seems that "pageoffset" is the big enemy around
+            here today. Hum.
+08072000 - Ryan gets the BUILD title text to stop flickering. Prints our names
+            at exit (maybe someone will want to hump OUR legs, too). Added the
+            _idle() function to dos_driver and sdl_driver, and sprinkled some
+            calls through overheadeditor() in build.c ... ideally, we'd
+            eventually want to not have the editor wipe the surface and
+            redraw everything like mad constantly, but rather wipe and draw
+            as needed to choke the processor even less. Added implementation
+            of getfilenames() in build.c...seems to work well enough. Got
+            map loading dialog to appear (in the wrong place), but the arrow
+            keys don't seem to work to test further. Added caption to window's
+            title bar. Dan completely the Herculean effort of cleaning up
+            EVERY compiler warning in the editor. Other tinkering.
+            Adrian Neill and Christian Zander cleaned up all the compile
+            warnings in game.c and multi.c. Christian also supplied a shell
+            script to set the BUILD_* variables for developing. Ryan fixed
+            permissions of map files in saveboard() in engine.c. game.c had a
+            static variable called "sync" that conflicted with unistd.h's
+            sync() function, so the static's been changed to _sync. Fixed
+            more graphic stuff; pageoffset is just blindly set to zero on
+            Unix, now, and that seems to fix some stuff. printext16() was
+            changed to statusbar_printext16() in the appropriate places, so
+            I could remove my ypos += 336 hack in the actual implementation,
+            make this #define to regular printext16 on DOS, and be a one-line
+            function to add 336 to ypos in Unix. sdl_key_filter now has
+            support for extended keys; in init_new_res_vars(), just add keys
+            with values of 0xE0** where "**" is the normal value. This allowed
+            me to add the arrow keys and the keypad enter key. Tried loading
+            Ken's maps, and they WORK. With today's graphic fixes and the
+            arrow keys, you can select a file from the loading menu, and
+            navigate around in 2D mode. Cool. Switching to 3D mode segfaults
+            immediately.  :)  Changed sdl_driver to NOT double buffer, and
+            the SDL_Flip() call is now a screen-wide SDL_UpdateRect(). Added
+            Ken's maps for his test game to the archive.
+08082000 - Added key bindings to sdl_driver: ALT-Enter (or ALT-Return) to
+            toggle between windowed and fullscreen, and CTRL-G to grab/ungrab
+            the mouse pointer. Increased sensitivity of mouse movement. Dan
+            fixed the editor's status bar; it now draws. I think Dan also
+            squashed the rest of the pageoffset annoyances in the editor.
+            Dan tracked down the line drawing problem, and Ryan patched some
+            ASM (clearbufbyte(), specifically), so you can add walls, now.
+            Things are REALLY starting to look good.
+08092000 - ASM day. Fixes and fights from Dan and Ryan, with lots of wisdom
+            from Andrew. Realized that we were in violation of Ken Silverman's
+            license by not updating/including his copyright header on all
+            source files. This has been fixed; sorry, Ken. Other video stuff.
+            Tweakage. 3D mode no longer segfaults, but is still garbage.
+08112000 - Fixed a bug; ALT-Enter wasn't changing sdl_flags, so next time you
+            changed resolutions, you went back to your original (non)windowed
+            state. Did the same for mouse grab state. Dan converted the ASM
+            for some more engine.c functions, and added a missing key to our
+            SDL scancode table. Hooked up keybindings in the (still not
+            functional) 3D mode. Discovered that we were missing some data
+            files. More sdl_driver tinkering. Moved stuff out of dos_driver's
+            _nextpage(), and back into the abstract engine.c section.
+            I don't know what I changed, but the sprite and vector squares
+            don't draw in the correct place anymore in engine.c's
+            draw2dscreen() ... culprit is something in sdl_driver.c...someone
+            diff this version against the last. Grrr. Generally, I'd fix this
+            before sending out a tarball, but it's 5:00a.m., and I need to get
+            something out the door here. Will fix for tommorow, and it doesn't
+            otherwise impede your use.
+08122000 - Turned optimizations back on, and the broken drawing from last
+            night works again. Yikes. Dan stubbed out lots of the missing C
+            functions in a.c (someday, we'll fill really these in, I hope.),
+            and made mad progress on attacking our palette issues. Some compile
+            fixes (incomplete) to allow building without SUPERBUILD defined
+            (for removing voxel support...might be needed for pre-voxel games
+            like Duke3D...) The self-modifying ASM passes function parameters
+            in registers, so I needed to do an inline wrapper. This also now
+            sits in a.c.  (Still crashes and otherwise doesn't WORK the same
+            in 3D mode, but still...) Added tiles000.art to the archive from
+            Duke3D shareware's duke3d.GRP file. I hope this doesn't violate
+            anyone's copyrights.
+08132000 - (For reference, apparently GCC requires -O2 for inline asm to work.
+            That would explain the drawing barfs...)  Dan fixed the status bar
+            (after Ryan broke it again.  :)  ), and moved krecipasm() into
+            a_linux.asm, since FPU opcodes don't inline correctly. Added Ken's
+            stuff.dat. As a milestone, 3D mode now seems to work a LITTLE.
+            Looking in the wrong place causes a segfault, and generally, what
+            very little draws seems mostly incorrect, but progress is being
+            made. Changed out all the collected data files with Ken's original
+            STUFF.DAT. initgroupfile() now aborts the program if it can't
+            open a data file. (Without stuff.dat, you get a blank surface, and
+            you have to blindly feel your way out of the program.) Dan also
+            started work on the command line tools, like kextract. Those are
+            in a separate tarball on the website.
+08152000 - (Stuck at LinuxWorld...sorry for delays.) 3D mode now does not (by
+            default) segfault, and you can stumble around. Some walls seem to
+            render correctly. Lots of things cause segfaults. Disabled the MMX
+            overlays for now, as that is a little less self-modified code in
+            use. Dan fixed some keyboard scancodes (an also independently
+            fixed the same 3D mode things. hah. :)  )
+08192000 - Back from LinuxWorld. Added an obnoxious hall of mirrors detector
+            for 3D mode. _asm_slopevlin now returns immediately, which for now
+            stops most 3D mode segfaults. This will have to change, but it
+            helps for now. Put in a hack for checking frames-per-second.
+            Added some new keyboard scancodes.
+08212000 - Another keyboard scancode added by Dan. Changed 3D mode to prompt
+            to save changes before dropping out of graphics mode; the stdio
+            thing was pretty obnoxious. Now we are basically waiting on a copy
+            of Watcom C to show up, so I can trace through the original code
+            and verify that I'm getting sane parameters and return values.
+            Needless to say, productivity has dropped off quite a bit.
+08232000 - Dan found a screwup in the inlined dmulscale32()'s return value.
+            Consequently, now the hall of mirrors are gone. Cool. Walls seem
+            to render correctly all the time now. Other visual problems, and
+            no floors or ceilings, but this is a BIG win. Thanks, Dan! (A few
+            other ASM functions in pragmas.c had this problem. dmulscale32()
+            was the most noticable fix, though.)
+08242000 - Dan added/fixed some more ASM. The SDL parachute is now in place,
+            so we will go back to the correct resolution, and the mouse
+            will ungrab in case of a segfault. A C version (mostly working?)
+            of qinterpolatedown16short() has been added to pragmas.c, and
+            the ASM version had a fix that allows ceilings to show (though they
+            render incorrectly in the correct place, and now certain sprites
+            segfault. Ugh. PageUp/PageDown scancodes now work, so you can
+            raise and lower ceilings and floors. Changed caption in titlebar
+            of windowed mode.
+08292000 - Matt Helsley contributed some ASM -> C conversions, and some test
+            code to help with further porting. Cleaned up some cruft in the
+            sdl_driver. Dan nailed another clobber list issue in pragmas.c.
+            Thanks to Nicholas Vining, we now have a copy of Watcom C. Ryan
+            sat down and stepped through the ASM in gdb (NOT fun at all),
+            while Nicholas stepped through the DOS version in parallel.
+            Eventually we stumbled upon some misassembled opcodes; we ended
+            up filling some registers with a pointer, and not what the pointer
+            pointed at!  Ryan went through a_linux.asm and fixed all these,
+            and now 3D mode is almost entirely FLAWLESS.  This is so cool.
+            Bedtime; I hope you all enjoy this.  :)  Thanks Nicholas!
+08302000 - GAME now works. There was something awful in multi.c, probably
+            memory corruption with a static initializer, so SDL_Init() would
+            die in XOpenDisplay(NULL). Yikes. I've stubbed out what game.c
+            needs for multiplayer and put it in multi_tcpip.c (guess what
+            THAT'S for.  :)  ). The original multiplayer code is completely
+            modem and COMit based, and is useless anywhere but DOS, so this
+            isn't a big loss. Added some support for building under Cygwin,
+            but not much. Note that distributing binaries of BUILD built with
+            Cygwin violates the GPL, due to newlib's license, so don't do it.
+            But you can try compiling your own local copies. Where the hell
+            did CONTRIB go? Quick rewrite of that file. Minor glitches and
+            sound (and networking?) are the only things pending.
+
+--ryan. (icculus@lokigames.com)
+
+// end of CHANGELOG ...
+
