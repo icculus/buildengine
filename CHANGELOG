@@ -534,6 +534,7 @@
             will end the need for most, if not all, of the assembly, and get
             us running on different platforms. I know, easier said than done.
             Other little cleanups and enhancements.
+07162001 - Moved CVS repository to icculus.org. Updated README.
 
 --ryan. (icculus@linuxgames.com)
 

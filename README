@@ -11,8 +11,8 @@
 
 (This code DOES run on Windows. Read on.)
 
-You NEED gcc 2.95.2 (or maybe later) to compile this code correctly.
-You'll also need Netwide Assembler (NASM). Get it at:
+For building on Linux, you NEED gcc 2.95.2 (or maybe later) to compile this
+code correctly. You'll also need Netwide Assembler (NASM). Get it at:
 
   http://www.kernel.org/pub/software/devel/nasm/
 
@@ -20,6 +20,18 @@ You'll also need Netwide Assembler (NASM). Get it at:
 (May I reiterate? Earlier than 2.95.2 revisions of GCC and EGCS do NOT
 compile this code correctly! It will run, but there will be all sorts of
 strange graphic glitches and odd crashes.)
+
+
+For building on Win32, you need Watcom C v11.0. With the Win32 target (Perhaps
+they call it the "NT" target?) installed. You can maybe get by with Watcom C
+version 10.x, but the binaries tend not to work on WinNT in that case. You
+can also compile the code on Win32 with Cygwin and NASM. Read below for more
+details in either case.
+
+
+For building under DOS, you need Watcom C v11 or v10 with the DOS target
+installed.
+
 
 This code uses Simple Directmedia Layer (SDL) for graphics, sound, and other
 platform abstractions. Build relies on a fairly recent SDL code snapshot.
@@ -34,9 +46,15 @@ cd SDL12; ./autogen.sh; make; make install
 
 CVS is also good if you want the up-to-the-minute changes of BUILD:
 
-cvs -d:pserver:anonymous@linux.ucla.edu:/var/cvs login
+cvs -z3 -d:pserver:anonymous@icculus.org:/cvs/cvsroot login
 # password is "anonymous", without the quotes.
-cvs -z3 -d:pserver:anonymous@linux.ucla.edu:/var/cvs co buildengine
+cvs -z3 -d:anonymous@icculus.org:/cvs/cvsroot co buildengine
+
+
+There is a win32 CVS client available for download here:
+  http://www.icculus.org/misc/cvs-over-ssh-win32.zip
+
+You can get more information about CVS from http://cvshome.org/ ...
 
 
 PLEASE READ THE CHANGELOG AND TODO FILE FOR DETAILS ON WHAT'S NEW AND
@@ -101,7 +119,7 @@ INFO:
   need NASM (http://www.kernel.org/pub/software/devel/nasm/). Make sure
   nasmw.exe ends up somewhere in your PATH, and SDL is somewhere you have
   access to. Once you have all this set up, unpack the BUILD sources.
-  Make sure your in the buildengine directory. Set these two environment
+  Make sure you're in the buildengine directory. Set these two environment
   variables:
 
     export SDL_LIB_DIR=C:/where/i/installed/SDL-1.2.0/lib
@@ -159,13 +177,13 @@ GOOD REFERENCES:
 HOW TO FIX ALL YOUR "//" COMMENTS:
 - We now compile BUILD with the most anal compiler settings available for any
   given platform. This forces us to write cleaner, more portable, and less
-  buggy code, but sometimes it limits what we can get away with. There are
-  some compilers on some platforms (*coughcoughSolariscoughcough*) that are
-  very anal about (the old version of) the C specification they follow.
-  Therefore, you can NOT use "//" single line comments in code compiled on
-  those toolchains. Since Ken used nothing but // comments, I needed to
-  automate the conversion process a little bit. Here's the quick and dirty
-  way to convert them, using Perl:
+  buggy code, but sometimes it limits what we can get away with. Most notably:
+  comment syntax. There are some compilers on some platforms
+  (*coughcoughSolariscoughcough*) that are very anal about (the old version
+  of) the C specification they follow. Therefore, you can NOT use "//" single
+  line comments in code compiled on those toolchains. Since Ken used nothing
+  but // comments, I needed to automate the conversion process a little bit.
+  Here's the quick and dirty way to convert them, using Perl:
 
         --- snip. ---
 
@@ -178,7 +196,7 @@ HOW TO FIX ALL YOUR "//" COMMENTS:
         --- snip. ---
 
   Just put that in a file, convert.pl, and run:
-    perl convert.pl < mysrc.c > myconvertedsrc.c
+    perl -w convert.pl < mysrc.c > myconvertedsrc.c
 
     (patches to that code are welcome.)
 
@@ -222,7 +240,4 @@ TO PORT TO NEW PROCESSORS:
   USE_I386_ASM. Define your own version.
 
 /* end of README ... */
-
-
-
 
