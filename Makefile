@@ -176,7 +176,6 @@ endif
 
 
 NETSRCS = mmulti.c
-#NETSRCS = multi_tcpip.c
 
 GAMEEXE = game
 GAMESRCS = game.c 
