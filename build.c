@@ -148,7 +148,8 @@ static char boardfilename[13], oboardfilename[13];
 
 static long repeatcountx, repeatcounty;
 
-static char menuname[MAXMENUFILES][17], curpath[80], menupath[80];
+#define BUILD_MAXPATH 255
+static char menuname[MAXMENUFILES][BUILD_MAXPATH+1], curpath[80], menupath[80];
 static long menunamecnt, menuhighlight;
 
 static long fillist[640];
@@ -970,7 +971,7 @@ int getfilenames(char kind[6])
 			if ((fileinfo.name[0] != '.') || (fileinfo.name[1] != 0))
 			{
 				strcpy(menuname[menunamecnt],fileinfo.name);
-				menuname[menunamecnt][16] = type;
+				menuname[menunamecnt][BUILD_MAXPATH] = type;
 				menunamecnt++;
 			}
 	}
@@ -1023,7 +1024,7 @@ int getfilenames(char kind[6])
                 if (add_this)
     			{
 	    			strcpy(menuname[menunamecnt],dent->d_name);
-		    		menuname[menunamecnt][16] = subdirs;
+		    		menuname[menunamecnt][BUILD_MAXPATH] = subdirs;
 			    	menunamecnt++;
                 } /* if */
             } /* if */
@@ -1039,7 +1040,7 @@ int getfilenames(char kind[6])
 
 void sortfilenames(void)
 {
-	char sortbuffer[17];
+	char sortbuffer[BUILD_MAXPATH+1];
 	long i, j, k;
 
 	for(i=1;i<menunamecnt;i++)
@@ -1113,7 +1114,7 @@ int menuselect(void)
 			}
 			if ((i-topplc >= 0) && (i-topplc <= 36))
 			{
-				if (menuname[i][16] == 1)
+				if (menuname[i][BUILD_MAXPATH] == 1)
 				{
                     #ifdef PLATFORM_DOS
            				printext16(0L,((i-topplc)<<3)+16L+((399360-pageoffset)/640),4,0,buffer,0);
@@ -1162,7 +1163,7 @@ int menuselect(void)
 			if (newhighlight >= menunamecnt)
 				newhighlight = 0;
 		}
-		if ((ch == 13) && (menuname[newhighlight][16] == 1))
+		if ((ch == 13) && (menuname[newhighlight][BUILD_MAXPATH] == 1))
 		{
 			if ((menuname[newhighlight][0] == '.') && (menuname[newhighlight][1] == '.'))
 			{
