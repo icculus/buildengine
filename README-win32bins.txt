@@ -49,3 +49,12 @@ Enjoy!
 --ryan. (icculus@lokigames.com)
 
 
+CHANGELOG of win32 binary releases:
+02192001 - first binary release.
+02202001 - Fixed rendering bug in 2D editor, enabled optimizations,
+           disabled debugging. Disabled console window.
+02212001 - Fixed too-slow gameplay (Thanks, Matt!).
+
+// end of README-win32bins.txt ...
+
+
