@@ -12,7 +12,7 @@
 #error Please define USE_I386_ASM if you want to compile this.
 #endif
 
-#if (!defined __GNUC__)
+#if (!defined __GNUC__) && (!defined __ICC)
 #error This file is filled with GNU C-specific inline asm.
 #endif
 

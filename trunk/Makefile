@@ -94,6 +94,11 @@ endif
 
 CC = gcc
 
+# Uncomment to use the Intel compiler (v6.0)
+# Note: Version 6.0   Build 020312Z fails to compile engine.c
+#CC = icc
+#CFLAGS = -g $(SDL_CFLAGS) -DUSE_SDL=1 -O2
+
 ifeq ($(strip $(cygwin)),true)
   ASM = nasmw
   DLL_EXT = .dll

@@ -873,7 +873,7 @@ void updateinterpolations()  /* Stick at beginning of domovethings */
 }
 
 
-void dointerpolations()       /* Stick at beginning of drawscreen */
+static void dointerpolations()       /* Stick at beginning of drawscreen */
 {
 	long i, j, odelta, ndelta;
 
@@ -1523,7 +1523,7 @@ void findrandomspot(long *x, long *y, short *sectnum)
 }
 
 
-long getanimationgoal(long animptr)
+static long getanimationgoal(long animptr)
 {
 	long i;
 
@@ -1533,7 +1533,7 @@ long getanimationgoal(long animptr)
 }
 
 
-long setanimation(long *animptr, long thegoal, long thevel, long theacc)
+static long setanimation(long *animptr, long thegoal, long thevel, long theacc)
 {
 	long i, j;
 
@@ -1809,7 +1809,7 @@ void operatesector(short dasector)
 	 * don't need to be passed everywhere.  Also this should make this
 	 * movesprite function compatible with the older movesprite functions.
      */
-short movesprite(short spritenum, long dx, long dy, long dz, long ceildist, long flordist, long clipmask)
+static short movesprite(short spritenum, long dx, long dy, long dz, long ceildist, long flordist, long clipmask)
 {
 	long daz, zoffs;
 	short retval, dasectnum, datempshort;
@@ -4096,7 +4096,7 @@ void checkmasterslaveswitch(void)
 	}
 }
 
-void domovethings(void)
+static void domovethings(void)
 {
 	short i, j, startwall, endwall;
 	walltype *wal;
@@ -4439,7 +4439,7 @@ void updatesectorz(long x, long y, long z, short *sectnum)
 }
 
 
-void view(short snum, long *vx, long *vy, long *vz,
+static void view(short snum, long *vx, long *vy, long *vz,
 		  short *vsectnum, short ang, long horiz)
 {
 	spritetype *sp;
@@ -5368,7 +5368,7 @@ void drawscreen(short snum, long dasmoothratio)
 }
 
 
-void playback(void)
+static void playback(void)
 {
 	long i, j, k;
 
@@ -6018,7 +6018,7 @@ int main(int argc, char **argv)
 }
 
 
-void getinput(void)
+static void getinput(void)
 {
 	char ch, keystate;
 	long i, j;
