@@ -347,7 +347,7 @@ extern long frameplace, pageoffset, ydim16;
 static long globhiz, globloz, globhihit, globlohit;
 //volatile long stereomode = 0;
 extern long stereowidth, stereopixelwidth;
-volatile long activepage;
+extern volatile long activepage;
 
 	//Over the shoulder mode variables
 static long cameradist = -1, cameraang = 0, cameraclock = 0;
