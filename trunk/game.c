@@ -40,6 +40,7 @@ void sendlogoff(void);
 short getpacket(short *otherconnectindex, char *bufptr);
 void sendpacket(short otherconnectindex, unsigned char *bufptr, short messleng);
 int getoutputcirclesize(void);
+void waitforeverybody(void);
 
 
 /*
@@ -5920,7 +5921,7 @@ int main(int argc, char **argv)
 	reccnt = 0;
 	for(i=connecthead;i>=0;i=connectpoint2[i]) initplayersprite((short)i);
 
-	/* waitforeverybody(); */
+	/*waitforeverybody();*/
 	totalclock = ototalclock = 0; gotlastpacketclock = 0; nummoves = 0;
 
 	drawscreen(screenpeek,65536L);
@@ -6375,6 +6376,7 @@ void waitforeverybody(void)
 			oldtotalclock = totalclock-8;
 			do
 			{
+				_idle();
 				getpackets();
 				if (totalclock >= oldtotalclock+8)
 				{
@@ -6382,8 +6384,10 @@ void waitforeverybody(void)
 					packbuf[0] = 5;
 					packbuf[1] = j;
 					for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
+					{
 						if (playerreadyflag[i] != j)
                             sendpacket(i,(unsigned char *) packbuf,2);
+					}
 				}
 				for(i=connectpoint2[connecthead];i>=0;i=connectpoint2[i])
 					if (playerreadyflag[i] != j) break;
@@ -6395,6 +6399,7 @@ void waitforeverybody(void)
 		playerreadyflag[connecthead] = 0;
 		while (playerreadyflag[connecthead] != 2)
 		{
+			_idle();
 			getpackets();
 			if (playerreadyflag[connecthead] == 1)
 			{
