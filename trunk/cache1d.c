@@ -468,6 +468,32 @@ return(leng);
 #endif
 }
 
+int kread16(long handle, short *buffer)
+{
+    if (kread(handle, buffer, 2) != 2)
+        return(0);
+
+    *buffer = BUILDSWAP_INTEL16(*buffer);
+    return(1);
+}
+
+int kread32(long handle, long *buffer)
+{
+    if (kread(handle, buffer, 4) != 4)
+        return(0);
+
+    *buffer = BUILDSWAP_INTEL32(*buffer);
+    return(1);
+}
+
+int kread8(long handle, char *buffer)
+{
+    if (kread(handle, buffer, 1) != 1)
+        return(0);
+
+    return(1);
+}
+
 long klseek(long handle, long offset, long whence)
 {
 #if (defined USE_PHYSICSFS)
