@@ -37,8 +37,6 @@ endif
 
 #-----------------------------------------------------------------------------#
 # To use a different platform's ASM or portable C, change this.
-#  (note that this MUST be -DUSE_I386_ASM right now if you even want a
-#   prayer of having a successful compilation.)
 #-----------------------------------------------------------------------------#
 USE_ASM := -DUSE_I386_ASM
 
@@ -146,7 +144,11 @@ ifeq ($(strip $(networking)),udp)
 endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
+ifeq ($(strip $(USE_ASM)),-DUSE_I386_ASM)
 ENGINESRCS += a_nasm.asm pragmas.c a_gnu.c 
+else
+ENGINESRCS += a.c pragmas.c
+endif
 
 ifeq ($(strip $(useopengl)),true)
 ENGINESRCS += buildgl.c
