@@ -436,12 +436,20 @@ extern long drawslab(long,long,long,long,long,long);
 #else /* !defined USE_I386_ASM */
         long nsqrtasm(unsigned long param)
 	{
+	    unsigned short *shlookup_a = (unsigned short*)shlookup;
+	    unsigned short *sqrtable_a = (unsigned short*)sqrtable;
 	    unsigned short cx;
-	    if (param&0xff000000)
-		    cx = ((unsigned short*)shlookup)[(param>>24)+8192];
+
+	    if (param & 0xff000000)
+		    cx = shlookup_a[(param>>24)+4096];
 	    else
-		    cx = ((unsigned short*)shlookup)[param>>12];
-	    return ((param&0xffff0000)|(((unsigned short*)sqrtable)[param>>((cx&0xff00)>>8)]))>>(cx&0xff);
+		    cx = shlookup_a[param>>12];
+
+	    param = param >> (cx&0xff);
+	    param = ((param&0xffff0000)|sqrtable_a[param]);
+	    param = param >> ((cx&0xff00)>>8);
+
+	    return param;
 	}
 #endif /* defined USE_I386_ASM */
 
@@ -511,39 +519,44 @@ extern long drawslab(long,long,long,long,long,long);
 
 #else  /* USE_I386_ASM */
 
+        static long krecipasm(long i1)
+        {
+            long retval;
+            __asm__ __volatile__ (
+                "\n\t"
+                "call _asm_krecipasm\n\t"
+            : "=a" (retval) : "a" (i1)
+        	: "cc", "ebx", "ecx", "memory");
+            return(retval);
+        } /* krecipasm */
+/*
     static long krecipasm(long x)
     {
         float xf;
         int z;
         int not;
     
-        if (x & 0x80000000) /* If the highest bit is set... */
+        if (x & 0x80000000)
             not = 0x0FFFFFFFF;
         else
             not = 0;
   
-        xf = (float)x;/* convert the int to a float */
+        xf = (float)x;
     
-        /* Pretend the float is an int so we can extract bits */
+        
         x = *((int*)(&xf));
         z = x;
       
-        x = x & 0x007FF000;/* Mask out: 11 << 13 */
-        x = x >> 10;       /* Divide x by 1024 */
+        x = x & 0x007FF000;
+        x = x >> 10;
     
-        /* X now contains: 13 high order bits of the mantissa,
-           followed by two 0 bits */
-    
-        /* Now we perform an elaborate extraction
-           of the exponent from the floating point
-           number? WTF is the subtraction for? */
-        z = z - 0x03F800000;/* Subtract (127<<23) */
+        z = z - 0x03F800000;
         z = z >> 23;
     
-        /* z now contains the exponent divided by two?  */
         x = shift_algebraic_right(reciptable[(x>>2)], z) ^ not;
         return x;
-    } /* krecipasm */
+    } 
+    */
 #endif /* defined USE_I386_ASM */
 
 
@@ -613,17 +626,16 @@ extern long drawslab(long,long,long,long,long,long);
     #endif
 
 #else   /* !defined USE_I386_ASM */
-        int setgotpic(unsigned long param)
+        void setgotpic(unsigned long param)
         {
-	    if (((unsigned char *)walock)[param] < 200)
-		   ((unsigned char *)walock)[param] = 199;
+	    unsigned char *gotpic_a = (unsigned char*)gotpic;
+	    unsigned char *walock_a = (unsigned char*)walock;
+	    unsigned char *pow2char_a = (unsigned char*)pow2char;
+	    
+	    if (walock_a[param] < 200) walock_a[param] = 199;
 
-	    param = param >> 3;
-
-	    ((unsigned char*)gotpic)[param] =
-		    ((((unsigned char*)gotpic)[param])|(((unsigned char*)pow2char)[param&7]));
-            return(param);
-        } /* setgotpic */
+	    gotpic_a[param>>3] |= pow2char_a[param&7];
+        }
 #endif /* defined USE_I386_ASM */
 
 
@@ -699,17 +711,16 @@ extern long drawslab(long,long,long,long,long,long);
 #else  /* !defined USE_I386_ASM */
         long getclipmask(int i1, int i2, int i3, int i4)
         {
-		unsigned long eax;
-		eax = i1 >> 31;
-		eax = eax << 1; i2 *= 2;
-		if (i2&0x80000000) { eax++; }
-		eax = eax << 1; i3 *= 2;
-		if (i3&0x80000000) { eax++; }
-		eax = eax << 1; i4 *= 2;
-		if (i4&0x80000000) { eax++; }
-
-		return ((eax<<4)^(eax|0xf0));
-        } /* getclipmask */
+	    unsigned long eax;
+	    eax = i1 >> 31;
+	    eax = eax << 1; i2 *= 2;
+	    if (i2&0x80000000) { eax++; }
+	    eax = eax << 1; i3 *= 2;
+	    if (i3&0x80000000) { eax++; }
+	    eax = eax << 1; i4 *= 2;
+	    if (i4&0x80000000) { eax++; }
+	    return ((eax<<4)^(eax|0xf0));
+        }
 #endif /* defined USE_I386_ASM */
 
 
