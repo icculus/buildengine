@@ -464,7 +464,11 @@
             passed through a function called sdldebug() that is used like
             fprintf(stderr), but adds the "BUILDSDL: " string to the front,
             a newline to the end, and prints nothing if debugging is disabled.
-            TODO is, as usual, expanding.
+            TODO is, as usual, expanding. Added BUILD_HALLOFMIRRORS environment
+            var, so that it isn't bound to BUILD_SDLDEBUG anymore. The
+            BUILD_SDLDEBUG variable now needs a value: the file to write debug
+            information to. The value can be "-" to write to stdout. This is
+            for that obnoxious win32 platform.  :)
 
 --ryan. (icculus@linuxgames.com)
 
