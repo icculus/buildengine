@@ -48,6 +48,7 @@
 #pragma aux (__cdecl) SDL_GetClipRect;
 #pragma aux (__cdecl) SDL_SetClipRect;
 #pragma aux (__cdecl) SDL_WM_ToggleFullScreen;
+#pragma aux (__cdecl) SDL_Linked_Version;
 #endif  /* defined __WATCOMC__ */
 
 #endif  /* defined PLATFORM_SUPPORTS_SDL */
