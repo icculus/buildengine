@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "ReleaseVC6"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /GX /Ot /Ow /Oi /Op /Oy /Ob1 /I "SDL-1.2.5\include" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "USE_I386_ASM" /D "PLATFORM_WIN32" /YX /J /FD /c
+# ADD CPP /nologo /GX /Ot /Ow /Oi /Op /Oy /Ob1 /I "SDL-1.2.5\include" /D "_LIB" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "USE_I386_ASM" /D "PLATFORM_WIN32" /D "UDP_NETWORKING" /YX /J /FD /c
 # SUBTRACT CPP /Oa /Og /Os
 # ADD BASE RSC /l 0xc09 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
@@ -65,7 +65,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "DebugVC6"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /Gm /GX /ZI /Od /I "SDL-1.2.5\include" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "_LIB" /D "USE_I386_ASM" /D "PLATFORM_WIN32" /FR /YX /J /FD /GZ /c
+# ADD CPP /nologo /Gm /GX /ZI /Od /I "SDL-1.2.5\include" /D "_LIB" /D "_DEBUG" /D "WIN32" /D "_MBCS" /D "USE_I386_ASM" /D "PLATFORM_WIN32" /D "UDP_NETWORKING" /FR /YX /J /FD /GZ /c
 # ADD BASE RSC /l 0xc09 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
