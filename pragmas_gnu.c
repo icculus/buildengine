@@ -23,7 +23,7 @@
 
 #if (defined USE_I386_ASM)
 
-#if (!defined __GNUC__)
+#if (!defined __GNUC__) && (!defined __ICC)
 #error This file is filled with GNU C-specific inline asm.
 #endif
 

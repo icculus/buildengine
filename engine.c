@@ -385,7 +385,7 @@ extern long drawslab(long,long,long,long,long,long);
 	    parm nomemory [eax]\
 	    modify exact [eax ebx ecx]\
 
-    #elif (defined __GNUC__)
+    #elif (defined __GNUC__) || (defined __ICC)
         static long nsqrtasm(int i1)
         {
             long retval;
@@ -465,7 +465,7 @@ extern long drawslab(long,long,long,long,long,long);
 	    parm [eax]\
 	    modify exact [eax ebx ecx]\
 
-    #elif (defined __GNUC__)
+    #elif (defined __GNUC__) || (defined __ICC)
         static long krecipasm(long i1)
         {
             long retval;
@@ -563,7 +563,7 @@ extern long drawslab(long,long,long,long,long,long);
         parm [eax]\
         modify exact [eax ebx ecx edx]\
 
-    #elif (defined __GNUC__)
+    #elif (defined __GNUC__) || (defined __ICC)
 
         int setgotpic(long i1)
         {
@@ -632,7 +632,7 @@ extern long drawslab(long,long,long,long,long,long);
         parm [eax][ebx][ecx][edx]\
         modify exact [eax ebx ecx edx]\
 
-  #elif (defined __GNUC__)
+  #elif (defined __GNUC__) || (defined __ICC)
         long getclipmask(int i1, int i2, int i3, int i4)
         {
             int retval;
