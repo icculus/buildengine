@@ -159,80 +159,16 @@ void rmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 
 
 /* #pragma aux setupqrhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
-static long qrmach_ebx;
-static unsigned long qrmach_ebx2;
-static long qrmach_ecx;
-static long qrmach_ecx2;
-static long qrmach_edx;
-static long qrmach_edi;
 void setupqrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-    qrmach_ebx = i2;
-    qrmach_ecx = i3;
-    qrmach_edx = i6;
-    qrmach_edi = -qrmach_ecx;
-    qrmach_ebx2 = qrmach_ebx + qrmach_ebx;
-    if (qrmach_ebx2 < qrmach_ebx) qrmach_ecx2 = qrmach_ecx + qrmach_ecx + 1;
-    else qrmach_ecx2 = qrmach_ecx + qrmach_ecx;
+    setuprhlineasm4(i1,i2,i3,i4,i5,i6);
 } /* setupqrhlineasm4 */
 
 
 /* #pragma aux qrhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
 void qrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-/*
-_asm_qrhlineasm4:
-	push ebp
-
-	cmp eax, 0
-	jle NEAR endqrhline
-
-	mov ebp, eax
-	test ebp, 3
-	jz short skipqrhline1
-	jmp short startqrhline1
-
-ALIGN 16
-startqrhline1:
-	mov cl, byte [ebx]                      ;bufplc
-	dec edi
-qrmach2e: sub esi, 88888888h                   ;ylo
-	dec ebp
-qrmach3e: sbb ebx, 88888888h                   ;xhi*tilesizy + yhi+ycarry
-qrmach4e: mov al, byte [ecx+88888888h]     ;palookup
-	mov byte [edi], al                      ;vidcntoffs
-	test ebp, 3
-	jnz short startqrhline1
-	test ebp, ebp
-	jz short endqrhline
-
-skipqrhline1:
-	mov cl, byte [ebx]                      ;bufplc
-	jmp short begqrhline
-ALIGN 16
-begqrhline:
-qrmach7a: mov dl, byte [ebx+88888888h]     ;bufplc
-qrmach2a: sub esi, 88888888h                   ;ylo
-qrmach3a: sbb ebx, 88888888h                   ;xhi*tilesizy + yhi+ycarry
-qrmach4a: mov ah, byte [ecx+88888888h]     ;palookup
-qrmach4b: mov al, byte [edx+88888888h]     ;palookup
-	sub edi, 4
-	shl eax, 16
-	mov cl, byte [ebx]                      ;bufplc
-qrmach7b: mov dl, byte [ebx+88888888h]     ;bufplc
-qrmach2b: sub esi, 88888888h                   ;ylo
-qrmach3b: sbb ebx, 88888888h                   ;xhi*tilesizy + yhi+ycarry
-qrmach4c: mov ah, byte [ecx+88888888h]     ;palookup
-qrmach4d: mov al, byte [edx+88888888h]     ;palookup
-	mov cl, byte [ebx]                      ;bufplc
-	mov dword [edi], eax
-	sub ebp, 4
-	jnz short begqrhline
-
-endqrhline:
-	pop ebp
-	ret
-*/
+    rhlineasm4(i1,i2,i3,i4,i5,i6);
 } /* qrhlineasm4 */
 
 /* #pragma aux setvlinebpl parm [eax] */
