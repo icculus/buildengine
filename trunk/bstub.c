@@ -196,7 +196,7 @@ void ExtInit(void)
 	printf("   properly with other Build engine games.  Please refer to license.doc\n");
 	printf("   for distribution rights\n");
 	printf("------------------------------------------------------------------------------\n");
-	getch();
+	getchar();
 	*/
 
         /* Now we check for an envr variable first, for Duke/SW/etc groups. */
