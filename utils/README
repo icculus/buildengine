@@ -1,0 +1,15 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+README for BUILD Utils Package
+
+These are Ken's utilities shipped with BUILD.  Your milage with them
+will vary.  Most of them are waiting on a replacement for _dos_findfirst
+and _dos_findnext before they will work.  All the ones that do work work
+quite well.
+
+More info in the CHANGELOG and TODO files if you're a hacker and interested.
+
+--
+Dan (theoddone33) Olson <dolson@raven-games.com>

@@ -1,0 +1,14 @@
+CHANGELOG for BUILD Utils Package
+
+08122000 - Initial release. kextract is the only utility that compiles cleanly,
+	kgroup and the map conversion utilities will work fine once they get
+	a findfirst/findnext implementation.  BUILD needs this too, so it may
+	get done soon.  I haven't touched the rest of the utils yet, since they
+	look like they'll need files from the BUILD source (pragmas.[ch], 
+	unix_compat.[ch], etc), and I really don't feel like screwing with this
+	anymore at the moment :)
+
+08222000 - kgroup now works... realized that kextract has some problems. kgroup
+	seems to have some too, but they are trivial, like files are sorted
+	backwards alphabetically in the group file and such.  As far as I can
+	tell, kgroup is stable.
