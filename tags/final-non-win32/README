@@ -1,0 +1,131 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+/*
+ * README.
+ *
+ *  Please do NOT harrass Ken Silverman about any code modifications
+ *   (including this file) to BUILD.
+ */
+
+(This code DOES run on Windows. Read on.)
+
+You NEED gcc 2.95.2 (or maybe later) to compile this code correctly.
+You'll also need Netwide Assembler (NASM). Get it at:
+
+  http://www.kernel.org/pub/software/devel/nasm/
+
+
+(May I reiterate? Earlier than 2.95.2 revisions of GCC and EGCS do NOT
+compile this code correctly! It will run, but there will be all sorts of
+strange graphic glitches and odd crashes.)
+
+This code uses Simple Directmedia Layer (SDL) for graphics, sound, and other
+platform abstractions. Build relies on a fairly recent SDL code snapshot.
+
+Get SDL from CVS like this:
+
+cvs -d :pserver:guest@cvs.lokigames.com:/cvs login
+# password is "guest", without the quotes.
+cvs -z3 -d :pserver:guest@cvs.lokigames.com:/cvs checkout -r devel_1_1_0 SDL
+cd SDL; ./autogen.sh; make; make install
+
+
+CVS is also good if you want the up-to-the-minute changes of BUILD:
+
+cvs -d:pserver:anonymous@linux.ucla.edu:/var/cvs login
+# password is "anonymous", without the quotes.
+cvs -z3 -d:pserver:anonymous@linux.ucla.edu:/var/cvs co buildengine
+
+
+PLEASE READ THE CHANGELOG AND TODO FILE FOR DETAILS ON WHAT'S NEW AND
+ WHAT'S NEEDED! They're in the tarball.
+
+Have fun!
+
+--ryan. (icculus@lokigames.com)
+
+
+INFO:
+- Patches go to Ryan at icculus@lokigames.com.
+- Please try to keep it so the original source can still be compiled with
+  Watcom C for DOS. Maybe if we do a good enough job, we can just get Ken
+  to make this his official version, although this is not the goal right now.
+  You may #ifdef DOSisms with PLATFORM_DOS, and Unixism with PLATFORM_UNIX, but
+  try not to touch the original code if you can circumvent it (i.e. reimplement
+  the functionality of missing functions in a separate file, #define
+  __interrupt to be blank, etc...) Reference unix_compat.[ch] and sdl_driver.c
+  for examples of this behaviour.
+- See us in #loki at irc.openprojects.net with questions.
+- This is NOT a Loki-sponsored project. We're Loki employees that get off on
+  this stuff. Don't harrass info@lokigames.com about it.
+- Yes, you CAN edit Duke3D maps with this. Sort of.
+  Get your DUKE3D.GRP file, and then rename it to stuff.dat. Go get a Duke3D
+  map off the net and open it in build. This segfaults a lot, still.
+  I haven't tried Blood, Shadow Warrior, or anything else. Anything with
+  voxels is going to need a more robust bstub.c than the one that KenBuild
+  uses. I'm not sure what the ramifications for Duke3D are, either; you might
+  need their editor to do certain things or do certain things correctly.
+
+   Either way, there's lots of screenshots up at:
+    http://www.icculus.org/BUILD/screenshots/duke3d_data_files/
+    http://www.icculus.org/BUILD/screenshots/shadow_warrior_data_files/
+
+ Is this enough to play Duke/Shadow/Blood? No. But it's a good start.
+
+- Can Windows users use this code? You bet. But, there are some complications.
+  First, you have to build it, currently, with Cygwin, a Windows port of the
+  GNU C compiler. Cygwin is free (as in speech and beer), and can be
+  downloaded from http://sources.redhat.com/cygwin/. You will also need to
+  have a development version of SDL installed (I used the prebuilt SDL
+  libraries under Windows, look at http://www.libsdl.org/). And, as under
+  Linux, you will need NASM (http://www.kernel.org/pub/software/devel/nasm/).
+  Make sure nasmw.exe ends up somewhere in your PATH, and SDL is somewhere you
+  have access to. Once you have all this set up, unpack the BUILD sources, and
+  edit "Makefile" in the newly created directory. Change the line that says
+  "cygwin = false" to "cygwin = true", and the SDL_INC_DIR and SDL_LIB_DIR
+  lines to the correct values. (Note the examples: C:/2/SDL-1.1.8/include/
+  has its directory separators backwards, as they are in Unix. This is
+  intentional.) Run "make" in the buildengine directory. If everything is
+  correct, this should build BUILD.EXE and GAME.EXE. You will probably have
+  to make sure that SDL.DLL and CYGWIN1.DLL are in your path somewhere.
+  This isn't as hard as it sounds.  :)  If anyone wants to make this work with
+  Visual C++ to make this easier for Windows users, I'll happily accept your
+  changes. One more thing, about licensing. If you build this with Cygwin, you
+  are NOT permitted to release binaries, as Cygwin's POSIX-support DLL is
+  under the GPL license, which forbids distribution of code linked with it
+  that doesn't abide by the OpenSource definition (Ken's license does not).
+  The solution here is to remove the dependency on the POSIX layer; the most
+  notable target is the mprotect() calls. Getting the code to build under
+  Visual C (or Mingw32, which is Cygwin without the POSIX layer) removes this
+  problem. Harrassing Ken Silverman to change his license to the GPL is not
+  only rude, it's unproductive. Distributing binaries built with Cygwin opens
+  you up to lawsuits from Red Hat and the Free Software Foundation. Do the
+  right thing, and move this to Mingw32. I accept patches.  :)  If any
+  commercial BUILD games are to make their way to Windows via this port, this
+  will need to be done, anyhow.
+
+
+GOOD REFERENCES:
+- VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
+- http://www-cgi.cs.cmu.edu/afs/cs.cmu.edu/user/ralf/pub/WWW/files.html
+  (THE Interrupt List, from Ralf Brown. Good stuff, here.)
+- FreeVGA: A VGA documentation project.
+  http://www.goodnet.com/~tinara/FreeVGA/home.htm
+- BUILD keyboard reference: http://home.online.no/~flovstak/duke/bkeys.htm
+- mapFAQ: http://mapfaq.3dportal.com/
+- Ken Silverman's homepage: http://www.advsys.net/ken/
+- The Art of Assembly Language, complete text:
+    http://webster.cs.ucr.edu/Page_asm/ArtofAssembly/ArtofAsm.html
+
+
+TO PORT TO NEW PROCESSORS:
+- You can either write new ASM for your processor, or better yet, implement
+  the stuff in C, so everyone can benefit.
+- Most of your work will be in pragmas.*, a_linux.*, and a.*.  Look for
+  USE_I386_ASM. Define your own version.
+
+// end of README.
+
+

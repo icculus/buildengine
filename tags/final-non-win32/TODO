@@ -1,0 +1,26 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+(questions to Ryan C. Gordon, icculus@lokigames.com)
+
+NEXT ON TAP:
+- My god. Almost all of a_linux.asm is self-modifying code.
+  Nothing too complex as this stuff goes, but it should be removed,
+  none the less.
+- Litter the code with assertions.
+- ASM->C port for non-intel boxes?
+- Look for the string "!!!" ... these are TODOs in the source.
+- Tie the window manager quit request to the program, so it reacts like an
+  ESC in 3D mode, and a "ESC, Q" in 2D mode. This will allows the user to
+  abort the shutdown, save if there are changes, etc...
+- Make 2D mode only prompt to save changes on exit if there are changes to
+  save.
+- Looking up/down in the editor seems to screw things up. This might not be
+  the case in 320x200 resolution. Look into it.
+- Slopes are misdrawn in kensig.map.
+- The timer issue.
+- Sound.
+
+// end of TODO ...
+
