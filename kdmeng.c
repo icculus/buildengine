@@ -15,6 +15,12 @@
 #include "pragmas.h"
 #include "cache1d.h"
 
+
+#if (!defined PLATFORM_DOS)
+#error This should only be compiled for the DOS/386 target.
+#endif
+
+
 #define NUMCHANNELS 16
 #define MAXWAVES 256
 #define MAXTRACKS 256
