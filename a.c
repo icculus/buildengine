@@ -966,7 +966,7 @@ void vlineasm4(long i1, long i2)
     //unsigned char machvinc3, machvinc4;
     unsigned short machvinc34;
     unsigned long eax, ebx, edx, esi, ebp;
-    unsigned long out;
+    unsigned long out = 0;
     unsigned long *dest = (unsigned long *)(-ylookup[i1]);
 
     ebp = vince[0]&0xfffffe00;

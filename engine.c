@@ -434,12 +434,15 @@ extern long drawslab(long,long,long,long,long,long);
     #endif
 
 #else /* !defined USE_I386_ASM */
-
-        static long nsqrtasm(long eax)
-        {
-            return((long) sqrt(eax));   /* !!! this might be wrong, due to precision issues. */
-        } /* nsqrtasm */
-
+        long nsqrtasm(unsigned long param)
+	{
+	    unsigned short cx;
+	    if (param&0xff000000)
+		    cx = ((unsigned short*)shlookup)[(param>>24)+8192];
+	    else
+		    cx = ((unsigned short*)shlookup)[param>>12];
+	    return ((param&0xffff0000)|(((unsigned short*)sqrtable)[param>>((cx&0xff00)>>8)]))>>(cx&0xff);
+	}
 #endif /* defined USE_I386_ASM */
 
 
@@ -610,7 +613,17 @@ extern long drawslab(long,long,long,long,long,long);
     #endif
 
 #else   /* !defined USE_I386_ASM */
-    #error Implement me in C!
+        int setgotpic(unsigned long param)
+        {
+	    if (((unsigned char *)walock)[param] < 200)
+		   ((unsigned char *)walock)[param] = 199;
+
+	    param = param >> 3;
+
+	    ((unsigned char*)gotpic)[param] =
+		    ((((unsigned char*)gotpic)[param])|(((unsigned char*)pow2char)[param&7]));
+            return(param);
+        } /* setgotpic */
 #endif /* defined USE_I386_ASM */
 
 
@@ -684,7 +697,19 @@ extern long drawslab(long,long,long,long,long,long);
     #endif
 
 #else  /* !defined USE_I386_ASM */
-    #error Implement me in C!
+        long getclipmask(int i1, int i2, int i3, int i4)
+        {
+		unsigned long eax;
+		eax = i1 >> 31;
+		eax = eax << 1; i2 *= 2;
+		if (i2&0x80000000) { eax++; }
+		eax = eax << 1; i3 *= 2;
+		if (i3&0x80000000) { eax++; }
+		eax = eax << 1; i4 *= 2;
+		if (i4&0x80000000) { eax++; }
+
+		return ((eax<<4)^(eax|0xf0));
+        } /* getclipmask */
 #endif /* defined USE_I386_ASM */
 
 
