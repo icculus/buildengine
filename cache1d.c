@@ -468,7 +468,7 @@ return(leng);
 long klseek(long handle, long offset, long whence)
 {
 #if (defined USE_PHYSICSFS)
-    if (whence == SEEK_END)
+    if (whence == SEEK_END)  /* !!! FIXME: You can try PHYSFS_filelength(). */
     {
         printf("UNSUPPORTED SEEK SEMANTIC!\n");
         exit(42);
