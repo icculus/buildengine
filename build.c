@@ -222,11 +222,7 @@ extern void printext256(long xpos, long ypos, short col, short backcol,
 extern void printext256_noupdate(long xpos, long ypos, short col, short backcol,
 			char name[82], char fontsize);
 extern void uninitengine(void);
-extern void clearbuf(void *buffer, int size, long fill_value);
-extern void clearbufbyte(void *buffer, int size, long fill_value);
 extern int loadpics(char *filename);
-extern int ksgn(int i1);
-extern int klabs(int i1);
 #ifndef PLATFORM_DOS
 extern void setvmode(int mode);
 #endif
@@ -312,7 +308,7 @@ int main(int argc,char **argv)
 	char ch, quitflag;
 	long i, j, k;
 
-    _platform_init(argc, argv);
+    _platform_init(argc, argv, "BUILD editor by Ken Silverman", "BUILD");
 
     if (getenv("BUILD_NOPENTIUM") != NULL)
         dommxoverlay = 0;
