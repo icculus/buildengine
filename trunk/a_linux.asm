@@ -26,6 +26,29 @@
 ; ************************
 SECTION .data
 
+    ; Some C compilers insert an underscore ('_') character in front of
+    ;  identifiers. In such a case, we need to redefine our references to
+    ;  global indentifiers that exist in the C code.  --ryan.
+%ifdef C_IDENTIFIERS_UNDERSCORED
+%define asm1 _asm1
+%define asm2 _asm2
+%define asm3 _asm3
+%define asm4 _asm4
+%define fpuasm _fpuasm
+%define reciptable _reciptable
+%define globalx3 _globalx3
+%define globaly3 _globaly3
+%define ylookup _ylookup
+%define vplce _vplce
+%define vince _vince
+%define palookupoffse _palookupoffse
+%define bufplce _bufplce
+%define ebpbak _ebpbak
+%define espbak _espbak
+%define pow2char _pow2char
+%define pow2long _pow2long
+%endif
+
 extern asm1
 extern asm2
 extern asm3
