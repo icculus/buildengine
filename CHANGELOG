@@ -62,7 +62,7 @@
 08052000 - Dan fixed an ASM screwup in getkensmessagecrc(). Ryan fixed the
             mouse button event code. Added event thread, and some bits of
             thread safety in sdl_driver.c. Mouse now seems to move okay if the
-            X11 cursor is hidded, and we grab the input. Goes to fullscreen
+            X11 cursor is hidden, and we grab the input. Goes to fullscreen
             and grabs input by default; export BUILD_WINDOWED=y and
             BUILD_NO_MOUSE_GRAB=y, respectively, to disable. Got myself a
             copy of Duke3D Atomic Edition for the data files. Fixed the
@@ -407,7 +407,7 @@
             like we should have done from the start. Added check in ExtInit()
             for the environment variable BUILD_GROUPFILE, which will be the
             groupfile to open if the variable exists. If the variable isn't
-            set, we default to Ken's "stuff.dat". Between this an TerminX's
+            set, we default to Ken's "stuff.dat". Between this and TerminX's
             lookup.dat code, we should be able to wander around a Duke3D map
             without segfaults all over the place. Changed initgroupfile() and
             kopen4load() to take a (const char *) argument. Should probably
@@ -516,6 +516,24 @@
             linked dynamically. Platform drivers now need to store _argv and
             _argc. Commented a few functions in engine.c as I start to grok
             what each bit of code does.
+06232001 - Cleaned up some whitespace issues in pragmas.c. The one SDL
+            dependency in engine.c has been abstracted into
+            _updateScreenRect() and implemented in the display drivers.
+            OpenGL should now always be compiled in unless you can't even
+            build it (and thus, I've officially flipped useopengl to "true"
+            in the Makefile). You can now choose your renderer at runtime by
+            setting the BUILD_RENDERER environment variable: Set it to
+            "software" for the usual drill, "opengl2d" for using OpenGL to
+            move the software-rendered framebuffer to the screen (got this
+            idea from zsnes. cool.), and "opengl3d" to try to render an actual
+            3D scene in OpenGL. Default is "software". The 3D stuff hasn't
+            even been started, since it'll need an actual implementation in
+            engine.c. The gl2D stuff is an hour's work. After the 3D
+            implementation is in there, I'll be adding Makefile flags and code
+            #ifdefs to prevent compilation of the software renderer, which
+            will end the need for most, if not all, of the assembly, and get
+            us running on different platforms. I know, easier said than done.
+            Other little cleanups and enhancements.
 
 --ryan. (icculus@linuxgames.com)
 
