@@ -5,8 +5,12 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
+# // "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+# // Ken Silverman's official web site: "http://www.advsys.net/ken"
+# // See the included license file "BUILDLIC.TXT" for license info.
+
 # Programs to build
-BINARIES = kextract kgroup
+BINARIES = grpextract kgroup
 
 CC = gcc
 LINKER = gcc
@@ -35,7 +39,11 @@ editart : editart.o
 	$(LINKER) -o editart $(LDFLAGS) editart.o
 
 kextract : kextract.o
+	@echo WARNING! kextract is BROKEN. Use grpextract instead!
 	$(LINKER) -o kextract $(LDFLAGS) kextract.o
+
+grpextract : grpextract.o
+	$(LINKER) -o grpextract $(LDFLAGS) grpextract.o
 
 kgroup : kgroup.o
 	$(LINKER) -o kgroup $(LDFLAGS) kgroup.o
