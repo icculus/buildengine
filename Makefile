@@ -37,7 +37,7 @@ endif
 #-----------------------------------------------------------------------------#
 # To use a different platform's ASM or portable C, change this.
 #-----------------------------------------------------------------------------#
-USE_ASM := -DUSE_I386_ASM
+#USE_ASM := -DUSE_I386_ASM
 
 
 #-----------------------------------------------------------------------------#
@@ -190,7 +190,7 @@ endif
 ENGINEDIR = .
 ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 LINKER = gcc
-CFLAGS += $(USE_ASM) -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fno-omit-frame-pointer
+CFLAGS += $(USE_ASM) -funsigned-char -O2 -DPLATFORM_UNIX -g -Wall $(SDL_CFLAGS) -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
 
 # Rules for turning source files into .o files
