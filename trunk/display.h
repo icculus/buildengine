@@ -44,6 +44,7 @@
 #pragma aux (__cdecl) SDL_VideoModeOK;
 #pragma aux (__cdecl) SDL_GetClipRect;
 #pragma aux (__cdecl) SDL_SetClipRect;
+#pragma aux (__cdecl) SDL_WM_ToggleFullScreen;
 #endif  // __WATCOMC__
 
 #endif  // PLATFORM_SUPPORTS_SDL
