@@ -5,6 +5,9 @@
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
+#networking := stubbed
+networking := udp
+
 #-----------------------------------------------------------------------------#
 # If this makefile fails to detect Cygwin correctly, or you want to force
 #  the build process's behaviour, set it to "true" or "false" (w/o quotes).
@@ -127,6 +130,14 @@ ENGINEBASE = buildengine
 ENGINEDLL = $(strip $(ENGINEBASE))$(strip $(DLL_EXT))
 NETBASE = buildnet
 NETDLL = $(strip $(NETBASE))$(strip $(DLL_EXT))
+endif
+
+ifeq ($(strip $(networking)),stubbed)
+  CFLAGS += -DSTUB_NETWORKING=1
+endif
+
+ifeq ($(strip $(networking)),udp)
+  CFLAGS += -DUDP_NETWORKING=1
 endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
