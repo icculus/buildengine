@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="SDL-1.2.5\include"
-				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;USE_I386_ASM;PLATFORM_WIN32"
+				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;USE_I386_ASM;PLATFORM_WIN32;UDP_NETWORKING=1"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="5"
 				DefaultCharIsUnsigned="TRUE"
@@ -39,6 +39,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="wsock32.lib"
 				OutputFile=".\DebugVC7\Engine.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -73,7 +74,7 @@
 				FavorSizeOrSpeed="0"
 				OmitFramePointers="TRUE"
 				AdditionalIncludeDirectories="SDL-1.2.5\include"
-				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;USE_I386_ASM;PLATFORM_WIN32"
+				PreprocessorDefinitions="NDEBUG;WIN32;_LIB;USE_I386_ASM;PLATFORM_WIN32;UDP_NETWORKING=1"
 				RuntimeLibrary="4"
 				DefaultCharIsUnsigned="TRUE"
 				UsePrecompiledHeader="2"
@@ -86,6 +87,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="wsock32.lib"
 				OutputFile=".\ReleaseVC7\Engine.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
