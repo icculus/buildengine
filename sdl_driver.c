@@ -1346,6 +1346,24 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_F12]             = 0x58;
     scancodes[SDLK_PAUSE]           = 0x59; /* SBF - technically incorrect */
 
+    /* Some AZERTY keys... */
+    scancodes[SDLK_AMPERSAND]       = 0x70;
+    scancodes[SDLK_QUOTEDBL]        = 0x71;
+    scancodes[SDLK_LEFTPAREN]       = 0x72;
+    scancodes[SDLK_EXCLAIM]         = 0x73;
+    scancodes[SDLK_CARET]           = 0x74;
+    scancodes[SDLK_DOLLAR]          = 0x75;
+    scancodes[SDLK_WORLD_0]         = 0x76;
+    scancodes[SDLK_WORLD_1]         = 0x77;
+    scancodes[SDLK_WORLD_2]         = 0x78;
+    scancodes[SDLK_WORLD_3]         = 0x79;
+    scancodes[SDLK_WORLD_4]         = 0x7A;
+    scancodes[SDLK_WORLD_5]         = 0x7B;
+    scancodes[SDLK_RIGHTPAREN]      = 0x7C;
+    scancodes[SDLK_COLON]           = 0x7D;
+    scancodes[SDLK_LESS]            = 0x7E;
+
+    /* extended DOS scancodes... */
     scancodes[SDLK_KP_ENTER]        = 0xE01C;
     scancodes[SDLK_RCTRL]           = 0xE01D;
     scancodes[SDLK_KP_DIVIDE]       = 0xE035;
