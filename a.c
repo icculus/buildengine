@@ -202,94 +202,27 @@ _asm_setuprhlineasm4:
 
 /* #pragma aux rhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
 /* DDOI - draws rotated lines, not needed in duke3d */
-void rhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
+void rhlineasm4(long i1, long i2, long i3, unsigned long i4, unsigned long i5, long i6)
 {
-	/*
-    __asm__ __volatile__ (
-        "call _asm_rhlineasm4   \n\t"
-       : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
-/*
-_asm_rhlineasm4:
-	push ebp
+    unsigned long ebp = i6 - i1;
+    unsigned long rmach6b = ebp-1;
 
-	cmp eax, 0
-	jle NEAR endrhline
+    if (i1 <= 0) return;
 
-	lea ebp, [edi-4]
-	sub ebp, eax
-	mov dword [rmach6a+2], ebp
-	add ebp, 3
-	mov dword [rmach6b+2], ebp
-	mov edi, eax
-	test edi, 3
-	jz short begrhline
-	jmp short startrhline1
-
-ALIGN 16
-startrhline1:
-	mov cl, byte [ebx]                      ;bufplc
-rmach1e: sub edx, 88888888h                    ;xlo
-	sbb ebp, ebp
-rmach2e: sub esi, 88888888h                    ;ylo
-rmach3e: sbb ebx, 88888888h                    ;xhi*tilesizy + yhi+ycarry
-rmach4e: mov al, byte [ecx+88888888h]      ;palookup
-rmach5e: and ebp, 88888888h                    ;tilesizy
-rmach6b: mov byte [edi+88888888h], al      ;vidcntoffs
-	sub ebx, ebp
-	dec edi
-	test edi, 3
-	jnz short startrhline1
-	test edi, edi
-	jz NEAR endrhline
-
-begrhline:
-	mov cl, byte [ebx]                      ;bufplc
-rmach1a: sub edx, 88888888h                    ;xlo
-	sbb ebp, ebp
-rmach2a: sub esi, 88888888h                    ;ylo
-rmach3a: sbb ebx, 88888888h                    ;xhi*tilesizy + yhi+ycarry
-rmach5a: and ebp, 88888888h                    ;tilesizy
-	sub ebx, ebp
-
-rmach1b: sub edx, 88888888h                    ;xlo
-	sbb ebp, ebp
-rmach4a: mov ah, byte [ecx+88888888h]      ;palookup
-	mov cl, byte [ebx]                      ;bufplc
-rmach2b: sub esi, 88888888h                    ;ylo
-rmach3b: sbb ebx, 88888888h                    ;xhi*tilesizy + yhi+ycarry
-rmach5b: and ebp, 88888888h                    ;tilesizy
-rmach4b: mov al, byte [ecx+88888888h]      ;palookup
-	sub ebx, ebp
-
-	shl eax, 16
-
-	mov cl, byte [ebx]                      ;bufplc
-rmach1c: sub edx, 88888888h                    ;xlo
-	sbb ebp, ebp
-rmach2c: sub esi, 88888888h                    ;ylo
-rmach3c: sbb ebx, 88888888h                    ;xhi*tilesizy + yhi+ycarry
-rmach5c: and ebp, 88888888h                    ;tilesizy
-	sub ebx, ebp
-
-rmach1d: sub edx, 88888888h                    ;xlo
-	sbb ebp, ebp
-rmach4c: mov ah, byte [ecx+88888888h]      ;palookup
-	mov cl, byte [ebx]                      ;bufplc
-rmach2d: sub esi, 88888888h                    ;ylo
-rmach3d: sbb ebx, 88888888h                    ;xhi*tilesizy + yhi+ycarry
-rmach5d: and ebp, 88888888h                    ;tilesizy
-rmach4d: mov al, byte [ecx+88888888h]      ;palookup
-	sub ebx, ebp
-
-rmach6a: mov dword [edi+88888888h], eax    ;vidcntoffs
-	sub edi, 4
-	jnz NEAR begrhline
-endrhline:
-	pop ebp
-	ret
-*/
+    i6 = i1;
+    do {
+	    i3 = ((i3&0xffffff00)|(*((unsigned char *)i2)));
+	    i4 -= rmach_eax;
+	    ebp = (((i4+rmach_eax) < i4) ? -1 : 0);
+	    i5 -= rmach_ebx;
+	    if ((i5 + rmach_ebx) < i5) i2 -= (rmach_ecx+1);
+	    else i2 -= rmach_ecx;
+	    ebp &= rmach_esi;
+	    i1 = ((i1&0xffffff00)|(((unsigned char *)i3)[rmach_edx]));
+	    ((unsigned char *)rmach6b)[i6] = (i1&0xff);
+	    i2 -= ebp;
+	    i6--;
+    } while (i6);
 } /* rhlineasm4 */
 
 
@@ -333,39 +266,27 @@ void rmhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
         : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
         : "cc", "memory");
 	*/
-/*
-_asm_rmhlineasm4:
-	push ebp
+    unsigned long ebp = i6 - i1;
+    unsigned long rmach6b = ebp-1;
 
-	cmp eax, 0
-	jle short endrmhline
+    if (i1 <= 0) return;
 
-	lea ebp, [edi-1]
-	sub ebp, eax
-	mov dword [rmmach6+2], ebp
-	mov edi, eax
-	jmp short begrmhline
-
-ALIGN 16
-begrmhline:
-	mov cl, byte [ebx]                      ;bufplc
-rmmach1: sub edx, 88888888h                    ;xlo
-	sbb ebp, ebp
-rmmach2: sub esi, 88888888h                    ;ylo
-rmmach3: sbb ebx, 88888888h                    ;xhi*tilesizy + yhi+ycarry
-rmmach5: and ebp, 88888888h                    ;tilesizy
-	cmp cl, 255
-	je short rmskip
-rmmach4: mov al, byte [ecx+88888888h]      ;palookup
-rmmach6: mov byte [edi+88888888h], al      ;vidcntoffs
-rmskip:
-	sub ebx, ebp
-	dec edi
-	jnz short begrmhline
-endrmhline:
-	pop ebp
-	ret
-*/
+    i6 = i1;
+    do {
+	    i3 = ((i3&0xffffff00)|(*((unsigned char *)i2)));
+	    i4 -= rmach_eax;
+	    ebp = (((i4+rmach_eax) < i4) ? -1 : 0);
+	    i5 -= rmach_ebx;
+	    if ((i5 + rmach_ebx) < i5) i2 -= (rmach_ecx+1);
+	    else i2 -= rmach_ecx;
+	    ebp &= rmach_esi;
+	    if ((i3&0xff) != 255) {
+		    i1 = ((i1&0xffffff00)|(((unsigned char *)i3)[rmach_edx]));
+		    ((unsigned char *)rmach6b)[i6] = (i1&0xff);
+	    }
+	    i2 -= ebp;
+	    i6--;
+    } while (i6);
 } /* rmhlineasm4 */
 
 
