@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------
 # Makefile for building BUILD on Unix/Cygwin systems.
 #
-#  Written by Ryan C. Gordon (icculus@lokigames.com)
+#  Written by Ryan C. Gordon (icculus@linuxgames.com)
 #   Do NOT contact Ken Silverman for support of BUILD on Unix or Linux.
 #----------------------------------------------------------------------------
 
@@ -39,6 +39,12 @@ endif
 #-----------------------------------------------------------------------------#
 USE_ASM := -DUSE_I386_ASM
 
+
+#-----------------------------------------------------------------------------#
+# Don't touch this unless you know what you are doing.
+#-----------------------------------------------------------------------------#
+#useperl := true
+useperl := false
 
 
 #-----------------------------------------------------------------------------#
@@ -85,6 +91,13 @@ else
   ASMOBJFMT = elf
 endif
 
+ifeq ($(strip $(useperl)),true)
+  CFLAGS += -DUSE_PERL
+  LDPERL := $(shell perl -MExtUtils::Embed -e ldopts)
+  CCPERL := $(shell perl -MExtUtils::Embed -e ccopts)
+  PERLOBJS += buildperl.o
+endif
+
 LINKER = gcc
 CFLAGS += $(USE_ASM) -Werror -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
@@ -113,7 +126,7 @@ GAMEOBJS := $(GAMEOBJS1:.asm=.o)
 BUILDOBJS1 := $(BUILDSRCS:.c=.o)
 BUILDOBJS := $(BUILDOBJS1:.asm=.o)
 
-CLEANUP = $(GAMEOBJS) $(BUILDOBJS) \
+CLEANUP = $(GAMEOBJS) $(BUILDOBJS) $(PERLOBJS) \
           $(GAMEEXE) $(BUILDEXE) \
           $(wildcard *.exe) $(wildcard *.obj) \
           $(wildcard *~) $(wildcard *.err) \
@@ -121,8 +134,14 @@ CLEANUP = $(GAMEOBJS) $(BUILDOBJS) \
 
 all: $(BUILDEXE) $(GAMEEXE)
 
-$(GAMEEXE) : $(GAMEOBJS)
-	$(LINKER) -o $(GAMEEXE) $(LDFLAGS) $(GAMEOBJS)
+ifeq ($(strip $(useperl)),true)
+buildperl.o : buildperl.c
+	$(CC) -c -o $@ $< $(CFLAGS) $(CCPERL)
+endif
+
+    # !!! can I lose the explicit path somehow?
+$(GAMEEXE) : $(GAMEOBJS) $(PERLOBJS)
+	$(LINKER) -o $(GAMEEXE) $(LDFLAGS) $(LDPERL) $(PERLOBJS) $(GAMEOBJS) /usr/lib/perl5/i386-linux/CORE/libperl.a
 
 $(BUILDEXE) : $(BUILDOBJS)
 	$(LINKER) -o $(BUILDEXE) $(LDFLAGS) $(BUILDOBJS)
@@ -157,13 +176,13 @@ win32bins:
 	wmake -f Makefile.w32 clean
 	wmake -f Makefile.w32
 	cp $(SDL_LIB_DIR)/SDL.dll .
-	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-win32bins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@lokigames.com)\r\n\r\n" |zip -9rz ../BUILD-win32bins-$(shell date +%m%d%Y).zip $(BINSCOMMON) SDL.dll README-win32bins.txt
+	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-win32bins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@linuxgames.com)\r\n\r\n" |zip -9rz ../BUILD-win32bins-$(shell date +%m%d%Y).zip $(BINSCOMMON) SDL.dll README-win32bins.txt
 
 dosbins:
 	wmake -f Makefile.dos clean
 	wmake -f Makefile.dos
 	cp C:/WATCOM/BINW/DOS4GW.EXE .
-	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-dosbins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@lokigames.com)\r\n\r\n" |zip -9rz ../BUILD-dosbins-$(shell date +%m%d%Y).zip $(BINSCOMMON) README-dosbins.txt DOS4GW.EXE
+	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-dosbins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@linuxgames.com)\r\n\r\n" |zip -9rz ../BUILD-dosbins-$(shell date +%m%d%Y).zip $(BINSCOMMON) README-dosbins.txt DOS4GW.EXE
 
 else
 msbins: nocygwin
