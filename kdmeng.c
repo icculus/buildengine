@@ -9,14 +9,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 
-#ifdef PLATFORM_DOS
-#include <conio.h>
-#include <dos.h>
-#include <io.h>
-#elif PLATFORM_UNIX
-#include "unix_compat.h"
-//#include <sys/io.h>
-#endif
+#include "platform.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>

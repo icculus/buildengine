@@ -7,17 +7,9 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
-#ifdef PLATFORM_DOS
-#include <io.h>
-#include <dos.h>
-#endif
-
 #ifdef PLATFORM_UNIX
-#include <stdio.h>
-#include <unistd.h>
-
 // !!! need support for Windows.  --ryan.
-#ifndef __CYGWIN__
+#if ((defined __GNUC__) && (!defined __CYGWIN__))
 // need this to get FNM_CASEFOLD to be defined in fnmatch.h ...
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -26,22 +18,19 @@
 #include <fnmatch.h>
 #endif
 
-#include <sys/types.h>
 #include <dirent.h>
-#include "unix_compat.h"
 #endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "platform.h"
 #include "build.h"
 #include "pragmas.h"
 
 #include "display.h"
 
-#ifdef PLATFORM_DOS
-#pragma intrinsic(min);
-#pragma intrinsic(max);
+#if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
 #define ENDLINE_CHAR '\r'
 #endif
 
@@ -92,7 +81,7 @@ long hvel;
 
 static long synctics = 0, lockclock = 0;
 
-extern long stereomode;
+extern volatile long stereomode;
 extern char vgacompatible;
 
 extern char picsiz[MAXTILES];
@@ -6150,7 +6139,7 @@ int menuselect(void)
 			}
 			else
 			{
-                #ifdef PLATFORM_DOS
+                #if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
     				strcat(menupath,"\\");
                 #elif PLATFORM_UNIX
     				strcat(menupath,"/");
@@ -6319,6 +6308,9 @@ short whitelinescan(short dalinehighlight)
 	bufplc = ((bufplc+1)&4095);                  \
 }                                               \
 
+
+// !!! we really need to lose this ENDLINE_CHAR shit.
+
 int loadnames(void)
 {
 	char buffer[80], firstch, ch;
@@ -6352,7 +6344,7 @@ int loadnames(void)
 
 		loadbyte(fil,tempbuf,bufplc,firstch);
 
-        #ifdef PLATFORM_DOS
+        #if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
     		if (firstch == 10) loadbyte(fil,tempbuf,bufplc,firstch);
         #endif
 	}

@@ -4,22 +4,13 @@
 // This file has been modified from Ken Silverman's original release
 
 #include <fcntl.h>
-
-#ifdef PLATFORM_UNIX
-#include <unistd.h>
-#include "unix_compat.h"
-//#include <sys/io.h>
-
-#elif (defined PLATFORM_DOS)
-#include <io.h>
-#include <dos.h>
-#endif
-
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+#include "platform.h"
 
 #include "display.h"
 #include "build.h"
@@ -354,8 +345,9 @@ static short neartagsector, neartagwall, neartagsprite;
 static long lockclock, neartagdist, neartaghitdist;
 extern long frameplace, pageoffset, ydim16;
 static long globhiz, globloz, globhihit, globlohit;
-static long stereomode = 0;
-extern long stereowidth, stereopixelwidth, activepage;
+//volatile long stereomode = 0;
+extern long stereowidth, stereopixelwidth;
+volatile long activepage;
 
 	//Over the shoulder mode variables
 static long cameradist = -1, cameraang = 0, cameraclock = 0;
@@ -4909,8 +4901,14 @@ void initlava(void)
 	lavanumframes = 0;
 }
 
-#ifdef PLATFORM_DOS
-#pragma aux addlava =\
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
+
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        long addlava(int param);
+    #endif
+  
+    #pragma aux addlava =\
 	"mov al, byte ptr [ebx-133]",\
 	"mov dl, byte ptr [ebx-1]",\
 	"add al, byte ptr [ebx-132]",\
@@ -4921,8 +4919,8 @@ void initlava(void)
 	"add al, dl",\
 	parm [ebx]\
 	modify exact [eax edx]
-#else
-    #ifdef USE_I386_ASM
+
+  #elif (defined __GNUC__)
 	static long addlava (int i1)
 	{
 	long retval;
@@ -4938,8 +4936,15 @@ void initlava(void)
 	" : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
 	return (retval);
 	}	
+
+  #else
+      #error Please write Assembly code for your platform!
     #endif
+
+#else   // USE_I386_ASM
+    #error Please implement this function in C.
 #endif
+
 
 void movelava(char *dapic)
 {

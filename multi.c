@@ -7,12 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if (!defined PLATFORM_UNIX)
-#include <dos.h>
-#include <i86.h>
-#else
-#include "unix_compat.h"
-#endif
+#include "platform.h"
 
 extern long getcrc(char *buffer, short bufleng);
 extern void processreservedmessage(short tempbufleng, char *datempbuf);

@@ -7,6 +7,40 @@
 
 #ifdef PLATFORM_DOS
 #include "ves2.h"
+#else
+#include "SDL.h"
+
+// This part sucks.
+#if (defined __WATCOMC__)
+#pragma aux (__cdecl) SDL_Init;
+#pragma aux (__cdecl) SDL_PumpEvents;
+#pragma aux (__cdecl) SDL_GetMouseState;
+#pragma aux (__cdecl) SDL_WM_GrabInput;
+#pragma aux (__cdecl) SDL_ToggleFullScreen;
+#pragma aux (__cdecl) SDL_GetError;
+#pragma aux (__cdecl) SDL_SetEventFilter;
+#pragma aux (__cdecl) SDL_WM_SetCaption;
+#pragma aux (__cdecl) SDL_WM_ToggleFullScreen;
+#pragma aux (__cdecl) SDL_ClearError;
+#pragma aux (__cdecl) SDL_SetVideoMode;
+#pragma aux (__cdecl) SDL_ClearError;
+#pragma aux (__cdecl) SDL_Quit;
+#pragma aux (__cdecl) SDL_QuitSubSystem;
+#pragma aux (__cdecl) SDL_GetTicks;
+#pragma aux (__cdecl) SDL_GetVideoInfo;
+#pragma aux (__cdecl) SDL_ListModes;
+#pragma aux (__cdecl) SDL_SetColors;
+#pragma aux (__cdecl) SDL_ShowCursor;
+#pragma aux (__cdecl) SDL_LockSurface;
+#pragma aux (__cdecl) SDL_UnlockSurface;
+#pragma aux (__cdecl) SDL_FillRect;
+#pragma aux (__cdecl) SDL_Delay;
+#pragma aux (__cdecl) SDL_AddTimer;
+#pragma aux (__cdecl) SDL_RemoveTimer;
+#pragma aux (__cdecl) SDL_Flip;
+#pragma aux (__cdecl) SDL_UpdateRect;
+#endif
+
 #endif
 
 extern long xres, yres, bytesperline, imageSize, maxpages;
@@ -45,17 +79,47 @@ void _idle(void);
 void *_getVideoBase(void);
 void _initkeys(void);
 
-// !!! move the stuff from unix_compat.h into here. --ryan.
+// VESA replacement code: The Unix (not-actually-VESA) version of this is
+//  originally using SDL (Simple Directmedia Layer: http://www.libsdl.org/),
+//  and is stored in sdl_driver.c, but there's no reason another driver
+//  couldn't be dropped in, so long as it implements these functions. Please
+//  reference sdl_driver.c and ves2.h (the original code) for all the nuances
+//  and global variables that need to get set up correctly.
 
+void getvalidvesamodes(void);
+int VBE_getPalette(long start, long num, char *dapal);
+int VBE_setPalette(long start, long num, char *palettebuffer);
+int setvesa(long x, long y);
+void uninitvesa(void);
+void setvmode(int mode);
+unsigned char readpixel(long offset);
+void drawpixel(long offset, Uint8 pixel);
+void drawpixels(long offset, Uint16 pixels);
+void drawpixelses(long offset, Uint32 pixelses);
+void drawpixel16(long offset);
+void fillscreen16 (long input1, long input2, long input3);
+void limitrate(void);
+//void printext16(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
+void setactivepage(long dapagenum);
+//void clear2dscreen(void);
 
-// rcg08012000 this could use a better abstraction...maybe I want a non-SDL
-//  driver on UNIX?  GGI?
-#ifdef PLATFORM_DOS
-#define VIDEOBASE 0xa0000
-#else
-extern SDL_Surface *surface;
-#define VIDEOBASE surface->pixels
-#endif
+// mouse/keystuff stuff. Also implemented in sdl_driver.c ...
+int setupmouse(void);
+void readmousexy(short *x, short *y);
+void readmousebstatus(short *bstatus);
+void keyhandler(void);
+unsigned char _readlastkeyhit(void);
+
+// timer krap.
+void timerhandler(void);
+
+// resolution inits. sdl_driver.c ...
+int setgamemode(char davidoption, long daxdim, long daydim);
+int _setgamemode(char davidoption, long daxdim, long daydim);
+void qsetmode640350(void);
+void qsetmode640480(void);
+
+unsigned long getticks();
 
 #endif
 

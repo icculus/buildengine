@@ -16,18 +16,7 @@
 #include <sys/stat.h>
 #include "pragmas.h"
 
-#ifdef PLATFORM_UNIX
-#include "unix_compat.h"
-//#include <sys/io.h>
-#include <unistd.h>
-#endif
-
-#ifdef PLATFORM_DOS
-#include <io.h>
-#include <conio.h>
-#include <i86.h>
-#include <dos.h>
-#endif
+#include "platform.h"
 
 #include "build.h"
 #include "cache1d.h"
@@ -105,11 +94,6 @@ extern void setcolor16(int color);
 extern void _uninitengine(void);
 extern void faketimerhandler(void);
 extern void clear2dscreen(void);
-
-#ifdef PLATFORM_DOS
-#pragma intrinsic(min);
-#pragma intrinsic(max);
-#endif
 
 #define MAXCLIPNUM 512
 #define MAXPERMS 512
@@ -230,8 +214,14 @@ char kensmessage[128];
 #endif
 
 
-#ifdef PLATFORM_DOS
-#pragma aux getkensmessagecrc =\
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
+
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        unsigned long getkensmessagecrc(long param);
+    #endif
+
+    #pragma aux getkensmessagecrc =\
 	"xor eax, eax",\
 	"mov ecx, 32",\
 	"beg: mov edx, dword ptr [ebx+ecx*4-4]",\
@@ -242,8 +232,7 @@ char kensmessage[128];
 	parm [ebx]\
 	modify exact [eax ebx ecx edx]\
 
-#else
-    #ifdef USE_I386_ASM
+  #elif (defined __GNUC__)
         static unsigned long getkensmessagecrc(long param) {
             long retval;
             __asm__ __volatile__ ("
@@ -257,13 +246,16 @@ char kensmessage[128];
             " : "=a" (retval) : "b" (param) : "ecx", "edx", "cc");
             return(retval);
         } // getkensmessagecrc
+
     #else
+        #error Please write Assembly for your platform.
+  #endif
+
+#else  // USE_I386_ASM
 
         // out of respect to Ken, the above ASM needs to be converted to
         //  portable C, so we can legitimately check this on all platforms.
         #define getkensmessagecrc(x) (0x56c764d4)
-
-    #endif
 
 #endif
 
@@ -491,17 +483,22 @@ extern long drawslab(long,long,long,long,long,long);
 #endif
 
 
-#ifdef PLATFORM_DOS
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
 
-#pragma aux nsqrtasm =\
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        long nsqrtasm(int param);
+    #endif
+
+    #pragma aux nsqrtasm =\
 	"test eax, 0xff000000",\
 	"mov ebx, eax",\
 	"jnz short over24",\
 	"shr ebx, 12",\
-	"mov cx, word ptr _shlookup[ebx*2]",\
+   "mov cx, word ptr shlookup[ebx*2]",\
 	"jmp short under24",\
 	"over24: shr ebx, 24",\
-	"mov cx, word ptr _shlookup[ebx*2+8192]",\
+   "mov cx, word ptr shlookup[ebx*2+8192]",\
 	"under24: shr eax, cl",\
 	"mov cl, ch",\
 	"mov ax, word ptr sqrtable[eax*2]",\
@@ -509,10 +506,7 @@ extern long drawslab(long,long,long,long,long,long);
 	parm nomemory [eax]\
 	modify exact [eax ebx ecx]\
 
-#else
-
-    #ifdef USE_I386_ASM
-
+  #elif (defined __GNUC__)
         static long nsqrtasm(int i1)
         {
             long retval;
@@ -534,20 +528,27 @@ extern long drawslab(long,long,long,long,long,long);
         } // nsqrtasm
 
     #else
+        #error Please write Assembly code for your platform!
+  #endif
+
+#else // USE_I386_ASM
 
         static long nsqrtasm(long eax)
         {
             return((long) sqrt(eax));
         } // nsqrtasm
 
-    #endif
-
 #endif
 
 
-#ifdef PLATFORM_DOS
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
 
-#pragma aux msqrtasm =\
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        long msqrtasm(int param);
+    #endif
+
+    #pragma aux msqrtasm =\
 	"mov eax, 0x40000000",\
 	"mov ebx, 0x20000000",\
 	"begit: cmp ecx, eax",\
@@ -564,10 +565,7 @@ extern long drawslab(long,long,long,long,long,long);
 	parm nomemory [ecx]\
 	modify exact [eax ebx ecx]\
 
-#elif (defined PLATFORM_UNIX)
-
-    #ifdef USE_I386_ASM
-
+  #elif (defined __GNUC__)
         static long msqrtasm(int i1)
         {
             int retval;
@@ -590,19 +588,28 @@ extern long drawslab(long,long,long,long,long,long);
         } // msqrtasm
 
     #else
+        #error Please write Assembly for your platform.
+  #endif
+
+#else   // USE_I386_ASM
+
         static inline long msqrtasm (int input1)
         {
             // this isn't used in the C version, as it just sets up a table
             //  for use by the ASM version of ksqrtasm. --ryan.
         } // msqrtasm
-    #endif
 #endif
 
 
-#ifdef PLATFORM_DOS
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
+
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        long krecipasm(long param);
+    #endif
 
 	//0x007ff000 is (11<<13), 0x3f800000 is (127<<23)
-#pragma aux krecipasm =\
+    #pragma aux krecipasm =\
 	"mov fpuasm, eax",\
 	"fild dword ptr fpuasm",\
 	"add eax, eax",\
@@ -620,9 +627,7 @@ extern long drawslab(long,long,long,long,long,long);
 	parm [eax]\
 	modify exact [eax ebx ecx]\
 
-#elif (defined PLATFORM_UNIX)
-
-    #ifdef USE_I386_ASM
+  #elif (defined __GNUC__)
         static long krecipasm(long i1)
         {
           long retval;
@@ -634,6 +639,10 @@ extern long drawslab(long,long,long,long,long,long);
         } // krecipasm
     
     #else
+        #error Please write Assembly for your platform!
+  #endif
+
+#else  // USE_I386_ASM
 
         static long krecipasm(long x)
         {
@@ -669,15 +678,19 @@ extern long drawslab(long,long,long,long,long,long);
             return x;
         }
     
-    #endif  USE_I386_ASM
-
-#endif /* PLATFORM_UNIX */
+#endif
 
 
 
-#ifdef PLATFORM_DOS
+#if (defined USE_I386_ASM)
 
-#pragma aux setgotpic =\
+  #if (defined __WATCOMC__)
+
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        int setgotpic(long param);
+    #endif
+
+    #pragma aux setgotpic =\
 	"mov ebx, eax",\
 	"cmp byte ptr walock[eax], 200",\
 	"jae skipit",\
@@ -691,9 +704,8 @@ extern long drawslab(long,long,long,long,long,long);
 	parm [eax]\
 	modify exact [eax ebx ecx edx]\
 
-#else
+  #elif (defined __GNUC__)
 
-    #ifdef USE_I386_ASM
         int setgotpic(long i1)
         {
             int retval = 0;
@@ -713,15 +725,22 @@ extern long drawslab(long,long,long,long,long,long);
         } // if
 
     #else
-        #error Implement me in C!
+        #error Please write Assembly for your platform!
     #endif
 
+#else   // USE_I386_ASM
+    #error Implement me in C!
 #endif
 
 
-#ifdef PLATFORM_DOS
+#if (defined USE_I386_ASM)
+  #if (defined __WATCOMC__)
 
-#pragma aux getclipmask =\
+    #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+        long getclipmask(int i1, int i2, int i3, int i4);
+    #endif
+
+    #pragma aux getclipmask =\
 	"sar eax, 31",\
 	"add ebx, ebx",\
 	"adc eax, eax",\
@@ -736,9 +755,7 @@ extern long drawslab(long,long,long,long,long,long);
 	parm [eax][ebx][ecx][edx]\
 	modify exact [eax ebx ecx edx]\
 
-#elif (defined PLATFORM_UNIX)
-
-    #ifdef USE_I386_ASM	
+  #elif (defined __GNUC__)
         long getclipmask(int i1, int i2, int i3, int i4)
         {
             int retval;
@@ -758,10 +775,13 @@ extern long drawslab(long,long,long,long,long,long);
         	  : "cc", "memory");
             return(retval);
         } // getclipmask
+
     #else
-        #error Implement me in C!
+        #error Please write Assembly for your platform!
     #endif
 
+#else  // USE_I386_ASM
+    #error Implement me in C!
 #endif
 
 
@@ -2310,9 +2330,9 @@ int saveboard(char *filename, long *daposx, long *daposy, long *daposz,
 	short fil, i, j, numsprites;
     int permissions = 0;
 
-    #ifdef PLATFORM_DOS
+    #if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
         permissions = S_IWRITE;
-    #else PLATFORM_UNIX
+    #elif (defined PLATFORM_UNIX)
         permissions = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
     #endif
 
@@ -5878,8 +5898,10 @@ void draw2dgrid(long posxe, long posye, short ange, long zoome, short gride)
 		if ((yp1 < ydim16) && (yp2 >= 0) && (yp2 >= yp1))
 		{
 			setcolor16(8);
+                        #ifdef PLATFORM_DOS
 			koutp(0x3ce,0x8);
-			templong = ((yp1*640+pageoffset)>>3)+(long)VIDEOBASE;
+                        #endif
+                        templong = ((yp1*640+pageoffset)>>3)+(long)_getVideoBase();
 			tempy = yp2-yp1+1;
 			mask = 0;
 			xp1 = 320-mulscale14(posxe+131072,zoome);
@@ -6166,7 +6188,7 @@ void __printext256(long xpos, long ypos, short col, short backcol, char name[82]
 
     #if (!defined PLATFORM_DOS)
         if (should_update)
-            SDL_UpdateRect(surface, xpos, ypos, charxsiz * i, 8); // !!! temp!  --ryan.
+            SDL_UpdateRect(SDL_GetVideoSurface(), xpos, ypos, charxsiz * i, 8); // !!! temp!  --ryan.
     #endif
 
 }
@@ -7722,7 +7744,7 @@ void clearview(long dacol)
 		for(y=windowy1;y<=windowy2;y++)
 		{
 			clearbufbyte((void *)p,dx,dacol);
-			clearbufbyte((void *)p+65536,dx,dacol);
+                        clearbufbyte((void *)(p+65536),dx,dacol);
 			p += ylookup[1];
 		}
 		faketimerhandler();
@@ -7870,9 +7892,9 @@ void completemirror(void)
 	i = windowx2-windowx1-mirrorsx2-mirrorsx1; mirrorsx2 -= mirrorsx1;
 	for(dy=mirrorsy2-mirrorsy1;dy>=0;dy--)
 	{
-		copybufbyte((void *)p+1,tempbuf,mirrorsx2+1);
+                copybufbyte((void *)(p+1),tempbuf,mirrorsx2+1);
 		tempbuf[mirrorsx2] = tempbuf[mirrorsx2-1];
-		copybufreverse(&tempbuf[mirrorsx2],(void *)p+i,mirrorsx2+1);
+                copybufreverse(&tempbuf[mirrorsx2],(void *)(p+i),mirrorsx2+1);
 		p += ylookup[1];
 		faketimerhandler();
 	}

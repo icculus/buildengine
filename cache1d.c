@@ -3,25 +3,14 @@
 // See the included license file "BUILDLIC.TXT" for license info.
 // This file has been modified from Ken Silverman's original release
 
-#ifdef PLATFORM_DOS
-#include <dos.h>
-#endif
-
 #include <stdio.h>
 #include <fcntl.h>
-
-#ifdef PLATFORM_DOS
-#include <io.h>
-#endif
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#ifdef PLATFORM_UNIX
-#include <stdlib.h>
-#include <unistd.h>
-#include "unix_compat.h"
-#endif
+#include "platform.h"
+#include "display.h"
 
 #include "pragmas.h"
 #include "cache1d.h"

@@ -13,8 +13,11 @@
 // See the included license file "BUILDLIC.TXT" for license info.
 // This file has been modified from Ken Silverman's original release
 
-#ifdef PLATFORM_DOS
-#error Do not compile this. Just include pragmas.h instead.
+
+#if (defined __WATCOMC__)
+  #if ((defined PLATFORM_DOS) || (defined PLATFORM_WIN32))
+    #error Do not compile this. Just include pragmas.h instead.
+  #endif
 #endif
 
 #ifdef USE_I386_ASM
