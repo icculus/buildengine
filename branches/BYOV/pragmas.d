@@ -1,0 +1,1 @@
+pragmas.o: pragmas.c
