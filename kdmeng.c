@@ -8,11 +8,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <fcntl.h>
-
-#include "platform.h"
-
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#include "platform.h"
+#include "pragmas.h"
+#include "cache1d.h"
 
 #define NUMCHANNELS 16
 #define MAXWAVES 256
@@ -129,6 +130,7 @@ extern long bound2short(long,long,long);
 #pragma aux bound2short parm [ecx][esi][edi];
 
 static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
+void fsin(long *i1);
 #pragma aux fsin =\
 	"fldpi",\
 	"fimul dword ptr [eax]",\
@@ -138,6 +140,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	"fistp dword ptr [eax]",\
 	parm [eax]\
 
+unsigned short convallocate(long i1);
 #pragma aux convallocate =\
 	"mov ax, 0x100",\
 	"int 0x31",\
@@ -147,6 +150,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [bx]\
 	modify [eax edx]\
 
+void convdeallocate(long i1);
 #pragma aux convdeallocate =\
 	"mov ax, 0x101",\
 	"mov dx, sndselector",\
@@ -154,6 +158,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [dx]\
 	modify [eax edx]\
 
+long resetsb(void);
 #pragma aux resetsb =\
 	"mov edx, sbport",\
 	"add edx, 0x6",\
@@ -181,6 +186,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	"resetend:",\
 	modify [ebx ecx edx]\
 
+long sbin(void);
 #pragma aux sbin =\
 	"xor eax, eax",\
 	"mov dx, word ptr sbport[0]",\
@@ -192,6 +198,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	"in al, dx",\
 	modify [edx]\
 
+void sbout(long i1);
 #pragma aux sbout =\
 	"mov dx, word ptr sbport[0]",\
 	"add dl, 0xc",\
@@ -204,6 +211,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [eax]\
 	modify [edx]\
 
+long sbmixin(long);
 #pragma aux sbmixin =\
 	"mov dx, word ptr sbport[0]",\
 	"add dl, 0x4",\
@@ -214,6 +222,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [eax]\
 	modify [edx]\
 
+void sbmixout(long i1, long i2);
 #pragma aux sbmixout =\
 	"mov dx, word ptr sbport[0]",\
 	"add dl, 0x4",\
@@ -224,6 +233,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [eax][ebx]\
 	modify [edx]\
 
+void findpas(void);
 #pragma aux findpas =\
 	"mov eax, 0x0000bc00",\
 	"mov ebx, 0x00003f3f",\
@@ -245,6 +255,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	"sbb eax, eax",\
 	modify [eax ebx ecx edx]\
 
+void calcvolookupmono(long i1, long i2, long i3);
 #pragma aux calcvolookupmono =\
 	"mov ecx, 64",\
 	"lea edx, [eax+ebx]",\
@@ -263,6 +274,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [edi][eax][ebx]\
 	modify [ecx edx]\
 
+void calcvolookupstereo(long i1, long i2, long i3, long i4, long i5);
 #pragma aux calcvolookupstereo =\
 	"mov esi, 128",\
 	"begit: mov dword ptr [edi], eax",\
@@ -279,6 +291,7 @@ static long oneshr10 = 0x3a800000, oneshl14 = 0x46800000;
 	parm [edi][eax][ebx][ecx][edx]\
 	modify [esi]\
 
+long gettimerval(void);
 #pragma aux gettimerval =\
 	"xor eax, eax",\
 	"xor ebx, ebx",\
@@ -472,7 +485,7 @@ void initsb(char dadigistat, char damusistat, long dasamplerate, char danumspeak
 
 	timecount = notecnt = musicstatus = musicrepeat = 0;
 
-	clearbuf(FP_OFF(stemp),sizeof(stemp)>>2,32768L);
+	clearbuf((void *)(FP_OFF(stemp)),sizeof(stemp)>>2,32768L);
 	for(i=0;i<256;i++)
 		for(j=0;j<16;j++)
 		{
@@ -822,7 +835,7 @@ uninitsb()
 
 void startwave(long wavnum, long dafreq, long davolume1, long davolume2, long dafrqeff, long davoleff, long dapaneff)
 {
-	long i, j, chanum;
+	long i, /*j,*/ chanum;
 
 	if ((davolume1|davolume2) == 0) return;
 
@@ -923,7 +936,7 @@ void preparesndbuf(void)
 	long i, j, k, voloffs1, voloffs2, *stempptr;
 	long daswave, dasinc, dacnt;
 	long ox, oy, x, y;
-	char *sndptr, v1, v2;
+	//char *sndptr, v1, v2;
 
 	kdmintinprep++;
 	if (kdminprep != 0) return;
@@ -1217,7 +1230,7 @@ void loadwaves(char *wavename)
 
 int loadsong(char *filename)
 {
-	long i, fil;
+	long /*i,*/ fil;
 
 	if (musistat != 1) return(0);
 	musicoff();

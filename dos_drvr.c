@@ -22,10 +22,72 @@
 #include <i86.h>
 #include <dos.h>
 
+#include "platform.h"
+#include "display.h"
 #include "build.h"
 #include "cache1d.h"
-#include "dos_driver.h"
 #include "ves2.h"
+
+static unsigned char tempbuf[MAXWALLS];
+extern long transarea;
+extern long totalarea;
+extern long beforedrawrooms;
+extern long stereowidth, stereopixelwidth, ostereopixelwidth;
+extern volatile long stereomode, visualpage, activepage, whiteband, blackband;
+extern volatile char oa1, o3c2, ortca, ortcb, overtbits, laststereoint;
+
+extern char pow2char[8];
+extern long pow2long[32];
+extern char kensmessage[128];
+
+static short capturecount = 0;
+static char screenalloctype = 255;
+
+static char pcxheader[128] =
+{
+        0xa,0x5,0x1,0x8,0x0,0x0,0x0,0x0,0x3f,0x1,0xc7,0x0,
+        0x40,0x1,0xc8,0x0,0x0,0x0,0x0,0x8,0x8,0x8,0x10,0x10,
+        0x10,0x18,0x18,0x18,0x20,0x20,0x20,0x28,0x28,0x28,0x30,0x30,
+        0x30,0x38,0x38,0x38,0x40,0x40,0x40,0x48,0x48,0x48,0x50,0x50,
+        0x50,0x58,0x58,0x58,0x60,0x60,0x60,0x68,0x68,0x68,0x70,0x70,
+        0x70,0x78,0x78,0x78,0x0,0x1,0x40,0x1,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+        0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,
+};
+
+
+static char vgapal16[48] =
+{
+        00,00,00,00,00,42,00,42,00,00,42,42,42,00,00,42,00,42,42,21,00,42,42,42,
+        21,21,21,21,21,63,21,63,21,21,63,63,63,21,21,63,21,63,63,63,21,63,63,63,
+};
+
+static void (__interrupt __far *oldtimerhandler)(void);
+static void (__interrupt __far *oldkeyhandler)(void);
+
+extern long setvlinebpl(long);
+#pragma aux setvlinebpl parm [eax];
+
+void *kkmalloc(size_t size);
+#pragma aux kkmalloc =\
+        "call kmalloc",\
+        parm [eax]\
+
+
+void kkfree(void *buffer);
+#pragma aux kkfree =\
+        "call kfree",\
+        parm [eax]\
+
+
+unsigned char _readlastkeyhit(void)
+{
+    return(kinp(0x60));
+} // _readlastkeyhit
+
 
 void _uninitengine(void)
 {
@@ -256,7 +318,7 @@ void drawline16(long x1, long y1, long x2, long y2, char col)
 		dx--;
 
 		koutpw(0x3ce,0x8+(lmask<<8)); drawpixel(p,readpixel(p)); p++;
-		if (dx > 0) { koutp(0x3cf,0xff); clearbufbyte(p,dx,0L); p += dx; }
+		if (dx > 0) { koutp(0x3cf,0xff); clearbufbyte((void *)p,dx,0L); p += dx; }
 		koutp(0x3cf,rmask); drawpixel(p,readpixel(p));
 		return;
 	}
@@ -466,7 +528,7 @@ void _nextpage(void)
 					}
 					break;
 				case 2:
-					copybuf(frameplace,0xa0000,64000>>2);
+					copybuf((void *)frameplace,(void *)0xa0000,64000>>2);
 					break;
 				case 6:
 					if (!activepage) redblueblit(screen,&screen[65536],64000L);
@@ -539,8 +601,8 @@ void stereonextpage(void)
 	{
 		if (stereomode == 1)
 		{
-			clearbuf(ylookup[ydim-1]+frameplace,xdim>>4,whiteband);
-			clearbuf(ylookup[ydim-1]+frameplace+(xdim>>2),(xdim>>2)-(xdim>>4),blackband);
+			clearbuf((void *)(ylookup[ydim-1]+frameplace),xdim>>4,whiteband);
+			clearbuf((void *)(ylookup[ydim-1]+frameplace+(xdim>>2)),(xdim>>2)-(xdim>>4),blackband);
 		}
 		activepage++;
 		setactivepage(activepage);
@@ -548,8 +610,8 @@ void stereonextpage(void)
 	}
 	if (stereomode == 1)
 	{
-		clearbuf(ylookup[ydim-1]+frameplace,(xdim>>2)-(xdim>>4),whiteband);
-		clearbuf(ylookup[ydim-1]+frameplace+xdim-(xdim>>2),xdim>>4,blackband);
+		clearbuf((void *)(ylookup[ydim-1]+frameplace),(xdim>>2)-(xdim>>4),whiteband);
+		clearbuf((void *)(ylookup[ydim-1]+frameplace+xdim-(xdim>>2)),xdim>>4,blackband);
 	}
 	if (visualpage < (numpages&~1)-2) visualpage += 2; else visualpage &= 1;
 	if (activepage < (numpages&~1)-1) activepage++; else activepage = 0;
@@ -558,8 +620,9 @@ void stereonextpage(void)
 
 void setstereo(long dastereomode)
 {
-	long i, dist, blackdist, whitedist, t1, t2, numlines;
-	char c1, c2;
+	//long i, dist, blackdist, whitedist, t1, t2, numlines;
+	//char c1, c2;
+	long i, dist, blackdist, whitedist;
 
 	if ((vidoption != 1) || (numpages < 2)) return;
 
@@ -590,7 +653,7 @@ void setstereo(long dastereomode)
 			for(i=0;i<numpages;i++)
 			{
 				setactivepage(i);
-				clearbuf(ylookup[ydim-1]+frameplace,xdim>>2,blackband);
+				clearbuf((void *)(ylookup[ydim-1]+frameplace),xdim>>2,blackband);
 			}
 			setactivepage(activepage);
 		}
@@ -673,11 +736,11 @@ void *engconvalloc32 (unsigned long size)
 
 void installbistereohandlers(void far *stereohan)
 {
-	char *ptr;
+	//char *ptr;
 	union REGS r;
 	struct SREGS sr;
 	void *lowp;
-	int c;
+	//int c;
 
 		//Get old protected mode handler
 	r.x.eax = 0x3500+0x70;   /* DOS get vector (INT 0Ch) */
@@ -764,6 +827,87 @@ void uninitkeys(void)
 		//Turn off shifts to prevent stucks with quitting
 	ptr = (short *)0x417; *ptr &= ~0x030f;
 }
+
+int _setgamemode(char davidoption, long daxdim, long daydim)
+{
+        long i, j, ostereomode;
+
+        if ((qsetmode == 200) && (vidoption == davidoption) && (xdim == daxdim) && (ydim == daydim))
+                return(0);
+        vidoption = davidoption; xdim = daxdim; ydim = daydim;
+
+        strcpy(kensmessage,"!!!! BUILD engine&tools programmed by Ken Silverman of E.G. RI.  (c) Copyright 1995 Ken Silverman.  Summary:  BUILD = Ken. !!!!");
+        if (getkensmessagecrc(FP_OFF(kensmessage)) != 0x56c764d4)
+                { setvmode(0x3); printf("Nice try.\n"); exit(0); }
+
+        ostereomode = stereomode; if (stereomode) setstereo(0L);
+
+        activepage = visualpage = 0;
+        switch(vidoption)
+        {
+                case 1: i = xdim*ydim; break;
+                case 2: xdim = 320; ydim = 200; i = xdim*ydim; break;
+                case 6: xdim = 320; ydim = 200; i = 131072; break;
+                default: return(-1);
+        }
+        j = ydim*4*sizeof(long);  //Leave room for horizlookup&horizlookup2
+
+        if (screen != NULL)
+        {
+                if (screenalloctype == 0) kkfree((void *)screen);
+                if (screenalloctype == 1) suckcache((long *)screen);
+                screen = NULL;
+        }
+        screenalloctype = 0;
+        if ((screen = (char *)kkmalloc(i+(j<<1))) == NULL)
+        {
+                 allocache((long *)&screen,i+(j<<1),&permanentlock);
+                 screenalloctype = 1;
+        }
+
+        frameplace = FP_OFF(screen);
+        horizlookup = (long *)(frameplace+i);
+        horizlookup2 = (long *)(frameplace+i+j);
+        horizycent = ((ydim*4)>>1);
+
+
+        switch(vidoption)
+        {
+                case 1:
+                                //bytesperline is set in this function
+                        if (setvesa(xdim,ydim) < 0) return(-1);
+                        break;
+                case 2:
+                        horizycent = ((ydim*4)>>1);  //HACK for switching to this mode
+                case 6:
+                        bytesperline = xdim;
+                        setvmode(0x13);
+                        break;
+                default: return(-1);
+        }
+
+                //Force drawrooms to call dosetaspect & recalculate stuff
+        oxyaspect = oxdimen = oviewingrange = -1;
+
+        setvlinebpl(bytesperline);
+        j = 0;
+        for(i=0;i<=ydim;i++) ylookup[i] = j, j += bytesperline;
+
+        numpages = 1;
+        if (vidoption == 1) numpages = min(maxpages,8);
+
+        setview(0L,0L,xdim-1,ydim-1);
+        clearallviews(0L);
+        setbrightness((char)curbrightness,(char *)&palette[0]);
+
+        if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
+
+        if (ostereomode) setstereo(ostereomode);
+
+        qsetmode = 200;
+        return(0);
+}
+
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {

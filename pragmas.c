@@ -20,7 +20,11 @@
   #endif
 #endif
 
-#ifdef USE_I386_ASM
+#if (defined USE_I386_ASM)
+
+#if (!defined __GNUC__)
+#error This file is filled with GNU C-specific inline asm.
+#endif
 
 static long dmval;
 
@@ -36,6 +40,40 @@ static inline void _touch_dmval_stop_compiler_whining(void)
     dmval = 0;
 }
 
+unsigned long getkensmessagecrc(long param) {
+    long retval;
+    __asm__ __volatile__ ("
+        xorl %%eax, %%eax
+        movl $32, %%ecx
+        kensmsgbeg: movl -4(%%ebx,%%ecx,4), %%edx
+        rorl %%cl, %%edx
+        adcl %%edx, %%eax
+        bswapl %%eax
+        loop kensmsgbeg
+    " : "=a" (retval) : "b" (param) : "ecx", "edx", "cc");
+    return(retval);
+}
+
+long msqrtasm(int i1)
+{
+    int retval;
+    __asm__ __volatile__ ("
+      movl $0x40000000, %%eax
+          movl $0x20000000, %%ebx
+          msqrasm_begit: cmpl %%eax, %%ecx
+          jl msqrasm_skip
+          subl %%eax, %%ecx
+      leal (%%eax, %%ebx, 4), %%eax
+          msqrasm_skip: subl %%ebx, %%eax
+          shrl $1, %%eax
+      shrl $2, %%ebx
+          jnz msqrasm_begit
+          cmpl %%eax, %%ecx
+      sbbl $-1, %%eax
+          shrl $1, %%eax
+    " : "=a" (retval) : "c" (i1) : "cc", "ebx");
+    return(retval);
+} // msqrtasm
 
 int sqr (int i1) {
   int retval;
@@ -2422,6 +2460,13 @@ static long timeroffs1mhz;
 */
 
 #else
+
+// !!! out of respect to Ken, the ASM version needs to be converted to
+//  portable C, so we can legitimately check this on all platforms.
+unsigned long getkensmessagecrc(long param)
+{
+    return(0x56c764d4);
+} // getkensmessagecrc
 
 void swapchar(unsigned char *p1, unsigned char *p2)
 {

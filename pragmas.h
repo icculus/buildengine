@@ -10,324 +10,282 @@
 
 static long dmval = 0;
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
+unsigned long getkensmessagecrc(long param);
+#pragma aux getkensmessagecrc =\
+    "xor eax, eax",\
+    "mov ecx, 32",\
+    "beg: mov edx, dword ptr [ebx+ecx*4-4]",\
+    "ror edx, cl",\
+    "adc eax, edx",\
+    "bswap eax",\
+    "loop short beg",\
+    parm [ebx]\
+    modify exact [eax ebx ecx edx]\
+
+long msqrtasm(int param);
+#pragma aux msqrtasm =\
+    "mov eax, 0x40000000",\
+    "mov ebx, 0x20000000",\
+    "begit: cmp ecx, eax",\
+    "jl skip",\
+    "sub ecx, eax",\
+    "lea eax, [eax+ebx*4]",\
+    "skip: sub eax, ebx",\
+    "shr eax, 1",\
+    "shr ebx, 2",\
+    "jnz begit",\
+    "cmp ecx, eax",\
+    "sbb eax, -1",\
+    "shr eax, 1",\
+    parm nomemory [ecx]\
+    modify exact [eax ebx ecx]\
+
 int sqr(int i1);
-#endif
 #pragma aux sqr =\
         "imul eax, eax",\
         parm nomemory [eax]\
         modify exact [eax]\
         value [eax]
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long scale(long i1, long i2, long i3);
-#endif
 #pragma aux scale =\
         "imul edx",\
         "idiv ecx",\
         parm nomemory [eax][edx][ecx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale(long i1, long i2, long i3);
-#endif
 #pragma aux mulscale =\
         "imul edx",\
         "shrd eax, edx, cl",\
         parm nomemory [eax][edx][ecx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale1(long i1, long i2);
-#endif
 #pragma aux mulscale1 =\
         "imul edx",\
         "shrd eax, edx, 1",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale2(long i1, long i2);
-#endif
 #pragma aux mulscale2 =\
         "imul edx",\
         "shrd eax, edx, 2",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale3(long i1, long i2);
-#endif
 #pragma aux mulscale3 =\
         "imul edx",\
         "shrd eax, edx, 3",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale4(long i1, long i2);
-#endif
 #pragma aux mulscale4 =\
         "imul edx",\
         "shrd eax, edx, 4",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale5(long i1, long i2);
-#endif
 #pragma aux mulscale5 =\
         "imul edx",\
         "shrd eax, edx, 5",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale6(long i1, long i2);
-#endif
 #pragma aux mulscale6 =\
         "imul edx",\
         "shrd eax, edx, 6",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale7(long i1, long i2);
-#endif
 #pragma aux mulscale7 =\
         "imul edx",\
         "shrd eax, edx, 7",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale8(long i1, long i2);
-#endif
 #pragma aux mulscale8 =\
         "imul edx",\
         "shrd eax, edx, 8",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale9(long i1, long i2);
-#endif
 #pragma aux mulscale9 =\
         "imul edx",\
         "shrd eax, edx, 9",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale10(long i1, long i2);
-#endif
 #pragma aux mulscale10 =\
         "imul edx",\
         "shrd eax, edx, 10",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale11(long i1, long i2);
-#endif
 #pragma aux mulscale11 =\
         "imul edx",\
         "shrd eax, edx, 11",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale12(long i1, long i2);
-#endif
 #pragma aux mulscale12 =\
         "imul edx",\
         "shrd eax, edx, 12",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale13(long i1, long i2);
-#endif
 #pragma aux mulscale13 =\
         "imul edx",\
         "shrd eax, edx, 13",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale14(long i1, long i2);
-#endif
 #pragma aux mulscale14 =\
         "imul edx",\
         "shrd eax, edx, 14",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale15(long i1, long i2);
-#endif
 #pragma aux mulscale15 =\
         "imul edx",\
         "shrd eax, edx, 15",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale16(long i1, long i2);
-#endif
 #pragma aux mulscale16 =\
         "imul edx",\
         "shrd eax, edx, 16",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale17(long i1, long i2);
-#endif
 #pragma aux mulscale17 =\
         "imul edx",\
         "shrd eax, edx, 17",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale18(long i1, long i2);
-#endif
 #pragma aux mulscale18 =\
         "imul edx",\
         "shrd eax, edx, 18",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale19(long i1, long i2);
-#endif
 #pragma aux mulscale19 =\
         "imul edx",\
         "shrd eax, edx, 19",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale20(long i1, long i2);
-#endif
 #pragma aux mulscale20 =\
         "imul edx",\
         "shrd eax, edx, 20",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale21(long i1, long i2);
-#endif
 #pragma aux mulscale21 =\
         "imul edx",\
         "shrd eax, edx, 21",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale22(long i1, long i2);
-#endif
 #pragma aux mulscale22 =\
         "imul edx",\
         "shrd eax, edx, 22",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale23(long i1, long i2);
-#endif
 #pragma aux mulscale23 =\
         "imul edx",\
         "shrd eax, edx, 23",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale24(long i1, long i2);
-#endif
 #pragma aux mulscale24 =\
         "imul edx",\
         "shrd eax, edx, 24",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale25(long i1, long i2);
-#endif
 #pragma aux mulscale25 =\
         "imul edx",\
         "shrd eax, edx, 25",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale26(long i1, long i2);
-#endif
 #pragma aux mulscale26 =\
         "imul edx",\
         "shrd eax, edx, 26",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale27(long i1, long i2);
-#endif
 #pragma aux mulscale27 =\
         "imul edx",\
         "shrd eax, edx, 27",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale28(long i1, long i2);
-#endif
 #pragma aux mulscale28 =\
         "imul edx",\
         "shrd eax, edx, 28",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale29(long i1, long i2);
-#endif
 #pragma aux mulscale29 =\
         "imul edx",\
         "shrd eax, edx, 29",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale30(long i1, long i2);
-#endif
 #pragma aux mulscale30 =\
         "imul edx",\
         "shrd eax, edx, 30",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale31(long i1, long i2);
-#endif
 #pragma aux mulscale31 =\
         "imul edx",\
         "shrd eax, edx, 31",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mulscale32(long i1, long i2);
-#endif
 #pragma aux mulscale32 =\
         "imul edx",\
         parm nomemory [eax][edx]\
         modify exact [eax edx]\
         value [edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale(long i1, long i2, long i3, long i4, long i5);
-#endif
 #pragma aux dmulscale =\
         "imul edx",\
         "mov ebx, eax",\
@@ -340,9 +298,7 @@ long dmulscale(long i1, long i2, long i3, long i4, long i5);
         parm nomemory [eax][edx][esi][edi][ecx]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale1(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale1 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -355,9 +311,7 @@ long dmulscale1(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale2(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale2 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -370,9 +324,7 @@ long dmulscale2(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale3(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale3 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -385,9 +337,7 @@ long dmulscale3(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale4(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale4 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -400,9 +350,7 @@ long dmulscale4(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale5(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale5 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -415,9 +363,7 @@ long dmulscale5(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale6(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale6 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -430,9 +376,7 @@ long dmulscale6(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale7(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale7 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -445,9 +389,7 @@ long dmulscale7(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale8(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale8 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -460,9 +402,7 @@ long dmulscale8(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale9(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale9 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -475,9 +415,7 @@ long dmulscale9(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale10(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale10 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -490,9 +428,7 @@ long dmulscale10(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale11(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale11 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -505,9 +441,7 @@ long dmulscale11(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale12(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale12 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -520,9 +454,7 @@ long dmulscale12(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale13(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale13 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -535,9 +467,7 @@ long dmulscale13(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale14(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale14 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -550,9 +480,7 @@ long dmulscale14(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale15(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale15 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -565,9 +493,7 @@ long dmulscale15(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale16(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale16 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -580,9 +506,7 @@ long dmulscale16(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale17(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale17 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -595,9 +519,7 @@ long dmulscale17(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale18(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale18 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -610,9 +532,7 @@ long dmulscale18(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale19(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale19 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -625,9 +545,7 @@ long dmulscale19(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale20(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale20 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -640,9 +558,7 @@ long dmulscale20(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale21(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale21 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -655,9 +571,7 @@ long dmulscale21(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale22(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale22 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -670,9 +584,7 @@ long dmulscale22(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale23(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale23 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -685,9 +597,7 @@ long dmulscale23(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale24(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale24 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -700,9 +610,7 @@ long dmulscale24(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale25(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale25 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -715,9 +623,7 @@ long dmulscale25(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale26(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale26 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -730,9 +636,7 @@ long dmulscale26(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale27(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale27 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -745,9 +649,7 @@ long dmulscale27(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale28(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale28 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -760,9 +662,7 @@ long dmulscale28(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale29(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale29 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -775,9 +675,7 @@ long dmulscale29(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale30(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale30 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -790,9 +688,7 @@ long dmulscale30(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale31(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale31 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -805,9 +701,7 @@ long dmulscale31(long i1, long i2, long i3, long i4);
         parm nomemory [eax][edx][esi][edi]\
         modify exact [eax ebx edx esi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long dmulscale32(long i1, long i2, long i3, long i4);
-#endif
 #pragma aux dmulscale32 =\
         "imul edx",\
         "mov ebx, eax",\
@@ -820,9 +714,7 @@ long dmulscale32(long i1, long i2, long i3, long i4);
         modify exact [eax ebx edx esi]\
         value [edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale1(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale1 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -838,9 +730,7 @@ long tmulscale1(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale2(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale2 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -856,9 +746,7 @@ long tmulscale2(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale3(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale3 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -874,9 +762,7 @@ long tmulscale3(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale4(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale4 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -892,9 +778,7 @@ long tmulscale4(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale5(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale5 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -910,9 +794,7 @@ long tmulscale5(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale6(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale6 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -928,9 +810,7 @@ long tmulscale6(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale7(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale7 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -946,9 +826,7 @@ long tmulscale7(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale8(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale8 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -964,9 +842,7 @@ long tmulscale8(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale9(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale9 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -982,9 +858,7 @@ long tmulscale9(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale10(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale10 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1000,9 +874,7 @@ long tmulscale10(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale11(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale11 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1018,9 +890,7 @@ long tmulscale11(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale12(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale12 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1036,9 +906,7 @@ long tmulscale12(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale13(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale13 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1054,9 +922,7 @@ long tmulscale13(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale14(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale14 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1072,9 +938,7 @@ long tmulscale14(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale15(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale15 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1090,9 +954,7 @@ long tmulscale15(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale16(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale16 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1108,9 +970,7 @@ long tmulscale16(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale17(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale17 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1126,9 +986,7 @@ long tmulscale17(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale18(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale18 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1144,9 +1002,7 @@ long tmulscale18(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale19(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale19 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1162,9 +1018,7 @@ long tmulscale19(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale20(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale20 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1180,9 +1034,7 @@ long tmulscale20(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale21(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale21 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1198,9 +1050,7 @@ long tmulscale21(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale22(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale22 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1216,9 +1066,7 @@ long tmulscale22(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale23(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale23 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1234,9 +1082,7 @@ long tmulscale23(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale24(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale24 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1252,9 +1098,7 @@ long tmulscale24(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale25(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale25 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1270,9 +1114,7 @@ long tmulscale25(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale26(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale26 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1288,9 +1130,7 @@ long tmulscale26(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale27(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale27 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1306,9 +1146,7 @@ long tmulscale27(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale28(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale28 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1324,9 +1162,7 @@ long tmulscale28(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale29(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale29 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1342,9 +1178,7 @@ long tmulscale29(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale30(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale30 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1360,9 +1194,7 @@ long tmulscale30(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale31(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale31 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1378,9 +1210,7 @@ long tmulscale31(long i1, long i2, long i3, long i4, long i5, long i6);
         parm nomemory [eax][edx][ebx][ecx][esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long tmulscale32(long i1, long i2, long i3, long i4, long i5, long i6);
-#endif
 #pragma aux tmulscale32 =\
         "imul edx",\
         "xchg eax, ebx",\
@@ -1396,9 +1226,7 @@ long tmulscale32(long i1, long i2, long i3, long i4, long i5, long i6);
         modify exact [eax ebx ecx edx]\
         value [edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long boundmulscale(long i1, long i2, long i3);
-#endif
 #pragma aux boundmulscale =\
         "imul ebx",\
         "mov ebx, edx",\
@@ -1418,9 +1246,7 @@ long boundmulscale(long i1, long i2, long i3);
         parm nomemory [eax][ebx][ecx]\
         modify exact [eax ebx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale(long i1, long i2, long i3);
-#endif
 #pragma aux divscale =\
         "mov edx, eax",\
         "shl eax, cl",\
@@ -1430,9 +1256,7 @@ long divscale(long i1, long i2, long i3);
         parm nomemory [eax][ebx][ecx]\
         modify exact [eax ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale1(long i1, long i2);
-#endif
 #pragma aux divscale1 =\
         "add eax, eax",\
         "sbb edx, edx",\
@@ -1440,9 +1264,7 @@ long divscale1(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale2(long i1, long i2);
-#endif
 #pragma aux divscale2 =\
         "mov edx, eax",\
         "sar edx, 30",\
@@ -1451,9 +1273,7 @@ long divscale2(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale3(long i1, long i2);
-#endif
 #pragma aux divscale3 =\
         "mov edx, eax",\
         "sar edx, 29",\
@@ -1462,9 +1282,7 @@ long divscale3(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale4(long i1, long i2);
-#endif
 #pragma aux divscale4 =\
         "mov edx, eax",\
         "sar edx, 28",\
@@ -1473,9 +1291,7 @@ long divscale4(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale5(long i1, long i2);
-#endif
 #pragma aux divscale5 =\
         "mov edx, eax",\
         "sar edx, 27",\
@@ -1484,9 +1300,7 @@ long divscale5(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale6(long i1, long i2);
-#endif
 #pragma aux divscale6 =\
         "mov edx, eax",\
         "sar edx, 26",\
@@ -1495,9 +1309,7 @@ long divscale6(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale7(long i1, long i2);
-#endif
 #pragma aux divscale7 =\
         "mov edx, eax",\
         "sar edx, 25",\
@@ -1506,9 +1318,7 @@ long divscale7(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale8(long i1, long i2);
-#endif
 #pragma aux divscale8 =\
         "mov edx, eax",\
         "sar edx, 24",\
@@ -1517,9 +1327,7 @@ long divscale8(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale9(long i1, long i2);
-#endif
 #pragma aux divscale9 =\
         "mov edx, eax",\
         "sar edx, 23",\
@@ -1528,9 +1336,7 @@ long divscale9(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale10(long i1, long i2);
-#endif
 #pragma aux divscale10 =\
         "mov edx, eax",\
         "sar edx, 22",\
@@ -1539,9 +1345,7 @@ long divscale10(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale11(long i1, long i2);
-#endif
 #pragma aux divscale11 =\
         "mov edx, eax",\
         "sar edx, 21",\
@@ -1550,9 +1354,7 @@ long divscale11(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale12(long i1, long i2);
-#endif
 #pragma aux divscale12 =\
         "mov edx, eax",\
         "sar edx, 20",\
@@ -1561,9 +1363,7 @@ long divscale12(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale13(long i1, long i2);
-#endif
 #pragma aux divscale13 =\
         "mov edx, eax",\
         "sar edx, 19",\
@@ -1572,9 +1372,7 @@ long divscale13(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale14(long i1, long i2);
-#endif
 #pragma aux divscale14 =\
         "mov edx, eax",\
         "sar edx, 18",\
@@ -1583,9 +1381,7 @@ long divscale14(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale15(long i1, long i2);
-#endif
 #pragma aux divscale15 =\
         "mov edx, eax",\
         "sar edx, 17",\
@@ -1594,9 +1390,7 @@ long divscale15(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale16(long i1, long i2);
-#endif
 #pragma aux divscale16 =\
         "mov edx, eax",\
         "sar edx, 16",\
@@ -1605,9 +1399,7 @@ long divscale16(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale17(long i1, long i2);
-#endif
 #pragma aux divscale17 =\
         "mov edx, eax",\
         "sar edx, 15",\
@@ -1616,9 +1408,7 @@ long divscale17(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale18(long i1, long i2);
-#endif
 #pragma aux divscale18 =\
         "mov edx, eax",\
         "sar edx, 14",\
@@ -1627,9 +1417,7 @@ long divscale18(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale19(long i1, long i2);
-#endif
 #pragma aux divscale19 =\
         "mov edx, eax",\
         "sar edx, 13",\
@@ -1638,9 +1426,7 @@ long divscale19(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale20(long i1, long i2);
-#endif
 #pragma aux divscale20 =\
         "mov edx, eax",\
         "sar edx, 12",\
@@ -1649,9 +1435,7 @@ long divscale20(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale21(long i1, long i2);
-#endif
 #pragma aux divscale21 =\
         "mov edx, eax",\
         "sar edx, 11",\
@@ -1660,9 +1444,7 @@ long divscale21(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale22(long i1, long i2);
-#endif
 #pragma aux divscale22 =\
         "mov edx, eax",\
         "sar edx, 10",\
@@ -1671,9 +1453,7 @@ long divscale22(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale23(long i1, long i2);
-#endif
 #pragma aux divscale23 =\
         "mov edx, eax",\
         "sar edx, 9",\
@@ -1682,9 +1462,7 @@ long divscale23(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale24(long i1, long i2);
-#endif
 #pragma aux divscale24 =\
         "mov edx, eax",\
         "sar edx, 8",\
@@ -1693,9 +1471,7 @@ long divscale24(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale25(long i1, long i2);
-#endif
 #pragma aux divscale25 =\
         "mov edx, eax",\
         "sar edx, 7",\
@@ -1704,9 +1480,7 @@ long divscale25(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale26(long i1, long i2);
-#endif
 #pragma aux divscale26 =\
         "mov edx, eax",\
         "sar edx, 6",\
@@ -1715,9 +1489,7 @@ long divscale26(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale27(long i1, long i2);
-#endif
 #pragma aux divscale27 =\
         "mov edx, eax",\
         "sar edx, 5",\
@@ -1726,9 +1498,7 @@ long divscale27(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale28(long i1, long i2);
-#endif
 #pragma aux divscale28 =\
         "mov edx, eax",\
         "sar edx, 4",\
@@ -1737,9 +1507,7 @@ long divscale28(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale29(long i1, long i2);
-#endif
 #pragma aux divscale29 =\
         "mov edx, eax",\
         "sar edx, 3",\
@@ -1748,9 +1516,7 @@ long divscale29(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale30(long i1, long i2);
-#endif
 #pragma aux divscale30 =\
         "mov edx, eax",\
         "sar edx, 2",\
@@ -1759,9 +1525,7 @@ long divscale30(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale31(long i1, long i2);
-#endif
 #pragma aux divscale31 =\
         "mov edx, eax",\
         "sar edx, 1",\
@@ -1770,43 +1534,28 @@ long divscale31(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale32(long i1, long i2);
-#endif
 #pragma aux divscale32 =\
         "xor eax, eax",\
         "idiv ebx",\
         parm nomemory [edx][ebx]\
         modify exact [eax edx]\
 
-// !!! move these into dos_driver.c?  --ryan.
+// !!! move these into ves.h?  --ryan.
 #ifdef PLATFORM_DOS
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void int5(void);
-#endif
 #pragma aux int5 =\
         "int 0x5",\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
-void setvmode(int i1);
-#endif
-#pragma aux setvmode =\
-        "int 0x10",\
-        parm [eax]\
-
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 int setupmouse(void);
-#endif
 #pragma aux setupmouse =\
         "mov ax, 0",\
         "int 33h",\
         "and eax, 0x0000ffff",\
         modify exact [eax]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void readmousexy(short *x, short *y);
-#endif
 #pragma aux readmousexy =\
         "mov ax, 11d",\
         "int 33h",\
@@ -1815,9 +1564,7 @@ void readmousexy(short *x, short *y);
         parm [esi][edi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void readmousebstatus(short *buttons);
-#endif
 #pragma aux readmousebstatus =\
         "mov ax, 5d",\
         "int 33h",\
@@ -1825,33 +1572,25 @@ void readmousebstatus(short *buttons);
         parm [esi]\
         modify exact [eax ebx ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 unsigned char readpixel(long offset);
-#endif
 #pragma aux readpixel =\
         "mov al, byte ptr [edi]",\
         parm nomemory [edi]\
         modify exact [eax]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void drawpixel(long offset, unsigned char p);
-#endif
 #pragma aux drawpixel =\
         "mov byte ptr [edi], al",\
         parm [edi][eax]\
         modify exact \
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void drawpixels(long offset, unsigned short p);
-#endif
 #pragma aux drawpixels =\
         "mov word ptr [edi], ax",\
         parm [edi][eax]\
         modify exact \
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void drawpixelses(long offset, unsigned long p);
-#endif
 #pragma aux drawpixelses =\
         "mov dword ptr [edi], eax",\
         parm [edi][eax]\
@@ -1860,17 +1599,13 @@ void drawpixelses(long offset, unsigned long p);
 #endif
 
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void clearbuf(void *buf, long i2, long i3);
-#endif
 #pragma aux clearbuf =\
         "rep stosd",\
         parm [edi][ecx][eax]\
         modify exact [edi ecx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void clearbufbyte(void *buf, long i2, long i3);
-#endif
 #pragma aux clearbufbyte =\
         "cmp ecx, 4",\
         "jae longcopy",\
@@ -1901,17 +1636,13 @@ void clearbufbyte(void *buf, long i2, long i3);
         parm [edi][ecx][eax]\
         modify [ebx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void copybuf(void *src, void *dst, long len);
-#endif
 #pragma aux copybuf =\
         "rep movsd",\
         parm [esi][edi][ecx]\
         modify exact [ecx esi edi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void copybufbyte(void *src, void *dst, long len);
-#endif
 #pragma aux copybufbyte =\
         "cmp ecx, 4",\
         "jae longcopy",\
@@ -1942,9 +1673,7 @@ void copybufbyte(void *src, void *dst, long len);
         parm [esi][edi][ecx]\
         modify [ebx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void copybufreverse(void *src, void *dst, long len);
-#endif
 #pragma aux copybufreverse =\
         "shr ecx, 1",\
         "jnc skipit1",\
@@ -1971,9 +1700,7 @@ void copybufreverse(void *src, void *dst, long len);
         "endloop:",\
         parm [esi][edi][ecx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void qinterpolatedown16(long *i1, long i2, long i3, long i4);
-#endif
 #pragma aux qinterpolatedown16 =\
         "mov ebx, ecx",\
         "shr ecx, 1",\
@@ -1995,9 +1722,7 @@ void qinterpolatedown16(long *i1, long i2, long i3, long i4);
         parm [eax][ecx][edx][esi]\
         modify exact [eax ebx ecx edx edi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void qinterpolatedown16short(long *i1, long i2, long i3, long i4);
-#endif
 #pragma aux qinterpolatedown16short =\
         "test ecx, ecx",\
         "jz endit",\
@@ -2035,9 +1760,7 @@ void qinterpolatedown16short(long *i1, long i2, long i3, long i4);
 
 #if (defined PLATFORM_DOS)   // !!! move this to dos_driver.c?
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void setcolor16(int i1);
-#endif
 #pragma aux setcolor16 =\
         "mov dx, 0x3ce",\
         "shl ax, 8",\
@@ -2048,9 +1771,7 @@ void setcolor16(int i1);
 #endif  // PLATFORM_DOS
 
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void vlin16first(long i1, long i2);
-#endif
 #pragma aux vlin16first =\
         "mov al, byte ptr [edi]",\
         "mov eax, ecx",\
@@ -2073,9 +1794,7 @@ void vlin16first(long i1, long i2);
         parm [edi][ecx]\
         modify exact [eax ecx edi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void vlin16(long i1, long i2);
-#endif
 #pragma aux vlin16 =\
         "mov esi, edi",\
         "begvlin16: movsb",\
@@ -2088,9 +1807,7 @@ void vlin16(long i1, long i2);
 
 #if (defined PLATFORM_DOS)   // !!! move this to dos_driver.c?
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void drawpixel16(long offset);
-#endif
 #pragma aux drawpixel16 =\
         "mov ecx, edi",\
         "mov eax, 0x00008008",\
@@ -2103,9 +1820,7 @@ void drawpixel16(long offset);
         parm [edi]\
         modify exact [eax ecx edx edi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void fillscreen16(long i1, long i2, long i3);
-#endif
 #pragma aux fillscreen16 =\
         "mov dx, 0x3ce",\
         "shl ax, 8",\
@@ -2118,25 +1833,19 @@ void fillscreen16(long i1, long i2, long i3);
         parm [edi][eax][ecx]\
         modify exact [eax ecx edx edi]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void koutp(long i1, long i);
-#endif
 #pragma aux koutp =\
         "out dx, al",\
         parm [edx][eax]\
         modify exact \
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void koutpw(long i1, long i);
-#endif
 #pragma aux koutpw =\
         "out dx, ax",\
         parm [edx][eax]\
         modify exact \
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 int kinp(long i);
-#endif
 #pragma aux kinp =\
         "in al, dx",\
         parm nomemory [edx]\
@@ -2145,31 +1854,23 @@ int kinp(long i);
 #endif  // PLATFORM_DOS
 
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mul3(long i1);
-#endif
 #pragma aux mul3 =\
         "lea eax, [eax+eax*2]",\
         parm nomemory [eax]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mul5(long i1);
-#endif
 #pragma aux mul5 =\
         "lea eax, [eax+eax*4]",\
         parm nomemory [eax]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long mul9(long i1);
-#endif
 #pragma aux mul9 =\
         "lea eax, [eax+eax*8]",\
         parm nomemory [eax]\
 
         //returns eax/ebx, dmval = eax%edx;
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divmod(long i1, long i2);
-#endif
 #pragma aux divmod =\
         "xor edx, edx",\
         "div ebx",\
@@ -2179,9 +1880,7 @@ long divmod(long i1, long i2);
         value [eax]
 
         //returns eax%ebx, dmval = eax/edx;
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long moddiv(long i1, long i2);
-#endif
 #pragma aux moddiv =\
         "xor edx, edx",\
         "div ebx",\
@@ -2190,9 +1889,7 @@ long moddiv(long i1, long i2);
         modify exact [eax edx]\
         value [edx]
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long klabs(long i1);
-#endif
 #pragma aux klabs =\
         "test eax, eax",\
         "jns skipnegate",\
@@ -2200,9 +1897,7 @@ long klabs(long i1);
         "skipnegate:",\
         parm nomemory [eax]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long ksgn(long i1);
-#endif
 #pragma aux ksgn =\
         "add ebx, ebx",\
         "sbb eax, eax",\
@@ -2212,9 +1907,7 @@ long ksgn(long i1);
         modify exact [eax ebx]\
 
         //eax = (unsigned min)umin(eax,ebx)
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long umin(long i1, long i2);
-#endif
 #pragma aux umin =\
         "sub eax, ebx",\
         "sbb ecx, ecx",\
@@ -2224,9 +1917,7 @@ long umin(long i1, long i2);
         modify exact [eax ecx]\
 
         //eax = (unsigned max)umax(eax,ebx)
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long umax(long i1, long i2);
-#endif
 #pragma aux umax =\
         "sub eax, ebx",\
         "sbb ecx, ecx",\
@@ -2236,9 +1927,7 @@ long umax(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax ecx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long kmin(long i1, long i2);
-#endif
 #pragma aux kmin =\
         "cmp eax, ebx",\
         "jl skipit",\
@@ -2247,9 +1936,7 @@ long kmin(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long kmax(long i1, long i2);
-#endif
 #pragma aux kmax =\
         "cmp eax, ebx",\
         "jg skipit",\
@@ -2259,9 +1946,7 @@ long kmax(long i1, long i2);
         modify exact [eax]\
 
 #if (defined PLATFORM_DOS)  // !!! move to dos_driver.c?
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void limitrate(void);
-#endif
 #pragma aux limitrate =\
         "mov dx, 0x3da",\
         "wait1: in al, dx",\
@@ -2272,9 +1957,7 @@ void limitrate(void);
         "jz wait2",\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long readtimer(void);
-#endif
 #pragma aux readtimer =\
         "mov al, 0xd2",\
         "out 0x43, al",\
@@ -2284,6 +1967,7 @@ long readtimer(void);
         "rol eax, 8",\
         modify [eax]\
 
+void redblueblit(void *i1, void *i2, long i3);
 #pragma aux redblueblit = \
         "xor ecx, ecx",\
         "begblit: mov eax, dword ptr [edx+ecx]",\
@@ -2332,9 +2016,7 @@ long readtimer(void);
 #endif
 
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void swapchar(char *i1, char *i2);
-#endif
 #pragma aux swapchar =\
         "mov cl, [eax]",\
         "mov ch, [ebx]",\
@@ -2343,9 +2025,7 @@ void swapchar(char *i1, char *i2);
         parm [eax][ebx]\
         modify exact [ecx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void swapshort(short *i1, short *i2);
-#endif
 #pragma aux swapshort =\
         "mov cx, [eax]",\
         "mov dx, [ebx]",\
@@ -2354,9 +2034,7 @@ void swapshort(short *i1, short *i2);
         parm [eax][ebx]\
         modify exact [ecx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void swaplong(long *i1, long *i2);
-#endif
 #pragma aux swaplong =\
         "mov ecx, [eax]",\
         "mov edx, [ebx]",\
@@ -2393,9 +2071,7 @@ void swaplong(long *i1, long *i2);
 
         //swapchar2(ptr1,ptr2,xsiz); is the same as:
         //swapchar(ptr1,ptr2); swapchar(ptr1+1,ptr2+xsiz);
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void swapchar2(char *ptr1, char *ptr2, long xsiz);
-#endif
 #pragma aux swapchar2 =\
         "add esi, ebx",\
         "mov cx, [eax]",\
@@ -2505,9 +2181,7 @@ static long timeroffs1mhz;
         parm nomemory [eax][ebx][ecx]\
         modify exact [eax ebx edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale(long i1, long i2, long i3);
-#endif
 #pragma aux divscale =\
         "mov edx, eax",\
         "shl eax, cl",\
@@ -2517,9 +2191,7 @@ long divscale(long i1, long i2, long i3);
         parm nomemory [eax][ebx][ecx]\
         modify exact [eax ecx edx]
         
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale1(long i1, long i2);
-#endif
 #pragma aux divscale1 =\
         "add eax, eax",\
         "sbb edx, edx",\
@@ -2527,9 +2199,7 @@ long divscale1(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]
         
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale2(long i1, long i2);
-#endif
 #pragma aux divscale2 =\
         "mov edx, eax",\
         "sar edx, 30",\
@@ -2538,9 +2208,7 @@ long divscale2(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale3(long i1, long i2);
-#endif
 #pragma aux divscale3 =\
         "mov edx, eax",\
         "sar edx, 29",\
@@ -2549,9 +2217,7 @@ long divscale3(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale4(long i1, long i2);
-#endif
 #pragma aux divscale4 =\
         "mov edx, eax",\
         "sar edx, 28",\
@@ -2560,9 +2226,7 @@ long divscale4(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale5(long i1, long i2);
-#endif
 #pragma aux divscale5 =\
         "mov edx, eax",\
         "sar edx, 27",\
@@ -2571,9 +2235,7 @@ long divscale5(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale6(long i1, long i2);
-#endif
 #pragma aux divscale6 =\
         "mov edx, eax",\
         "sar edx, 26",\
@@ -2582,9 +2244,7 @@ long divscale6(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale7(long i1, long i2);
-#endif
 #pragma aux divscale7 =\
         "mov edx, eax",\
         "sar edx, 25",\
@@ -2593,9 +2253,7 @@ long divscale7(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale8(long i1, long i2);
-#endif
 #pragma aux divscale8 =\
         "mov edx, eax",\
         "sar edx, 24",\
@@ -2604,9 +2262,7 @@ long divscale8(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale9(long i1, long i2);
-#endif
 #pragma aux divscale9 =\
         "mov edx, eax",\
         "sar edx, 23",\
@@ -2615,9 +2271,7 @@ long divscale9(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale10(long i1, long i2);
-#endif
 #pragma aux divscale10 =\
         "mov edx, eax",\
         "sar edx, 22",\
@@ -2626,9 +2280,7 @@ long divscale10(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale11(long i1, long i2);
-#endif
 #pragma aux divscale11 =\
         "mov edx, eax",\
         "sar edx, 21",\
@@ -2637,9 +2289,7 @@ long divscale11(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale12(long i1, long i2);
-#endif
 #pragma aux divscale12 =\
         "mov edx, eax",\
         "sar edx, 20",\
@@ -2648,9 +2298,7 @@ long divscale12(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale13(long i1, long i2);
-#endif
 #pragma aux divscale13 =\
         "mov edx, eax",\
         "sar edx, 19",\
@@ -2659,9 +2307,7 @@ long divscale13(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale14(long i1, long i2);
-#endif
 #pragma aux divscale14 =\
         "mov edx, eax",\
         "sar edx, 18",\
@@ -2670,9 +2316,7 @@ long divscale14(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale15(long i1, long i2);
-#endif
 #pragma aux divscale15 =\
         "mov edx, eax",\
         "sar edx, 17",\
@@ -2681,9 +2325,7 @@ long divscale15(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale16(long i1, long i2);
-#endif
 #pragma aux divscale16 =\
         "mov edx, eax",\
         "sar edx, 16",\
@@ -2692,9 +2334,7 @@ long divscale16(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale17(long i1, long i2);
-#endif
 #pragma aux divscale17 =\
         "mov edx, eax",\
         "sar edx, 15",\
@@ -2703,9 +2343,7 @@ long divscale17(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale18(long i1, long i2);
-#endif
 #pragma aux divscale18 =\
         "mov edx, eax",\
         "sar edx, 14",\
@@ -2714,9 +2352,7 @@ long divscale18(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale19(long i1, long i2);
-#endif
 #pragma aux divscale19 =\
         "mov edx, eax",\
         "sar edx, 13",\
@@ -2725,9 +2361,7 @@ long divscale19(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale20(long i1, long i2);
-#endif
 #pragma aux divscale20 =\
         "mov edx, eax",\
         "sar edx, 12",\
@@ -2736,9 +2370,7 @@ long divscale20(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale21(long i1, long i2);
-#endif
 #pragma aux divscale21 =\
         "mov edx, eax",\
         "sar edx, 11",\
@@ -2747,9 +2379,7 @@ long divscale21(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale22(long i1, long i2);
-#endif
 #pragma aux divscale22 =\
         "mov edx, eax",\
         "sar edx, 10",\
@@ -2758,9 +2388,7 @@ long divscale22(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale23(long i1, long i2);
-#endif
 #pragma aux divscale23 =\
         "mov edx, eax",\
         "sar edx, 9",\
@@ -2769,9 +2397,7 @@ long divscale23(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale24(long i1, long i2);
-#endif
 #pragma aux divscale24 =\
         "mov edx, eax",\
         "sar edx, 8",\
@@ -2780,9 +2406,7 @@ long divscale24(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale25(long i1, long i2);
-#endif
 #pragma aux divscale25 =\
         "mov edx, eax",\
         "sar edx, 7",\
@@ -2791,9 +2415,7 @@ long divscale25(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale26(long i1, long i2);
-#endif
 #pragma aux divscale26 =\
         "mov edx, eax",\
         "sar edx, 6",\
@@ -2802,9 +2424,7 @@ long divscale26(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale27(long i1, long i2);
-#endif
 #pragma aux divscale27 =\
         "mov edx, eax",\
         "sar edx, 5",\
@@ -2813,9 +2433,7 @@ long divscale27(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale28(long i1, long i2);
-#endif
 #pragma aux divscale28 =\
         "mov edx, eax",\
         "sar edx, 4",\
@@ -2824,9 +2442,7 @@ long divscale28(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale29(long i1, long i2);
-#endif
 #pragma aux divscale29 =\
         "mov edx, eax",\
         "sar edx, 3",\
@@ -2835,9 +2451,7 @@ long divscale29(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale30(long i1, long i2);
-#endif
 #pragma aux divscale30 =\
         "mov edx, eax",\
         "sar edx, 2",\
@@ -2846,9 +2460,7 @@ long divscale30(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale31(long i1, long i2);
-#endif
 #pragma aux divscale31 =\
         "mov edx, eax",\
         "sar edx, 1",\
@@ -2857,9 +2469,7 @@ long divscale31(long i1, long i2);
         parm nomemory [eax][ebx]\
         modify exact [eax edx]\
 
-#if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 long divscale32(long i1, long i2);
-#endif
 #pragma aux divscale32 =\
         "xor eax, eax",\
         "idiv ebx",\
@@ -2874,6 +2484,8 @@ void swapchar(unsigned char *p1, unsigned char *p2);
 void swapshort(short *p1, short *p2);
 void swaplong(long *p1, long *p2);
 void swapchar2(unsigned char *p1, unsigned char *p2, int xsiz);
+unsigned long getkensmessagecrc(long param);
+long msqrtasm(int i1);
 
 
 #ifdef USE_I386_ASM
@@ -3116,3 +2728,7 @@ void qinterpolatedown16short (long *source, int size, int linum, int linum_inc);
 #endif // __WATCOMC__
 
 #endif // _INCLUDE_PRAGMAS_H_
+
+// end of pragmas.h ...
+
+
