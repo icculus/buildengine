@@ -18,6 +18,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <string.h>
+#include <sys/param.h>
 #include "platform.h"
 
 #if (!defined PLATFORM_SUPPORTS_SDL)
@@ -1166,6 +1167,33 @@ void set_splash(void)
 
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
+    /* deal with Application Bundles on MacOS X... */
+    #if (defined PLATFORM_MACOSX)
+    char buf[MAXPATHLEN];
+    char realbuf[MAXPATHLEN];
+    if ((argv[0] != NULL) && (strchr(argv[0], '/') != NULL))
+        strcpy(buf, argv[0]);
+    else
+    {
+        if ((getcwd(buf, sizeof (buf)) == NULL) || (strcmp(buf, "/") == 0))
+            buf[0] = '\0'; /* oh well. */
+    } /* else */
+
+    if (buf[0])
+    {
+        buf[sizeof (buf) - 1] = '\0';
+        if (realpath(buf, realbuf) != NULL)
+        {
+            char *ptr = strstr(realbuf, "/Contents/MacOS/");
+            if (ptr != NULL)
+            {
+                *ptr = '\0';  /* chop off bundle dirs... */
+                chdir(realbuf);
+            } /* if */
+        } /* if */
+    } /* if */
+    #endif
+
     _argc = argc;
     _argv = argv;
 
