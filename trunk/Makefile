@@ -46,11 +46,15 @@ USE_ASM := -DUSE_I386_ASM
 #useperl := true
 useperl := false
 
-useopengl := true
-#useopengl := false
+#useopengl := true
+useopengl := false
 GL_INCLDIR := /usr/X11R6/include
 
+#usedlls := true
 usedlls := false
+
+#usephysfs := true
+usephysfs := false
 
 #-----------------------------------------------------------------------------#
 # Everything below this line is probably okay.
@@ -113,6 +117,11 @@ ifeq ($(strip $(useperl)),true)
   PERLOBJS += buildperl.o /usr/lib/perl5/i386-linux/CORE/libperl.a
 endif
 
+ifeq ($(strip $(usephysfs)),true)
+  CFLAGS += -DUSE_PHYSICSFS
+  LDFLAGS += -lphysfs
+endif
+
 ifeq ($(strip $(usedlls)),true)
 ENGINEBASE = buildengine
 ENGINEDLL = $(strip $(ENGINEBASE))$(strip $(DLL_EXT))
@@ -122,6 +131,12 @@ endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
 ENGINESRCS += a_nasm.asm pragmas.c a.c
+
+ifeq ($(strip $(useopengl)),true)
+ENGINESRCS += buildgl.c
+endif
+
+
 
 NETSRCS = multi_tcpip.c
 
