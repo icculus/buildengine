@@ -274,6 +274,8 @@
             cleanups in the Makefile. Moved VIDEOBASE defines to display.h.
             _platform_init() now takes icon and titlebar titles, and has been
             updated in all drivers.
+02102001 - Someone on the 3DRealms Web Forums finds icculus.org:
+            http://www.3drealms.com/cgi-bin/ultimatebb.cgi?ubb=get_topic&f=5&t=001318
 02132001 - (Five months later...ugh.) Dan noticed that my webpage is being
             discussed on the 3DRealms forums, so I went back into the code
             and finished the work to get this running under Cygwin. Here's
@@ -361,8 +363,16 @@
             CONTRIB file. Fixed Makefile.w32 and changed the default builds
             to optimized and not debug to make binary distribution easier.
             Automated the packaging of binary releases in Makefile.
+04262001 - EDuke 2.1 goes into private beta. Will it be the last release based
+            on Ken Silverman's original BUILD object code for Duke Nukem 3D?
+05102001 - Embedded a Perl interpreter that runs a function in game.pl once
+            per frame into the KenBuild game. This is just a test for a future
+            project, and probably shouldn't be compiled by the average person.
+            Changes to the Makefile, game.c and buildperl.[ch] was added.
+            Changed all occurances of my email address from lokigames.com to
+            linuxgames.com. One or two comment tweaks elsewhere.
 
---ryan. (icculus@lokigames.com)
+--ryan. (icculus@linuxgames.com)
 
 // end of CHANGELOG ...
 
