@@ -1,11 +1,17 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
 TODO for BUILD Utilities Package
 
 - A findfirst()/findnext() implementation
 - Utils that generate files should lowercase the names
 - Fix some asm in editart.c
 - Port setup to ncurses (is it even needed anymore?)
+- Maybe a nice GTK+ front end to manage Group files?
 
 As with the BUILD source, send patches to Ryan (icculus@lokigames.com)
 
 --
 Dan (theoddone33) Olson <dolson@raven-games.com>
+
