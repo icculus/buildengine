@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 // !!! need support for Windows.  --ryan.
-#ifndef CYGWIN
+#ifndef __CYGWIN__
 // need this to get FNM_CASEFOLD to be defined in fnmatch.h ...
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -5994,7 +5994,7 @@ int getfilenames(char kind[6])
                     add_this = 1;
 
                 // !!! need support for Windows.  --ryan.
-                #ifndef CYGWIN
+                #ifndef __CYGWIN__
                 else if (fnmatch(kind, dent->d_name, FNM_CASEFOLD) == 0)
                     add_this = 1;
                 #endif
