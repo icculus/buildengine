@@ -5,6 +5,7 @@
 (questions to Ryan C. Gordon, icculus@linuxgames.com)
 
 NEXT ON TAP:
+- extern "C" in every header.
 - Litter the code with assertions.
 - ASM->C port for non-intel boxes?
 - Look for the string "!!!" ... these are TODOs in the source.

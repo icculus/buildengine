@@ -534,7 +534,21 @@
             will end the need for most, if not all, of the assembly, and get
             us running on different platforms. I know, easier said than done.
             Other little cleanups and enhancements.
+06242001 - Followed through on my threat, and split off most of the OpenGL
+            code into buildgl.c.  :) Added more GL func pointers, and tried
+            (failingly) to get OpenGL2D more working. It's way too slow;
+            I guess all that conversion from 8-bit, through the lookup tables,
+            to 32-bit, back to whatever the screen depth is, etc is expensive.
+            Looks like it's just software rendering and full 3D. Sigh.
+            More SDL cleanups. (committed on Aug 1st).
+07082001 - Implemented support for PhysicsFS in cache1d.c; this allows you to
+            replace your GRP file with a compressed ZIP file. This is optional,
+            since it's an extra dependency. PhysicsFS is another one of my
+            projects, and information and source for it can be found at:
+            http://www.icculus.org/physfs/   ... (committed on Aug 1st).
 07162001 - Moved CVS repository to icculus.org. Updated README.
+08012001 - Committed some stuff, fixed a bug in the PhysicsFS code. Flipped
+            the useopengl flag in the Makefile back to false for now.
 
 --ryan. (icculus@linuxgames.com)
 
