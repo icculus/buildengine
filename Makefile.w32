@@ -1,0 +1,73 @@
+!define BLANK ""
+
+CC = wcc386.exe
+ASM = wasm.exe
+
+WATCOM_INC_DIR = C:\WATCOM\h;C:\WATCOM\h\nt
+SDL_INC_DIR = C:\2\SDL-1.1.8\include
+SDL_LIB_DIR = C:\2\SDL-1.1.8\lib
+
+INCLUDES = -i=$(WATCOM_INC_DIR);$(SDL_INC_DIR)
+DEFINES = -dUSE_I386_ASM -dPLATFORM_WIN32
+
+CFLAGS = $(INCLUDES) $(DEFINES) -w4 -we -e25 -ei -zq -ot -of+ &
+         -ol -ol+ -om -oc -oi -or -d2 -bm -5r -bt=nt -mf
+ASMFLAGS = $(INCLUDES) -mf -5r -w4 -we -e25 -zq
+
+
+BUILDOBJS = a.obj bstub.obj build.obj cache1d.obj engine.obj &
+            multi_tcpip.obj sdl_driver.obj
+GAMEOBJS  = a.obj game.obj cache1d.obj engine.obj multi_tcpip.obj &
+            sdl_driver.obj
+
+BUILDOBJS_COMMAS = a.obj,bstub.obj,build.obj,cache1d.obj,engine.obj,multi_tcpip.obj,sdl_driver.obj
+GAMEOBJS_COMMAS  = a.obj,game.obj,cache1d.obj,engine.obj,multi_tcpip.obj,sdl_driver.obj
+
+all : project .SYMBOLIC
+
+project : build.exe game.exe .SYMBOLIC
+
+clean : .SYMBOLIC
+	erase *.obj
+	erase *.exe
+	erase *.o
+	erase *~
+
+.asm.obj : .AUTODEPEND
+	*$(ASM) $[* $(ASMFLAGS)
+
+.c.obj :  .AUTODEPEND
+	*$(CC) $[* $(CFLAGS)
+
+build.exe : $(BUILDOBJS) .AUTODEPEND
+ @%write build.lk1 NAME build
+ @%append build.lk1 FIL $(BUILDOBJS_COMMAS)
+ @%append build.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b build.imp 
+ @%append build.lk1 LIBR build.imp
+!endif
+ *wlink d all SYS nt op m libp $(SDL_LIB_DIR) libf SDL.lib op c op maxe=&
+25 op q op symf @build.lk1 
+erase build.lk1
+!ifneq BLANK ""
+ wrc -q -ad -t  build.exe
+!endif
+
+game.exe : $(GAMEOBJS) .AUTODEPEND
+ @%write game.lk1 NAME game
+ @%append game.lk1 FIL $(GAMEOBJS_COMMAS)
+ @%append game.lk1 
+!ifneq BLANK ""
+ *wlib -q -n -b game.imp 
+ @%append game.lk1 LIBR game.imp
+!endif
+ *wlink d all SYS nt op m libp $(SDL_LIB_DIR) libf SDL.lib op c op &
+maxe=25 op q op symf @game.lk1
+erase game.lk1
+!ifneq BLANK ""
+ wrc -q -ad -t  game.exe
+!endif
+
+# end of Makefile.w32 ...
+
