@@ -1,6 +1,6 @@
-cache1d.o: cache1d.c unix_compat.h /usr/local/include/SDL/SDL.h \
- /usr/local/include/SDL/SDL_main.h /usr/local/include/SDL/SDL_types.h \
- /usr/local/include/SDL/SDL_error.h \
+cache1d.o: cache1d.c platform.h unix_compat.h display.h \
+ /usr/local/include/SDL/SDL.h /usr/local/include/SDL/SDL_main.h \
+ /usr/local/include/SDL/SDL_types.h /usr/local/include/SDL/SDL_error.h \
  /usr/local/include/SDL/begin_code.h \
  /usr/local/include/SDL/close_code.h \
  /usr/local/include/SDL/SDL_rwops.h /usr/local/include/SDL/SDL_timer.h \

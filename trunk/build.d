@@ -1,6 +1,6 @@
-build.o: build.c unix_compat.h /usr/local/include/SDL/SDL.h \
- /usr/local/include/SDL/SDL_main.h /usr/local/include/SDL/SDL_types.h \
- /usr/local/include/SDL/SDL_error.h \
+build.o: build.c platform.h unix_compat.h build.h pragmas.h display.h \
+ /usr/local/include/SDL/SDL.h /usr/local/include/SDL/SDL_main.h \
+ /usr/local/include/SDL/SDL_types.h /usr/local/include/SDL/SDL_error.h \
  /usr/local/include/SDL/begin_code.h \
  /usr/local/include/SDL/close_code.h \
  /usr/local/include/SDL/SDL_rwops.h /usr/local/include/SDL/SDL_timer.h \
@@ -14,4 +14,4 @@ build.o: build.c unix_compat.h /usr/local/include/SDL/SDL.h \
  /usr/local/include/SDL/SDL_keysym.h \
  /usr/local/include/SDL/SDL_mouse.h /usr/local/include/SDL/SDL_video.h \
  /usr/local/include/SDL/SDL_mutex.h /usr/local/include/SDL/SDL_quit.h \
- /usr/local/include/SDL/SDL_version.h build.h pragmas.h display.h
+ /usr/local/include/SDL/SDL_version.h
