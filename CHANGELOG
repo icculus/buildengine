@@ -401,6 +401,20 @@
             Other cleanups were made, along with update in build.txt. Lots of
             code was touched in ways not appropriate to mention in polite
             company.
+05232001 - Added lookup.dat support code, thanks to TerminX's help. Changed
+            initgroupfile() to not exit() if the groupfile won't open().
+            instead, we check for failed return values in ExtInit() (bstub.c),
+            like we should have done from the start. Added check in ExtInit()
+            for the environment variable BUILD_GROUPFILE, which will be the
+            groupfile to open if the variable exists. If the variable isn't
+            set, we default to Ken's "stuff.dat". Between this an TerminX's
+            lookup.dat code, we should be able to wander around a Duke3D map
+            without segfaults all over the place. Changed initgroupfile() and
+            kopen4load() to take a (const char *) argument. Should probably
+            show some diligence in adding this elsewhere, too, for the sake
+            of cleanliness and bughunting. Added some more function
+            declarations to engine.h. Updated README with new info on
+            Mapster and Duke3D.
 
 --ryan. (icculus@linuxgames.com)
 
