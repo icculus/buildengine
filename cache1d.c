@@ -14,7 +14,6 @@
 #include <sys/stat.h>
 
 #include "platform.h"
-#include "engine.h"
 #include "display.h"
 
 #include "pragmas.h"
