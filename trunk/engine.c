@@ -88,6 +88,7 @@ void drawvox(long dasprx, long daspry, long dasprz, long dasprang,
 #endif
 
 // External function prototypes
+// !!! should move some of these into display.h ...
 extern void vlin16first (long i1, long i2);
 extern void drawline16(long XStart, long YStart, long XEnd, long YEnd, char Color);
 extern void setcolor16(int color);

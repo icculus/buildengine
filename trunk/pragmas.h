@@ -2032,6 +2032,9 @@ void qinterpolatedown16short(long *i1, long i2, long i3, long i4);
         parm [eax][ecx][edx][esi]\
         modify exact [eax ebx ecx edx edi]\
 
+
+#if (defined PLATFORM_DOS)   // !!! move this to dos_driver.c?
+
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void setcolor16(int i1);
 #endif
@@ -2041,6 +2044,9 @@ void setcolor16(int i1);
         "out dx, ax",\
         parm [eax]\
         modify exact [eax edx]\
+
+#endif  // PLATFORM_DOS
+
 
 #if (__WATCOMC__ < 1100)   // apparently, you need declares for pragmas.
 void vlin16first(long i1, long i2);
