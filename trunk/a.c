@@ -180,12 +180,6 @@ void setupqrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 /* #pragma aux qrhlineasm4 parm [eax][ebx][ecx][edx][esi][edi] */
 void qrhlineasm4(long i1, long i2, long i3, long i4, long i5, long i6)
 {
-	/*
-    __asm__ __volatile__ (
-        "call _asm_qrhlineasm4   \n\t"
-        : : "a" (i1), "b" (i2), "c" (i3), "d" (i4), "S" (i5), "D" (i6)
-        : "cc", "memory");
-	*/
 /*
 _asm_qrhlineasm4:
 	push ebp
@@ -393,7 +387,7 @@ void tvlineasm2(unsigned long i1, unsigned long i2, unsigned long i3, unsigned l
 				((unsigned char *)tmach)[r];
 		}
 		i6 += fixchain;
-	} while (i6 < i6 - fixchain);
+	} while (i6 > i6 - fixchain);
 	asm1 = i5;
 	asm2 = ebp;
 } /* tvlineasm2 */
