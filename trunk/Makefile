@@ -185,13 +185,13 @@ win32bins:
 	wmake -f Makefile.w32 clean
 	wmake -f Makefile.w32
 	cp $(SDL_LIB_DIR)/SDL.dll .
-	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-win32bins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@linuxgames.com)\r\n\r\n" |zip -9rz ../BUILD-win32bins-$(shell date +%m%d%Y).zip $(BINSCOMMON) SDL.dll README-win32bins.txt
+	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-win32bins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@linuxgames.com)\r\n\r\n" |zip -9rz ../BUILD-win32bins-$(shell date +%m%d%Y).zip $(BINSCOMMON) SDL.dll README-win32bins.txt README CHANGELOG
 
 dosbins:
 	wmake -f Makefile.dos clean
 	wmake -f Makefile.dos
 	cp C:/WATCOM/BINW/DOS4GW.EXE .
-	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-dosbins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@linuxgames.com)\r\n\r\n" |zip -9rz ../BUILD-dosbins-$(shell date +%m%d%Y).zip $(BINSCOMMON) README-dosbins.txt DOS4GW.EXE
+	echo -e "\r\n\r\n\r\nHEY YOU.\r\n\r\n\r\nTake a look at README-dosbins.txt FIRST.\r\n\r\n\r\n--ryan. (icculus@linuxgames.com)\r\n\r\n" |zip -9rz ../BUILD-dosbins-$(shell date +%m%d%Y).zip $(BINSCOMMON) README-dosbins.txt README CHANGELOG DOS4GW.EXE
 
 else
 msbins: nocygwin
