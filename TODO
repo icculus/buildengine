@@ -27,8 +27,6 @@ NEXT ON TAP:
 - Port to Visual C?
 - Port to Mingwin32?  (the mprotect()s need to be #ifdef'd out. That should
   be the biggest change.)
-- Change the ENDLINE_CHAR junk in loadnames() (build.c) to something more
-  abstract: Accept a '\r', a '\n', or a "\r\n" as a valid end of line.
 
 // end of TODO ...
 
