@@ -1,4 +1,4 @@
-#----------------------------------------------------------------------------
+
 # Makefile for building BUILD on Unix/Cygwin systems.
 #
 #  Written by Ryan C. Gordon (icculus@clutteredmind.org)
@@ -141,7 +141,7 @@ ifeq ($(strip $(networking)),udp)
 endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
-ENGINESRCS += a_nasm.asm pragmas_gnu.c a_gnu.c 
+ENGINESRCS += a_nasm.asm pragmas.c a_gnu.c 
 
 ifeq ($(strip $(useopengl)),true)
 ENGINESRCS += buildgl.c
@@ -169,7 +169,7 @@ endif
 ENGINEDIR = .
 ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
 LINKER = gcc
-CFLAGS += $(USE_ASM) -Werror -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
+CFLAGS += $(USE_ASM) -funsigned-char -DPLATFORM_UNIX -O2 -g -Wall $(SDL_CFLAGS) -fasm -fno-omit-frame-pointer
 LDFLAGS += -g $(SDL_LDFLAGS)
 
 # Rules for turning source files into .o files

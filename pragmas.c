@@ -21,10 +21,8 @@
 static long dmval;
 
 #define low32(a) ((a&0xffffffff))
-#define STUBBED(x) fprintf(stderr,"STUB: %s (%s, %s:%d)\n",x,__FUNCTION__,__FILE__,__LINE__)
 
 unsigned long getkensmessagecrc(long param) {
-    STUBBED ("Not implemented");
     return(0x56c764d4);
 }
 
@@ -915,7 +913,6 @@ int tmulscale32(int i1, int i2, int i3, int i4, int i5, int i6) {
 }
 
 int boundmulscale(int i1, int i2, int i3) {
-  STUBBED ("Not implemented!");
   return 0;
 }
 
@@ -1169,37 +1166,38 @@ void clearbuf(void *buffer, int size, long fill_value) {
 }
 
 void clearbufbyte(void *buffer, int size, long fill_value) {
-  STUBBED ("Not implemented!");
-  __asm__ __volatile__ (
-	"cmpl $4, %%ecx   \n\t"
-	"jae longcopya   \n\t"
-	"testb $1, %%cl   \n\t"
-	"jz preskipa   \n\t"
-	"stosb   \n\t"
-	"preskipa: shrl $1, %%ecx   \n\t"
-	"rep   \n\t"
-    "stosw   \n\t"
-	"jmp endita   \n\t"
-	"longcopya: testl $1, %%edi   \n\t"
-	"jz skip1a   \n\t"
-	"stosb   \n\t"
-	"decl %%ecx   \n\t"
-	"skip1a: testl $2, %%edi   \n\t"
-	"jz skip2a   \n\t"
-	"stosw   \n\t"
-	"subl $2, %%ecx   \n\t"
-	"skip2a: movl %%ecx, %%ebx   \n\t"
-	"shrl $2, %%ecx   \n\t"
-    "rep   \n\t"
-    "stosl   \n\t"
-	"testb $2, %%bl   \n\t"
-	"jz skip3a   \n\t"
-	"stosw   \n\t"
-	"skip3a: testb $1, %%bl   \n\t"
-	"jz endita   \n\t"
-	"stosb   \n\t"
-	"endita:   \n\t"
-   : : "D" (buffer), "c" (size), "a" (fill_value) : "ebx", "cc");
+  if (size < 4) {
+	  if (size&1) {
+		  *((unsigned char*)buffer)++ = fill_value;
+	  }
+	  size = size >> 1;
+	  while (size) {
+		  *((unsigned short*)buffer)++ = fill_value;
+		  size--;
+	  }
+  } else {
+	  int oldsize;
+	  if (size&1) {
+		  *((unsigned char*)buffer)++ = fill_value;
+		  size--;
+	  }
+	  if (size&2) {
+		  *((unsigned short*)buffer)++ = fill_value;
+		  size -= 2;
+	  }
+	  oldsize = size;
+	  size = size >> 2;
+	  while (size) {
+		  *((unsigned int*)buffer)++ = fill_value;
+		  size--;
+	  }
+	  if (oldsize&2) {
+		  *((unsigned short*)buffer)++ = fill_value;
+	  }
+	  if (oldsize&1) {
+		  *((unsigned char*)buffer)++ = fill_value;
+	  }
+  }
 }
 
 void copybuf(void *source, void *dest, int size) {
@@ -1208,41 +1206,66 @@ void copybuf(void *source, void *dest, int size) {
 }
 
 void copybufbyte(void *source, void *dest, int size) {
-  STUBBED ("Not implemented!");
-  __asm__ __volatile__ (
-	"cmpl $4, %%ecx   \n\t"
-	"jae longcopyb   \n\t"
-	"testb $1, %%cl   \n\t"
-	"jz preskipb   \n\t"
-	"movsb   \n\t"
-	"preskipb: shrl $1, %%ecx   \n\t"
-	"rep   \n\t"
-    "movsw   \n\t"
-	"jmp enditb   \n\t"
-	"longcopyb: testl $1, %%edi   \n\t"
-	"jz skip1b   \n\t"
-	"movsb   \n\t"
-	"decl %%ecx   \n\t"
-	"skip1b: testl $2, %%edi   \n\t"
-	"jz skip2b   \n\t"
-	"movsw   \n\t"
-	"sub $2, %%ecx   \n\t"
-	"skip2b: mov %%ecx, %%ebx   \n\t"
-	"shr $2, %%ecx   \n\t"
-	"rep   \n\t"
-    "movsl   \n\t"
-	"testb $2, %%bl   \n\t"
-	"jz skip3b   \n\t"
-	"movsw   \n\t"
-	"skip3b: testb $1, %%bl   \n\t"
-	"jz enditb   \n\t"
-	"movsb   \n\t"
-	"enditb:   \n\t"
-   : : "S" (source), "D" (dest), "c" (size) : "ebx", "cc");
+  if (size < 4) {
+	  if (size&1) {
+		  *((unsigned char*)dest)++ = *((unsigned char*)source)++;
+	  }
+	  size = size >> 1;
+	  while (size) {
+		  *((unsigned short*)dest)++ = *((unsigned short*)source)++;
+		  size--;
+	  }
+  } else {
+	  int oldsize;
+	  if (size&1) {
+		  *((unsigned char*)dest)++ = *((unsigned char*)source)++;
+		  size--;
+	  }
+	  if (size&2) {
+		  *((unsigned short*)dest)++ = *((unsigned short*)source)++;
+		  size -= 2;
+	  }
+	  oldsize = size;
+	  size = size >> 2;
+	  while (size) {
+		  *((unsigned int*)dest)++ = *((unsigned int*)source)++;
+		  size--;
+	  }
+	  if (oldsize&2) {
+		  *((unsigned short*)dest)++ = *((unsigned short*)source)++;
+	  }
+	  if (oldsize&1) {
+		  *((unsigned char*)dest)++ = *((unsigned char*)source)++;
+	  }
+  }
 }
 
 void copybufreverse(void *source, void *dest, int size) {
-  STUBBED ("Not implemented!");
+  if (size&1)
+  {
+	  *((unsigned char*)dest)++ = *((unsigned char*)source)--;
+  }
+  size = size / 2;
+  if (size&1)
+  {
+	  unsigned short a;
+	  ((unsigned char*)source)--;
+	  a = *((unsigned short*)source)--;
+	  ((unsigned char*)source)++;
+	  *((unsigned short*)dest)++ = ((a>>8)|(a<<8));
+  }
+  size = size / 2;
+  while (size)
+  {
+	  unsigned int a;
+	  ((unsigned char*)source) -= 3;
+	  a = *((unsigned int*)source)--;
+	  ((unsigned char*)source) += 3;
+	  *((unsigned int*)dest)++ = ((a<<24)|((a<<8)&0x00FF0000)|((a>>8)&0x0000FF00)|(a>>24));
+	  size--;
+  }
+  return;
+
   __asm__ __volatile__ (
 	"shrl $1, %%ecx   \n\t"
 	"jnc skipit1   \n\t"
@@ -1325,6 +1348,12 @@ int klabs (int i1) {
 }
 
 int ksgn(int i1) {
+  if (i1 < 0) return -1;
+  else if (i1 > 0) return 1;
+  else return 0;
+}
+
+int sgn(int i1) {
   if (i1 < 0) return -1;
   else if (i1 > 0) return 1;
   else return 0;
