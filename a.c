@@ -1396,7 +1396,7 @@ void slopevlin(long i1, unsigned long i2, long i3, long i4, long i5, long i6)
 	    c.f = a;
 	    fpuasm = eax = c.i;
 	    edx = 0;
-	    if ((eax - eax) > eax) edx--;	// edx = sign bit
+	    if ((eax + eax) < eax) edx--;	// edx = sign bit
 	    eax += eax;
 	    ecx = (eax>>24);	//  exponent
 	    eax = ((eax&0xffe000)>>11);
