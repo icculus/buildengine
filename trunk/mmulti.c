@@ -559,6 +559,7 @@ void deinit_network_transport(gcomtype *gcom)
 
 #define SOCKET_SHUTDOWN_BOTH 2
 
+#include <signal.h>
 #include "cache1d.h"  /* kopen4load for cfg file. */
 #include "display.h"  /* getticks */
 
@@ -581,14 +582,10 @@ static struct {
 } allowed_addresses[MAX_PLAYERS];  /* only respond to these IPs. */
 
 volatile int ctrlc_pressed = 0;
-
-#if PLATFORM_UNIX
-#include <signal.h>
 static void siginthandler(int sigint)
 {
     ctrlc_pressed = 1;
 }
-#endif
 
 #if PLATFORM_WIN32
 /*
@@ -952,9 +949,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
     int remaining = max;
     unsigned short heard_from[MAX_PLAYERS];
 
-#if PLATFORM_UNIX
     void (*oldsigint)(int) = signal(SIGINT, siginthandler);
-#endif
 
     memset(heard_from, '\0', sizeof (heard_from));
 
@@ -1025,9 +1020,7 @@ static int connect_to_everyone(gcomtype *gcom, int myip) /* peer to peer init. *
         }
     }
 
-#if PLATFORM_UNIX
     signal(SIGINT, oldsigint);
-#endif
 
     if (ctrlc_pressed)
     {
