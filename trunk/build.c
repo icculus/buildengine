@@ -280,7 +280,7 @@ int loadnames(void)
 }
 
 
-void initcrc(void)
+static void initcrc(void)
 {
 	long i, j, k, a;
 

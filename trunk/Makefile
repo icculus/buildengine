@@ -130,15 +130,15 @@ NETDLL = $(strip $(NETBASE))$(strip $(DLL_EXT))
 endif
 
 ENGINESRCS = engine.c cache1d.c sdl_driver.c unix_compat.c
-ENGINESRCS += a_nasm.asm pragmas_gnu.c a_gnu.c
+ENGINESRCS += a_nasm.asm pragmas_gnu.c a_gnu.c 
 
 ifeq ($(strip $(useopengl)),true)
 ENGINESRCS += buildgl.c
 endif
 
 
-
-NETSRCS = multi_tcpip.c
+NETSRCS = mmulti.c
+#NETSRCS = multi_tcpip.c
 
 GAMEEXE = game
 GAMESRCS = game.c 
