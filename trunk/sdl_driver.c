@@ -1109,12 +1109,16 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_KP2]             = 0x50;
     scancodes[SDLK_KP3]             = 0x51;
     scancodes[SDLK_KP0]             = 0x52;
+    scancodes[SDLK_KP_PERIOD]       = 0x53;
     scancodes[SDLK_F11]             = 0x57;
     scancodes[SDLK_F12]             = 0x58;
-        
+    scancodes[SDLK_PAUSE]           = 0x59; /* SBF - technically incorrect */
+
     scancodes[SDLK_KP_ENTER]        = 0xE01C;
     scancodes[SDLK_RCTRL]           = 0xE01D;
     scancodes[SDLK_KP_DIVIDE]       = 0xE035;
+    scancodes[SDLK_PRINT]           = 0xE037; /* SBF - technically incorrect */
+    scancodes[SDLK_SYSREQ]          = 0xE037; /* SBF - for windows... */
     scancodes[SDLK_RALT]            = 0xE038;
     scancodes[SDLK_HOME]            = 0xE047;
     scancodes[SDLK_UP]              = 0xE048;
