@@ -14,9 +14,6 @@
  * This file IS NOT A PART OF Ken Silverman's original release
  */
 
-/* need _GNU_SOURCE to get snprintf()... */
-#define _GNU_SOURCE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -41,11 +38,14 @@
  * !!! move this to buildgl.c, and add a function to that to abstract
  * !!!  SDL_GL_GetProcAddress().
  */
-const GLubyte* (*dglGetString)(GLenum name) = NULL;
-void (*dglBegin)(GLenum mode) = NULL;
-void (*dglEnd)(void) = NULL;
-void (*dglClear)(GLbitfield mask) = NULL;
-void (*dglClearColor)(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) = NULL;
+glGetString_t dglGetString = NULL;
+glBegin_t dglBegin = NULL;
+glEnd_t dglEnd = NULL;
+glClear_t dglClear = NULL;
+glClearColor_t dglClearColor = NULL;
+glDrawPixels_t dglDrawPixels = NULL;
+glPixelMapfv_t dglPixelMapfv = NULL;
+glPixelStorei_t dglPixelStorei = NULL;
 #endif
 
 
@@ -99,6 +99,9 @@ extern long setvlinebpl(long);
 
 #define UNLOCK_SURFACE_AND_RETURN  if (SDL_MUSTLOCK(surface)) SDL_UnlockSurface(surface); return;
 
+
+int _argc = 0;
+char **_argv = NULL;
 
     /* !!! move these elsewhere? */
 long xres, yres, bytesperline, frameplace, imageSize, maxpages;
@@ -839,7 +842,7 @@ static char *default_gl_libs[] = {
 #endif
 };
 
-static void *try_glsym_load(const char *sym)
+static void *try_glsym_load(void **ptr, const char *sym)
 {
     void *retval = NULL;
 
@@ -850,18 +853,23 @@ static void *try_glsym_load(const char *sym)
     else
         sgldebug("Symbol \"%s\" located.", sym);
 
+    if (ptr != NULL)
+        *ptr = retval;
+
     return(retval);
 } /* try_glsym_load */
 
 
 static int load_opengl_symbols(void)
 {
-    if (!(dglGetString = try_glsym_load("glGetString"))) return(-1);
-    if (!(dglBegin = try_glsym_load("glBegin"))) return(-1);
-    if (!(dglEnd = try_glsym_load("glEnd"))) return(-1);
-    if (!(dglClear = try_glsym_load("glClear"))) return(-1);
-    if (!(dglClearColor = try_glsym_load("glClearColor"))) return(-1);
-
+    if (!try_glsym_load((void **) &dglGetString, "glGetString")) return(-1);
+    if (!try_glsym_load((void **) &dglBegin, "glBegin")) return(-1);
+    if (!try_glsym_load((void **) &dglEnd, "glEnd")) return(-1);
+    if (!try_glsym_load((void **) &dglClear, "glClear")) return(-1);
+    if (!try_glsym_load((void **) &dglClearColor, "glClearColor")) return(-1);
+    if (!try_glsym_load((void **) &dglDrawPixels, "glDrawPixels")) return(-1);
+    if (!try_glsym_load((void **) &dglPixelStorei, "glPixelStorei")) return(-1);
+    if (!try_glsym_load((void **) &dglPixelMapfv, "glPixelMapfv")) return(-1);
     return(0);
 } /* load_opengl_symbols */
 
@@ -950,12 +958,17 @@ static inline void init_debugging(void)
 } /* init_debugging */
 
 
+#if (!defined __DATE__)
+#define __DATE__ "a long, long time ago"
+#endif
+
 static inline void output_sdl_versions(void)
 {
     const SDL_version *linked_ver = SDL_Linked_Version();
     sdldebug("SDL display driver for the BUILD engine initializing.");
-    sdldebug("Compiled against SDL version %d.%d.%d ...",
-                SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+    sdldebug("  sdl_driver.c by Ryan C. Gordon (icculus@linuxgames.com).");
+    sdldebug("Compiled %s against SDL version %d.%d.%d ...",
+               __DATE__, SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
     sdldebug("Linked SDL version is %d.%d.%d ...",
                 linked_ver->major, linked_ver->minor, linked_ver->patch);
 } /* output_sdl_versions */
@@ -972,8 +985,21 @@ static inline void detect_vmware(void)
 } /* detect_vmware */
 
 
+/* lousy -ansi flag.  :) */
+static char *string_dupe(const char *str)
+{
+    char *retval = malloc(strlen(str) + 1);
+    if (retval != NULL)
+        strcpy(retval, str);
+    return(retval);
+} /* string_dupe */
+
+
 void _platform_init(int argc, char **argv, const char *title, const char *icon)
 {
+    _argc = argc;
+    _argv = argv;
+
     init_debugging();
 
     output_sdl_versions();
@@ -990,8 +1016,8 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
 
     detect_vmware();
 
-    titlelong = strdup(title);
-    titleshort = strdup(icon);
+    titlelong = string_dupe(title);
+    titleshort = string_dupe(icon);
 
     if (getenv(BUILD_NOMOUSEGRAB) == NULL)
         mouse_grabbed = 1;
@@ -1189,6 +1215,18 @@ int _setgamemode(char davidoption, long daxdim, long daydim)
             sgldebug("GL_EXTENSIONS [%s]\n", (char *) dglGetString(GL_EXTENSIONS));
             shown_gl_strings = 1;
         } /* if */
+
+        #if 0
+        dglViewport(0, 0, daxdim, daydim);
+        dglEnable(GL_TEXTURE_2D);
+        dglClearDepth(1.0);
+        dglDepthFunc(GL_LESS);
+        dglEnable(GL_DEPTH_TEST);
+        dglShadeModel(GL_SMOOTH);
+        dglMatrixMode(GL_PROJECTION);
+        dglLoadIdentity();
+        dglMatrixMode(GL_MODELVIEW);
+        #endif
     #endif
 
     qsetmode = 200;
@@ -1442,7 +1480,7 @@ static inline void output_vesa_modelist(void)
 
     for (i = 0; i < validmodecnt; i++)
     {
-        snprintf(numbuf, sizeof (numbuf), " (%ldx%ld)",
+        sprintf(numbuf, " (%ldx%ld)",
                   (long) validmodexdim[i], (long) validmodeydim[i]);
 
         if ( (strlen(buffer) + strlen(numbuf)) >= (sizeof (buffer) - 1) )
@@ -1512,6 +1550,13 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
     char *p = palettebuffer;
     int i;
 
+#if (defined USE_OPENGL)
+    GLfloat gl_reds[256];
+    GLfloat gl_greens[256];
+    GLfloat gl_blues[256];
+    GLfloat gl_alphas[256];
+#endif
+
     assert( (start + num) <= (sizeof (fmt_swap) / sizeof (SDL_Color)) );
 
     for (i = 0; i < num; i++)
@@ -1520,8 +1565,23 @@ int VBE_setPalette(long start, long num, char *palettebuffer)
         sdlp->g = (Uint8) ((((float) *p++) / 63.0) * 255.0);
         sdlp->r = (Uint8) ((((float) *p++) / 63.0) * 255.0);
         sdlp->unused = *p++;   /* This byte is unused in BUILD, too. */
+
+#if (defined USE_OPENGL)
+        gl_reds[i]   = ((GLfloat) sdlp->r) / 255.0f;
+        gl_greens[i] = ((GLfloat) sdlp->g) / 255.0f;
+        gl_blues[i]  = ((GLfloat) sdlp->b) / 255.0f;
+        gl_alphas[i] = 1.0f;
+#endif
+
         sdlp++;
     } /* for */
+
+#if (defined USE_OPENGL)
+    dglPixelMapfv(GL_PIXEL_MAP_I_TO_R, num, &gl_reds[start]);
+    dglPixelMapfv(GL_PIXEL_MAP_I_TO_G, num, &gl_greens[start]);
+    dglPixelMapfv(GL_PIXEL_MAP_I_TO_B, num, &gl_blues[start]);
+    dglPixelMapfv(GL_PIXEL_MAP_I_TO_A, num, &gl_alphas[start]);
+#endif
 
     return(SDL_SetColors(surface, fmt_swap, start, num));
 } /* VBE_setPalette */
@@ -1623,7 +1683,8 @@ void _nextpage(void)
             SDL_GL_SwapBuffers();
             if (debug_hall_of_mirrors)
             {
-                dglClearColor3ub(mirrorcolor, 0, 0);
+                dglClearColor( ((GLfloat) mirrorcolor) / 255.0,
+                                0.0f, 0.0f, 0.0f );
                 mirrorcolor++;
             } /* if */
             dglClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
