@@ -335,6 +335,11 @@
             fully functional. Put safety checks in a.h. Put a fix in build.c's
             overheadeditor(), so it doesn't try to reference element -1 in an
             array when clicking the left mouse button. Other ASM cleanups.
+            Fixed an annoying function declaration in bstub.c. Fixed an
+            incorrect assumption in sdl_driver.c's VBE_setPalette() that was
+            exposed by game.c under Watcom/win32. One quick addition of the
+            keyword "extern" to game.c, and we have a working game.exe under
+            Windows that isn't GPL encumbered. Woohoo!
 
 --ryan. (icculus@lokigames.com)
 
