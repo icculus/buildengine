@@ -426,7 +426,19 @@
             Added README and CHANGELOG to the win32 and dos bin distros, and
             updated README-dosbins.txt and README-win32bins.txt. Updated
             README with info on Watcom 10 vs 11, porting to new OSes, etc.
-            Updated TODO, AGAIN. :)
+            Updated TODO, AGAIN. :) Wrote a hopefully-robust function that
+            toggles the screen surface between windowed and full screen
+            without using SDL_WM_ToggleFullScreen(), so that you can use
+            ALT-Enter on Win32. Accordingly, removed references to
+            SDL_WM_ToggleFullScreen() in display.h and sdl_driver.c ...
+            The new fullscreen toggle code throws up on Windows if you destroy
+            the window (via SDL_SetVideoMode()) while in the middle of
+            handling one of its events...we were processing all events via the
+            SDL event filter during the SDL_PumpEvents() call. I've added
+            handle_events() to sdl_driver.c, and replaced all the PumpEvents
+            calls with that. This gets its events via SDL_PollEvent(), and
+            passes them on to our filter manually. That's just generally better
+            practice anyhow.
 
 --ryan. (icculus@linuxgames.com)
 
