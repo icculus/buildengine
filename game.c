@@ -3892,7 +3892,7 @@ SDL_PumpEvents();
 
 				//WARNING!  Assuming (MIRRORLABEL&31) = 0 and MAXMIRRORS = 64
 			longptr = (long *)FP_OFF(gotpic[MIRRORLABEL>>3]);
-			if ((longptr != NULL) && (longptr[0]|longptr[1]))
+			//if ((longptr != NULL) && (longptr[0]|longptr[1]))
 				for(i=MAXMIRRORS-1;i>=0;i--)
 					if (gotpic[(i+MIRRORLABEL)>>3]&(1<<(i&7)))
 					{
