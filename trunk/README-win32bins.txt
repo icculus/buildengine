@@ -4,9 +4,7 @@ These binaries are BETA quality. Expect crashes.
 
 The notable annoyances:
 1) No sound.
-2) It's too slow (it's rendering 100+ frames per second here, but there's a
-   bug in the animation timer, so it looks like it's running in Matrix mode).
-3) No networking. Boohoo.   :)
+2) No networking. Boohoo.   :)
 
 Bug reports to Ryan C. Gordon (icculus@lokigames.com).
 
@@ -56,8 +54,9 @@ CHANGELOG of win32 binary releases:
 02212001 - Fixed too-slow gameplay (Thanks, Matt!).
 02222001 - Ported back to DOS/386...since so much code got touched, it's
            worth putting out a new binary to make sure nothing broke.
-02222001 - Ported back to DOS/386...since so much code got touched, it's
-           worth putting out a new binary to make sure nothing broke.
+02262001 - Fixed WinNT/Win2k problems. Should run now. YMMV. Automated
+           packaging system, but not sure if everything is getting included.
+           time will tell.
 
 // end of README-win32bins.txt ...
 

@@ -353,6 +353,14 @@
             PLATFORM_TIMER_HZ, defined in platform.h ... Removed the wedged-in
             call to SDL_PumpEvents() in game.c...not needed anymore.
 02222001 - Ported the codebase back to DOS. Point wmake.exe at Makefile.dos.
+02262001 - Added code to enable write access to self-modified ASM memory pages
+            so this will work on WinNT and Win2K. Discovered it wasn't needed,
+            and the real problem is that Watcom produces an incorrect PE
+            header in the generated EXE files. Steven Fuller dug up a program
+            that fixes this, and did a ton of debugging. Fixed Makefile.w32
+            and changed the default builds to optimized and not debug to make
+            binary distribution easier. Automated the packaging of binary
+            releases in Makefile.
 
 --ryan. (icculus@lokigames.com)
 

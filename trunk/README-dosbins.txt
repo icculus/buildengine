@@ -34,8 +34,9 @@ Enjoy!
 --ryan. (icculus@lokigames.com)
 
 
-CHANGELOG of win32 binary releases:
+CHANGELOG of DOS binary releases:
 02222001 - first binary release.
+02262001 - Improved Makefile system. May not be packaging correctly, though.
 
 // end of README-dosbins.txt ...
 
