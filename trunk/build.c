@@ -2660,8 +2660,11 @@ void overheadeditor(void)
 	drawline16(256,143-24,256,143,7);
 	pageoffset = 92160; ydim16 = 336;
 
-	outpw(0x3d4,0x000c);
-	outpw(0x3d4,0x000d);
+    //rcg08312000 whoops. Missed this one.
+    #ifdef PLATFORM_DOS
+    	outpw(0x3d4,0x000c);
+    	outpw(0x3d4,0x000d);
+    #endif
 
 	pag = 0;
 	highlightcnt = -1;
