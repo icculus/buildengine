@@ -348,9 +348,7 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     else
         mouse_grabbed = 0;
 
-    sdl_flags = SDL_HWSURFACE | SDL_FULLSCREEN;
-    if (getenv(BUILD_WINDOWED) != NULL)
-        sdl_flags &= ~SDL_FULLSCREEN;
+    sdl_flags = ((getenv(BUILD_WINDOWED) == NULL) ? SDL_FULLSCREEN : 0);
 
     memset(scancodes, '\0', sizeof (scancodes));
     scancodes[SDLK_ESCAPE]          = 0x01;
@@ -450,7 +448,7 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_DELETE]          = 0xE0D3;
     scancodes[SDLK_KP0]             = 0xE052;
     scancodes[SDLK_INSERT]          = 0xE052;
-	scancodes[SDLK_KP_ENTER]		= 0xE01C;
+    scancodes[SDLK_KP_ENTER]        = 0xE01C;
 
     if (SDL_Init(SDL_INIT_VIDEO |
                  SDL_INIT_TIMER |
