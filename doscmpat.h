@@ -23,6 +23,8 @@
 #warning This is almost certainly wrong.
 #endif
 
+#define PLATFORM_TIMER_HZ 280
+
 // need these for something where we abstracted with SDL...
 typedef unsigned long Uint32;
 typedef unsigned short Uint16;
