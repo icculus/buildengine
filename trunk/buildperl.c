@@ -19,7 +19,10 @@
 
 static PerlInterpreter *perl = NULL;
 static char *embedding[] = { "", "game.pl" };
-static char *args[] = { NULL };
+//static char *args[] = { NULL };
+static SV *framefunc = NULL;
+//static SV *ref_framefunc = NULL;
+static HV *stash = NULL;
 
 int buildperl_init(void)
 {
@@ -41,6 +44,18 @@ int buildperl_init(void)
             perl_run(perl);
             printf("perl mainline complete.\n");
             retval = 0;
+
+//            framefunc = get_sv("BUILD_frame", FALSE);
+
+            stash = gv_stashpv("main", FALSE);
+            if (stash == NULL)
+                printf("main stash is NULL!\n");
+            else
+            {
+                framefunc = *(hv_fetch(stash, "BUILD_frame", 11, FALSE));
+                if (framefunc == NULL)
+                    printf("framefunc == NULL!\n");
+            }
         } // if
         else
         {
@@ -57,8 +72,15 @@ int buildperl_init(void)
 
 void buildperl_frame(void)
 {
+    dSP;
+
+    PUSHMARK(SP);
+
     if (perl != NULL)
-        call_argv("BUILD_frame", G_DISCARD | G_NOARGS, args);
+    {
+//        call_argv("BUILD_frame", G_DISCARD | G_NOARGS, args);
+        call_sv(framefunc, G_DISCARD | G_NOARGS);
+    } // if
 } // buildperl_frame
 
 
