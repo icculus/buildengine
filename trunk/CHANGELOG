@@ -274,6 +274,18 @@
             cleanups in the Makefile. Moved VIDEOBASE defines to display.h.
             _platform_init() now takes icon and titlebar titles, and has been
             updated in all drivers.
+02132001 - (Five months later...ugh.) Dan noticed that my webpage is being
+            discussed on the 3DRealms forums, so I went back into the code
+            and finished the work to get this running under Cygwin. Here's
+            the list of that work: Makefile is now more robust, added a
+            non-__attribute__ version of asm_prohlineasm4() to a.h, moved some
+            #includes in cache1d.c to prevent a double-definition of O_BINARY.
+            Fixed the inline asm in engine.c and pragmas.c to handle C
+            compilers that add underscores to identifiers. Removed the
+            SDL_HWSURFACE flag in sdl_driver.c (didn't realize this is
+            actually slower on most hardware, and it also breaks fullscreen
+            mode in Win32 on my box). Had to #ifndef CYGWIN the fnmatch stuff
+            in build.c until I find a portable, non-GPL solution.
 
 --ryan. (icculus@lokigames.com)
 
