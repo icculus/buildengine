@@ -328,6 +328,9 @@ void _platform_init(int argc, char **argv)
         unprotect_ASM_pages();
     #endif
 
+    setbuf(stderr, NULL);
+    setbuf(stdout, NULL);
+
     if (getenv(BUILD_NOMOUSEGRAB) == NULL)
         mouse_grabbed = 1;
     else
@@ -498,7 +501,6 @@ static void init_new_res_vars(int davidoption)
 
     if (davidoption != -1)
     {
-//        vidoption = davidoption;
     	switch(vidoption)
     	{
     		case 1:i = xdim*ydim; break;
@@ -518,7 +520,7 @@ static void init_new_res_vars(int davidoption)
         frameplace = FP_OFF(screen);
       	horizlookup = (long *)(frameplace+i);
        	horizlookup2 = (long *)(frameplace+i+j);
-    } // else
+    } // if
 
     j = 0;
   	for(i = 0; i <= ydim; i++)
@@ -534,8 +536,11 @@ static void init_new_res_vars(int davidoption)
 
 	setvlinebpl(bytesperline);
 
-	setview(0L,0L,xdim-1,ydim-1);
-	clearallviews(0L);
+    if (davidoption != -1)
+    {
+    	setview(0L,0L,xdim-1,ydim-1);
+    	clearallviews(0L);
+    } // if
 	setbrightness((char)curbrightness,(char *)&palette[0]);
 
 	if (searchx < 0) { searchx = halfxdimen; searchy = (ydimen>>1); }
