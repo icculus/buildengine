@@ -69,7 +69,7 @@ INFO:
     Without this environment variable, Build looks for "stuff.dat" in the
     current directory; that's KenBuild's groupfile.
 
-  Now Go get a Duke3D map off the net and open it in build.
+  Now go get a Duke3D map off the net and open it in build.
   I haven't tried Blood, Shadow Warrior, or anything else, but someone sent
   me screenshots of Shadow Warrior. Your mileage may vary.
 
