@@ -756,6 +756,13 @@ static void handle_events(void)
 } /* handle_events */
 
 
+/* bleh...public version... */
+void _handle_events(void)
+{
+    handle_events();
+} /* _handle_events */
+
+
 unsigned char _readlastkeyhit(void)
 {
     return(lastkey);

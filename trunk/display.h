@@ -98,6 +98,7 @@ extern unsigned char permanentlock;
 /* these need to be implemented by YOUR driver. */
 void _platform_init(int argc, char **argv, const char *title, const char *icon);
 void _idle(void);
+void _handle_events(void);
 void *_getVideoBase(void);
 void initkeys(void);
 void uninitkeys(void);
