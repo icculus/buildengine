@@ -21,15 +21,16 @@ platform abstractions. Build relies on a fairly recent SDL code snapshot.
 Get SDL from CVS like this:
 
 cvs -d :pserver:guest@cvs.lokigames.com:/cvs login
-# password is "guest"
+# password is "guest", without the quotes.
 cvs -z3 -d :pserver:guest@cvs.lokigames.com:/cvs checkout -r devel_1_1_0 SDL
 cd SDL; ./autogen.sh; make; make install
 
 
 CVS is also good if you want the up-to-the-minute changes of BUILD:
 
-cvs -d:pserver:anonymous@linux.ucla.edu:/var/cvs
-cvs -z3 co buildengine
+cvs -d:pserver:anonymous@linux.ucla.edu:/var/cvs login
+# password is "anonymous", without the quotes.
+cvs -z3 -d:pserver:anonymous@linux.ucla.edu:/var/cvs co buildengine
 
 
 PLEASE READ THE CHANGELOG AND TODO FILE FOR DETAILS ON WHAT'S NEW AND
@@ -53,7 +54,11 @@ INFO:
 - See us in #loki at irc.openprojects.net with questions.
 - This is NOT a Loki-sponsored project. We're Loki employees that get off on
   this stuff. Don't harrass info@lokigames.com about it.
-
+- Yes, you CAN edit Duke3D maps with this, but I haven't tried extensively.
+  Get your DUKE3D.GRP file, kextract *.map from it, and then rename it to
+  stuff.dat. Open one of the extracted maps in BUILD, and it should work.
+  I haven't tried Blood, Shadow Warrior, or anything else, and I only walked
+  around E1L1.MAP for a few minutes, but that much looked copacetic.
 
 GOOD REFERENCES:
 - VESA i/o reference: http://pm.cse.rmit.edu.au/~steve/vbe/vbe20.htm
