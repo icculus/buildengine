@@ -10,10 +10,12 @@
 #include <sys/stat.h>
 #include <memory.h>
 #include <stdlib.h>
+#include "engine.h"
 #include "platform.h"
 #include "build.h"
 #include "pragmas.h"
 #include "names.h"
+#include "bstub.h"
 
 // !!! temporary externs.
 extern long total_rendered_frames, total_render_time;
@@ -61,9 +63,9 @@ extern long stretchhline(long,long,long,long,long,long);
 #endif
 
 // External function prototypes
+// !!! lose these! --ryan.
 extern long initgroupfile(char *filename);
 extern void uninitgroupfile(void);
-extern int initmouse(void);
 extern void initengine(void);
 extern void makepalookup(long palnum, char *remapbuf, signed char r,
 			signed char g, signed char b, char dastat);
@@ -329,7 +331,12 @@ void ExtCheckKeys(void)
 			walock[4094] = 1;
 
 			sprintf(tempbuf,"%ld",(hang*180)>>10);
-			printext256(0L,8L,31,-1,tempbuf,1);
+
+            #ifdef USE_OPENGL
+//!!! Fill me in!
+            #else
+    			printext256(0L,8L,31,-1,tempbuf,1);
+            #endif
 		}
 
 		if (keystatus[0xa]) setaspect(viewingrange+(viewingrange>>8),yxaspect+(yxaspect>>8));
@@ -358,8 +365,11 @@ void ExtCheckKeys(void)
     		sprintf(tempbuf,"%.2f", (double) (total_rendered_frames / ((double) total_render_time / 1000.0)));
         #endif
 
-
-		printext256(0L,0L,31,-1,tempbuf,1);
+        #ifdef USE_OPENGL
+            // !!! Fill me in!
+        #else
+    		printext256(0L,0L,31,-1,tempbuf,1);
+        #endif
 
 		editinput();
 	}

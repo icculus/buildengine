@@ -19,6 +19,7 @@
 #include "pragmas.h"
 #include "display.h"
 #include "build.h"
+#include "engine.h"
 #include "names.h"
 
 #define TIMERINTSPERSECOND PLATFORM_TIMER_HZ 
@@ -49,7 +50,6 @@ extern void makepalookup(long palnum, char *remapbuf, signed char r, signed char
 extern long initgroupfile(char *filename);
 extern void sendlogon(void);
 extern void printext256(long xpos, long ypos, short col, short backcol, char name[82], char fontsize);
-extern void nextpage(void);
 extern void getpackets(void);
 extern void sendlogoff(void);
 extern void musicoff(void);
@@ -113,8 +113,6 @@ extern void drawoverheadmap(long cposx, long cposy, long czoom, short cang);
 extern int screencapture(char *filename, char inverseit);
 extern void flushperms(void);
 extern void  rotatesprite (long sx, long sy, long z, short a, short picnum,  signed char dashade, char dapalnum, char dastat, long cx1, long cy1, long cx2, long cy2);
-extern void drawrooms(long daposx, long daposy, long daposz, short daang, long dahoriz, short dacursectnum);
-
 void drawscreen(short snum, long dasmoothratio);
 void domovethings(void);
 void prepareboard(char *daboardfilename);
