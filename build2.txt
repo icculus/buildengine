@@ -1653,3 +1653,13 @@ hitscan (long xs, long ys, long zs, short sectnum, long vx, long vy, long vz,
 					 Before you first call initengine, set dommxoverlay = 0;
 
 					 The default is dommxoverlay = 1 and it will run the code.
+
+                        !!! THIS IS NO LONGER TRUE.
+                        !!!  do #include "engine.h" in your code, and
+                        !!!  use setmmxoverlay(1) or setmmxoverlay(0) to set
+                        !!!  this BEFORE initengine. It defaults to 1, so you
+                        !!!  really only need to call this to disable the
+                        !!!  overlay. dommxoverlay is no longer exposed. You
+                        !!!  can also call int getmmxoverlay(void) to find out
+                        !!!  what you've set it to. The value is locked in
+                        !!!  once you call initengine().   --ryan. 05/22/2001

@@ -534,6 +534,12 @@ engineinput();
 nextpage();
 			 After a screen is prepared, use this function to view the screen.
 
+
+
+!!! NOTE: qsetmode320200() doesn't exist anymore. setgamemode(), when called
+!!!        with width and height of 320x200 appears to be equivalent anyhow.
+!!!   --ryan.
+
 draw2dscreen(long posxe, long posye, short ange, long zoome,
 				 short gride)
 			 Draws the 2d screen - this function is a direct replacement
