@@ -118,7 +118,7 @@ static short *dotp1[MAXYDIM], *dotp2[MAXYDIM];
 static unsigned char tempbuf[MAXWALLS];
 
 long ebpbak, espbak;
-long slopalookup[2048];
+long slopalookup[16384];
 
 /*
  * !!! used to be static. If we ever put the original setgamemode() back, this
@@ -1901,7 +1901,7 @@ static void grouscan (long dax1, long dax2, long sectnum, char dastat)
 	l = (globalzd>>16);
 
 	shinc = mulscale16(globalz,xdimenscale);
-	if (shinc > 0) shoffs = (4<<15); else shoffs = ((2044-ydimen)<<15);
+	if (shinc > 0) shoffs = (4<<15); else shoffs = ((16380-ydimen)<<15);
 	if (dastat == 0) y1 = umost[dax1]; else y1 = max(umost[dax1],dplc[dax1]);
 	m1 = mulscale16(y1,globalzd) + (globalzx>>6);
 		/* Avoid visibility overflow by crossing horizon */
