@@ -439,8 +439,7 @@ void _platform_init(int argc, char **argv)
 
     if (SDL_Init(SDL_INIT_VIDEO |
                  SDL_INIT_TIMER |
-                 SDL_INIT_AUDIO |
-                 SDL_INIT_EVENTTHREAD) == -1)
+                 SDL_INIT_AUDIO ) == -1)
     {
         fprintf(stderr, "SDL_Init() failed!\n");
         fprintf(stderr, "SDL_GetError() says \"%s\".\n", SDL_GetError());
@@ -480,6 +479,7 @@ static void init_new_res_vars(int davidoption)
 
     xdim = xres = surface->w;
     ydim = yres = surface->h;
+
     bytesperline = surface->w;
     vesachecked = 1;
     vgacompatible = 1;
@@ -829,6 +829,8 @@ void _nextpage(void)
 {
     Uint32 ticks;
 
+    SDL_PumpEvents();
+
     if (qsetmode == 200)
     {
         memcpy(surface->pixels, (const void *) frameplace, surface->w * surface->h);
@@ -1167,6 +1169,7 @@ void clear2dscreen(void)
 
 void _idle(void)
 {
+    SDL_PumpEvents();
     SDL_Delay(1);
 } // _idle
 
