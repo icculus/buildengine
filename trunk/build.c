@@ -5028,6 +5028,7 @@ void overheadeditor(void)
                         _idle();
 						if (keystatus[0x15] != 0)
 						{
+                            // !!! this should probably prompt to save changes to the current map. --ryan.
 							keystatus[0x15] = 0;
 
 							highlightsectorcnt = -1;
@@ -5057,6 +5058,7 @@ void overheadeditor(void)
 							cursectnum = -1;
 							initspritelists();
 							strcpy(boardfilename,"newboard.map");
+                            asksave = 0;  //rcg09032000 my add.
 							break;
 						}
 					}
@@ -5197,6 +5199,7 @@ void overheadeditor(void)
 							}
 
 							printmessage16("Map loaded successfully.");
+                            asksave = 0;  //rcg09032000 my add.
 						}
 						updatenumsprites();
 						startposx = posx;      //this is same
@@ -5290,6 +5293,7 @@ void overheadeditor(void)
 						saveboard(boardfilename,&startposx,&startposy,&startposz,&startang,&startsectnum);
 						ExtSaveMap(boardfilename);
 						printmessage16("Board saved.");
+                        asksave = 0;  //rcg09032000 my add.
 					}
 					bad = 0;
 				}
@@ -5303,6 +5307,7 @@ void overheadeditor(void)
 					saveboard(boardfilename,&startposx,&startposy,&startposz,&startang,&startsectnum);
 					ExtSaveMap(boardfilename);
 					printmessage16("Board saved.");
+                    asksave = 0;  //rcg09032000 my add.
 				}
 				if (keystatus[0x10] > 0)  //Q
 				{
@@ -5316,21 +5321,25 @@ void overheadeditor(void)
 						{
 							keystatus[0x15] = 0;             //QUIT!
 
-							printmessage16("Save changes?");
-							while ((keystatus[1]|keystatus[0x1c]|keystatus[0x39]|keystatus[0x31]) == 0)
-							{
-                                _idle();
-								if (keystatus[0x15] > 0)
-								{
-									keystatus[0x15] = 0;
-
-									fixspritesectors();   //Do this before saving!
-									updatesector(startposx,startposy,&startsectnum);
-									saveboard(boardfilename,&startposx,&startposy,&startposz,&startang,&startsectnum);
-									ExtSaveMap(boardfilename);
-									break;
-								}
-							}
+                            if (asksave)   // rcg09032000 my add.
+                            {
+    							printmessage16("Save changes?");
+    							while ((keystatus[1]|keystatus[0x1c]|keystatus[0x39]|keystatus[0x31]) == 0)
+    							{
+                                    _idle();
+    								if (keystatus[0x15] > 0)
+    								{
+    									keystatus[0x15] = 0;
+    
+    									fixspritesectors();   //Do this before saving!
+    									updatesector(startposx,startposy,&startsectnum);
+    									saveboard(boardfilename,&startposx,&startposy,&startposz,&startang,&startsectnum);
+    									ExtSaveMap(boardfilename);
+                                        asksave = 0;  //rcg09032000 my add.
+    									break;
+    								}
+    							}
+                            } // if
 							uninittimer();
 							uninitkeys();
 							ExtUnInit();
