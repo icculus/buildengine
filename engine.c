@@ -3368,6 +3368,9 @@ void initengine(void)
 
     initengine_called = 1;
 
+    memset(tilesizx, '\0', sizeof (tilesizx));
+    memset(tilesizy, '\0', sizeof (tilesizy));
+
 	if (dommxoverlay)
         mmxoverlay();
 
