@@ -1,0 +1,13 @@
+// "Build Engine & Tools" Copyright (c) 1993-1997 Ken Silverman
+// Ken Silverman's official web site: "http://www.advsys.net/ken"
+// See the included license file "BUILDLIC.TXT" for license info.
+
+Port of BUILD engine from Ken Silverman's original DOS386 codebase to Linux
+and Win32. BUILD is the engine that powers games like Duke Nukem 3D, Blood,
+Shadow Warrior, Redneck Rampage, and others.
+
+Please read the included README for all the dirty details.
+
+--ryan. (icculus@lokigames.com)
+
+
