@@ -1038,7 +1038,8 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_8]               = 0x09;
     scancodes[SDLK_9]               = 0x0A;
     scancodes[SDLK_0]               = 0x0B;
-    scancodes[SDLK_EQUALS]          = 0x4E;
+    scancodes[SDLK_MINUS]           = 0x0C; /* was 0x4A */
+    scancodes[SDLK_EQUALS]          = 0x0D; /* was 0x4E */
     scancodes[SDLK_BACKSPACE]       = 0x0E;
     scancodes[SDLK_TAB]             = 0x0F;
     scancodes[SDLK_q]               = 0x10;
@@ -1080,11 +1081,8 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_PERIOD]          = 0x34;
     scancodes[SDLK_SLASH]           = 0x35;
     scancodes[SDLK_RSHIFT]          = 0x36;
-    scancodes[SDLK_KP_DIVIDE]       = 0xE035;
     scancodes[SDLK_KP_MULTIPLY]     = 0x37;
     scancodes[SDLK_LALT]            = 0x38;
-    scancodes[SDLK_RALT]            = 0xB8;
-    scancodes[SDLK_RCTRL]           = 0x9D;
     scancodes[SDLK_SPACE]           = 0x39;
     scancodes[SDLK_CAPSLOCK]        = 0x3A;
     scancodes[SDLK_F1]              = 0x3B;
@@ -1097,35 +1095,38 @@ void _platform_init(int argc, char **argv, const char *title, const char *icon)
     scancodes[SDLK_F8]              = 0x42;
     scancodes[SDLK_F9]              = 0x43;
     scancodes[SDLK_F10]             = 0x44;
-    scancodes[SDLK_F11]             = 0x57;
-    scancodes[SDLK_F12]             = 0x58;
     scancodes[SDLK_NUMLOCK]         = 0x45;
     scancodes[SDLK_SCROLLOCK]       = 0x46;
-    scancodes[SDLK_MINUS]           = 0x4A;
     scancodes[SDLK_KP7]             = 0x47;
     scancodes[SDLK_KP8]             = 0x48;
     scancodes[SDLK_KP9]             = 0x49;
-    scancodes[SDLK_HOME]            = 0xE047;
-    scancodes[SDLK_UP]              = 0xE048;
-    scancodes[SDLK_PAGEUP]          = 0xE0C9;
-    scancodes[SDLK_KP_MINUS]        = 0xE04A;
+    scancodes[SDLK_KP_MINUS]        = 0x4A;
     scancodes[SDLK_KP4]             = 0x4B;
     scancodes[SDLK_KP5]             = 0x4C;
     scancodes[SDLK_KP6]             = 0x4D;
-    scancodes[SDLK_LEFT]            = 0xE04B;
-    scancodes[SDLK_RIGHT]           = 0xE04D;
-    scancodes[SDLK_KP_PLUS]         = 0xE04E;
+    scancodes[SDLK_KP_PLUS]         = 0x4E;
     scancodes[SDLK_KP1]             = 0x4F;
     scancodes[SDLK_KP2]             = 0x50;
     scancodes[SDLK_KP3]             = 0x51;
+    scancodes[SDLK_KP0]             = 0x52;
+    scancodes[SDLK_F11]             = 0x57;
+    scancodes[SDLK_F12]             = 0x58;
+        
+    scancodes[SDLK_KP_ENTER]        = 0xE01C;
+    scancodes[SDLK_RCTRL]           = 0xE01D;
+    scancodes[SDLK_KP_DIVIDE]       = 0xE035;
+    scancodes[SDLK_RALT]            = 0xE038;
+    scancodes[SDLK_HOME]            = 0xE047;
+    scancodes[SDLK_UP]              = 0xE048;
+    scancodes[SDLK_PAGEUP]          = 0xE049;
+    scancodes[SDLK_LEFT]            = 0xE04B;
+    scancodes[SDLK_RIGHT]           = 0xE04D;
     scancodes[SDLK_END]             = 0xE04F;
     scancodes[SDLK_DOWN]            = 0xE050;
-    scancodes[SDLK_PAGEDOWN]        = 0xE0D1;
-    scancodes[SDLK_DELETE]          = 0xE0D3;
-    scancodes[SDLK_KP0]             = 0xE052;
+    scancodes[SDLK_PAGEDOWN]        = 0xE051;
     scancodes[SDLK_INSERT]          = 0xE052;
-    scancodes[SDLK_KP_ENTER]        = 0xE01C;
-
+    scancodes[SDLK_DELETE]          = 0xE053;
+    
     set_sdl_renderer();
 
     output_sdl_versions();
