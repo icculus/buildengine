@@ -357,10 +357,10 @@
             so this will work on WinNT and Win2K. Discovered it wasn't needed,
             and the real problem is that Watcom produces an incorrect PE
             header in the generated EXE files. Steven Fuller dug up a program
-            that fixes this, and did a ton of debugging. Fixed Makefile.w32
-            and changed the default builds to optimized and not debug to make
-            binary distribution easier. Automated the packaging of binary
-            releases in Makefile.
+            that fixes this, and did a ton of debugging. Added him to the
+            CONTRIB file. Fixed Makefile.w32 and changed the default builds
+            to optimized and not debug to make binary distribution easier.
+            Automated the packaging of binary releases in Makefile.
 
 --ryan. (icculus@lokigames.com)
 
