@@ -84,19 +84,28 @@ INFO:
   Windows, look at http://www.libsdl.org/). And, as under Linux, you will
   need NASM (http://www.kernel.org/pub/software/devel/nasm/). Make sure
   nasmw.exe ends up somewhere in your PATH, and SDL is somewhere you have
-  access to. Once you have all this set up, unpack the BUILD sources, and
-  edit "Makefile" in the newly created directory. Change the line that says
-  "cygwin = false" to "cygwin = true", and the SDL_INC_DIR and SDL_LIB_DIR
-  lines to the correct values. (Note the examples: C:/2/SDL-1.1.8/include/
-  has its directory separators backwards, as they are in Unix. This is
-  intentional.) Run "make" in the buildengine directory. If everything is
-  correct, this should build BUILD.EXE and GAME.EXE. You will probably have
-  to make sure that SDL.DLL and CYGWIN1.DLL are in your path somewhere.
-  This isn't as hard as it sounds.  :) 
+  access to. Once you have all this set up, unpack the BUILD sources.
+  Make sure your in the buildengine directory. Set these two environment
+  variables:
+
+    export SDL_LIB_DIR=C:/where/i/installed/SDL-1.1.8/lib
+    export SDL_INC_DIR=C:/where/i/installed/SDL-1.1.8/include
+
+   (Yes, those directory separators are backwards; it is intentional.)
+
+  ...then, type "make", and it should produce binaries for you if you did
+  everything right.
+
+  You will have to make sure that SDL.DLL and CYGWIN1.DLL are in your path
+  somewhere.
+
+  This isn't all as hard as it sounds.  :)
 
 - To build with Watcom C for Win32: Get SDL (as above). Unpack the source,
-  edit Makefile.w32. Change the paths at the top to point to your Watcom
-  and SDL installs. Run "wmake -f Makefile.w32" ... that's all.
+  edit Makefile.w32 (instructions are in that file). Change the paths at the
+  top to point to your Watcom and SDL installs. Run "wmake -f Makefile.w32"
+  ... that's all. I tried this with Watcom C 10.6 and the win32 ("nt") target.
+  Your mileage may vary.
 
 - If anyone wants to make this work with Visual C++ to make this easier
   for Windows users, I'll happily accept your changes.
