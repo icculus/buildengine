@@ -138,6 +138,10 @@ int _setgamemode(char davidoption, long daxdim, long daydim);
 void qsetmode640350(void);
 void qsetmode640480(void);
 
+
+unsigned long getticks();
+
+
 // Other DOSisms. See unix_compat.c for implementation.
 long filelength(int fhandle);
 
