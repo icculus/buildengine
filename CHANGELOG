@@ -475,6 +475,13 @@
             you hold down SHIFT while hitting either return or the keypad
             enter, sdl_driver.c reports to the engine that the keypad enter
             was pressed. Now I can get into 3D mode on WinNT 4.0.  :)
+05302001 - More toggle_fulscreen work. Check to see if the debug output file
+            was opened, and printf() a warning if not. setbuf(..., NULL) was
+            no longer called on stderr and stdout in sdl_driver.c's version
+            of _platform_init(), but the buffer is set to NULL for the debug
+            file now, which may or may not be stdout. Just for a goof, I added
+            vmWare virtual machine detection code, which returns false in the
+            portable C version, and does some lowlevel voodoo in i386 asm.
 
 --ryan. (icculus@linuxgames.com)
 

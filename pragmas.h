@@ -10,6 +10,9 @@
 
 static long dmval = 0;
 
+long is_vmware_running(void);
+#pragma aux is_vmware_running modify exact [eax ebx ecx edx];
+
 unsigned long getkensmessagecrc(long param);
 #pragma aux getkensmessagecrc =\
     "xor eax, eax",\

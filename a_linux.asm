@@ -123,6 +123,9 @@ extern pow2long
   global _asm_stretchhline
   global _asm_mmxoverlay
 
+  global _asm_isvmwarerunning
+
+
 ; ************************
 ; **   End Data Block   **
 ; ************************
@@ -139,6 +142,20 @@ SEGMENT .text
 ; Align entire code block to 16 bit boundaries
 ALIGN 16
 
+_asm_isvmwarerunning:
+	mov eax,564d5868h
+	mov ecx,0000000ah
+	mov dx,5658h
+	in  eax,dx
+	cmp ebx,564d5868h
+	jz  vmware_y
+	xor eax,eax
+	ret
+vmware_y:
+        mov eax,1h
+        ret
+
+ 
 _asm_sethlinesizes:
 	mov byte [machxbits1+2], al
 	mov byte [machxbits2+2], al
