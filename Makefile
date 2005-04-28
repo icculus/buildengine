@@ -9,6 +9,7 @@ linux_ppc := false
 beos := false
 macosx := false
 solaris := false
+linux64 :=true
 
 #-----------------------------------------------------------------------------#
 # If this makefile fails to detect Cygwin correctly, or you want to force
@@ -71,6 +72,11 @@ networking := udp
 ifeq ($(strip $(beos)),true)
   networking := stubbed
   USE_ASM :=
+endif
+
+ifeq ($(strip $(linux64)),true)
+  CFLAGS += -m32
+  LDFLAGS +=-m32 -L/emul/linux/x86/usr/lib
 endif
 
 ifeq ($(strip $(solaris)),true)

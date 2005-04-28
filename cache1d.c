@@ -310,8 +310,11 @@ long initgroupfile(const char *filename)
 	if (numgroupfiles >= MAXGROUPFILES) return(-1);
 
 	groupfil[numgroupfiles] = open(filename,O_BINARY|O_RDONLY,S_IREAD);
-	if (groupfil[numgroupfiles] >= 0)
-	{
+	if (groupfil[numgroupfiles] < 0) {
+	  fprintf(stderr, "Unable to open %s\n", filename);
+	  exit(0);
+	} // if
+	else {
 		groupfilpos[numgroupfiles] = 0;
 		read(groupfil[numgroupfiles],buf,16);
 		if ((buf[0] != 'K') || (buf[1] != 'e') || (buf[2] != 'n') ||
