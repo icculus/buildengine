@@ -7,9 +7,9 @@
 
 linux_ppc := false
 beos := false
-macosx := false
+macosx := true
 solaris := false
-linux64 :=true
+linux64 := false
 
 #-----------------------------------------------------------------------------#
 # If this makefile fails to detect Cygwin correctly, or you want to force
@@ -135,7 +135,7 @@ else
 endif
 
 ifeq ($(strip $(macosx)),true)
-  CFLAGS += -DPLATFORM_MACOSX=1 -faltivec -falign-loops=32 -falign-functions=32
+  CFLAGS += -DPLATFORM_MACOSX=1 -faltivec -mdynamic-no-pic -falign-loops=32 -falign-functions=32
   LDFLAGS += -framework AppKit -lSDL -lSDLmain
 endif
 
