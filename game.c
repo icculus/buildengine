@@ -568,15 +568,15 @@ void initlava(void)
             long retval;
             __asm__ __volatile__ (
                 "\n\t"
-                "movb -133(%%ebx), %%al\n\t"
-                "movb -1(%%ebx), %%dl\n\t"
-                "addb -132(%%ebx), %%al\n\t"
-                "addb 131(%%ebx), %%dl\n\t"
-                "addb -131(%%ebx), %%al\n\t"
-                "addb 132(%%ebx), %%dl\n\t"
-                "addb 1(%%ebx), %%al\n\t"
+                "movb -133(%%edi), %%al\n\t"
+                "movb -1(%%edi), %%dl\n\t"
+                "addb -132(%%edi), %%al\n\t"
+                "addb 131(%%edi), %%dl\n\t"
+                "addb -131(%%edi), %%al\n\t"
+                "addb 132(%%edi), %%dl\n\t"
+                "addb 1(%%edi), %%al\n\t"
                 "addb %%dl, %%al\n\t"
-            : "=a" (retval) : "b" (i1) : "edx", "cc", "memory");
+            : "=a" (retval) : "D" (i1) : "edx", "cc", "memory");
             return (retval);
         } /* addlava */
 
