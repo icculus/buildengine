@@ -391,7 +391,7 @@ extern long drawslab(long,long,long,long,long,long);
 	    modify exact [eax ebx ecx]\
 
     #elif (defined __GNUC__) || (defined __ICC)
-        static long nsqrtasm(int i1)
+        static __attribute__((noinline)) long nsqrtasm(int i1)
         {
             long retval;
             __asm__ __volatile__ (
@@ -601,7 +601,7 @@ extern long drawslab(long,long,long,long,long,long);
 
     #elif (defined __GNUC__) || (defined __ICC)
 
-        int setgotpic(long i1)
+        int __attribute__((noinline)) setgotpic(long i1)
         {
             int retval = 0;
             __asm__ __volatile__ (
