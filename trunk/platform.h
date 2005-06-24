@@ -15,6 +15,17 @@
 #error Define your platform!
 #endif
 
+#ifdef PLATFORM_MACOSX
+    /* may be an x86 Mac, so turn off PowerPC ASM and Altivec if needed... */
+    #if __POWERPC__
+        #define HAVE_POWERPC 1
+    #endif
+#endif
+
+#ifdef PLATFORM_LINUXPPC
+#define HAVE_POWERPC 1
+#endif
+
 #if (!defined __EXPORT__)
 #define __EXPORT__
 #endif
@@ -33,7 +44,7 @@
 
 static __inline unsigned short _swap16(unsigned short D)
 {
-#if PLATFORM_MACOSX || PLATFORM_LINUXPPC
+#if HAVE_POWERPC
     register unsigned short returnValue;
     __asm__ volatile("lhbrx %0,0,%1"
         : "=r" (returnValue)
@@ -47,7 +58,7 @@ static __inline unsigned short _swap16(unsigned short D)
 
 static __inline unsigned int _swap32(unsigned int D)
 {
-#if PLATFORM_MACOSX || PLATFORM_LINUXPPC
+#if HAVE_POWERPC
     register unsigned int returnValue;
     __asm__ volatile("lwbrx %0,0,%1"
         : "=r" (returnValue)
@@ -59,7 +70,7 @@ static __inline unsigned int _swap32(unsigned int D)
 #endif
 }
 
-#if PLATFORM_MACOSX || PLATFORM_LINUXPPC
+#if HAVE_POWERPC
 #define PLATFORM_BIGENDIAN 1
 #define BUILDSWAP_INTEL16(x) _swap16(x)
 #define BUILDSWAP_INTEL32(x) _swap32(x)

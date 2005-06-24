@@ -344,7 +344,7 @@ void setupvlineasm(long i1)
 
 extern long vplce[4], vince[4], palookupoffse[4], bufplce[4];
 
-#ifdef PLATFORM_MACOSX || PLATFORM_LINUXPPC
+#if HAVE_POWERPC
 /* About 25% faster than the scalar version on my 12" Powerbook. --ryan. */
 static void vlineasm4_altivec(long i1, long i2)
 {
@@ -392,7 +392,7 @@ static void vlineasm4_altivec(long i1, long i2)
 /* #pragma aux vlineasm4 parm [ecx][edi] modify [eax ebx ecx edx esi edi] */
 void vlineasm4(long i1, long i2)
 {
-#ifdef PLATFORM_MACOSX || PLATFORM_LINUXPPC
+#if HAVE_POWERPC
     if (has_altivec)
         vlineasm4_altivec(i1, i2);
     else
