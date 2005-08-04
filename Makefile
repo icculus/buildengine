@@ -7,7 +7,7 @@
 
 linux_ppc := false
 beos := false
-macosx := true
+macosx := false
 solaris := false
 linux64 := false
 
