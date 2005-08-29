@@ -6,6 +6,9 @@
 #elif (defined PLATFORM_MACOSX)
 #include "unix_compat.h"
 #include <machine/endian.h>
+#elif (defined PLATFORM_FREEBSD)
+#include "unix_compat.h"
+#include <sys/endian.h>
 #elif (defined PLATFORM_UNIX)
 #include "unix_compat.h"
 #include <endian.h>
