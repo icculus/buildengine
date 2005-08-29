@@ -8,6 +8,7 @@
 linux_ppc := false
 beos := false
 macosx := false
+freebsd := false
 solaris := false
 linux64 := false
 
@@ -109,8 +110,10 @@ ifeq ($(strip $(cygwin)),true)
     SDL_LDFLAGS := -L$(SDL_LIB_DIR) -lSDL
   endif
 else
-  SDL_CFLAGS := $(shell sdl-config --cflags)
-  SDL_LDFLAGS := $(shell sdl-config --libs)
+  ifneq ($(strip $(freebsd)),true)
+    SDL_CFLAGS := $(shell sdl-config --cflags)
+    SDL_LDFLAGS := $(shell sdl-config --libs)
+  endif
 endif
 
 CC = gcc
@@ -137,6 +140,12 @@ endif
 ifeq ($(strip $(macosx)),true)
   CFLAGS += -DPLATFORM_MACOSX=1 -faltivec -mdynamic-no-pic -falign-loops=32 -falign-functions=32
   LDFLAGS += -framework AppKit -lSDL -lSDLmain
+endif
+
+ifeq ($(strip $(freebsd)),true)
+  CFLAGS += -DPLATFORM_FREEBSD=1
+  SDL_CFLAGS := $(shell sdl11-config --cflags)
+  SDL_LDFLAGS := $(shell sdl11-config --libs) -L.
 endif
 
 ifeq ($(strip $(linux_ppc)),true)

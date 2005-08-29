@@ -14,8 +14,12 @@
 
 #include <string.h>
 
-#if !PLATFORM_MACOSX
+#if !PLATFORM_MACOSX && !PLATFORM_FREEBSD
 #include <malloc.h>
+#endif
+
+#if PLATFORM_FREEBSD
+#include <stdlib.h>
 #endif
 
 #include <math.h>

@@ -916,7 +916,7 @@ static int open_udp_socket(int ip, int port)
     if (!set_socket_blockmode(0))
         return(0);
 
-    #if !PLATFORM_WIN32 && !PLATFORM_MACOSX && !PLATFORM_SOLARIS
+    #if !PLATFORM_WIN32 && !PLATFORM_MACOSX && !PLATFORM_SOLARIS && !PLATFORM_FREEBSD
     {
         /* Linux-specific. */
         int flags = 1;
