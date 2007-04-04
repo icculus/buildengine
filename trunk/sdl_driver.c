@@ -511,15 +511,15 @@ static int sdl_mouse_motion_filter(SDL_Event const *event)
     {
         if (mouse_grabbed)
         {
-          	mouse_relative_x = event->motion.xrel;
-       	    mouse_relative_y = event->motion.yrel;
+          	mouse_relative_x += event->motion.xrel;
+       	        mouse_relative_y += event->motion.yrel;
            	mouse_x += mouse_relative_x;
            	mouse_y += mouse_relative_y;
         } /* if */
         else
         {
-          	mouse_relative_x = event->motion.x - mouse_x;
-           	mouse_relative_y = event->motion.y - mouse_y;
+          	mouse_relative_x += event->motion.x - mouse_x;
+           	mouse_relative_y += event->motion.y - mouse_y;
            	mouse_x = event->motion.x;
            	mouse_y = event->motion.y;
         } /* else */
