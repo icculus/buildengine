@@ -11,7 +11,9 @@
 #include <sys/endian.h>
 #elif (defined PLATFORM_UNIX)
 #include "unix_compat.h"
+#if !defined(__SUNPRO_C)
 #include <endian.h>
+#endif
 #elif (defined PLATFORM_DOS)
 #include "doscmpat.h"
 #else
@@ -43,6 +45,10 @@
 
 #if (defined __WATCOMC__)
 #define snprintf _snprintf
+#endif
+
+#if (defined __SUNPRO_C)
+#define __inline inline
 #endif
 
 static __inline unsigned short _swap16(unsigned short D)
