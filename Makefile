@@ -38,6 +38,8 @@ ifeq ($(strip $(SDL_LIB_DIR)),)
   SDL_LIB_DIR := please_set_me_cygwin_users
 endif
 
+CC = gcc
+LINKER = gcc
 
 #-----------------------------------------------------------------------------#
 # To use a different platform's ASM or portable C, change this.
@@ -81,6 +83,8 @@ ifeq ($(strip $(linux64)),true)
 endif
 
 ifeq ($(strip $(solaris)),true)
+  LINKER= cc
+  CC = cc
   LDFLAGS += -lsocket -lnsl
   CFLAGS += -DPLATFORM_SOLARIS
 endif
@@ -115,8 +119,6 @@ else
     SDL_LDFLAGS := $(shell sdl-config --libs)
   endif
 endif
-
-CC = gcc
 
 # Uncomment to use the Intel compiler (v6.0)
 # Note: Version 6.0   Build 020312Z fails to compile engine.c
@@ -220,13 +222,17 @@ endif
 
 ENGINEDIR = .
 ASMFLAGS = -f $(ASMOBJFMT) $(ASMDEFS)
-LINKER = gcc
-CFLAGS += $(USE_ASM) -funsigned-char -O3 -DPLATFORM_UNIX -g -Wall $(SDL_CFLAGS) -fno-omit-frame-pointer
+CFLAGS += $(USE_ASM) -DPLATFORM_UNIX -g $(SDL_CFLAGS)
 LDFLAGS += -g $(SDL_LDFLAGS)
 
+ifeq ($(strip $(solaris)),true)
+CFLAGS += -xO5 -xchar=u
+else
 # Always turn OFF strict aliasing, even when optimizing. Otherwise, this is
 #  just an accident waiting to happen...  --ryan.
 CFLAGS += -fno-strict-aliasing
+CFLAGS += -fno-omit-frame-pointer -Wall -O3 -funsigned-char
+endif
 
 # Rules for turning source files into .o files
 %.o: %.c
