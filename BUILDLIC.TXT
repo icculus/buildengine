@@ -1,9 +1,3 @@
-(Note from Ryan: This is Ken's BUILD license. It is NOT GPL. Please respect
- his license, and also keep in mind that Ken does NOT work on the Linux port.
- Please don't harrass him for bug fixes and enhancements to the Linux version.
- He did the DOS version.  --ryan.)
-
-
 BUILD SOURCE CODE LICENSE TERMS:                             06/20/2000
 
 [1] I give you permission to make modifications to my Build source and
